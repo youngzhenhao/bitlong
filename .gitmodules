@@ -1,0 +1,6 @@
+[submodule "bitlong-client"]
+	path = bitlong-client
+	url = https://github.com/youngzhenhao/bitlong-client.git
+[submodule "tap-grpc-api"]
+	path = tap-grpc-api
+	url = https://github.com/youngzhenhao/tap-grpc-api.git

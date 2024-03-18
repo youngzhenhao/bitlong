@@ -107,7 +107,7 @@ func GetWalletBalance() string {
 //	@Description: 试图在发票数据库中添加新发票。任何重复的发票都会被拒绝，因此所有发票都必须有唯一的付款预图像
 //	@param value
 //	@return string
-func AddInvoice(value int64) string {
+func AddInvoice(value int64) *lnrpc.AddInvoiceResponse {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -150,8 +150,7 @@ func AddInvoice(value int64) string {
 	if err != nil {
 		log.Fatalf("client.AddInvoice :%v", err)
 	}
-	log.Print(response)
-	return response.String()
+	return response
 
 }
 
@@ -505,7 +504,7 @@ func CheckMacaroonPermissions() *lnrpc.CheckMacPermResponse {
 //		如果两者都未指定，则使用默认的宽松区块确认目标。
 //	 @param fundingTxidStr
 //	 @param outputIndex
-func CloseChannel(fundingTxidStr string, outputIndex uint32) {
+func CloseChannel(fundingTxidStr string, outputIndex uint32) *lnrpc.CloseStatusUpdate {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -565,7 +564,7 @@ func CloseChannel(fundingTxidStr string, outputIndex uint32) {
 			}
 			log.Fatalf("stream Recv err: %v\n", err)
 		}
-		log.Printf("response: %v\n", response)
+		return response
 	}
 }
 
@@ -880,7 +879,7 @@ func OpenChannelSync() *lnrpc.ChannelPoint {
 //	根据 OpenChannelRequest 中指定的参数，该待定通道 ID 可用于手动推进通道资金流。
 //	@param nodePubkey
 //	@param localFundingAmount
-func OpenChannel(nodePubkey string, localFundingAmount int64) {
+func OpenChannel(nodePubkey string, localFundingAmount int64) *lnrpc.OpenStatusUpdate {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -938,7 +937,8 @@ func OpenChannel(nodePubkey string, localFundingAmount int64) {
 			}
 			log.Fatalf("stream Recv err: %v\n", err)
 		}
-		log.Printf("response: %v\n", response)
+		//log.Printf("response: %v\n", response)
+		return response
 	}
 }
 
@@ -1337,6 +1337,58 @@ func ConnectPeer(pubkey, host string) *lnrpc.ConnectPeerResponse {
 		},
 	}
 	response, err := client.ConnectPeer(context.Background(), request)
+	if err != nil {
+		log.Fatalf("lnrpc ConnectPeer err: %v", err)
+	}
+	return response
+}
+
+func EstimateFee(addr string, amount int64) *lnrpc.EstimateFeeResponse {
+	const (
+		grpcHost = "202.79.173.41:10009"
+	)
+	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		log.Fatalf("Failed to read cert file: %s", err)
+	}
+
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		log.Fatalf("Failed to append cert")
+	}
+
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Fatalf("conn Close err: %v", err)
+		}
+	}(conn)
+	client := lnrpc.NewLightningClient(conn)
+	addrToAmount := make(map[string]int64)
+	addrToAmount[addr] = amount
+	request := &lnrpc.EstimateFeeRequest{
+		AddrToAmount: addrToAmount,
+	}
+	response, err := client.EstimateFee(context.Background(), request)
 	if err != nil {
 		log.Fatalf("lnrpc ConnectPeer err: %v", err)
 	}

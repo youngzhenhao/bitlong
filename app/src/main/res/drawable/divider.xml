@@ -1,0 +1,5 @@
+<!-- drawable/divider.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <size android:width="1dp" android:height="1dp"/>
+    <solid android:color="#ff0000"/> <!-- 红色分割线 -->
+</shape>

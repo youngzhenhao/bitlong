@@ -1,0 +1,72 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion rootProject.ext.android.compileSdkVersion
+    buildToolsVersion rootProject.ext.android.buildToolsVersion
+    defaultConfig {
+        applicationId rootProject.ext.android.applicationId
+        minSdkVersion rootProject.ext.android.minSdkVersion
+        targetSdkVersion rootProject.ext.android.targetSdkVersion
+        versionCode rootProject.ext.android.versionCode
+        versionName rootProject.ext.android.versionName
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+
+        implementation 'androidx.recyclerview:recyclerview:1.2.1'
+
+    implementation 'com.android.support:appcompat-v7:27.0.1'
+    implementation 'com.android.support:design:27.0.1'
+    //support
+    implementation rootProject.ext.dependencies["appcompat-v7"]
+    implementation rootProject.ext.dependencies["support-v4"]
+
+    //http
+    implementation rootProject.ext.dependencies["retrofit2"]
+//    compile rootProject.ext.dependencies["converter-scalars"]
+    implementation rootProject.ext.dependencies["converter-gson"]
+    implementation rootProject.ext.dependencies["adapter-rxjava2"]
+
+    //rxjava
+//    compile rootProject.ext.dependencies["rxjava"]
+    implementation rootProject.ext.dependencies["rxandroid"]
+//    compile rootProject.ext.dependencies["rxbinding2"]
+    implementation rootProject.ext.dependencies.rxlifecycle2
+    implementation rootProject.ext.dependencies.rxlifecomponents
+
+    //ui
+//    implementation rootProject.ext.dependencies["butterknife"]
+//    implementation rootProject.ext.dependencies["butterknife-compiler"]
+    implementation 'com.jakewharton:butterknife:10.0.0'
+    implementation 'com.google.android.material:material:1.11.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.0.0'
+
+
+    implementation rootProject.ext.dependencies["glide"]
+    implementation rootProject.ext.dependencies["gif-drawable"]
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
+
+    implementation 'com.android.support:design:28.1.0'
+    implementation'com.android.support:support-v4:25.0.1'
+
+    //banner
+    implementation 'com.jude:rollviewpager:1.4.6'
+
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+
+
+//AndroidX 版本
+    implementation 'com.king.zxing:zxing-lite:1.1.7-androidx'
+    implementation "com.google.android.material:material:1.8.0"
+
+}

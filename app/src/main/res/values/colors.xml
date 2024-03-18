@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <!-- 亮粉红色 -->
+    <color name="orange">#FFA500</color>
+    <!--白色-->
+    <color name="white">#ffffffff</color>
+    <color name="color_3838">#383838</color>
+    <color name="color_fafa"> #FAFAFA</color>
+    <color name="color_5af0">#665AF0</color>
+    <color name="color_f2f2"> #F2F2F2</color>
+    <color name="color_0000"> #000000</color>
+    <color name="color_70ff"> #7C70FF</color>
+    <color name="color_82e4"> #2A82E4</color>
+    <color name="color_f5f5">  #F5F5F5</color>
+    <color name="color_f4ff">#EBF4FF</color>
+
+    <color name="menu_gray">#8a8a8a</color>
+    <color name="menu_green">#45c01a</color>
+
+    <color name="line_gray">#dcdcdc</color>
+    <color name="line_gray_light">#f1f1f1</color>
+    <color name="gray_page_bg">#ecedf1</color>
+    <color name="gray_text">#5b5b5b</color>
+    <color name="gray_text_dark">#292929</color>
+    <color name="gray_text_light">#979797</color>
+    <color name="window_half_transparent">#90000000</color>
+    <color name="blue_white">#0eabe5</color>
+
+    <color name="wx_head_selected">#45c01a</color>
+    <color name="wx_head_default">#5b666f</color>
+    <color name="color_71f2">#7B71F2</color>
+
+    <color name="color_8080">#808080</color>
+    <color name="color_5a5a">#EB5A5A</color>
+    <color name="color_6e82">#6E6E82</color>
+    <color name="color_6af1">#FFFAF0</color>
+    <color name="color_71f0">#7B71F0</color>
+    <color name="color_eb38">#FFEB3B</color>
+    <color name="color_f9f9">#F9F9F9</color>
+    <color name="color_e7e7"> #E8E7E7</color>
+    <color name="color_af95"> #50AF95</color>
+
+    <color name="ctirp_color_primary">#42b5ff</color>
+    <color name="ctirp_color_white">#ffffff</color>
+    <color name="color_primary">#3f51b5</color>
+    <color name="color_trans">#ddffffff</color>
+    <color name="color_d9fa">#D2D9FA</color>
+    <color name="color_1b1b">#1C1B1B</color>
+    <color name="color_95fc">#3A95FC</color>
+    <color name="color_f8f8">#F8F8F8</color>
+
+</resources>

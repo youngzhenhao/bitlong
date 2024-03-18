@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/item_wllect"
+
+        android:title="钱包" />
+    <item
+        android:id="@+id/item_tapr"
+
+        android:title="Tapr" />
+    <item
+        android:id="@+id/item_nostr"
+
+        android:title="Nostr" />
+
+</menu>

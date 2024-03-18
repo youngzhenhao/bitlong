@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_fafa"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:text="钱包名称"
+        android:textColor="@color/color_3838"
+        android:textSize="16sp" />
+
+    <EditText
+        android:id="@+id/ed_wallet_name"
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_white"
+        android:hint="输入1-12个字符"
+        android:maxEms="12"
+        android:paddingLeft="14dp"
+        android:singleLine="true"
+        android:textSize="14sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="创建密码"
+
+        android:textColor="@color/color_3838"
+        android:textSize="16sp" />
+
+    <EditText
+        android:id="@+id/ed_input_passWord"
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_white"
+        android:hint="输入密码"
+        android:paddingLeft="14dp"
+        android:singleLine="true"
+        android:textSize="14sp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_white">
+
+        <EditText
+            android:id="@+id/ed_reuse_input_passWord"
+            android:layout_width="300dp"
+            android:layout_height="46dp"
+
+            android:background="@null"
+            android:hint="重复输入密码"
+            android:paddingLeft="14dp"
+            android:singleLine="true"
+            android:textSize="14sp" />
+
+        <ImageView
+            android:id="@+id/img_passWord"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="17dp"
+         />
+    </RelativeLayout>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="密码提示(可选)"
+        android:textColor="@color/color_3838"
+        android:textSize="16sp" />
+
+    <EditText
+        android:id="@+id/ed_remind_txt"
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_white"
+        android:hint="输入提醒文字"
+        android:paddingLeft="14dp"
+        android:singleLine="true"
+        android:textSize="14sp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="90dp">
+
+        <TextView
+            android:id="@+id/tv_submit"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/bg_5af0"
+            android:gravity="center"
+            android:text="确认创建"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
+    </RelativeLayout>
+</LinearLayout>

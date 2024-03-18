@@ -10,7 +10,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -23,13 +22,13 @@ func GetNewAddress() bool {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := ioutil.ReadFile(macaroonPath)
+	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
 		panic(err)
 	}
 	macaroon := hex.EncodeToString(macaroonBytes)
 
-	cert, err := ioutil.ReadFile(tlsCertPath)
+	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
 		log.Fatalf("Failed to read cert file: %s", err)
 	}
@@ -58,6 +57,7 @@ func GetNewAddress() bool {
 	log.Print(response.Address)
 	return true
 }
+
 func GetWalletBalance() string {
 	const (
 		grpcHost = "202.79.173.41:10009"
@@ -65,13 +65,13 @@ func GetWalletBalance() string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := ioutil.ReadFile(macaroonPath)
+	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
 		panic(err)
 	}
 	macaroon := hex.EncodeToString(macaroonBytes)
 
-	cert, err := ioutil.ReadFile(tlsCertPath)
+	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
 		log.Fatalf("Failed to read cert file: %s", err)
 	}
@@ -102,6 +102,11 @@ func GetWalletBalance() string {
 	return response.String()
 }
 
+// AddInvoice
+//
+//	@Description: 试图在发票数据库中添加新发票。任何重复的发票都会被拒绝，因此所有发票都必须有唯一的付款预图像
+//	@param value
+//	@return string
 func AddInvoice(value int64) string {
 	const (
 		grpcHost = "202.79.173.41:10009"
@@ -109,13 +114,13 @@ func AddInvoice(value int64) string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := ioutil.ReadFile(macaroonPath)
+	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
 		panic(err)
 	}
 	macaroon := hex.EncodeToString(macaroonBytes)
 
-	cert, err := ioutil.ReadFile(tlsCertPath)
+	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
 		log.Fatalf("Failed to read cert file: %s", err)
 	}
@@ -150,6 +155,13 @@ func AddInvoice(value int64) string {
 
 }
 
+// ListInvoices
+//
+//	@Description: 返回数据库中当前存储的所有发票的列表。任何活动的调试发票都会被忽略。
+//	它完全支持分页响应，允许用户通过 add_index 查询特定发票。
+//	可以使用响应中包含的 first_index_offset 或 last_index_offset 字段作为下一个请求的 index_offset。默认情况下，
+//	将返回创建的前 100 张发票。还可通过 Reversed 标志支持向后分页
+//	@return string
 func ListInvoices() string {
 	const (
 		grpcHost = "202.79.173.41:10009"
@@ -157,13 +169,13 @@ func ListInvoices() string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := ioutil.ReadFile(macaroonPath)
+	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
 		panic(err)
 	}
 	macaroon := hex.EncodeToString(macaroonBytes)
 
-	cert, err := ioutil.ReadFile(tlsCertPath)
+	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
 		log.Fatalf("Failed to read cert file: %s", err)
 	}
@@ -203,13 +215,13 @@ func lookupInvoice(rhash []byte) string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := ioutil.ReadFile(macaroonPath)
+	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
 		panic(err)
 	}
 	macaroon := hex.EncodeToString(macaroonBytes)
 
-	cert, err := ioutil.ReadFile(tlsCertPath)
+	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
 		log.Fatalf("Failed to read cert file: %s", err)
 	}

@@ -52,5 +52,7 @@
     <color name="color_1b1b">#1C1B1B</color>
     <color name="color_95fc">#3A95FC</color>
     <color name="color_f8f8">#F8F8F8</color>
+    <color name="color_cffc"> #D3CFFC</color>
+    #D3CFFC
 
 </resources>

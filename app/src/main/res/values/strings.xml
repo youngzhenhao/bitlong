@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">wallet</string>
+    <string name="app_name">btl</string>
     <string name="app_txt1">妥善保管助记词至隔离网络的安全地方。</string>
     <string name="app_txt2">请勿将助记词在联网环境下分享和存储，比如邮件、相册、\n社交应用等。</string>
     <string name="app_txt3">手动备份</string>

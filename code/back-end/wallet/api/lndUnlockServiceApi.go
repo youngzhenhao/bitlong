@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/hex"
 	"github.com/wallet/base"
 	"golang.org/x/exp/rand"
 	"google.golang.org/grpc/credentials"
@@ -193,4 +194,55 @@ func Unlockwallet(Psw string) bool {
 	}
 	log.Println("unlockSuccess")
 	return true
+}
+
+func ChangePassword(currentPassword, newPassword string) *lnrpc.ChangePasswordResponse {
+	const (
+		grpcHost = "202.79.173.41:10009"
+	)
+	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		log.Printf("Failed to read cert file: %s", err)
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		log.Printf("Failed to append cert")
+	}
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		log.Printf("did not connect: %v", err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close err: %v", err)
+		}
+	}(conn)
+	client := lnrpc.NewWalletUnlockerClient(conn)
+	_currentPasswordByteSlice, _ := hex.DecodeString(currentPassword)
+	_newPasswordByteSlice, _ := hex.DecodeString(newPassword)
+	request := &lnrpc.ChangePasswordRequest{
+		CurrentPassword: _currentPasswordByteSlice,
+		NewPassword:     _newPasswordByteSlice,
+	}
+	response, err := client.ChangePassword(context.Background(), request)
+	if err != nil {
+		log.Printf("lnrpc ChangePassword err: %v", err)
+		return nil
+	}
+	return response
 }

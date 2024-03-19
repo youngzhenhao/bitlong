@@ -5,57 +5,21 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
-	"github.com/lightningnetwork/lnd/lnrpc"
+
+	"github.com/lightningnetwork/lnd/lnrpc/watchtowerrpc"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 )
 
-func GetStateForSubscribe() bool {
-	const (
-		grpcHost = "127.0.0.1:10009"
-	)
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	// Load the TLS certificate
-	cert, err := ioutil.ReadFile(tlsCertPath)
-	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-
-	creds := credentials.NewTLS(config)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds))
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-
-	// 创建 WalletUnlocker 客户端
-	client := lnrpc.NewStateClient(conn)
-	request := &lnrpc.SubscribeStateRequest{}
-	response, err := client.SubscribeState(context.Background(), request)
-	log.Print(response)
-	return true
-}
-
-// GetState
+// GetInfo
 //
-//	@Description: 返回当前钱包状态，不做进一步更改
-//	@return *lnrpc.GetStateResponse
-func GetState() *lnrpc.GetStateResponse {
+//	@Description: 返回有关同伴监视塔的一般信息，包括其公钥和服务器当前正在监听客户端的 URI
+//	@return *watchtowerrpc.GetInfoResponse
+func GetInfo() *watchtowerrpc.GetInfoResponse {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -91,11 +55,11 @@ func GetState() *lnrpc.GetStateResponse {
 			log.Fatalf("conn Close err: %v", err)
 		}
 	}(conn)
-	client := lnrpc.NewStateClient(conn)
-	request := &lnrpc.GetStateRequest{}
-	response, err := client.GetState(context.Background(), request)
+	client := watchtowerrpc.NewWatchtowerClient(conn)
+	request := &watchtowerrpc.GetInfoRequest{}
+	response, err := client.GetInfo(context.Background(), request)
 	if err != nil {
-		log.Printf("watchtowerrpc GetState err: %v", err)
+		log.Printf("watchtowerrpc GetInfo err: %v", err)
 		return nil
 	}
 	return response

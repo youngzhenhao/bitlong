@@ -107,7 +107,7 @@ func GetWalletBalance() string {
 //	@Description: 试图在发票数据库中添加新发票。任何重复的发票都会被拒绝，因此所有发票都必须有唯一的付款预图像
 //	@param value
 //	@return string
-func AddInvoice(value int64) string {
+func AddInvoice(value int64) *lnrpc.AddInvoiceResponse {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -122,12 +122,12 @@ func AddInvoice(value int64) string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -138,7 +138,7 @@ func AddInvoice(value int64) string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer conn.Close()
 
@@ -148,10 +148,10 @@ func AddInvoice(value int64) string {
 	}
 	response, err := client.AddInvoice(context.Background(), request)
 	if err != nil {
-		log.Fatalf("client.AddInvoice :%v", err)
+		log.Printf("client.AddInvoice :%v", err)
+		return nil
 	}
-	log.Print(response)
-	return response.String()
+	return response
 
 }
 
@@ -177,12 +177,12 @@ func ListInvoices() string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -193,7 +193,7 @@ func ListInvoices() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer conn.Close()
 
@@ -201,10 +201,9 @@ func ListInvoices() string {
 	request := &lnrpc.ListInvoiceRequest{}
 	response, err := client.ListInvoices(context.Background(), request)
 	if err != nil {
-		log.Fatalf("client.ListInvoice :%v", err)
+		log.Printf("client.ListInvoice :%v", err)
+		return ""
 	}
-
-	log.Print(response)
 	return response.String()
 }
 
@@ -223,12 +222,12 @@ func lookupInvoice(rhash []byte) string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -239,7 +238,7 @@ func lookupInvoice(rhash []byte) string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer conn.Close()
 
@@ -249,10 +248,9 @@ func lookupInvoice(rhash []byte) string {
 	}
 	response, err := client.LookupInvoice(context.Background(), request)
 	if err != nil {
-		log.Fatalf("client.ListInvoice :%v", err)
+		log.Printf("client.ListInvoice :%v", err)
+		return ""
 	}
-
-	log.Print(response)
 	return response.String()
 }
 
@@ -271,12 +269,12 @@ func AbandonChannel() *lnrpc.AbandonChannelResponse {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -287,19 +285,20 @@ func AbandonChannel() *lnrpc.AbandonChannelResponse {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.AbandonChannelRequest{}
 	response, err := client.AbandonChannel(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc  err: %v", err)
+		log.Printf("lnrpc  err: %v", err)
+		return nil
 	}
 	return response
 }
@@ -319,12 +318,12 @@ func BatchOpenChannel() *lnrpc.BatchOpenChannelResponse {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -335,19 +334,20 @@ func BatchOpenChannel() *lnrpc.BatchOpenChannelResponse {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.BatchOpenChannelRequest{}
 	response, err := client.BatchOpenChannel(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc BatchOpenChannel err: %v", err)
+		log.Printf("lnrpc BatchOpenChannel err: %v", err)
+		return nil
 	}
 	return response
 }
@@ -367,12 +367,12 @@ func ChannelAcceptor() *lnrpc.Lightning_ChannelAcceptorClient {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -383,12 +383,12 @@ func ChannelAcceptor() *lnrpc.Lightning_ChannelAcceptorClient {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
@@ -396,7 +396,8 @@ func ChannelAcceptor() *lnrpc.Lightning_ChannelAcceptorClient {
 	//response, err := client.ChannelAcceptor(context.Background(), request)
 	response, err := client.ChannelAcceptor(context.Background())
 	if err != nil {
-		log.Fatalf("lnrpc ChannelAcceptor err: %v", err)
+		log.Printf("lnrpc ChannelAcceptor err: %v", err)
+		return nil
 	}
 	return &response
 }
@@ -416,12 +417,12 @@ func ChannelBalance() *lnrpc.ChannelBalanceResponse {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -432,19 +433,20 @@ func ChannelBalance() *lnrpc.ChannelBalanceResponse {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ChannelBalanceRequest{}
 	response, err := client.ChannelBalance(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc ChannelBalance err: %v", err)
+		log.Printf("lnrpc ChannelBalance err: %v", err)
+		return nil
 	}
 	return response
 }
@@ -464,12 +466,12 @@ func CheckMacaroonPermissions() *lnrpc.CheckMacPermResponse {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -480,19 +482,20 @@ func CheckMacaroonPermissions() *lnrpc.CheckMacPermResponse {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.CheckMacPermRequest{}
 	response, err := client.CheckMacaroonPermissions(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc CheckMacaroonPermissions err: %v", err)
+		log.Printf("lnrpc CheckMacaroonPermissions err: %v", err)
+		return nil
 	}
 	return response
 }
@@ -505,7 +508,7 @@ func CheckMacaroonPermissions() *lnrpc.CheckMacPermResponse {
 //		如果两者都未指定，则使用默认的宽松区块确认目标。
 //	 @param fundingTxidStr
 //	 @param outputIndex
-func CloseChannel(fundingTxidStr string, outputIndex uint32) {
+func CloseChannel(fundingTxidStr string, outputIndex uint32) *lnrpc.CloseStatusUpdate {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -520,12 +523,12 @@ func CloseChannel(fundingTxidStr string, outputIndex uint32) {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -536,12 +539,12 @@ func CloseChannel(fundingTxidStr string, outputIndex uint32) {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
@@ -554,18 +557,21 @@ func CloseChannel(fundingTxidStr string, outputIndex uint32) {
 	}
 	stream, err := client.CloseChannel(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc CloseChannel err: %v", err)
+		log.Printf("lnrpc CloseChannel err: %v", err)
+		return nil
 	}
 	for {
 		response, err := stream.Recv()
 		if err != nil {
 			if err == io.EOF {
 				// 流已经关闭，退出循环
-				log.Fatalf("err == io.EOF, err: %v\n", err)
+				log.Printf("err == io.EOF, err: %v\n", err)
+				return nil
 			}
-			log.Fatalf("stream Recv err: %v\n", err)
+			log.Printf("stream Recv err: %v\n", err)
+			return nil
 		}
-		log.Printf("response: %v\n", response)
+		return response
 	}
 }
 
@@ -588,12 +594,12 @@ func ClosedChannels() *lnrpc.ClosedChannelsResponse {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -604,19 +610,20 @@ func ClosedChannels() *lnrpc.ClosedChannelsResponse {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ClosedChannelsRequest{}
 	response, err := client.ClosedChannels(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc ClosedChannels err: %v", err)
+		log.Printf("lnrpc ClosedChannels err: %v", err)
+		return nil
 	}
 	return response
 }
@@ -636,12 +643,12 @@ func ExportAllChannelBackups() *lnrpc.ChanBackupSnapshot {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -652,19 +659,20 @@ func ExportAllChannelBackups() *lnrpc.ChanBackupSnapshot {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ChanBackupExportRequest{}
 	response, err := client.ExportAllChannelBackups(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc ChanBackupExportRequest err: %v", err)
+		log.Printf("lnrpc ChanBackupExportRequest err: %v", err)
+		return nil
 	}
 	return response
 }
@@ -684,12 +692,12 @@ func ExportChannelBackup() *lnrpc.ChannelBackup {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -700,19 +708,20 @@ func ExportChannelBackup() *lnrpc.ChannelBackup {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ExportChannelBackupRequest{}
 	response, err := client.ExportChannelBackup(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc ExportChannelBackup err: %v", err)
+		log.Printf("lnrpc ExportChannelBackup err: %v", err)
+		return nil
 	}
 	return response
 }
@@ -737,12 +746,12 @@ func GetChanInfo(chanId uint64) *lnrpc.ChannelEdge {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -753,12 +762,12 @@ func GetChanInfo(chanId uint64) *lnrpc.ChannelEdge {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
@@ -767,7 +776,8 @@ func GetChanInfo(chanId uint64) *lnrpc.ChannelEdge {
 	}
 	response, err := client.GetChanInfo(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc GetChanInfo err: %v", err)
+		log.Printf("lnrpc GetChanInfo err: %v", err)
+		return nil
 	}
 	return response
 }
@@ -791,12 +801,12 @@ func ListChannels() *lnrpc.ListChannelsResponse {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -807,19 +817,20 @@ func ListChannels() *lnrpc.ListChannelsResponse {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ListChannelsRequest{}
 	response, err := client.ListChannels(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc ListChannels err: %v", err)
+		log.Printf("lnrpc ListChannels err: %v", err)
+		return nil
 	}
 	return response
 }
@@ -839,12 +850,12 @@ func OpenChannelSync() *lnrpc.ChannelPoint {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -855,19 +866,20 @@ func OpenChannelSync() *lnrpc.ChannelPoint {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.OpenChannelRequest{}
 	response, err := client.OpenChannelSync(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc OpenChannelSync err: %v", err)
+		log.Printf("lnrpc OpenChannelSync err: %v", err)
+		return nil
 	}
 	return response
 }
@@ -880,7 +892,7 @@ func OpenChannelSync() *lnrpc.ChannelPoint {
 //	根据 OpenChannelRequest 中指定的参数，该待定通道 ID 可用于手动推进通道资金流。
 //	@param nodePubkey
 //	@param localFundingAmount
-func OpenChannel(nodePubkey string, localFundingAmount int64) {
+func OpenChannel(nodePubkey string, localFundingAmount int64) *lnrpc.OpenStatusUpdate {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -895,12 +907,12 @@ func OpenChannel(nodePubkey string, localFundingAmount int64) {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -911,12 +923,12 @@ func OpenChannel(nodePubkey string, localFundingAmount int64) {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
@@ -927,18 +939,21 @@ func OpenChannel(nodePubkey string, localFundingAmount int64) {
 	}
 	stream, err := client.OpenChannel(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc OpenChannel err: %v", err)
+		log.Printf("lnrpc OpenChannel err: %v", err)
+		return nil
 	}
 	for {
 		response, err := stream.Recv()
 		if err != nil {
 			if err == io.EOF {
 				// 流已经关闭，退出循环
-				log.Fatalf("err == io.EOF, err: %v\n", err)
+				log.Printf("err == io.EOF, err: %v\n", err)
+				return nil
 			}
-			log.Fatalf("stream Recv err: %v\n", err)
+			log.Printf("stream Recv err: %v\n", err)
+			return nil
 		}
-		log.Printf("response: %v\n", response)
+		return response
 	}
 }
 
@@ -963,12 +978,12 @@ func PendingChannels() *lnrpc.PendingChannelsResponse {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -979,19 +994,20 @@ func PendingChannels() *lnrpc.PendingChannelsResponse {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.PendingChannelsRequest{}
 	response, err := client.PendingChannels(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc PendingChannels err: %v", err)
+		log.Printf("lnrpc PendingChannels err: %v", err)
+		return nil
 	}
 	return response
 }
@@ -1011,12 +1027,12 @@ func RestoreChannelBackups() *lnrpc.RestoreBackupResponse {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1027,19 +1043,20 @@ func RestoreChannelBackups() *lnrpc.RestoreBackupResponse {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.RestoreChanBackupRequest{}
 	response, err := client.RestoreChannelBackups(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc RestoreChannelBackups err: %v", err)
+		log.Printf("lnrpc RestoreChannelBackups err: %v", err)
+		return nil
 	}
 	return response
 }
@@ -1059,12 +1076,12 @@ func SubscribeChannelBackups() *lnrpc.Lightning_SubscribeChannelBackupsClient {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1075,19 +1092,20 @@ func SubscribeChannelBackups() *lnrpc.Lightning_SubscribeChannelBackupsClient {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ChannelBackupSubscription{}
 	response, err := client.SubscribeChannelBackups(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc SubscribeChannelBackups err: %v", err)
+		log.Printf("lnrpc SubscribeChannelBackups err: %v", err)
+		return nil
 	}
 	return &response
 }
@@ -1107,12 +1125,12 @@ func SubscribeChannelEvents() *lnrpc.Lightning_SubscribeChannelEventsClient {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1123,19 +1141,20 @@ func SubscribeChannelEvents() *lnrpc.Lightning_SubscribeChannelEventsClient {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ChannelEventSubscription{}
 	response, err := client.SubscribeChannelEvents(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc  err: %v", err)
+		log.Printf("lnrpc  err: %v", err)
+		return nil
 	}
 	return &response
 }
@@ -1155,12 +1174,12 @@ func SubscribeChannelGraph() *lnrpc.Lightning_SubscribeChannelGraphClient {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1171,19 +1190,20 @@ func SubscribeChannelGraph() *lnrpc.Lightning_SubscribeChannelGraphClient {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.GraphTopologySubscription{}
 	response, err := client.SubscribeChannelGraph(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc SubscribeChannelGraph err: %v", err)
+		log.Printf("lnrpc SubscribeChannelGraph err: %v", err)
+		return nil
 	}
 	return &response
 }
@@ -1203,12 +1223,12 @@ func UpdateChannelPolicy() *lnrpc.PolicyUpdateResponse {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1219,19 +1239,20 @@ func UpdateChannelPolicy() *lnrpc.PolicyUpdateResponse {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.PolicyUpdateRequest{}
 	response, err := client.UpdateChannelPolicy(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc UpdateChannelPolicy err: %v", err)
+		log.Printf("lnrpc UpdateChannelPolicy err: %v", err)
+		return nil
 	}
 	return response
 }
@@ -1251,12 +1272,12 @@ func VerifyChanBackup() *lnrpc.VerifyChanBackupResponse {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1267,19 +1288,20 @@ func VerifyChanBackup() *lnrpc.VerifyChanBackupResponse {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ChanBackupSnapshot{}
 	response, err := client.VerifyChanBackup(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc VerifyChanBackup err: %v", err)
+		log.Printf("lnrpc VerifyChanBackup err: %v", err)
+		return nil
 	}
 	return response
 }
@@ -1305,12 +1327,12 @@ func ConnectPeer(pubkey, host string) *lnrpc.ConnectPeerResponse {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1321,12 +1343,12 @@ func ConnectPeer(pubkey, host string) *lnrpc.ConnectPeerResponse {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
@@ -1338,7 +1360,61 @@ func ConnectPeer(pubkey, host string) *lnrpc.ConnectPeerResponse {
 	}
 	response, err := client.ConnectPeer(context.Background(), request)
 	if err != nil {
-		log.Fatalf("lnrpc ConnectPeer err: %v", err)
+		log.Printf("lnrpc ConnectPeer err: %v", err)
+		return nil
+	}
+	return response
+}
+
+func EstimateFee(addr string, amount int64) *lnrpc.EstimateFeeResponse {
+	const (
+		grpcHost = "202.79.173.41:10009"
+	)
+	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		log.Printf("Failed to read cert file: %s", err)
+	}
+
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		log.Printf("Failed to append cert")
+	}
+
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		log.Printf("did not connect: %v", err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close err: %v", err)
+		}
+	}(conn)
+	client := lnrpc.NewLightningClient(conn)
+	addrToAmount := make(map[string]int64)
+	addrToAmount[addr] = amount
+	request := &lnrpc.EstimateFeeRequest{
+		AddrToAmount: addrToAmount,
+	}
+	response, err := client.EstimateFee(context.Background(), request)
+	if err != nil {
+		log.Printf("lnrpc ConnectPeer err: %v", err)
+		return nil
 	}
 	return response
 }

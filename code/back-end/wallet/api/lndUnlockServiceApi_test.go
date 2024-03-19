@@ -5,9 +5,9 @@ import (
 )
 
 func TestInitwallet(t *testing.T) {
-	Initwallet("cd123321")
+	InitWallet("12345678")
 }
 
 func TestUnlockwallet(t *testing.T) {
-	Unlockwallet("cd123321")
+	UnlockWallet("12345678")
 }

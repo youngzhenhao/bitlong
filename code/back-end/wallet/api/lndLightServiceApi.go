@@ -17,7 +17,7 @@ import (
 
 func GetNewAddress() bool {
 	const (
-		grpcHost = "127.0.0.1:10009"
+		grpcHost = "202.79.173.41:10009"
 	)
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
@@ -30,12 +30,12 @@ func GetNewAddress() bool {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -46,15 +46,23 @@ func GetNewAddress() bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
-	defer conn.Close()
-
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close err: %v", err)
+		}
+	}(conn)
 	// 创建 WalletUnlocker 客户端
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.NewAddressRequest{}
 	response, err := client.NewAddress(context.Background(), request)
-	log.Print(response.Address)
+	if err != nil {
+		log.Printf("lnrpc NewAddress err: %v", err)
+		return false
+	}
+	log.Printf("%v\n", response)
 	return true
 }
 
@@ -73,12 +81,12 @@ func GetWalletBalance() string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -89,16 +97,22 @@ func GetWalletBalance() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
-	defer conn.Close()
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close err: %v", err)
+		}
+	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.WalletBalanceRequest{}
 	response, err := client.WalletBalance(context.Background(), request)
 	if err != nil {
-		log.Fatalf("client.WalletBalance :%v", err)
+		log.Printf("lnrpc WalletBalance err: %v", err)
+		return ""
 	}
-	log.Print(response)
+	//log.Printf("%v\n", response)
 	return response.String()
 }
 
@@ -142,8 +156,12 @@ func AddInvoice(value int64) string {
 	if err != nil {
 		log.Printf("did not connect: %v", err)
 	}
-	defer conn.Close()
-
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close err: %v", err)
+		}
+	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.Invoice{
 		Value: value,
@@ -196,8 +214,12 @@ func ListInvoices() string {
 	if err != nil {
 		log.Printf("did not connect: %v", err)
 	}
-	defer conn.Close()
-
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close err: %v", err)
+		}
+	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ListInvoiceRequest{}
 	response, err := client.ListInvoices(context.Background(), request)
@@ -241,8 +263,12 @@ func lookupInvoice(rhash []byte) string {
 	if err != nil {
 		log.Printf("did not connect: %v", err)
 	}
-	defer conn.Close()
-
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close err: %v", err)
+		}
+	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.PaymentHash{
 		RHash: rhash,
@@ -299,7 +325,7 @@ func AbandonChannel() bool {
 	request := &lnrpc.AbandonChannelRequest{}
 	response, err := client.AbandonChannel(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc  err: %v", err)
+		log.Printf("lnrpc AbandonChannel err: %v", err)
 		return false
 	}
 	log.Printf("%v\n", response)
@@ -421,6 +447,11 @@ func ChannelAcceptor() bool {
 	}
 }
 
+// ChannelBalance
+//
+//	@Description: 返回所有开放渠道的资金总额报告，按本地/远程、待结算的本地/远程和未结算的本地/远程余额分类
+//	@return bool
+//
 // func ChannelBalance() *lnrpc.ChannelBalanceResponse {
 func ChannelBalance() bool {
 	const (
@@ -1537,12 +1568,12 @@ func DecodePayReq(pay_req string) string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1553,17 +1584,21 @@ func DecodePayReq(pay_req string) string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
-	defer conn.Close()
-
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close err: %v", err)
+		}
+	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.PayReqString{
 		PayReq: pay_req,
 	}
 	response, err := client.DecodePayReq(context.Background(), request)
 	if err != nil {
-		log.Fatalf("client.AddInvoice :%v", err)
+		log.Printf("client.AddInvoice :%v", err)
 		return ""
 	}
 	//log.Printf("%v\n", response)

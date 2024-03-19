@@ -9,35 +9,31 @@ import (
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 )
 
-func ListAddress() bool {
+func ListAddress() string {
 	const (
-		grpcHost = "127.0.0.1:10009"
+		grpcHost = "202.79.173.41:10009"
 	)
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := ioutil.ReadFile(macaroonPath)
+	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
 		panic(err)
 	}
 	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := ioutil.ReadFile(tlsCertPath)
+	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
-
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
-
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
 		RootCAs:    certPool,
@@ -46,17 +42,23 @@ func ListAddress() bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
-	defer conn.Close()
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close err: %v", err)
+		}
+	}(conn)
 	client := walletrpc.NewWalletKitClient(conn)
 	request := &walletrpc.ListAddressesRequest{}
 	response, err := client.ListAddresses(context.Background(), request)
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
+		return ""
 	}
-	log.Println(response)
-	return true
+	log.Printf("%v\n", response)
+	return response.String()
 }
 
 type macaroonCredential struct {
@@ -95,11 +97,11 @@ func ListAccounts() string {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -109,12 +111,12 @@ func ListAccounts() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := walletrpc.NewWalletKitClient(conn)
@@ -148,11 +150,11 @@ func ListLeases() string {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -162,12 +164,12 @@ func ListLeases() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := walletrpc.NewWalletKitClient(conn)
@@ -201,11 +203,11 @@ func ListSweeps() string {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -215,12 +217,12 @@ func ListSweeps() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := walletrpc.NewWalletKitClient(conn)
@@ -255,11 +257,11 @@ func ListUnspent() string {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -269,12 +271,12 @@ func ListUnspent() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := walletrpc.NewWalletKitClient(conn)
@@ -308,11 +310,11 @@ func NextAddr() string {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -322,12 +324,12 @@ func NextAddr() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			log.Printf("conn Close err: %v", err)
 		}
 	}(conn)
 	client := walletrpc.NewWalletKitClient(conn)

@@ -208,7 +208,9 @@ func SendAssets() bool {
 //
 //	@Description: 将尝试取消当前待处理批次
 //	@return *mintrpc.CancelBatchResponse
-func CancelBatch() *mintrpc.CancelBatchResponse {
+//
+// func CancelBatch() *mintrpc.CancelBatchResponse {
+func CancelBatch() bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -254,17 +256,19 @@ func CancelBatch() *mintrpc.CancelBatchResponse {
 	response, err := client.CancelBatch(context.Background(), request)
 	if err != nil {
 		log.Printf("mintrpc CancelBatch Error: %v", err)
-		return nil
+		return false
 	}
-	// 处理结果
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
 // FinalizeBatch
 //
 //	@Description: 将尝试完成当前待处理的批次
 //	@return *mintrpc.FinalizeBatchResponse
-func FinalizeBatch(shortResponse bool, feeRate uint32) *mintrpc.FinalizeBatchResponse {
+//
+// func FinalizeBatch(shortResponse bool, feeRate uint32) *mintrpc.FinalizeBatchResponse {
+func FinalizeBatch(shortResponse bool, feeRate int) bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -307,16 +311,16 @@ func FinalizeBatch(shortResponse bool, feeRate uint32) *mintrpc.FinalizeBatchRes
 	// 构建请求
 	request := &mintrpc.FinalizeBatchRequest{
 		ShortResponse: shortResponse,
-		FeeRate:       feeRate,
+		FeeRate:       uint32(feeRate),
 	}
 	// 得到响应
 	response, err := client.FinalizeBatch(context.Background(), request)
 	if err != nil {
 		log.Printf("mintrpc FinalizeBatch Error: %v", err)
-		return nil
+		return false
 	}
-	// 处理结果
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
 // ListBatches
@@ -324,7 +328,9 @@ func FinalizeBatch(shortResponse bool, feeRate uint32) *mintrpc.FinalizeBatchRes
 //	 @Description: 列出提交到守护程序的批处理集，包括待处理和已取消的批处理
 //		过滤器设置为空
 //	 @return *mintrpc.ListBatchResponse
-func ListBatches() *mintrpc.ListBatchResponse {
+//
+// func ListBatches() *mintrpc.ListBatchResponse {
+func ListBatches() string {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -370,10 +376,10 @@ func ListBatches() *mintrpc.ListBatchResponse {
 	response, err := client.ListBatches(context.Background(), request)
 	if err != nil {
 		log.Printf("mintrpc ListBatches Error: %v", err)
-		return nil
+		return ""
 	}
-	// 处理结果
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
 // MintAsset
@@ -381,7 +387,9 @@ func ListBatches() *mintrpc.ListBatchResponse {
 //	@Description:  将尝试铸模请求中指定的资产集（默认为异步，以确保正确的批处理）。
 //	返回的待处理批次将显示属于下一批次的其他待处理资产。此调用将阻塞，直至操作成功（资产已在批次中分期）或失败
 //	@return *mintrpc.MintAssetResponse
-func MintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, assetMetaData string, AssetMetaTypeIsJsonNotOpaque bool, amount uint64, newGroupedAsset bool, groupedAsset bool, groupKey string, groupAnchor string, shortResponse bool) *mintrpc.MintAssetResponse {
+//
+// func MintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, assetMetaData string, AssetMetaTypeIsJsonNotOpaque bool, amount uint64, newGroupedAsset bool, groupedAsset bool, groupKey string, groupAnchor string, shortResponse bool) *mintrpc.MintAssetResponse {
+func MintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, assetMetaData string, AssetMetaTypeIsJsonNotOpaque bool, amount int, newGroupedAsset bool, groupedAsset bool, groupKey string, groupAnchor string, shortResponse bool) bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -456,7 +464,7 @@ func MintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, 
 				Data: _assetMetaDataByteSlice,
 				Type: _assetMetaType,
 			},
-			Amount:          amount,
+			Amount:          uint64(amount),
 			NewGroupedAsset: newGroupedAsset,
 			GroupedAsset:    groupedAsset,
 			GroupKey:        _groupKeyByteSlice,
@@ -468,8 +476,8 @@ func MintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, 
 	response, err := client.MintAsset(context.Background(), request)
 	if err != nil {
 		log.Printf("mintrpc MintAsset Error: %v", err)
-		return nil
+		return false
 	}
-	// 处理结果
-	return response
+	log.Printf("%v\n", response)
+	return true
 }

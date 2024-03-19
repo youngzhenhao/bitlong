@@ -30,7 +30,8 @@ func DeleteFederationServer() {}
 //
 //	@Description: 返回一组关于宇宙当前状态的信息
 //	@return *universerpc.InfoResponse
-func Info() *universerpc.InfoResponse {
+//func UniverseInfo() *universerpc.InfoResponse {
+func UniverseInfo() string {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -77,10 +78,10 @@ func Info() *universerpc.InfoResponse {
 	response, err := client.Info(context.Background(), request)
 	if err != nil {
 		log.Printf("universerpc Info Error: %v", err)
-		return nil
+		return ""
 	}
-	// 处理结果
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
 func InsertProof() {}
@@ -89,7 +90,8 @@ func InsertProof() {}
 //
 //	@Description: 列出了组成本地 Universe 服务器联盟的服务器集。这些服务器用于推送新的证明，并定期从远程服务器同步调用新的证明
 //	@return *universerpc.ListFederationServersResponse
-func ListFederationServers() *universerpc.ListFederationServersResponse {
+//func ListFederationServers() *universerpc.ListFederationServersResponse {
+func ListFederationServers() string {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -136,10 +138,10 @@ func ListFederationServers() *universerpc.ListFederationServersResponse {
 	response, err := client.ListFederationServers(context.Background(), request)
 	if err != nil {
 		log.Printf("universerpc ListFederationServers Error: %v", err)
-		return nil
+		return ""
 	}
-	// 处理结果
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
 func MultiverseRoot() {}

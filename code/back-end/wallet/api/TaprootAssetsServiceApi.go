@@ -46,7 +46,9 @@ func FetchAssetMeta() {
 //
 //	@Description: 返回节点的信息
 //	@return *taprpc.GetInfoResponse
-func TapGetInfo() *taprpc.GetInfoResponse {
+//
+// func TapGetInfo() *taprpc.GetInfoResponse {
+func TapGetInfo() string {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -93,10 +95,10 @@ func TapGetInfo() *taprpc.GetInfoResponse {
 	response, err := client.GetInfo(context.Background(), request)
 	if err != nil {
 		log.Printf("taprpc GetInfo Error: %v", err)
-		return nil
+		return ""
 	}
-	// 处理结果
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
 // ListAssets
@@ -104,7 +106,9 @@ func TapGetInfo() *taprpc.GetInfoResponse {
 //	@Description: 列出目标守护程序拥有的资产集，返回的嵌套结构体中的[]byte需要使用get函数单独处理，如hex.EncodeToString
 //	请注意，IncludeSpent和IncludeLeased不能同时指定为true
 //	@return *taprpc.ListAssetResponse
-func ListAssets(withWitness, includeSpent, includeLeased bool) *taprpc.ListAssetResponse {
+//
+// func ListAssets(withWitness, includeSpent, includeLeased bool) *taprpc.ListAssetResponse {
+func ListAssets(withWitness, includeSpent, includeLeased bool) string {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -155,10 +159,10 @@ func ListAssets(withWitness, includeSpent, includeLeased bool) *taprpc.ListAsset
 	response, err := client.ListAssets(context.Background(), request)
 	if err != nil {
 		log.Printf("taprpc ListAssets Error: %v", err)
-		return nil
+		return ""
 	}
-	// 处理结果
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
 // ListBalances
@@ -166,7 +170,9 @@ func ListAssets(withWitness, includeSpent, includeLeased bool) *taprpc.ListAsset
 //	@Description: 列出资产余额
 //	参数为true按照AssetsId排序，false则按照GroupKey排序，资产和组键过滤器未设置
 //	@return *taprpc.ListBalancesResponse
-func ListBalances(isListAssetIdNotGroupKey bool) *taprpc.ListBalancesResponse {
+//
+// func ListBalances(isListAssetIdNotGroupKey bool) *taprpc.ListBalancesResponse {
+func ListBalances(isListAssetIdNotGroupKey bool) string {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -223,17 +229,19 @@ func ListBalances(isListAssetIdNotGroupKey bool) *taprpc.ListBalancesResponse {
 	response, err := client.ListBalances(context.Background(), request)
 	if err != nil {
 		log.Printf("taprpc ListBalances Error: %v", err)
-		return nil
+		return ""
 	}
-	// 处理结果
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
 // ListGroups
 //
 //	@Description: 列出目标守护程序已知的资产组，以及每个组中持有的资产
 //	@return *taprpc.ListGroupsResponse
-func ListGroups() *taprpc.ListGroupsResponse {
+//
+// func ListGroups() *taprpc.ListGroupsResponse {
+func ListGroups() string {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -280,17 +288,19 @@ func ListGroups() *taprpc.ListGroupsResponse {
 	response, err := client.ListGroups(context.Background(), request)
 	if err != nil {
 		log.Printf("taprpc ListGroups Error: %v", err)
-		return nil
+		return ""
 	}
-	// 处理结果
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
 // ListTransfers
 //
 //	@Description: 列出目标守护程序跟踪的出站资产转移
 //	@return *taprpc.ListTransfersResponse
-func ListTransfers() *taprpc.ListTransfersResponse {
+//
+// func ListTransfers() *taprpc.ListTransfersResponse {
+func ListTransfers() string {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -337,10 +347,10 @@ func ListTransfers() *taprpc.ListTransfersResponse {
 	response, err := client.ListTransfers(context.Background(), request)
 	if err != nil {
 		log.Printf("taprpc ListTransfers Error: %v", err)
-		return nil
+		return ""
 	}
-	// 处理结果
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
 // ListUtxos
@@ -348,7 +358,9 @@ func ListTransfers() *taprpc.ListTransfersResponse {
 //	@Description: 列出目标守护进程管理的 UTXO 及其持有的资产
 //	@param includeLeased
 //	@return *taprpc.ListUtxosResponse
-func ListUtxos(includeLeased bool) *taprpc.ListUtxosResponse {
+//
+// func ListUtxos(includeLeased bool) *taprpc.ListUtxosResponse {
+func ListUtxos(includeLeased bool) string {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -397,13 +409,14 @@ func ListUtxos(includeLeased bool) *taprpc.ListUtxosResponse {
 	response, err := client.ListUtxos(context.Background(), request)
 	if err != nil {
 		log.Printf("taprpc ListUtxos Error: %v", err)
-		return nil
+		return ""
 	}
-	// 处理结果
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
-func NewAddr(assetId string, amt uint64) *taprpc.Addr {
+// func NewAddr(assetId string, amt uint64) *taprpc.Addr {
+func NewAddr(assetId string, amt int) bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -448,23 +461,24 @@ func NewAddr(assetId string, amt uint64) *taprpc.Addr {
 	// 构建请求
 	request := &taprpc.NewAddrRequest{
 		AssetId: _assetIdByteSlice,
-		Amt:     amt,
+		Amt:     uint64(amt),
 	}
 	// 得到响应
 	response, err := client.NewAddr(context.Background(), request)
 	if err != nil {
 		log.Printf("taprpc NewAddr Error: %v", err)
-		return nil
+		return false
 	}
-	// 处理结果
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
 func QueryAddrs() {
 
 }
 
-func SendAsset(tapAddrs []string, feeRate uint32) *taprpc.SendAssetResponse {
+// func SendAsset(tapAddrs []string, feeRate uint32) *taprpc.SendAssetResponse {
+func SendAsset(tapAddrs []string, feeRate int) bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -508,16 +522,16 @@ func SendAsset(tapAddrs []string, feeRate uint32) *taprpc.SendAssetResponse {
 	// 构建请求
 	request := &taprpc.SendAssetRequest{
 		TapAddrs: tapAddrs,
-		FeeRate:  feeRate,
+		FeeRate:  uint32(feeRate),
 	}
 	// 得到响应
 	response, err := client.SendAsset(context.Background(), request)
 	if err != nil {
 		log.Printf("taprpc SendAsset Error: %v", err)
-		return nil
+		return false
 	}
-	// 处理结果
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
 func StopDaemon() {

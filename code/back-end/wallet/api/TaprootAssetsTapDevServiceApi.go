@@ -20,7 +20,9 @@ import (
 //	@param proofFile
 //	@param genesisPoint
 //	@return *tapdevrpc.ImportProofResponse
-func ImportProof(proofFile, genesisPoint string) *tapdevrpc.ImportProofResponse {
+//
+// func ImportProof(proofFile, genesisPoint string) *tapdevrpc.ImportProofResponse {
+func ImportProof(proofFile, genesisPoint string) bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -71,8 +73,8 @@ func ImportProof(proofFile, genesisPoint string) *tapdevrpc.ImportProofResponse 
 	response, err := client.ImportProof(context.Background(), request)
 	if err != nil {
 		log.Printf("tapdevrpc QueryRfqAcceptedQuotes Error: %v", err)
-		return nil
+		return false
 	}
-	// 处理结果
-	return response
+	log.Printf("%v\n", response)
+	return true
 }

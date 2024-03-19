@@ -9,12 +9,14 @@ import (
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
 )
 
-func AddAssetBuyOrder() *rfqrpc.AddAssetBuyOrderResponse {
+// func AddAssetBuyOrder() *rfqrpc.AddAssetBuyOrderResponse {
+func AddAssetBuyOrder() bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -61,13 +63,14 @@ func AddAssetBuyOrder() *rfqrpc.AddAssetBuyOrderResponse {
 	response, err := client.AddAssetBuyOrder(context.Background(), request)
 	if err != nil {
 		log.Printf("rfqrpc  Error: %v", err)
-		return nil
+		return false
 	}
-	// 处理结果
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
-func AddAssetSellOffer() *rfqrpc.AddAssetSellOfferResponse {
+// func AddAssetSellOffer() *rfqrpc.AddAssetSellOfferResponse {
+func AddAssetSellOffer() bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -114,13 +117,14 @@ func AddAssetSellOffer() *rfqrpc.AddAssetSellOfferResponse {
 	response, err := client.AddAssetSellOffer(context.Background(), request)
 	if err != nil {
 		log.Printf("rfqrpc  Error: %v", err)
-		return nil
+		return false
 	}
-	// 处理结果
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
-func QueryRfqAcceptedQuotes() *rfqrpc.QueryRfqAcceptedQuotesResponse {
+// func QueryRfqAcceptedQuotes() *rfqrpc.QueryRfqAcceptedQuotesResponse {
+func QueryRfqAcceptedQuotes() string {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -167,13 +171,14 @@ func QueryRfqAcceptedQuotes() *rfqrpc.QueryRfqAcceptedQuotesResponse {
 	response, err := client.QueryRfqAcceptedQuotes(context.Background(), request)
 	if err != nil {
 		log.Printf("rfqrpc QueryRfqAcceptedQuotes Error: %v", err)
-		return nil
+		return ""
 	}
-	// 处理结果
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
-func SubscribeRfqEventNtfns() *rfqrpc.Rfq_SubscribeRfqEventNtfnsClient {
+// func SubscribeRfqEventNtfns() *rfqrpc.Rfq_SubscribeRfqEventNtfnsClient {
+func SubscribeRfqEventNtfns() bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -217,11 +222,24 @@ func SubscribeRfqEventNtfns() *rfqrpc.Rfq_SubscribeRfqEventNtfnsClient {
 	// 构建请求
 	request := &rfqrpc.SubscribeRfqEventNtfnsRequest{}
 	// 得到响应
-	response, err := client.SubscribeRfqEventNtfns(context.Background(), request)
+	stream, err := client.SubscribeRfqEventNtfns(context.Background(), request)
 	if err != nil {
 		log.Printf("rfqrpc  Error: %v", err)
-		return nil
+		return false
 	}
-	// 处理结果
-	return &response
+	for {
+		response, err := stream.Recv()
+		if err != nil {
+			if err == io.EOF {
+				// 流已经关闭，退出循环
+				log.Printf("err == io.EOF, err: %v\n", err)
+				return false
+			}
+			log.Printf("stream Recv err: %v\n", err)
+			return false
+		}
+		log.Printf("%v\n", response)
+		return true
+	}
+
 }

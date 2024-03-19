@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
-	"github.com/lightninglabs/taproot-assets/taprpc"
 	"github.com/lightninglabs/taproot-assets/taprpc/assetwalletrpc"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
@@ -16,7 +15,8 @@ import (
 )
 
 // AnchorVirtualPsbts NOT COMPLETED
-func AnchorVirtualPsbts(virtualPsbts [][]byte) *taprpc.SendAssetResponse {
+// func AnchorVirtualPsbts(virtualPsbts [][]byte) *taprpc.SendAssetResponse {
+func AnchorVirtualPsbts(virtualPsbts []string) bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -58,21 +58,27 @@ func AnchorVirtualPsbts(virtualPsbts [][]byte) *taprpc.SendAssetResponse {
 	// 创建客户端
 	client := assetwalletrpc.NewAssetWalletClient(conn)
 	// 构建请求
+	_virtualPsbts := make([][]byte, 0)
+	for _, i := range virtualPsbts {
+		str, _ := hex.DecodeString(i)
+		_virtualPsbts = append(_virtualPsbts, str)
+	}
 	request := &assetwalletrpc.AnchorVirtualPsbtsRequest{
-		VirtualPsbts: virtualPsbts,
+		VirtualPsbts: _virtualPsbts,
 	}
 	// 得到响应
 	response, err := client.AnchorVirtualPsbts(context.Background(), request)
 	if err != nil {
 		log.Printf("assetwalletrpc AnchorVirtualPsbts Error: %v", err)
-		return nil
+		return false
 	}
-	// 处理结果
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
 // FundVirtualPsbt NOT COMPLETED
-func FundVirtualPsbt(isPsbtNotRaw bool, psbt ...string) *assetwalletrpc.FundVirtualPsbtResponse { // 读取参数
+// func FundVirtualPsbt(isPsbtNotRaw bool, psbt ...string) *assetwalletrpc.FundVirtualPsbtResponse { // 读取参数
+func FundVirtualPsbt(isPsbtNotRaw bool, psbt ...string) bool { // 读取参数
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -130,10 +136,10 @@ func FundVirtualPsbt(isPsbtNotRaw bool, psbt ...string) *assetwalletrpc.FundVirt
 	response, err := client.FundVirtualPsbt(context.Background(), request)
 	if err != nil {
 		log.Printf("assetwalletrpc FundVirtualPsbt Error: %v", err)
-		return nil
+		return false
 	}
-	// 处理结果
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
 // NextInternalKey
@@ -143,7 +149,8 @@ func FundVirtualPsbt(isPsbtNotRaw bool, psbt ...string) *assetwalletrpc.FundVirt
 //		但建议使用 NextScriptKey RPC，以确保经过调整的 Taproot 输出密钥也能被识别为本地密钥。
 //	 @param keyFamily
 //	 @return *assetwalletrpc.NextInternalKeyResponse
-func NextInternalKey(keyFamily uint32) *assetwalletrpc.NextInternalKeyResponse { // 读取参数
+func NextInternalKey(keyFamily int) string { // 读取参数
+	//func NextInternalKey(keyFamily uint32) *assetwalletrpc.NextInternalKeyResponse { // 读取参数
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -186,16 +193,16 @@ func NextInternalKey(keyFamily uint32) *assetwalletrpc.NextInternalKeyResponse {
 	client := assetwalletrpc.NewAssetWalletClient(conn)
 	// 构建请求
 	request := &assetwalletrpc.NextInternalKeyRequest{
-		KeyFamily: keyFamily,
+		KeyFamily: uint32(keyFamily),
 	}
 	// 得到响应
 	response, err := client.NextInternalKey(context.Background(), request)
 	if err != nil {
 		log.Printf("assetwalletrpc NextInternalKey Error: %v", err)
-		return nil
+		return ""
 	}
-	// 处理结果
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
 // NextScriptKey
@@ -203,7 +210,9 @@ func NextInternalKey(keyFamily uint32) *assetwalletrpc.NextInternalKeyResponse {
 //	@Description: 导出下一个脚本密钥（及其相应的内部密钥），并将它们都存储在数据库中，以确保以后导入证明时能将它们识别为本地密钥
 //	@param keyFamily
 //	@return *assetwalletrpc.NextScriptKeyResponse
-func NextScriptKey(keyFamily uint32) *assetwalletrpc.NextScriptKeyResponse { // 读取参数
+//
+// func NextScriptKey(keyFamily uint32) *assetwalletrpc.NextScriptKeyResponse { // 读取参数
+func NextScriptKey(keyFamily int) string { // 读取参数
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -246,16 +255,16 @@ func NextScriptKey(keyFamily uint32) *assetwalletrpc.NextScriptKeyResponse { // 
 	client := assetwalletrpc.NewAssetWalletClient(conn)
 	// 构建请求
 	request := &assetwalletrpc.NextScriptKeyRequest{
-		KeyFamily: keyFamily,
+		KeyFamily: uint32(keyFamily),
 	}
 	// 得到响应
 	response, err := client.NextScriptKey(context.Background(), request)
 	if err != nil {
 		log.Printf("assetwalletrpc NextScriptKey Error: %v", err)
-		return nil
+		return ""
 	}
-	// 处理结果
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
 // ProveAssetOwnership
@@ -265,7 +274,9 @@ func NextScriptKey(keyFamily uint32) *assetwalletrpc.NextScriptKeyResponse { // 
 //	 @param assetId
 //	 @param scriptKey
 //	 @return *assetwalletrpc.ProveAssetOwnershipResponse
-func ProveAssetOwnership(assetId, scriptKey string) *assetwalletrpc.ProveAssetOwnershipResponse {
+//
+// func ProveAssetOwnership(assetId, scriptKey string) *assetwalletrpc.ProveAssetOwnershipResponse {
+func ProveAssetOwnership(assetId, scriptKey string) bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -318,10 +329,10 @@ func ProveAssetOwnership(assetId, scriptKey string) *assetwalletrpc.ProveAssetOw
 	response, err := client.ProveAssetOwnership(context.Background(), request)
 	if err != nil {
 		log.Printf("assetwalletrpc ProveAssetOwnership Error: %v", err)
-		return nil
+		return false
 	}
-	// 处理结果
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
 // QueryInternalKey
@@ -330,7 +341,9 @@ func ProveAssetOwnership(assetId, scriptKey string) *assetwalletrpc.ProveAssetOw
 //	 @param internalKey
 //	 @return *assetwalletrpc.QueryInternalKeyResponse
 //		rpc error: code = Unknown desc = unknown request
-func QueryInternalKey(internalKey string) *assetwalletrpc.QueryInternalKeyResponse {
+//
+// func QueryInternalKey(internalKey string) *assetwalletrpc.QueryInternalKeyResponse {
+func QueryInternalKey(internalKey string) string {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -381,10 +394,10 @@ func QueryInternalKey(internalKey string) *assetwalletrpc.QueryInternalKeyRespon
 	response, err := client.QueryInternalKey(context.Background(), request)
 	if err != nil {
 		log.Printf("assetwalletrpc QueryInternalKey Error: %v", err)
-		return nil
+		return ""
 	}
-	// 处理结果
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
 // QueryScriptKey
@@ -392,7 +405,9 @@ func QueryInternalKey(internalKey string) *assetwalletrpc.QueryInternalKeyRespon
 //	@Description: 返回给定调整后脚本密钥的完整脚本密钥描述符
 //	@param tweakedScriptKey
 //	@return *assetwalletrpc.QueryScriptKeyResponse
-func QueryScriptKey(tweakedScriptKey string) *assetwalletrpc.QueryScriptKeyResponse {
+//
+// func QueryScriptKey(tweakedScriptKey string) *assetwalletrpc.QueryScriptKeyResponse {
+func QueryScriptKey(tweakedScriptKey string) string {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -442,17 +457,19 @@ func QueryScriptKey(tweakedScriptKey string) *assetwalletrpc.QueryScriptKeyRespo
 	response, err := client.QueryScriptKey(context.Background(), request)
 	if err != nil {
 		log.Printf("assetwalletrpc QueryScriptKey Error: %v", err)
-		return nil
+		return ""
 	}
-	// 处理结果
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
 // RemoveUTXOLease
 //
 //	@Description: 移除给定受管 UTXO 的租用/锁定/保留
 //	@return *assetwalletrpc.RemoveUTXOLeaseResponse
-func RemoveUTXOLease() *assetwalletrpc.RemoveUTXOLeaseResponse {
+//
+// func RemoveUTXOLease() *assetwalletrpc.RemoveUTXOLeaseResponse {
+func RemoveUTXOLease() bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -501,10 +518,10 @@ func RemoveUTXOLease() *assetwalletrpc.RemoveUTXOLeaseResponse {
 	response, err := client.RemoveUTXOLease(context.Background(), request)
 	if err != nil {
 		log.Printf("assetwalletrpc RemoveUTXOLease Error: %v", err)
-		return nil
+		return false
 	}
-	// 处理结果
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
 // SignVirtualPsbt
@@ -512,7 +529,9 @@ func RemoveUTXOLease() *assetwalletrpc.RemoveUTXOLeaseResponse {
 //	@Description: 签署虚拟交易的输入，并准备输入和输出的承诺
 //	@param fundedPsbt
 //	@return *assetwalletrpc.SignVirtualPsbtResponse
-func SignVirtualPsbt(fundedPsbt string) *assetwalletrpc.SignVirtualPsbtResponse {
+//
+// func SignVirtualPsbt(fundedPsbt string) *assetwalletrpc.SignVirtualPsbtResponse {
+func SignVirtualPsbt(fundedPsbt string) bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -562,10 +581,10 @@ func SignVirtualPsbt(fundedPsbt string) *assetwalletrpc.SignVirtualPsbtResponse 
 	response, err := client.SignVirtualPsbt(context.Background(), request)
 	if err != nil {
 		log.Printf("assetwalletrpc SignVirtualPsbt Error: %v", err)
-		return nil
+		return false
 	}
-	// 处理结果
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
 // VerifyAssetOwnership
@@ -574,7 +593,9 @@ func SignVirtualPsbt(fundedPsbt string) *assetwalletrpc.SignVirtualPsbtResponse 
 //	如果证明有效，则返回 true
 //	validProof := response.ValidProof
 //	@return *assetwalletrpc.VerifyAssetOwnershipResponse
-func VerifyAssetOwnership(proofWithWitness string) *assetwalletrpc.VerifyAssetOwnershipResponse {
+//
+// func VerifyAssetOwnership(proofWithWitness string) *assetwalletrpc.VerifyAssetOwnershipResponse {
+func VerifyAssetOwnership(proofWithWitness string) bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -624,10 +645,8 @@ func VerifyAssetOwnership(proofWithWitness string) *assetwalletrpc.VerifyAssetOw
 	response, err := client.VerifyAssetOwnership(context.Background(), request)
 	if err != nil {
 		log.Printf("assetwalletrpc VerifyAssetOwnership Error: %v", err)
-		return nil
+		return false
 	}
-	// bool
-	//response.ValidProof
-	// 处理结果
-	return response
+	log.Printf("%v\n", response)
+	return true
 }

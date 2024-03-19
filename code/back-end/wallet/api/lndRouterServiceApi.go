@@ -17,7 +17,7 @@ import (
 	"path/filepath"
 )
 
-func SendPaymentV2(invoice string) bool {
+func SendPaymentV2(invoice string, feelimit int64) string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -56,12 +56,13 @@ func SendPaymentV2(invoice string) bool {
 	client := routerrpc.NewRouterClient(conn)
 	request := &routerrpc.SendPaymentRequest{
 		PaymentRequest: invoice,
+		FeeLimitSat:    feelimit,
 		TimeoutSeconds: 60,
 	}
 	stream, err := client.SendPaymentV2(context.Background(), request)
 	if err != nil {
 		log.Printf("client.SendPaymentV2 :%v", err)
-		return false
+		return "false"
 	}
 	for {
 		response, err := stream.Recv()
@@ -69,17 +70,17 @@ func SendPaymentV2(invoice string) bool {
 			if err == io.EOF {
 				// 流已经关闭，退出循环
 				log.Printf("err == io.EOF, err: %v\n", err)
-				return false
+				return "false"
 			}
 			log.Printf("stream Recv err: %v\n", err)
-			return false
+			return "false"
 		}
 		log.Printf("%v\n", response)
-		return true
+		return response.PaymentHash
 	}
 }
 
-func TrackPaymentV2(payhash string) bool {
+func TrackPaymentV2(payhash string) string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -127,7 +128,7 @@ func TrackPaymentV2(payhash string) bool {
 
 	if err != nil {
 		log.Printf("client.SendPaymentV2 :%v", err)
-		return false
+		return "false"
 	}
 	for {
 		response, err := stream.Recv()
@@ -135,13 +136,13 @@ func TrackPaymentV2(payhash string) bool {
 			if err == io.EOF {
 				// 流已经关闭，退出循环
 				log.Printf("err == io.EOF, err: %v\n", err)
-				return false
+				return "false"
 			}
 			log.Printf("stream Recv err: %v\n", err)
-			return false
+			return "false"
 		}
 		log.Printf("%v\n", response)
-		return true
+		return response.Status.String()
 	}
 }
 
@@ -239,17 +240,16 @@ func EstimateRouteFee(dest string, amtsat int64) string {
 		}
 	}(conn)
 	client := routerrpc.NewRouterClient(conn)
-	_destByteSlice, _ := hex.DecodeString(dest)
+
+	bDest, _ := hex.DecodeString(dest)
 	request := &routerrpc.RouteFeeRequest{
-		Dest:   _destByteSlice,
+		Dest:   bDest,
 		AmtSat: amtsat,
 	}
 	response, err := client.EstimateRouteFee(context.Background(), request)
-
 	if err != nil {
-		log.Printf("client.SendPaymentV2 :%v", err)
+		log.Printf("client.Sen下dPaymentV2 :%v", err)
 	}
-
 	log.Print(response.RoutingFeeMsat)
 	return response.String()
 }

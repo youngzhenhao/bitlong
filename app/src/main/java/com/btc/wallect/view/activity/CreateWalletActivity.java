@@ -16,7 +16,9 @@ import com.btc.wallect.R;
 import com.btc.wallect.model.entity.UserInfo;
 import com.btc.wallect.model.entity.Wallet;
 import com.btc.wallect.utils.ConStantUtil;
+import com.btc.wallect.utils.CopyUtil;
 import com.btc.wallect.utils.DialogUtil;
+import com.btc.wallect.utils.SharedPreferencesHelperUtil;
 import com.btc.wallect.utils.UiUtils;
 import com.btc.wallect.view.activity.base.BaseActivity;
 import com.btc.wallect.view.interfaceview.LoginView;
@@ -40,12 +42,12 @@ public class CreateWalletActivity extends BaseActivity implements LoginView {
     ImageView imgPasswordSate;
     @BindView(R.id.tv_submit)
     TextView mTvSubmit;
-//    @BindView(R.id.ed_remind_txt)
-//    EditText edRemind;
+
 
     ILoginPresenter presenter;
     private boolean passWordState = true;
     private String page = "";
+    private boolean wallectState;
 
     @Override
     protected int setContentView() {
@@ -57,6 +59,7 @@ public class CreateWalletActivity extends BaseActivity implements LoginView {
         setImgBack(true);
         Intent in = getIntent();
         page = in.getStringExtra(ConStantUtil.KEY_TOACTION);
+        wallectState=in.getBooleanExtra(ConStantUtil.WALLECT_STATE,false);
         isCreateWallet();
 
 
@@ -92,8 +95,8 @@ public class CreateWalletActivity extends BaseActivity implements LoginView {
                 DialogUtil.showSimpleDialog(this, "提示", "密码不一致", null);
                 return;
             }
-            //    String txt = edRemind.getText().toString().trim();
-            String txt = "111";
+                String txt = remindTxt.getText().toString().trim();
+
 //            if (!TextUtils.isEmpty(account) && !TextUtils.isEmpty(password)){
 //                presenter.loginSubmit(account, password);
 //            }else {
@@ -101,16 +104,15 @@ public class CreateWalletActivity extends BaseActivity implements LoginView {
 //            }
 
 
-            setDataSave(account, password, txt, "");
-            if (isCreateWallet()){
+            setDataSave(account, password, txt, wallectState);
+            if (isCreateWallet()) {
                 openActivity(CollectActivity.class);
-            }else {
+            } else {
                 openActivity(EditMnemonWordActivity.class);
             }
 
-
         } else if (view.getId() == R.id.img_passWord) {
-            setImgPasswordSate();
+           setImgPasswordSate();
         }
     }
 
@@ -152,20 +154,26 @@ public class CreateWalletActivity extends BaseActivity implements LoginView {
     /**
      * 保存数据
      */
-    public void setDataSave(String name, String passWord, String txt, String collect) {
+    public void setDataSave(String name, String passWord, String txt, boolean isShow) {
         try {
-
             Wallet wallet = new Wallet();
             wallet.name = name;
             wallet.password = passWord;
             wallet.txt = txt;
             wallet.collect = "";
+            if(isShow){
+                wallet.show = "true";
+            }else {
+                wallet.show = "false";
+            }
+
 
             Long result = wallectDao.save(wallet);
 
             if (result != -1) {
-                Toast.makeText(getApplication(), "保存数据成功!返回插入行号是[" + result + "]", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplication(), "保存数据成功!返回插入id是[" + result + "]", Toast.LENGTH_SHORT).show();
                 //  showToast("保存数据成功!返回插入行号是["+result+"]");
+                SharedPreferencesHelperUtil.getInstance().putIntValue(ConStantUtil.CURRENT_SQL_ID, 1);
             } else {
                 // showToast("保存数据失败result["+result+"]");
                 Toast.makeText(getApplication(), "保存数据失败result[\"+result+\"]", Toast.LENGTH_SHORT).show();
@@ -177,19 +185,18 @@ public class CreateWalletActivity extends BaseActivity implements LoginView {
     }
 
 
-
     private boolean isCreateWallet() {
 
         if (page.equals(ConStantUtil.V_TOACTION_CREATE)) {
-           // setTitle(R.string.app_txt_create_wallect);
+            // setTitle(R.string.app_txt_create_wallect);
             setTitle("创建钱包");
-           // mTvSubmit.setText(R.string.app_btn_sure);
+            // mTvSubmit.setText(R.string.app_btn_sure);
             mTvSubmit.setText("确认");
             return true;
         } else {
-           // setTitle(R.string.app_txt_input_wallect);
+            // setTitle(R.string.app_txt_input_wallect);
             setTitle("导入钱包");
-         //   mTvSubmit.setText(R.string.app_btn_sure_input);
+            //   mTvSubmit.setText(R.string.app_btn_sure_input);
             mTvSubmit.setText("确认导入");
             return false;
         }

@@ -8,19 +8,27 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.btc.wallect.db.DBOpenHelper;
+import com.btc.wallect.db.DBdao;
+import com.btc.wallect.model.entity.Wallet;
 import com.btc.wallect.utils.ConStantUtil;
+import com.btc.wallect.utils.SharedPreferencesHelperUtil;
 import com.btc.wallect.view.activity.MainActivity;
+
+import java.util.List;
 
 import butterknife.Unbinder;
 
 public abstract class BaseFrament  extends Fragment{
     private Unbinder unbinder;
-    protected boolean isVisible = false;// 对用户界面是否可见
+    protected boolean isVisible = false;
     private int backCount;
 
     private static final String STATE_SAVE_IS_HIDDEN = "STATE_SAVE_IS_HIDDEN";
 
     private MainActivity mActivity;
+    private DBOpenHelper dBhelpUtil;
+    public DBdao wallectDao;
 
     @Override
     public void onAttach(Context context) {
@@ -31,7 +39,9 @@ public abstract class BaseFrament  extends Fragment{
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        SharedPreferencesHelperUtil.getInstance().init(getActivity());
+        dBhelpUtil = new DBOpenHelper(getActivity(), DBOpenHelper.DB_NAME, null, DBOpenHelper.DB_VERSION);
+        wallectDao = new DBdao(getActivity(), dBhelpUtil);
         backCount = mActivity.getSupportFragmentManager().getBackStackEntryCount();
 //        if (backCount != 0){
 //            mActivity.hideBottom();
@@ -122,6 +132,35 @@ public abstract class BaseFrament  extends Fragment{
         intent.putExtra(ConStantUtil.KEY_TOACTION,toWhere);
 
         startActivity(intent);
+    }
+    protected void openActivityData(Class<?> Action, String toWhere,boolean state) {
+        Intent intent = new Intent(getActivity(), Action);
+        intent.putExtra(ConStantUtil.KEY_TOACTION, toWhere);
+        intent.putExtra(ConStantUtil.WALLECT_STATE, state);
+        startActivity(intent);
+    }
+
+    public List<Wallet> selectWallectData() {
+
+        List<Wallet> data = wallectDao.select(null);
+        if (data.equals(null) || data.size() == 0) {
+            //  textView.setText("没有查到数据！");
+        } else {
+            //  textView.setText(data.toString());
+        }
+        return data;
+
+    }
+
+    public List<Wallet> selectDataByID(Long id) {
+        List<Wallet> data = wallectDao.select(id);
+        if (data.equals(null) || data.size() == 0) {
+
+        } else {
+
+        }
+        return data;
+
     }
 
 }

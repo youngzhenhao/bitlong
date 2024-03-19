@@ -14,14 +14,14 @@ public class DBOpenHelper extends SQLiteOpenHelper {
     /**数据库名字*/
     public static final String DB_NAME = "walletDB";
 
-    /**学生表字段信息*/
+    /**表字段信息*/
     public static final String TABLE_NAME = "tb_wallet";
     public static final String TB_NAME = "name";
     public static final String TB_SEX = "password";
     public static final String TB_AGE = "txt";
     public static final String TB_CLAZZ = "collect";
     public static final String TB_CREATEDATE = "createDate";
-    public static final String TB_ISSHOW_WALLECT = "isShowWallect";
+    public static final String TB_ISSHOW_WALLECT = "show";
 
     /**数据版本号 第一次运行要打开 */
 //    public static final int DB_VERSION = 1;
@@ -47,17 +47,14 @@ public class DBOpenHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         //初始化 第一次 创建数据库
         StringBuilder sql = new StringBuilder();
-
-
-
         sql.append(" create table tb_wallet(");
         sql.append(" id integer primary key,  ");
         sql.append(" name varchar(20),");
         sql.append(" password varchar(2),");
         sql.append(" txt varchar(20),");
         sql.append(" collect varchar(20),");
-        sql.append(" isshowwallect varchar(2),");
-        sql.append(" createDate varchar(23) )");
+        sql.append(" createDate varchar(23),");
+        sql.append(" show varchar(23) )");
 
 
 //        Log.e("TAG","------"+sql.toString());

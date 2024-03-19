@@ -32,7 +32,7 @@ public class WallectDialog extends Dialog {
     private String messageStr;//从外界设置的消息文本
     //确定文本和取消文本的显示的内容
     private String yesStr, noStr;
-    private onAddClickListener addClickListener;
+    private onAddWallectClickListener addClickListener;
 
     public List<WalletListBean> walletList;
 
@@ -43,7 +43,7 @@ public class WallectDialog extends Dialog {
     }
 
 
-    public void setAddOnclickListener(onAddClickListener addClick) {
+    public void setAddOnclickListener(onAddWallectClickListener addClick) {
         this.addClickListener = addClick;
     }
 
@@ -110,9 +110,9 @@ public class WallectDialog extends Dialog {
         mImg_add2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                if (noOnclickListener != null) {
-//                    noOnclickListener.onNoClick();
-//                }
+                if (addClickListener != null) {
+                    addClickListener.onAddWallectClick();
+                }
             }
         });
     }
@@ -135,8 +135,8 @@ public class WallectDialog extends Dialog {
         messageStr = message;
     }
 
-    public interface onAddClickListener {
-        public void onAddClick();
+    public interface onAddWallectClickListener {
+        public void onAddWallectClick();
     }
 
 

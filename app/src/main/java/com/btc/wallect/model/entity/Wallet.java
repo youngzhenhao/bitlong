@@ -10,7 +10,8 @@ public class Wallet implements Serializable {
     public String collect;
 
     public String creatDate;
-    public String isShowWallect;
+
+    public String show;
 
     //头像
     public byte[] logoHead;
@@ -24,7 +25,7 @@ public class Wallet implements Serializable {
                 ", age=" + txt +
                 ", clazz='" + collect + '\'' +
                 ", creatDate='" + creatDate + '\'' +
-                ", isShowWallect='" + isShowWallect + '\'' +
+                ", show='" + show + '\'' +
                 '}';
     }
 

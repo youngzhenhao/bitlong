@@ -68,12 +68,7 @@ public class TaprFragment extends Fragment {
     private TabLayout.Tab two;
 private TaprTabAdapter taprTabAdapter;
     public List<TaprTabListBean> taprTabList;
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
-
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

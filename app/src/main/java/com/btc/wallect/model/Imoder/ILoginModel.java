@@ -1,8 +1,6 @@
 package com.btc.wallect.model.Imoder;
 
-/**
- * Created by aiyang on 2018/7/3.
- */
+
 
 public interface ILoginModel {
 

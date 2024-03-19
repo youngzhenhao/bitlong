@@ -12,6 +12,8 @@ import android.os.Build;
 import androidx.annotation.RequiresApi;
 
 import com.btc.wallect.model.entity.Wallet;
+import com.btc.wallect.utils.ConStantUtil;
+import com.btc.wallect.utils.SharedPreferencesHelperUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -43,7 +45,7 @@ public class DBdao {
         contentValues.put(DBOpenHelper.TB_SEX, wallet.password);
         contentValues.put(DBOpenHelper.TB_AGE, wallet.txt);
         contentValues.put(DBOpenHelper.TB_CLAZZ, wallet.collect);
-        contentValues.put(DBOpenHelper.TB_ISSHOW_WALLECT, wallet.isShowWallect);
+        contentValues.put(DBOpenHelper.TB_ISSHOW_WALLECT, wallet.show);
 
 //        Log.e("TAG","--------------"+student.toString());
 //        Toast.makeText(context,"sql 语句--"+student.toString(),Toast.LENGTH_LONG).show();
@@ -60,6 +62,7 @@ public class DBdao {
          * ContentValues values 数据行数据
          * 返回值 成功插入行号的id  ,插入失败 -1
          */
+        SharedPreferencesHelperUtil.getInstance().putBooleanValue(ConStantUtil.ISWALLECT,true);
         return DB.insert(DBOpenHelper.TABLE_NAME, "空值", contentValues);
         //INSERT INTO tb_student(id,age,sex,name,clazz,createDate) VALUES (?,?,?,?,?,?)
 
@@ -113,7 +116,7 @@ public class DBdao {
                 wallet.txt = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_AGE));
                 wallet.collect = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_CLAZZ));
                 wallet.creatDate = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_CREATEDATE));
-                wallet.isShowWallect = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_ISSHOW_WALLECT));
+                wallet.show = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_ISSHOW_WALLECT));
                 //添加到集合
                 walletList.add(wallet);
             }
@@ -161,7 +164,7 @@ public class DBdao {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         //执行sql语句 方式
-        String sql = "INSERT INTO tb_student(age,sex,name,clazz,createDate,logoHead) VALUES (?,?,?,?,?,?)";
+        String sql = "INSERT INTO tb_student(age,sex,name,clazz,createDate,logoHead) VALUES (?,?,?,?,?,?,?)";
         /**
          * sql 语句
          * 要插入的数据
@@ -206,9 +209,9 @@ public class DBdao {
                 wallet.txt = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_AGE));
                 wallet.collect = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_CLAZZ));
                 wallet.creatDate = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_CREATEDATE));
-                wallet.isShowWallect=cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_ISSHOW_WALLECT));
-                //图片
+
                 wallet.logoHead = cursor.getBlob(cursor.getColumnIndexOrThrow("logoHead"));
+                wallet.show=cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_ISSHOW_WALLECT));
             }
         }
         cursor.close();
@@ -236,8 +239,30 @@ public class DBdao {
         contentValues.put(DBOpenHelper.TB_SEX, wallet.password);
         contentValues.put(DBOpenHelper.TB_AGE, wallet.txt);
         contentValues.put(DBOpenHelper.TB_CLAZZ, wallet.collect);
-        contentValues.put(DBOpenHelper.TB_ISSHOW_WALLECT,wallet.isShowWallect);
+        contentValues.put(DBOpenHelper.TB_ISSHOW_WALLECT,wallet.show);
 
+        //时间
+        Date date = new Date();
+        //格式化
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        contentValues.put(DBOpenHelper.TB_CREATEDATE, simpleDateFormat.format(date));
+
+        int result = DB.update(DBOpenHelper.TABLE_NAME, contentValues, "id = ?", new String[]{id + ""});
+        //完成事务
+        DB.setTransactionSuccessful();
+        //结束事务
+        DB.endTransaction();
+
+        return result;
+    }
+    public int updateCollectById(Wallet wallet, Long id) {
+        // 获取写操作数据库对象
+        DB = dBhelpUtil.getWritableDatabase();
+        //开启事务
+        DB.beginTransaction();
+        //数据行数据
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBOpenHelper.TB_CLAZZ, wallet.collect);
         //时间
         Date date = new Date();
         //格式化

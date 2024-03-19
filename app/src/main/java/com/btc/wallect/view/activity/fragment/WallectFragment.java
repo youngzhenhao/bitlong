@@ -35,20 +35,26 @@ import com.btc.wallect.adapter.OurAdapter;
 import com.btc.wallect.model.Imoder.onItemClickListener;
 import com.btc.wallect.model.entity.MainDateilBean;
 import com.btc.wallect.model.entity.MainTabListBean;
+import com.btc.wallect.model.entity.Wallet;
 import com.btc.wallect.model.entity.WalletListBean;
+import com.btc.wallect.presenter.IPresenter.IWallectFragmentPresentImpl;
+import com.btc.wallect.presenter.compl.WallectFragmentPresentImpl;
 import com.btc.wallect.qr.ActivityResultHelper;
 import com.btc.wallect.utils.ConStantUtil;
 import com.btc.wallect.utils.GsonUtils;
 import com.btc.wallect.utils.LogUntil;
 import com.btc.wallect.utils.SharedPreferencesHelperUtil;
+import com.btc.wallect.utils.UiUtils;
 import com.btc.wallect.utils.dialog.ChannelOpeningDialog;
 import com.btc.wallect.utils.dialog.WallectDialog;
 import com.btc.wallect.view.activity.CreateTokenActivity;
+import com.btc.wallect.view.activity.CreateWalletActivity;
 import com.btc.wallect.view.activity.MainActivity;
 import com.btc.wallect.view.activity.TokenDetailActivity;
 import com.btc.wallect.view.activity.WallectEditActivity;
 import com.btc.wallect.view.activity.base.BaseFrament;
 
+import com.btc.wallect.view.interfaceview.WallectFragmentView;
 import com.example.scanzxing.zxing.android.CaptureActivity;
 import com.example.scanzxing.zxing.common.Constantes;
 import com.google.gson.Gson;
@@ -62,12 +68,12 @@ import com.jude.rollviewpager.hintview.ColorPointHintView;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
-public class WallectFragment extends BaseFrament implements View.OnClickListener {
-    //    @BindView(R.id.recycler_main_view)
-//    RecyclerView mRerecyclerMainview;
-//    @BindView(R.id.img_btc_hide)
-//    ImageView mImg_btc_hide;
+
+public class WallectFragment extends BaseFrament implements View.OnClickListener, WallectFragmentView {
+
     public static final int REQUEST_CODE = 1;
 
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -87,12 +93,17 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
     private boolean isShowNum = true;
     public List<WalletListBean> walletListBeans;
     private ActivityResultHelper helper;
+    @BindView(R.id.tv_btc_name)
+    TextView textViewName;
+    @BindView(R.id.tv_btc_amont)
+    TextView mTvBtcAmout;
+    IWallectFragmentPresentImpl wallectFragmentPresent;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_wallect, container, false);
-
+        ButterKnife.bind(this, view);
         initViews(view);
         return view;
     }
@@ -117,6 +128,8 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
         dataList = new ArrayList<>();
         mMainTabList = new ArrayList<>();
         walletListBeans = new ArrayList<>();
+        wallectFragmentPresent = new WallectFragmentPresentImpl();
+
         initCollectTest();
         setTab();
         setRecyclerMianDatailTabView();
@@ -125,6 +138,7 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
         isShowDatail();
         setWallectDatail();
         setRequestCode();
+        showUIData();
     }
 
     private void setRecyclerMianDatailTabView() {
@@ -273,8 +287,6 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
         dataList.add(collectBean6);
 
         mainTabListBean.setDataTabList(dataList);
-
-
         mMainTabList.add(mainTabListBean);
         LogUntil.d(new Gson().toJson(mMainTabList));
 
@@ -331,9 +343,11 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
     private void isShowDatail() {
         if (isShowNum) {
             mImg_btc_hide.setImageResource(R.mipmap.icon_btc_hide1);
+            UiUtils.setHidePassword(getActivity(), mTvBtcAmout, mImg_btc_hide, isShowNum);
             isShowNum = false;
         } else {
             mImg_btc_hide.setImageResource(R.mipmap.icon_btc_hide2);
+            UiUtils.setHidePassword(getActivity(), mTvBtcAmout, mImg_btc_hide, isShowNum);
             isShowNum = true;
         }
     }
@@ -351,11 +365,12 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
 
     private void setDialogList() {
         WallectDialog wallectDialog = new WallectDialog(getActivity(), walletListBeans);
-        wallectDialog.setAddOnclickListener(new WallectDialog.onAddClickListener() {
+        wallectDialog.setAddOnclickListener(new WallectDialog.onAddWallectClickListener() {
             @Override
-            public void onAddClick() {
-
+            public void onAddWallectClick() {
+                openActivityData(CreateWalletActivity.class, ConStantUtil.V_TOACTION_CREATE,ConStantUtil.STATE_FALSE);
             }
+
         });
         wallectDialog.show();
     }
@@ -376,23 +391,23 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
                         if (data != null) {
                             //返回的文本内容
                             String content = data.getStringExtra(Constantes.CODED_CONTENT);
-                            Bitmap bitmap =  data.getParcelableExtra(Constantes.CODED_BITMAP);
+                            Bitmap bitmap = data.getParcelableExtra(Constantes.CODED_BITMAP);
                             //返回的BitMap图像
 //                Bitmap bitmap = data.getParcelableExtra(DECODED_BITMAP_KEY);
 //                tv_scanResult.setText("你扫描到的内容是：" + content);
 
-                            Log.e("扫描到的内容是" , "扫描到的内容是：" + content);
+                            Log.e("扫描到的内容是", "扫描到的内容是：" + content);
 
-                            if (!TextUtils.isEmpty(content)){
+                            if (!TextUtils.isEmpty(content)) {
 
                                 LogUntil.d("扫描结果： " + content);
                             }
-                            if (bitmap != null){
+                            if (bitmap != null) {
 //                    ImageView textBitmapIMG = findViewById(R.id.test_Bitmap_IMG);
 //                    textBitmapIMG.setVisibility(View.VISIBLE);
 //                    textBitmapIMG.setImageBitmap(bitmap);
                             } else {
-                                Log.e("扫描到的内容是" , "扫描到的内容是：bitmap = null" );
+                                Log.e("扫描到的内容是", "扫描到的内容是：bitmap = null");
                             }
                         }
                     }
@@ -408,4 +423,15 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
         helper.onActivityResult(requestCode, resultCode, data);
     }
 
+
+    public void showUIData() {
+        List<Wallet> walletList = selectWallectData();
+        for (Wallet wallet : walletList) {
+            if (wallet.show.equals(ConStantUtil.TRUE)) {
+                textViewName.setText(wallet.name);
+            }
+
+        }
+
+    }
 }

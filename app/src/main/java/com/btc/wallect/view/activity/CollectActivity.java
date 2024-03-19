@@ -9,11 +9,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.btc.wallect.adapter.CollectAdapter;
+import com.btc.wallect.model.entity.Wallet;
+import com.btc.wallect.utils.ConStantUtil;
+import com.btc.wallect.utils.CopyUtil;
 import com.btc.wallect.utils.HorizontalDividerItemDecoration;
+import com.btc.wallect.utils.SharedPreferencesHelperUtil;
 import com.btc.wallect.view.activity.base.BaseActivity;
 import com.btc.wallect.R;
 import com.btc.wallect.model.entity.CollectBean;
 import com.btc.wallect.utils.DialogUtil;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +65,11 @@ public class CollectActivity extends BaseActivity {
             CollectBean collectBean = new CollectBean("collect", i + 1);
             fruitList.add(collectBean);
         }
+        Wallet wallet = new Wallet();
+        String _collect = new Gson().toJson(fruitList);
+        wallet.collect = _collect;
+        int id = SharedPreferencesHelperUtil.getInstance().getIntValue(ConStantUtil.CURRENT_SQL_ID, 1);
+        wallectDao.updateCollectById(wallet, Long.valueOf(id));
     }
 
     @OnClick({R.id.tv_hand_copy, R.id.tv_cloud_copy, R.id.tv_later_copy})
@@ -67,12 +77,23 @@ public class CollectActivity extends BaseActivity {
         if (view.getId() == R.id.tv_hand_copy) {
             openActivity(ImportMnemonicWordActivity.class);
         } else if (view.getId() == R.id.tv_cloud_copy) {
-           // DialogUtil.showSimpleDialog(this, "提示", "云备份", null);
+            // DialogUtil.showSimpleDialog(this, "提示", "云备份", null);
             openActivity(MainActivity.class);
         } else if (view.getId() == R.id.tv_later_copy) {
-          //  DialogUtil.showSimpleDialog(this, "提示", "稍后备份", null);
+            //  DialogUtil.showSimpleDialog(this, "提示", "稍后备份", null);
             openActivity(MainActivity.class);
         }
+    }
+
+    private void copyCollect() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < fruitList.size(); i++) {
+            stringBuilder.append(i + "、" + fruitList.get(i).getName()).append(" ");
+        }
+
+
+        String result = stringBuilder.toString().trim();
+        CopyUtil.copyClicks(result);
     }
 
 

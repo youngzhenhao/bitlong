@@ -19,7 +19,7 @@ public class CopyUtil {
         // 把数据集设置（复制）到剪贴板
         clipboard.setPrimaryClip(clipData);
 
-      //  ToastUtils.showToast(context, R.string.app_txt43);
+        ToastUtils.showToast(context, "已复制到剪切板");
 
     }
 

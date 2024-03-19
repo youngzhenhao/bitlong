@@ -57,7 +57,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="37dp"
-                android:text="BTC-1"
+                android:text=""
                 android:textColor="@color/white"
                 android:textSize="24sp"
                 android:textStyle="bold" />
@@ -88,11 +88,22 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/tv_btc_amont"
+                android:id="@+id/tv_btc_key"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="37dp"
                 android:text="0x5656****2635"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/tv_btc_amont"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="37dp"
+                android:text="0.2"
+                android:maxLines="1"
+                android:maxEms="6"
                 android:textColor="@color/white"
                 android:textSize="24sp"
                 android:textStyle="bold" />

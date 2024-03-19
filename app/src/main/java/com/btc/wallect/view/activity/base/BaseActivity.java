@@ -1,9 +1,16 @@
 package com.btc.wallect.view.activity.base;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -17,10 +24,12 @@ import com.btc.wallect.R;
 import com.btc.wallect.model.entity.Wallet;
 import com.btc.wallect.utils.ConStantUtil;
 import com.btc.wallect.utils.DialogUtil;
+import com.btc.wallect.utils.LogUntil;
 import com.btc.wallect.utils.SharedPreferencesHelperUtil;
 import com.trello.rxlifecycle2.LifecycleTransformer;
 import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
+import java.io.File;
 import java.util.List;
 
 import butterknife.ButterKnife;
@@ -42,12 +51,14 @@ public abstract class BaseActivity<T extends BaseConstract.IBasePersenter> exten
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
+        SharedPreferencesHelperUtil.getInstance().init(this);
+        dBhelpUtil = new DBOpenHelper(this, DBOpenHelper.DB_NAME, null, DBOpenHelper.DB_VERSION);
+        wallectDao = new DBdao(this, dBhelpUtil);
         createView();
         init(mRootView, savedInstanceState);
         attachView();
-        dBhelpUtil = new DBOpenHelper(this, DBOpenHelper.DB_NAME, null, DBOpenHelper.DB_VERSION);
-        wallectDao = new DBdao(this, dBhelpUtil);
-        SharedPreferencesHelperUtil.getInstance().init(this);
+
+
     }
 
     private void createView() {
@@ -183,10 +194,10 @@ public abstract class BaseActivity<T extends BaseConstract.IBasePersenter> exten
         startActivity(new Intent(this, Action));
     }
 
-    protected void openActivityData(Class<?> Action, String toWhere) {
+    protected void openActivityData(Class<?> Action, String toWhere,boolean state) {
         Intent intent = new Intent(this, Action);
         intent.putExtra(ConStantUtil.KEY_TOACTION, toWhere);
-
+        intent.putExtra(ConStantUtil.WALLECT_STATE, state);
         startActivity(intent);
     }
 
@@ -217,7 +228,6 @@ public abstract class BaseActivity<T extends BaseConstract.IBasePersenter> exten
     public List<Wallet> selectWallectData() {
 
         List<Wallet> data = wallectDao.select(null);
-
         if (data.equals(null) || data.size() == 0) {
             //  textView.setText("没有查到数据！");
         } else {
@@ -228,9 +238,7 @@ public abstract class BaseActivity<T extends BaseConstract.IBasePersenter> exten
     }
 
     public List<Wallet> selectDataByID(Long id) {
-
         List<Wallet> data = wallectDao.select(id);
-
         if (data.equals(null) || data.size() == 0) {
 
         } else {
@@ -239,5 +247,11 @@ public abstract class BaseActivity<T extends BaseConstract.IBasePersenter> exten
         return data;
 
     }
+
+
+
+
+
+
 }
 

@@ -104,6 +104,7 @@ func UnlockWallet(password string) bool
 ### 付款 `pay`
 
 #### DecodePayReq
+>func DecodePayReq(pay_req string) int64   
 
 解码发票  
 解码支付请求字符串,返回发票金额
@@ -118,16 +119,63 @@ func UnlockWallet(password string) bool
 
 
 #### EstimateRouteFee
+>EstimateRouteFee(dest string, amtsat int64) string  
 
-计算费用
+计算费用  
+允许测试发送到目标节点指定金额是否成功
 
-#### SendPaymentV2
+| 返回参数   | 类型     | 用途       |
+|--------|--------|----------|
+| dest   | string | 目标节点地址   |
+| amtsat | int64  | 要测试发送的金额 |
 
-支付发票
+| 返回类型   | 用途     |
+|--------|--------|
+| string | 返回测试信息 |
+
+#### SendPaymentSync
+
+>func SendPaymentSync(invoice string) string  
+
+支付发票  
+支付闪电发票请求  
+
+| 返回参数    | 类型     | 用途         |
+|---------|--------|------------|
+| invoice | string | 要支付的闪电发票请求 |
+
+| 返回类型   | 用途                 |
+|--------|--------------------|
+| string | 返回支付hash,可用于跟踪付款进度 |
 
 #### TrackPaymentV2
+>func TrackPaymentV2(payhash string) string
 
-交易追踪
+交易信息  
+返回由付款哈希值标识的付款的更新流。
 
----
+
+| 返回参数    | 类型     | 用途            |
+|---------|--------|---------------|
+| payhash | string | 要查询的支付的支付hash |
+
+| 返回类型   | 用途     |
+|--------|--------|
+| string | 返回支付状态 |
+
+#### SendCoins
+>func SendCoins(addr string, amount int64) string
+
+发送至链上  
+向指定比特币地址发送金额。
+
+| 返回参数   | 类型     | 用途   |
+|--------|--------|------|
+| addr   | string | 目的地址 |
+| amount | string | 发送金额 |
+
+| 返回类型   | 用途     |
+|--------|--------|
+| string | 返回交易ID |
+
 

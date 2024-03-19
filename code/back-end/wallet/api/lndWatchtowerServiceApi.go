@@ -19,7 +19,9 @@ import (
 //
 //	@Description: 返回有关同伴监视塔的一般信息，包括其公钥和服务器当前正在监听客户端的 URI
 //	@return *watchtowerrpc.GetInfoResponse
-func WatchtowerGetInfo() *watchtowerrpc.GetInfoResponse {
+//
+// func WatchtowerGetInfo() *watchtowerrpc.GetInfoResponse {
+func WatchtowerGetInfo() string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -60,7 +62,8 @@ func WatchtowerGetInfo() *watchtowerrpc.GetInfoResponse {
 	response, err := client.GetInfo(context.Background(), request)
 	if err != nil {
 		log.Printf("watchtowerrpc GetInfo err: %v", err)
-		return nil
+		return ""
 	}
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }

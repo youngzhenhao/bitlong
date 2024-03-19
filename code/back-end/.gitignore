@@ -6,3 +6,6 @@ go.work
 go.work.sum
 wallet/.idea
 .idea
+wallet/lnurl/temp.go
+wallet/api/api.aar
+wallet/api/api-sources.jar

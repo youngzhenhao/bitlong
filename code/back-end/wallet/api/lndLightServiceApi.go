@@ -107,7 +107,9 @@ func GetWalletBalance() string {
 //	@Description: 试图在发票数据库中添加新发票。任何重复的发票都会被拒绝，因此所有发票都必须有唯一的付款预图像
 //	@param value
 //	@return string
-func AddInvoice(value int64) *lnrpc.AddInvoiceResponse {
+//
+// func AddInvoice(value int64) *lnrpc.AddInvoiceResponse {
+func AddInvoice(value int64) string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -149,10 +151,9 @@ func AddInvoice(value int64) *lnrpc.AddInvoiceResponse {
 	response, err := client.AddInvoice(context.Background(), request)
 	if err != nil {
 		log.Printf("client.AddInvoice :%v", err)
-		return nil
+		return ""
 	}
-	return response
-
+	return response.PaymentRequest
 }
 
 // ListInvoices
@@ -254,7 +255,8 @@ func lookupInvoice(rhash []byte) string {
 	return response.String()
 }
 
-func AbandonChannel() *lnrpc.AbandonChannelResponse {
+// func AbandonChannel() *lnrpc.AbandonChannelResponse {
+func AbandonChannel() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -298,12 +300,14 @@ func AbandonChannel() *lnrpc.AbandonChannelResponse {
 	response, err := client.AbandonChannel(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc  err: %v", err)
-		return nil
+		return false
 	}
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
-func BatchOpenChannel() *lnrpc.BatchOpenChannelResponse {
+// func BatchOpenChannel() *lnrpc.BatchOpenChannelResponse {
+func BatchOpenChannel() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -347,12 +351,14 @@ func BatchOpenChannel() *lnrpc.BatchOpenChannelResponse {
 	response, err := client.BatchOpenChannel(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc BatchOpenChannel err: %v", err)
-		return nil
+		return false
 	}
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
-func ChannelAcceptor() *lnrpc.Lightning_ChannelAcceptorClient {
+// func ChannelAcceptor() *lnrpc.Lightning_ChannelAcceptorClient {
+func ChannelAcceptor() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -394,15 +400,29 @@ func ChannelAcceptor() *lnrpc.Lightning_ChannelAcceptorClient {
 	client := lnrpc.NewLightningClient(conn)
 	//request := &lnrpc.ChannelAcceptRequest{}
 	//response, err := client.ChannelAcceptor(context.Background(), request)
-	response, err := client.ChannelAcceptor(context.Background())
+	stream, err := client.ChannelAcceptor(context.Background())
 	if err != nil {
 		log.Printf("lnrpc ChannelAcceptor err: %v", err)
-		return nil
+		return false
 	}
-	return &response
+	for {
+		response, err := stream.Recv()
+		if err != nil {
+			if err == io.EOF {
+				// 流已经关闭，退出循环
+				log.Printf("err == io.EOF, err: %v\n", err)
+				return false
+			}
+			log.Printf("stream Recv err: %v\n", err)
+			return false
+		}
+		log.Printf("%v\n", response)
+		return true
+	}
 }
 
-func ChannelBalance() *lnrpc.ChannelBalanceResponse {
+// func ChannelBalance() *lnrpc.ChannelBalanceResponse {
+func ChannelBalance() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -446,12 +466,14 @@ func ChannelBalance() *lnrpc.ChannelBalanceResponse {
 	response, err := client.ChannelBalance(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc ChannelBalance err: %v", err)
-		return nil
+		return false
 	}
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
-func CheckMacaroonPermissions() *lnrpc.CheckMacPermResponse {
+// func CheckMacaroonPermissions() *lnrpc.CheckMacPermResponse {
+func CheckMacaroonPermissions() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -495,9 +517,10 @@ func CheckMacaroonPermissions() *lnrpc.CheckMacPermResponse {
 	response, err := client.CheckMacaroonPermissions(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc CheckMacaroonPermissions err: %v", err)
-		return nil
+		return false
 	}
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
 // CloseChannel
@@ -508,7 +531,7 @@ func CheckMacaroonPermissions() *lnrpc.CheckMacPermResponse {
 //		如果两者都未指定，则使用默认的宽松区块确认目标。
 //	 @param fundingTxidStr
 //	 @param outputIndex
-func CloseChannel(fundingTxidStr string, outputIndex uint32) *lnrpc.CloseStatusUpdate {
+func CloseChannel(fundingTxidStr string, outputIndex int) bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -552,13 +575,13 @@ func CloseChannel(fundingTxidStr string, outputIndex uint32) *lnrpc.CloseStatusU
 	request := &lnrpc.CloseChannelRequest{
 		ChannelPoint: &lnrpc.ChannelPoint{
 			FundingTxid: &lnrpc.ChannelPoint_FundingTxidStr{FundingTxidStr: fundingTxidStr},
-			OutputIndex: outputIndex,
+			OutputIndex: uint32(outputIndex),
 		},
 	}
 	stream, err := client.CloseChannel(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc CloseChannel err: %v", err)
-		return nil
+		return false
 	}
 	for {
 		response, err := stream.Recv()
@@ -566,20 +589,24 @@ func CloseChannel(fundingTxidStr string, outputIndex uint32) *lnrpc.CloseStatusU
 			if err == io.EOF {
 				// 流已经关闭，退出循环
 				log.Printf("err == io.EOF, err: %v\n", err)
-				return nil
+				return false
 			}
 			log.Printf("stream Recv err: %v\n", err)
-			return nil
+			return false
 		}
-		return response
+		log.Printf("%v\n", response)
+		return true
 	}
+
 }
 
 // ClosedChannels
 //
 //	@Description: 返回该节点参与的所有封闭通道的描述
 //	@return *lnrpc.ClosedChannelsResponse
-func ClosedChannels() *lnrpc.ClosedChannelsResponse {
+//
+// func ClosedChannels() *lnrpc.ClosedChannelsResponse {
+func ClosedChannels() string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -623,12 +650,14 @@ func ClosedChannels() *lnrpc.ClosedChannelsResponse {
 	response, err := client.ClosedChannels(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc ClosedChannels err: %v", err)
-		return nil
+		return ""
 	}
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
-func ExportAllChannelBackups() *lnrpc.ChanBackupSnapshot {
+// func ExportAllChannelBackups() *lnrpc.ChanBackupSnapshot {
+func ExportAllChannelBackups() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -672,12 +701,14 @@ func ExportAllChannelBackups() *lnrpc.ChanBackupSnapshot {
 	response, err := client.ExportAllChannelBackups(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc ChanBackupExportRequest err: %v", err)
-		return nil
+		return false
 	}
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
-func ExportChannelBackup() *lnrpc.ChannelBackup {
+// func ExportChannelBackup() *lnrpc.ChannelBackup {
+func ExportChannelBackup() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -721,9 +752,10 @@ func ExportChannelBackup() *lnrpc.ChannelBackup {
 	response, err := client.ExportChannelBackup(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc ExportChannelBackup err: %v", err)
-		return nil
+		return false
 	}
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
 // GetChanInfo
@@ -731,7 +763,9 @@ func ExportChannelBackup() *lnrpc.ChannelBackup {
 //	@Description: 返回指定通道的最新认证网络公告，该通道由通道 ID 标识：一个 8 字节整数，用于唯一标识区块链中交易资金输出的位置
 //	@param chanId
 //	@return *lnrpc.ChannelEdge
-func GetChanInfo(chanId uint64) *lnrpc.ChannelEdge {
+//
+// func GetChanInfo(chanId uint64) *lnrpc.ChannelEdge {
+func GetChanInfo(chanId int) string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -772,21 +806,24 @@ func GetChanInfo(chanId uint64) *lnrpc.ChannelEdge {
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ChanInfoRequest{
-		ChanId: chanId,
+		ChanId: uint64(chanId),
 	}
 	response, err := client.GetChanInfo(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc GetChanInfo err: %v", err)
-		return nil
+		return ""
 	}
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
 // ListChannels
 //
 //	@Description: 返回该节点参与的所有开放通道的描述。
 //	@return *lnrpc.ListChannelsResponse
-func ListChannels() *lnrpc.ListChannelsResponse {
+//
+// func ListChannels() *lnrpc.ListChannelsResponse {
+func ListChannels() string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -830,12 +867,14 @@ func ListChannels() *lnrpc.ListChannelsResponse {
 	response, err := client.ListChannels(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc ListChannels err: %v", err)
-		return nil
+		return ""
 	}
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
-func OpenChannelSync() *lnrpc.ChannelPoint {
+// func OpenChannelSync() *lnrpc.ChannelPoint {
+func OpenChannelSync() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -879,9 +918,10 @@ func OpenChannelSync() *lnrpc.ChannelPoint {
 	response, err := client.OpenChannelSync(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc OpenChannelSync err: %v", err)
-		return nil
+		return false
 	}
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
 // OpenChannel
@@ -892,7 +932,9 @@ func OpenChannelSync() *lnrpc.ChannelPoint {
 //	根据 OpenChannelRequest 中指定的参数，该待定通道 ID 可用于手动推进通道资金流。
 //	@param nodePubkey
 //	@param localFundingAmount
-func OpenChannel(nodePubkey string, localFundingAmount int64) *lnrpc.OpenStatusUpdate {
+//
+// func OpenChannel(nodePubkey string, localFundingAmount int64) *lnrpc.OpenStatusUpdate {
+func OpenChannel(nodePubkey string, localFundingAmount int64) bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -940,7 +982,7 @@ func OpenChannel(nodePubkey string, localFundingAmount int64) *lnrpc.OpenStatusU
 	stream, err := client.OpenChannel(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc OpenChannel err: %v", err)
-		return nil
+		return false
 	}
 	for {
 		response, err := stream.Recv()
@@ -948,12 +990,13 @@ func OpenChannel(nodePubkey string, localFundingAmount int64) *lnrpc.OpenStatusU
 			if err == io.EOF {
 				// 流已经关闭，退出循环
 				log.Printf("err == io.EOF, err: %v\n", err)
-				return nil
+				return false
 			}
 			log.Printf("stream Recv err: %v\n", err)
-			return nil
+			return false
 		}
-		return response
+		log.Printf("%v\n", response)
+		return true
 	}
 }
 
@@ -963,7 +1006,9 @@ func OpenChannel(nodePubkey string, localFundingAmount int64) *lnrpc.OpenStatusU
 //		如果一个通道已完成筹资工作流程，正在等待筹资 txn 的确认，
 //		或正在关闭（合作或非合作启动），则该通道为 "待定 "通道。
 //	 @return *lnrpc.PendingChannelsResponse
-func PendingChannels() *lnrpc.PendingChannelsResponse {
+//
+// func PendingChannels() *lnrpc.PendingChannelsResponse {
+func PendingChannels() string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -1007,12 +1052,14 @@ func PendingChannels() *lnrpc.PendingChannelsResponse {
 	response, err := client.PendingChannels(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc PendingChannels err: %v", err)
-		return nil
+		return ""
 	}
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
-func RestoreChannelBackups() *lnrpc.RestoreBackupResponse {
+// func RestoreChannelBackups() *lnrpc.RestoreBackupResponse {
+func RestoreChannelBackups() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -1056,12 +1103,14 @@ func RestoreChannelBackups() *lnrpc.RestoreBackupResponse {
 	response, err := client.RestoreChannelBackups(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc RestoreChannelBackups err: %v", err)
-		return nil
+		return false
 	}
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
-func SubscribeChannelBackups() *lnrpc.Lightning_SubscribeChannelBackupsClient {
+// func SubscribeChannelBackups() *lnrpc.Lightning_SubscribeChannelBackupsClient {
+func SubscribeChannelBackups() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -1102,15 +1151,30 @@ func SubscribeChannelBackups() *lnrpc.Lightning_SubscribeChannelBackupsClient {
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ChannelBackupSubscription{}
-	response, err := client.SubscribeChannelBackups(context.Background(), request)
+	stream, err := client.SubscribeChannelBackups(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc SubscribeChannelBackups err: %v", err)
-		return nil
+		return false
 	}
-	return &response
+	for {
+		response, err := stream.Recv()
+		if err != nil {
+			if err == io.EOF {
+				// 流已经关闭，退出循环
+				log.Printf("err == io.EOF, err: %v\n", err)
+				return false
+			}
+			log.Printf("stream Recv err: %v\n", err)
+			return false
+		}
+		log.Printf("%v\n", response)
+		return true
+	}
+
 }
 
-func SubscribeChannelEvents() *lnrpc.Lightning_SubscribeChannelEventsClient {
+// func SubscribeChannelEvents() *lnrpc.Lightning_SubscribeChannelEventsClient {
+func SubscribeChannelEvents() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -1151,15 +1215,30 @@ func SubscribeChannelEvents() *lnrpc.Lightning_SubscribeChannelEventsClient {
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ChannelEventSubscription{}
-	response, err := client.SubscribeChannelEvents(context.Background(), request)
+	stream, err := client.SubscribeChannelEvents(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc  err: %v", err)
-		return nil
+		return false
 	}
-	return &response
+	for {
+		response, err := stream.Recv()
+		if err != nil {
+			if err == io.EOF {
+				// 流已经关闭，退出循环
+				log.Printf("err == io.EOF, err: %v\n", err)
+				return false
+			}
+			log.Printf("stream Recv err: %v\n", err)
+			return false
+		}
+		log.Printf("%v\n", response)
+		return true
+	}
+
 }
 
-func SubscribeChannelGraph() *lnrpc.Lightning_SubscribeChannelGraphClient {
+// func SubscribeChannelGraph() *lnrpc.Lightning_SubscribeChannelGraphClient {
+func SubscribeChannelGraph() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -1200,15 +1279,30 @@ func SubscribeChannelGraph() *lnrpc.Lightning_SubscribeChannelGraphClient {
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.GraphTopologySubscription{}
-	response, err := client.SubscribeChannelGraph(context.Background(), request)
+	stream, err := client.SubscribeChannelGraph(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc SubscribeChannelGraph err: %v", err)
-		return nil
+		return false
 	}
-	return &response
+	for {
+		response, err := stream.Recv()
+		if err != nil {
+			if err == io.EOF {
+				// 流已经关闭，退出循环
+				log.Printf("err == io.EOF, err: %v\n", err)
+				return false
+			}
+			log.Printf("stream Recv err: %v\n", err)
+			return false
+		}
+		log.Printf("%v\n", response)
+		return true
+	}
+
 }
 
-func UpdateChannelPolicy() *lnrpc.PolicyUpdateResponse {
+// func UpdateChannelPolicy() *lnrpc.PolicyUpdateResponse {
+func UpdateChannelPolicy() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -1252,12 +1346,14 @@ func UpdateChannelPolicy() *lnrpc.PolicyUpdateResponse {
 	response, err := client.UpdateChannelPolicy(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc UpdateChannelPolicy err: %v", err)
-		return nil
+		return false
 	}
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
-func VerifyChanBackup() *lnrpc.VerifyChanBackupResponse {
+// func VerifyChanBackup() *lnrpc.VerifyChanBackupResponse {
+func VerifyChanBackup() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -1301,9 +1397,10 @@ func VerifyChanBackup() *lnrpc.VerifyChanBackupResponse {
 	response, err := client.VerifyChanBackup(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc VerifyChanBackup err: %v", err)
-		return nil
+		return false
 	}
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
 // ConnectPeer
@@ -1312,7 +1409,9 @@ func VerifyChanBackup() *lnrpc.VerifyChanBackupResponse {
 //	@param pubkey
 //	@param host
 //	@return *lnrpc.ConnectPeerResponse
-func ConnectPeer(pubkey, host string) *lnrpc.ConnectPeerResponse {
+//
+// func ConnectPeer(pubkey, host string) *lnrpc.ConnectPeerResponse {
+func ConnectPeer(pubkey, host string) bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -1361,12 +1460,14 @@ func ConnectPeer(pubkey, host string) *lnrpc.ConnectPeerResponse {
 	response, err := client.ConnectPeer(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc ConnectPeer err: %v", err)
-		return nil
+		return false
 	}
-	return response
+	log.Printf("%v\n", response)
+	return true
 }
 
-func EstimateFee(addr string, amount int64) *lnrpc.EstimateFeeResponse {
+// func EstimateFee(addr string, amount int64) *lnrpc.EstimateFeeResponse {
+func EstimateFee(addr string, amount int64) string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -1414,12 +1515,14 @@ func EstimateFee(addr string, amount int64) *lnrpc.EstimateFeeResponse {
 	response, err := client.EstimateFee(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc ConnectPeer err: %v", err)
-		return nil
+		return ""
 	}
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
-func DecodePayReq(pay_req string) *lnrpc.PayReq {
+// func DecodePayReq(pay_req string) *lnrpc.PayReq {
+func DecodePayReq(pay_req string) string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -1461,8 +1564,8 @@ func DecodePayReq(pay_req string) *lnrpc.PayReq {
 	response, err := client.DecodePayReq(context.Background(), request)
 	if err != nil {
 		log.Fatalf("client.AddInvoice :%v", err)
+		return ""
 	}
-
-	log.Print(response)
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }

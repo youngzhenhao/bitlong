@@ -55,7 +55,9 @@ func GetStateForSubscribe() bool {
 //
 //	@Description: 返回当前钱包状态，不做进一步更改
 //	@return *lnrpc.GetStateResponse
-func GetState() *lnrpc.GetStateResponse {
+//
+// func GetState() *lnrpc.GetStateResponse {
+func GetState() string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -96,7 +98,8 @@ func GetState() *lnrpc.GetStateResponse {
 	response, err := client.GetState(context.Background(), request)
 	if err != nil {
 		log.Printf("watchtowerrpc GetState err: %v", err)
-		return nil
+		return ""
 	}
-	return response
+	//log.Printf("%v\n", response)
+	return response.String()
 }

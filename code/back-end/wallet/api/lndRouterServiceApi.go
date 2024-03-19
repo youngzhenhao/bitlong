@@ -10,13 +10,14 @@ import (
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"io/ioutil"
+	"io"
 	"log"
+	"os"
 
 	"path/filepath"
 )
 
-func SendPaymentV2(invoice string) *lnrpc.Payment {
+func SendPaymentV2(invoice string) bool {
 
 	const (
 		grpcHost = "202.79.173.41:10009"
@@ -24,13 +25,13 @@ func SendPaymentV2(invoice string) *lnrpc.Payment {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := ioutil.ReadFile(macaroonPath)
+	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
 		panic(err)
 	}
 	macaroon := hex.EncodeToString(macaroonBytes)
 
-	cert, err := ioutil.ReadFile(tlsCertPath)
+	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
 		log.Fatalf("Failed to read cert file: %s", err)
 	}
@@ -57,29 +58,41 @@ func SendPaymentV2(invoice string) *lnrpc.Payment {
 		PaymentRequest: invoice,
 		TimeoutSeconds: 60,
 	}
-	response, err := client.SendPaymentV2(context.Background(), request)
+	stream, err := client.SendPaymentV2(context.Background(), request)
 
 	if err != nil {
 		log.Fatalf("client.SendPaymentV2 :%v", err)
+		return false
 	}
-	temp, _ := response.Recv()
-	log.Print(response.Recv())
-	return temp
+	for {
+		response, err := stream.Recv()
+		if err != nil {
+			if err == io.EOF {
+				// 流已经关闭，退出循环
+				log.Printf("err == io.EOF, err: %v\n", err)
+				return false
+			}
+			log.Printf("stream Recv err: %v\n", err)
+			return false
+		}
+		log.Printf("%v\n", response)
+		return true
+	}
 }
-func TrackPaymentV2(payhash []byte) bool {
+func TrackPaymentV2(payhash string) bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := ioutil.ReadFile(macaroonPath)
+	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
 		panic(err)
 	}
 	macaroon := hex.EncodeToString(macaroonBytes)
 
-	cert, err := ioutil.ReadFile(tlsCertPath)
+	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
 		log.Fatalf("Failed to read cert file: %s", err)
 	}
@@ -102,19 +115,33 @@ func TrackPaymentV2(payhash []byte) bool {
 	defer conn.Close()
 
 	client := routerrpc.NewRouterClient(conn)
+	_payhashByteSlice, _ := hex.DecodeString(payhash)
 	request := &routerrpc.TrackPaymentRequest{
-		PaymentHash: payhash,
+		PaymentHash: _payhashByteSlice,
 	}
-	response, err := client.TrackPaymentV2(context.Background(), request)
+	stream, err := client.TrackPaymentV2(context.Background(), request)
 
 	if err != nil {
 		log.Fatalf("client.SendPaymentV2 :%v", err)
+		return false
 	}
-	temp, _ := response.Recv()
-	log.Print(temp.Status)
-
-	return true
+	for {
+		response, err := stream.Recv()
+		if err != nil {
+			if err == io.EOF {
+				// 流已经关闭，退出循环
+				log.Printf("err == io.EOF, err: %v\n", err)
+				return false
+			}
+			log.Printf("stream Recv err: %v\n", err)
+			return false
+		}
+		log.Printf("%v\n", response)
+		return true
+	}
 }
+
+// route *lnrpc.Route
 func SendToRouteV2(payhash []byte, route *lnrpc.Route) {
 	const (
 		grpcHost = "202.79.173.41:10009"
@@ -122,13 +149,13 @@ func SendToRouteV2(payhash []byte, route *lnrpc.Route) {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := ioutil.ReadFile(macaroonPath)
+	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
 		panic(err)
 	}
 	macaroon := hex.EncodeToString(macaroonBytes)
 
-	cert, err := ioutil.ReadFile(tlsCertPath)
+	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
 		log.Fatalf("Failed to read cert file: %s", err)
 	}
@@ -163,20 +190,21 @@ func SendToRouteV2(payhash []byte, route *lnrpc.Route) {
 
 	log.Print(response)
 }
-func EstimateRouteFee(dest []byte, amtsat int64) string {
+
+func EstimateRouteFee(dest string, amtsat int64) string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := ioutil.ReadFile(macaroonPath)
+	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
 		panic(err)
 	}
 	macaroon := hex.EncodeToString(macaroonBytes)
 
-	cert, err := ioutil.ReadFile(tlsCertPath)
+	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
 		log.Fatalf("Failed to read cert file: %s", err)
 	}
@@ -199,8 +227,9 @@ func EstimateRouteFee(dest []byte, amtsat int64) string {
 	defer conn.Close()
 
 	client := routerrpc.NewRouterClient(conn)
+	_destByteSlice, _ := hex.DecodeString(dest)
 	request := &routerrpc.RouteFeeRequest{
-		Dest:   dest,
+		Dest:   _destByteSlice,
 		AmtSat: amtsat,
 	}
 	response, err := client.EstimateRouteFee(context.Background(), request)

@@ -49,6 +49,10 @@ wallet
 ```bash
   go install golang.org/x/mobile/cmd/gobind@latest
 ```
+- 需要下载
+```bash
+go get golang.org/x/mobile/bind
+```
 
 ## 5. 打包命令
 ```bash

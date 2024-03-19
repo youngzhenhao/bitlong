@@ -13,7 +13,7 @@ require (
 	github.com/lightninglabs/taproot-assets v0.3.3-0.20240315091907-f5ef93e9998a // indirect
 	github.com/tyler-smith/go-bip32 v1.0.0
 	github.com/vedhavyas/go-subkey v1.0.4
-	golang.org/x/crypto v0.19.0
+	golang.org/x/crypto v0.21.0
 )
 
 require (
@@ -156,14 +156,14 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.23.0 // indirect
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
-	golang.org/x/mod v0.15.0 // indirect
-	golang.org/x/net v0.21.0 // indirect
+	golang.org/x/mod v0.16.0 // indirect
+	golang.org/x/net v0.22.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
-	golang.org/x/sys v0.17.0 // indirect
-	golang.org/x/term v0.17.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/term v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.0.0-20220224211638-0e9765cccd65 // indirect
-	golang.org/x/tools v0.18.0 // indirect
+	golang.org/x/tools v0.19.0 // indirect
 	google.golang.org/genproto v0.0.0-20240123012728-ef4313101c80 // indirect
 	google.golang.org/grpc v1.62.0
 	google.golang.org/protobuf v1.32.0 // indirect

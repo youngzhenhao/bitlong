@@ -196,7 +196,7 @@ func Unlockwallet(Psw string) bool {
 	return true
 }
 
-func ChangePassword(currentPassword, newPassword string) *lnrpc.ChangePasswordResponse {
+func ChangePassword(currentPassword, newPassword string) bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -242,7 +242,8 @@ func ChangePassword(currentPassword, newPassword string) *lnrpc.ChangePasswordRe
 	response, err := client.ChangePassword(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc ChangePassword err: %v", err)
-		return nil
+		return false
 	}
-	return response
+	log.Printf("%v\n", response)
+	return true
 }

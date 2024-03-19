@@ -79,7 +79,9 @@ func (c *macaroonCredential) RequireTransportSecurity() bool {
 //
 //	@Description: 默认情况下会检索属于该钱包的所有账户。可以提供名称和密钥范围过滤器来过滤所有钱包账户，并只返回符合以下条件的账户
 //	@return *walletrpc.ListAccountsResponse
-func ListAccounts() *walletrpc.ListAccountsResponse {
+//
+// func ListAccounts() *walletrpc.ListAccountsResponse {
+func ListAccounts() string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -120,16 +122,19 @@ func ListAccounts() *walletrpc.ListAccountsResponse {
 	response, err := client.ListAccounts(context.Background(), request)
 	if err != nil {
 		log.Printf("watchtowerrpc ListAccounts err: %v", err)
-		return nil
+		return ""
 	}
-	return response
+	//log.Printf("%v", response)
+	return response.String()
 }
 
 // ListLeases
 //
 //	@Description: 列出当前锁定的所有实用程序
 //	@return *walletrpc.ListLeasesResponse
-func ListLeases() *walletrpc.ListLeasesResponse {
+//
+// func ListLeases() *walletrpc.ListLeasesResponse {
+func ListLeases() string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -170,16 +175,19 @@ func ListLeases() *walletrpc.ListLeasesResponse {
 	response, err := client.ListLeases(context.Background(), request)
 	if err != nil {
 		log.Printf("watchtowerrpc ListLeases err: %v", err)
-		return nil
+		return ""
 	}
-	return response
+	//log.Printf("%v", response)
+	return response.String()
 }
 
 // ListSweeps
 //
 //	@Description: 返回我们的节点产生的扫描事务列表。请注意，这些清扫事务可能尚未得到确认，因为我们是通过广播而非确认来记录清扫事务的
 //	@return *walletrpc.ListSweepsResponse
-func ListSweeps() *walletrpc.ListSweepsResponse {
+//
+// func ListSweeps() *walletrpc.ListSweepsResponse {
+func ListSweeps() string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -220,9 +228,10 @@ func ListSweeps() *walletrpc.ListSweepsResponse {
 	response, err := client.ListSweeps(context.Background(), request)
 	if err != nil {
 		log.Printf("watchtowerrpc ListSweeps err: %v", err)
-		return nil
+		return ""
 	}
-	return response
+	//log.Printf("%v", response)
+	return response.String()
 }
 
 // ListUnspent
@@ -230,7 +239,9 @@ func ListSweeps() *walletrpc.ListSweepsResponse {
 //	 @Description: 返回钱包可使用的所有 utxos 的列表，确认次数介于指定的最小值和最大值之间。
 //		默认情况下，会列出所有 utxos。要只列出未确认的 utxos，请将 unconfirmed_only 设为 true
 //	 @return *walletrpc.ListUnspentResponse
-func ListUnspent() *walletrpc.ListUnspentResponse {
+//
+// func ListUnspent() *walletrpc.ListUnspentResponse {
+func ListUnspent() string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -271,16 +282,19 @@ func ListUnspent() *walletrpc.ListUnspentResponse {
 	response, err := client.ListUnspent(context.Background(), request)
 	if err != nil {
 		log.Printf("watchtowerrpc ListUnspent err: %v", err)
-		return nil
+		return ""
 	}
-	return response
+	//log.Printf("%v", response)
+	return response.String()
 }
 
 // NextAddr
 //
 //	@Description: 返回钱包中下一个未使用的地址
 //	@return *walletrpc.AddrResponse
-func NextAddr() *walletrpc.AddrResponse {
+//
+// func NextAddr() *walletrpc.AddrResponse {
+func NextAddr() string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -321,7 +335,8 @@ func NextAddr() *walletrpc.AddrResponse {
 	response, err := client.NextAddr(context.Background(), request)
 	if err != nil {
 		log.Printf("watchtowerrpc NextAddr err: %v", err)
-		return nil
+		return ""
 	}
-	return response
+	//log.Printf("%v", response)
+	return response.String()
 }

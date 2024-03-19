@@ -55,9 +55,9 @@ func setupRouter() *gin.Engine {
 			})
 		})
 	}
-	router.GET("/GetInfo", func(c *gin.Context) {
+	router.GET("/WatchtowerGetInfo", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"GetInfo": api.GetInfo(),
+			"GetInfo": api.WatchtowerGetInfo(),
 		})
 	})
 	router.GET("/GetState", func(c *gin.Context) {

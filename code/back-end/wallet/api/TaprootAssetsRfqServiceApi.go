@@ -1,0 +1,227 @@
+package api
+
+import (
+	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/hex"
+	"github.com/lightninglabs/taproot-assets/taprpc/rfqrpc"
+	"github.com/wallet/base"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"log"
+	"os"
+	"path/filepath"
+)
+
+func AddAssetBuyOrder() *rfqrpc.AddAssetBuyOrderResponse {
+	const (
+		grpcHost = "202.79.173.41:8443"
+	)
+	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		log.Printf("Failed to read cert file: %s", err)
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		log.Printf("Failed to append cert")
+	}
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+
+	// 连接到grpc服务器
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		log.Printf("did not connect: grpc.Dial: %v", err)
+	}
+	// 匿名函数延迟关闭grpc连接
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close Error: %v", err)
+		}
+	}(conn)
+	// 创建客户端
+	client := rfqrpc.NewRfqClient(conn)
+	// 构建请求
+	request := &rfqrpc.AddAssetBuyOrderRequest{}
+	// 得到响应
+	response, err := client.AddAssetBuyOrder(context.Background(), request)
+	if err != nil {
+		log.Printf("rfqrpc  Error: %v", err)
+		return nil
+	}
+	// 处理结果
+	return response
+}
+
+func AddAssetSellOffer() *rfqrpc.AddAssetSellOfferResponse {
+	const (
+		grpcHost = "202.79.173.41:8443"
+	)
+	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		log.Printf("Failed to read cert file: %s", err)
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		log.Printf("Failed to append cert")
+	}
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+
+	// 连接到grpc服务器
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		log.Printf("did not connect: grpc.Dial: %v", err)
+	}
+	// 匿名函数延迟关闭grpc连接
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close Error: %v", err)
+		}
+	}(conn)
+	// 创建客户端
+	client := rfqrpc.NewRfqClient(conn)
+	// 构建请求
+	request := &rfqrpc.AddAssetSellOfferRequest{}
+	// 得到响应
+	response, err := client.AddAssetSellOffer(context.Background(), request)
+	if err != nil {
+		log.Printf("rfqrpc  Error: %v", err)
+		return nil
+	}
+	// 处理结果
+	return response
+}
+
+func QueryRfqAcceptedQuotes() *rfqrpc.QueryRfqAcceptedQuotesResponse {
+	const (
+		grpcHost = "202.79.173.41:8443"
+	)
+	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		log.Printf("Failed to read cert file: %s", err)
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		log.Printf("Failed to append cert")
+	}
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+
+	// 连接到grpc服务器
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		log.Printf("did not connect: grpc.Dial: %v", err)
+	}
+	// 匿名函数延迟关闭grpc连接
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close Error: %v", err)
+		}
+	}(conn)
+	// 创建客户端
+	client := rfqrpc.NewRfqClient(conn)
+	// 构建请求
+	request := &rfqrpc.QueryRfqAcceptedQuotesRequest{}
+	// 得到响应
+	response, err := client.QueryRfqAcceptedQuotes(context.Background(), request)
+	if err != nil {
+		log.Printf("rfqrpc QueryRfqAcceptedQuotes Error: %v", err)
+		return nil
+	}
+	// 处理结果
+	return response
+}
+
+func SubscribeRfqEventNtfns() *rfqrpc.Rfq_SubscribeRfqEventNtfnsClient {
+	const (
+		grpcHost = "202.79.173.41:8443"
+	)
+	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		log.Printf("Failed to read cert file: %s", err)
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		log.Printf("Failed to append cert")
+	}
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+
+	// 连接到grpc服务器
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		log.Printf("did not connect: grpc.Dial: %v", err)
+	}
+	// 匿名函数延迟关闭grpc连接
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close Error: %v", err)
+		}
+	}(conn)
+	// 创建客户端
+	client := rfqrpc.NewRfqClient(conn)
+	// 构建请求
+	request := &rfqrpc.SubscribeRfqEventNtfnsRequest{}
+	// 得到响应
+	response, err := client.SubscribeRfqEventNtfns(context.Background(), request)
+	if err != nil {
+		log.Printf("rfqrpc  Error: %v", err)
+		return nil
+	}
+	// 处理结果
+	return &response
+}

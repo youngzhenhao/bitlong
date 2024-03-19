@@ -7,7 +7,7 @@ replace github.com/wallet => ../../wallet
 require (
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/jessevdk/go-flags v1.4.0
-	github.com/lightninglabs/taproot-assets v0.3.3
+	github.com/lightninglabs/taproot-assets v0.3.3-0.20240315091907-f5ef93e9998a
 	github.com/wallet v0.0.0-00010101000000-000000000000
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
 	google.golang.org/grpc v1.62.0

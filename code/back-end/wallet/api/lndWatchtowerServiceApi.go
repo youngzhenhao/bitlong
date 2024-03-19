@@ -15,11 +15,11 @@ import (
 	"path/filepath"
 )
 
-// GetInfo
+// WatchtowerGetInfo
 //
 //	@Description: 返回有关同伴监视塔的一般信息，包括其公钥和服务器当前正在监听客户端的 URI
 //	@return *watchtowerrpc.GetInfoResponse
-func GetInfo() *watchtowerrpc.GetInfoResponse {
+func WatchtowerGetInfo() *watchtowerrpc.GetInfoResponse {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)

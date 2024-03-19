@@ -6,470 +6,532 @@ import (
 	"crypto/x509"
 	"encoding/hex"
 	"github.com/lightninglabs/taproot-assets/taprpc"
-	"github.com/lightninglabs/taproot-assets/taprpc/mintrpc"
-	"os"
-
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 )
 
-func InitMint() bool {
-	const (
-		grpcHost = "127.0.0.1:10029"
-	)
-	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("tapd"), "data/testnet")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := ioutil.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
+func AddrReceives() {
 
-	cert, err := ioutil.ReadFile(tlsCertPath)
-	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-
-	client := mintrpc.NewMintClient(conn)
-
-	assetMeta := &taprpc.AssetMeta{
-		Type: 1,
-		Data: []byte("bullFire97014 is great"),
-	}
-	mintAsset := &mintrpc.MintAsset{
-		AssetVersion:    1,
-		AssetType:       0,
-		Name:            "bullFire97014",
-		AssetMeta:       assetMeta,
-		Amount:          100,
-		NewGroupedAsset: true,
-	}
-	request := &mintrpc.MintAssetRequest{Asset: mintAsset, ShortResponse: true}
-	response, err := client.MintAsset(context.Background(), request)
-	log.Print(response)
-	return true
 }
 
-func FinalizeMint() bool {
-	const (
-		grpcHost = "127.0.0.1:10029"
-	)
-	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("tapd"), "data/testnet")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := ioutil.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
+func BurnAsset() {
 
-	cert, err := ioutil.ReadFile(tlsCertPath)
-	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-
-	client := mintrpc.NewMintClient(conn)
-	request := &mintrpc.FinalizeBatchRequest{}
-	response, err := client.FinalizeBatch(context.Background(), request)
-	log.Print(response)
-	return true
 }
 
-func GetTapRootAddr() bool {
+func DebugLevel() {
+
+}
+
+func DecodeAddr() {
+
+}
+
+func DecodeProof() {
+
+}
+
+func ExportProof() {
+
+}
+
+func FetchAssetMeta() {
+
+}
+
+// TapGetInfo
+//
+//	@Description: 返回节点的信息
+//	@return *taprpc.GetInfoResponse
+func TapGetInfo() *taprpc.GetInfoResponse {
 	const (
-		grpcHost = "127.0.0.1:10029"
+		grpcHost = "202.79.173.41:8443"
 	)
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("tapd"), "data/testnet")
+	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := ioutil.ReadFile(macaroonPath)
+	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
 		panic(err)
 	}
 	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := ioutil.ReadFile(tlsCertPath)
+	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
-
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
-
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
 		RootCAs:    certPool,
 	}
 	creds := credentials.NewTLS(config)
+
+	// 连接到grpc服务器
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: grpc.Dial: %v", err)
 	}
-	defer conn.Close()
-	btye, err := hex.DecodeString("58fac0a06471220d3b086d8d35189ad380586ab9260b500f3c060ef549c955e2")
+	// 匿名函数延迟关闭grpc连接
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close Error: %v", err)
+		}
+	}(conn)
+	// 创建客户端
 	client := taprpc.NewTaprootAssetsClient(conn)
+	// 构建请求
+	request := &taprpc.GetInfoRequest{}
+	// 得到响应
+	response, err := client.GetInfo(context.Background(), request)
+	if err != nil {
+		log.Printf("taprpc GetInfo Error: %v", err)
+		return nil
+	}
+	// 处理结果
+	return response
+}
+
+// ListAssets
+//
+//	@Description: 列出目标守护程序拥有的资产集，返回的嵌套结构体中的[]byte需要使用get函数单独处理，如hex.EncodeToString
+//	请注意，IncludeSpent和IncludeLeased不能同时指定为true
+//	@return *taprpc.ListAssetResponse
+func ListAssets(withWitness, includeSpent, includeLeased bool) *taprpc.ListAssetResponse {
+	const (
+		grpcHost = "202.79.173.41:8443"
+	)
+	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		log.Printf("Failed to read cert file: %s", err)
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		log.Printf("Failed to append cert")
+	}
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+
+	// 连接到grpc服务器
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		log.Printf("did not connect: grpc.Dial: %v", err)
+	}
+	// 匿名函数延迟关闭grpc连接
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close Error: %v", err)
+		}
+	}(conn)
+	// 创建客户端
+	client := taprpc.NewTaprootAssetsClient(conn)
+	// 构建请求
+	request := &taprpc.ListAssetRequest{
+		WithWitness:   withWitness,
+		IncludeSpent:  includeSpent,
+		IncludeLeased: includeLeased,
+	}
+	// 得到响应
+	response, err := client.ListAssets(context.Background(), request)
+	if err != nil {
+		log.Printf("taprpc ListAssets Error: %v", err)
+		return nil
+	}
+	// 处理结果
+	return response
+}
+
+// ListBalances
+//
+//	@Description: 列出资产余额
+//	参数为true按照AssetsId排序，false则按照GroupKey排序，资产和组键过滤器未设置
+//	@return *taprpc.ListBalancesResponse
+func ListBalances(isListAssetIdNotGroupKey bool) *taprpc.ListBalancesResponse {
+	const (
+		grpcHost = "202.79.173.41:8443"
+	)
+	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		log.Printf("Failed to read cert file: %s", err)
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		log.Printf("Failed to append cert")
+	}
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+
+	// 连接到grpc服务器
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		log.Printf("did not connect: grpc.Dial: %v", err)
+	}
+	// 匿名函数延迟关闭grpc连接
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close Error: %v", err)
+		}
+	}(conn)
+	// 创建客户端
+	client := taprpc.NewTaprootAssetsClient(conn)
+	// 构建请求
+	request := &taprpc.ListBalancesRequest{
+		// 不设置过滤器
+		AssetFilter:    nil,
+		GroupKeyFilter: nil,
+	}
+	// 根据给定参数修改请求结构体的排序方式
+	if isListAssetIdNotGroupKey {
+		request.GroupBy = &taprpc.ListBalancesRequest_AssetId{AssetId: true}
+	} else {
+		request.GroupBy = &taprpc.ListBalancesRequest_GroupKey{GroupKey: true}
+	}
+	// 得到响应
+	response, err := client.ListBalances(context.Background(), request)
+	if err != nil {
+		log.Printf("taprpc ListBalances Error: %v", err)
+		return nil
+	}
+	// 处理结果
+	return response
+}
+
+// ListGroups
+//
+//	@Description: 列出目标守护程序已知的资产组，以及每个组中持有的资产
+//	@return *taprpc.ListGroupsResponse
+func ListGroups() *taprpc.ListGroupsResponse {
+	const (
+		grpcHost = "202.79.173.41:8443"
+	)
+	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		log.Printf("Failed to read cert file: %s", err)
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		log.Printf("Failed to append cert")
+	}
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+
+	// 连接到grpc服务器
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		log.Printf("did not connect: grpc.Dial: %v", err)
+	}
+	// 匿名函数延迟关闭grpc连接
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close Error: %v", err)
+		}
+	}(conn)
+	// 创建客户端
+	client := taprpc.NewTaprootAssetsClient(conn)
+	// 构建请求
+	request := &taprpc.ListGroupsRequest{}
+	// 得到响应
+	response, err := client.ListGroups(context.Background(), request)
+	if err != nil {
+		log.Printf("taprpc ListGroups Error: %v", err)
+		return nil
+	}
+	// 处理结果
+	return response
+}
+
+// ListTransfers
+//
+//	@Description: 列出目标守护程序跟踪的出站资产转移
+//	@return *taprpc.ListTransfersResponse
+func ListTransfers() *taprpc.ListTransfersResponse {
+	const (
+		grpcHost = "202.79.173.41:8443"
+	)
+	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		log.Printf("Failed to read cert file: %s", err)
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		log.Printf("Failed to append cert")
+	}
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+
+	// 连接到grpc服务器
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		log.Printf("did not connect: grpc.Dial: %v", err)
+	}
+	// 匿名函数延迟关闭grpc连接
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close Error: %v", err)
+		}
+	}(conn)
+	// 创建客户端
+	client := taprpc.NewTaprootAssetsClient(conn)
+	// 构建请求
+	request := &taprpc.ListTransfersRequest{}
+	// 得到响应
+	response, err := client.ListTransfers(context.Background(), request)
+	if err != nil {
+		log.Printf("taprpc ListTransfers Error: %v", err)
+		return nil
+	}
+	// 处理结果
+	return response
+}
+
+// ListUtxos
+//
+//	@Description: 列出目标守护进程管理的 UTXO 及其持有的资产
+//	@param includeLeased
+//	@return *taprpc.ListUtxosResponse
+func ListUtxos(includeLeased bool) *taprpc.ListUtxosResponse {
+	const (
+		grpcHost = "202.79.173.41:8443"
+	)
+	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		log.Printf("Failed to read cert file: %s", err)
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		log.Printf("Failed to append cert")
+	}
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+
+	// 连接到grpc服务器
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		log.Printf("did not connect: grpc.Dial: %v", err)
+	}
+	// 匿名函数延迟关闭grpc连接
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close Error: %v", err)
+		}
+	}(conn)
+	// 创建客户端
+	client := taprpc.NewTaprootAssetsClient(conn)
+	// 构建请求
+	request := &taprpc.ListUtxosRequest{
+		IncludeLeased: includeLeased,
+	}
+	// 得到响应
+	response, err := client.ListUtxos(context.Background(), request)
+	if err != nil {
+		log.Printf("taprpc ListUtxos Error: %v", err)
+		return nil
+	}
+	// 处理结果
+	return response
+}
+
+func NewAddr(assetId string, amt uint64) *taprpc.Addr {
+	const (
+		grpcHost = "202.79.173.41:8443"
+	)
+	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		log.Printf("Failed to read cert file: %s", err)
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		log.Printf("Failed to append cert")
+	}
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+
+	// 连接到grpc服务器
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		log.Printf("did not connect: grpc.Dial: %v", err)
+	}
+	// 匿名函数延迟关闭grpc连接
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close Error: %v", err)
+		}
+	}(conn)
+	// 创建客户端
+	client := taprpc.NewTaprootAssetsClient(conn)
+	_assetIdByteSlice, _ := hex.DecodeString(assetId)
+	// 构建请求
 	request := &taprpc.NewAddrRequest{
-		AssetId: btye,
-		Amt:     10,
+		AssetId: _assetIdByteSlice,
+		Amt:     amt,
 	}
+	// 得到响应
 	response, err := client.NewAddr(context.Background(), request)
-	log.Print(response)
-	return true
+	if err != nil {
+		log.Printf("taprpc NewAddr Error: %v", err)
+		return nil
+	}
+	// 处理结果
+	return response
 }
 
-func SendAssets() bool {
+func QueryAddrs() {
+
+}
+
+func SendAsset(tapAddrs []string, feeRate uint32) *taprpc.SendAssetResponse {
 	const (
-		grpcHost = "127.0.0.1:10029"
+		grpcHost = "202.79.173.41:8443"
 	)
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("tapd"), "data/testnet")
+	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := ioutil.ReadFile(macaroonPath)
+	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
 		panic(err)
 	}
 	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := ioutil.ReadFile(tlsCertPath)
+	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
-
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
-
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
 		RootCAs:    certPool,
 	}
 	creds := credentials.NewTLS(config)
+
+	// 连接到grpc服务器
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: grpc.Dial: %v", err)
 	}
-	defer conn.Close()
-
+	// 匿名函数延迟关闭grpc连接
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close Error: %v", err)
+		}
+	}(conn)
+	// 创建客户端
 	client := taprpc.NewTaprootAssetsClient(conn)
+	// 构建请求
 	request := &taprpc.SendAssetRequest{
-		TapAddrs: []string{"taptb1qqqsqqspqqzzqsczw2wfw56q2d5stk87yzw9vpnzpchaqrqp3y0umaexckc75lhwq5ssxcfat33js52y49pgqzlald48wltsmkse4k5cadnxgug0d7zmecmzqcssy3jra2y3kwd93v399hmpwttke8v6sg09evsvmjdfqmvj06k7335mpqss8jrgusekgysyszexkzlg2lhmmractu9eu8e7qhwx99j7xeennmzhpgqsxrpkw4hxjan9wfek2unsvvaz7tm5v4ehgmn9wsh82mnfwejhyum99ekxjemgw3hxjmn89enxjmnpde3k2w33xqcrywgj07486"},
-		FeeRate:  0,
+		TapAddrs: tapAddrs,
+		FeeRate:  feeRate,
 	}
+	// 得到响应
 	response, err := client.SendAsset(context.Background(), request)
-	log.Print(response)
-	return true
-}
-
-// CancelBatch
-//
-//	@Description: 将尝试取消当前待处理批次
-//	@return *mintrpc.CancelBatchResponse
-func CancelBatch() *mintrpc.CancelBatchResponse {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
-	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
-	}
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
-	}
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
-	// 连接到grpc服务器
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
-	if err != nil {
-		log.Printf("did not connect: grpc.Dial: %v", err)
-	}
-	// 匿名函数延迟关闭grpc连接
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			log.Printf("conn Close Error: %v", err)
-		}
-	}(conn)
-	// 创建客户端
-	client := mintrpc.NewMintClient(conn)
-	// 构建请求
-	request := &mintrpc.CancelBatchRequest{}
-	// 得到响应
-	response, err := client.CancelBatch(context.Background(), request)
-	if err != nil {
-		log.Printf("mintrpc CancelBatch Error: %v", err)
+		log.Printf("taprpc SendAsset Error: %v", err)
 		return nil
 	}
 	// 处理结果
 	return response
 }
 
-// FinalizeBatch
-//
-//	@Description: 将尝试完成当前待处理的批次
-//	@return *mintrpc.FinalizeBatchResponse
-func FinalizeBatch(shortResponse bool, feeRate uint32) *mintrpc.FinalizeBatchResponse {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
-	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
-	}
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
-	}
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
-	// 连接到grpc服务器
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
-	if err != nil {
-		log.Printf("did not connect: grpc.Dial: %v", err)
-	}
-	// 匿名函数延迟关闭grpc连接
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			log.Printf("conn Close Error: %v", err)
-		}
-	}(conn)
-	// 创建客户端
-	client := mintrpc.NewMintClient(conn)
-	// 构建请求
-	request := &mintrpc.FinalizeBatchRequest{
-		ShortResponse: shortResponse,
-		FeeRate:       feeRate,
-	}
-	// 得到响应
-	response, err := client.FinalizeBatch(context.Background(), request)
-	if err != nil {
-		log.Printf("mintrpc FinalizeBatch Error: %v", err)
-		return nil
-	}
-	// 处理结果
-	return response
+func StopDaemon() {
+
 }
 
-// ListBatches
-//
-//	 @Description: 列出提交到守护程序的批处理集，包括待处理和已取消的批处理
-//		过滤器设置为空
-//	 @return *mintrpc.ListBatchResponse
-func ListBatches() *mintrpc.ListBatchResponse {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
-	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
-	}
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
-	}
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
-	// 连接到grpc服务器
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
-	if err != nil {
-		log.Printf("did not connect: grpc.Dial: %v", err)
-	}
-	// 匿名函数延迟关闭grpc连接
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			log.Printf("conn Close Error: %v", err)
-		}
-	}(conn)
-	// 创建客户端
-	client := mintrpc.NewMintClient(conn)
-	// 构建请求
-	request := &mintrpc.ListBatchRequest{}
-	// 得到响应
-	response, err := client.ListBatches(context.Background(), request)
-	if err != nil {
-		log.Printf("mintrpc ListBatches Error: %v", err)
-		return nil
-	}
-	// 处理结果
-	return response
+func SubscribeReceiveAssetEventNtfns() {
+
 }
 
-// MintAsset
-//
-//	@Description:  将尝试铸模请求中指定的资产集（默认为异步，以确保正确的批处理）。
-//	返回的待处理批次将显示属于下一批次的其他待处理资产。此调用将阻塞，直至操作成功（资产已在批次中分期）或失败
-//	@return *mintrpc.MintAssetResponse
-func MintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, assetMetaData string, AssetMetaTypeIsJsonNotOpaque bool, amount uint64, newGroupedAsset bool, groupedAsset bool, groupKey string, groupAnchor string, shortResponse bool) *mintrpc.MintAssetResponse {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
-	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
-	}
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
-	}
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
-	// 连接到grpc服务器
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
-	if err != nil {
-		log.Printf("did not connect: grpc.Dial: %v", err)
-	}
-	// 匿名函数延迟关闭grpc连接
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			log.Printf("conn Close Error: %v", err)
-		}
-	}(conn)
-	// 创建客户端
-	client := mintrpc.NewMintClient(conn)
-	// 指定资产版本是否为V1，默认V0
-	var _assetVersion taprpc.AssetVersion
-	if assetVersionIsV1 {
-		_assetVersion = taprpc.AssetVersion_ASSET_VERSION_V1
-	} else {
-		_assetVersion = taprpc.AssetVersion_ASSET_VERSION_V0
-	}
-	// 指定资产类型是否为收藏品，默认正常
-	var _assetType taprpc.AssetType
-	if assetTypeIsCollectible {
-		_assetType = taprpc.AssetType_COLLECTIBLE
-	} else {
-		_assetType = taprpc.AssetType_NORMAL
-	}
-	// AssetMeta Data
-	_assetMetaDataByteSlice, _ := hex.DecodeString(assetMetaData)
-	// 指定资产元数据类型
-	var _assetMetaType taprpc.AssetMetaType
-	if AssetMetaTypeIsJsonNotOpaque {
-		_assetMetaType = taprpc.AssetMetaType_META_TYPE_JSON
-	} else {
-		_assetMetaType = taprpc.AssetMetaType_META_TYPE_OPAQUE
-	}
-	// GroupKey
-	_groupKeyByteSlice, _ := hex.DecodeString(groupKey)
-	// 构建请求
-	request := &mintrpc.MintAssetRequest{
-		Asset: &mintrpc.MintAsset{
-			AssetVersion: _assetVersion,
-			AssetType:    _assetType,
-			Name:         name,
-			AssetMeta: &taprpc.AssetMeta{
-				Data: _assetMetaDataByteSlice,
-				Type: _assetMetaType,
-			},
-			Amount:          amount,
-			NewGroupedAsset: newGroupedAsset,
-			GroupedAsset:    groupedAsset,
-			GroupKey:        _groupKeyByteSlice,
-			GroupAnchor:     groupAnchor,
-		},
-		ShortResponse: shortResponse,
-	}
-	// 得到响应
-	response, err := client.MintAsset(context.Background(), request)
-	if err != nil {
-		log.Printf("mintrpc MintAsset Error: %v", err)
-		return nil
-	}
-	// 处理结果
-	return response
+func SubscribeSendAssetEventNtfns() {
+
+}
+
+func VerifyProof() {
+
 }

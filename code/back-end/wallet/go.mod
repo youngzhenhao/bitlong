@@ -10,10 +10,9 @@ require (
 	github.com/btcsuite/btcd/btcutil v1.1.5
 	github.com/btcsuite/btcd/chaincfg/chainhash v1.1.0
 	github.com/cosmos/go-bip39 v1.0.0
-	github.com/lightninglabs/taproot-assets v0.3.3 // indirect
+	github.com/lightninglabs/taproot-assets v0.3.3-0.20240315091907-f5ef93e9998a // indirect
 	github.com/tyler-smith/go-bip32 v1.0.0
 	github.com/vedhavyas/go-subkey v1.0.4
-	github.com/wallet/api v0.0.0-00010101000000-000000000000
 	golang.org/x/crypto v0.19.0
 )
 
@@ -216,6 +215,11 @@ require (
 )
 
 require (
+	github.com/gin-gonic/gin v1.9.1
+	github.com/wallet/api v0.0.0-00010101000000-000000000000
+)
+
+require (
 	github.com/Masterminds/semver/v3 v3.2.0 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/caddyserver/certmagic v0.17.2 // indirect
@@ -223,7 +227,6 @@ require (
 	github.com/frankban/quicktest v1.14.3 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
-	github.com/gin-gonic/gin v1.9.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.14.0 // indirect

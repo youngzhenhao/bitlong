@@ -7,39 +7,34 @@ import (
 	"encoding/hex"
 	"github.com/lightninglabs/taproot-assets/taprpc"
 	"github.com/lightninglabs/taproot-assets/taprpc/mintrpc"
-	"os"
-
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 )
 
 func InitMint() bool {
 	const (
-		grpcHost = "127.0.0.1:10029"
+		grpcHost = "202.79.173.41:8443"
 	)
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "data/testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := ioutil.ReadFile(macaroonPath)
+	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
 		panic(err)
 	}
 	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := ioutil.ReadFile(tlsCertPath)
+	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
-
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
-
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
 		RootCAs:    certPool,
@@ -48,12 +43,15 @@ func InitMint() bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
-	defer conn.Close()
-
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Fatalf("conn Close err: %v", err)
+		}
+	}(conn)
 	client := mintrpc.NewMintClient(conn)
-
 	assetMeta := &taprpc.AssetMeta{
 		Type: 1,
 		Data: []byte("bullFire97014 is great"),
@@ -68,33 +66,36 @@ func InitMint() bool {
 	}
 	request := &mintrpc.MintAssetRequest{Asset: mintAsset, ShortResponse: true}
 	response, err := client.MintAsset(context.Background(), request)
-	log.Print(response)
+	if err != nil {
+		log.Printf("mintrpc MintAsset err: %v", err)
+		return false
+	}
+	log.Printf("%v\n", response)
 	return true
 }
 
 func FinalizeMint() bool {
 	const (
-		grpcHost = "127.0.0.1:10029"
+		grpcHost = "202.79.173.41:8443"
 	)
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "data/testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := ioutil.ReadFile(macaroonPath)
+	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
 		panic(err)
 	}
 	macaroon := hex.EncodeToString(macaroonBytes)
 
-	cert, err := ioutil.ReadFile(tlsCertPath)
+	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
-
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
 		RootCAs:    certPool,
@@ -103,40 +104,45 @@ func FinalizeMint() bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
-	defer conn.Close()
-
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Fatalf("conn Close err: %v", err)
+		}
+	}(conn)
 	client := mintrpc.NewMintClient(conn)
 	request := &mintrpc.FinalizeBatchRequest{}
 	response, err := client.FinalizeBatch(context.Background(), request)
-	log.Print(response)
+	if err != nil {
+		log.Printf("mintrpc FinalizeBatch err: %v", err)
+		return false
+	}
+	log.Printf("%v\n", response)
 	return true
 }
 
-func GetTapRootAddr() bool {
+func GetTapRootAddr() string {
 	const (
-		grpcHost = "127.0.0.1:10029"
+		grpcHost = "202.79.173.41:8443"
 	)
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "data/testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := ioutil.ReadFile(macaroonPath)
+	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
 		panic(err)
 	}
 	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := ioutil.ReadFile(tlsCertPath)
+	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
-
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
-
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
 		RootCAs:    certPool,
@@ -145,9 +151,14 @@ func GetTapRootAddr() bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
-	defer conn.Close()
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Fatalf("conn Close err: %v", err)
+		}
+	}(conn)
 	btye, err := hex.DecodeString("58fac0a06471220d3b086d8d35189ad380586ab9260b500f3c060ef549c955e2")
 	client := taprpc.NewTaprootAssetsClient(conn)
 	request := &taprpc.NewAddrRequest{
@@ -155,33 +166,34 @@ func GetTapRootAddr() bool {
 		Amt:     10,
 	}
 	response, err := client.NewAddr(context.Background(), request)
-	log.Print(response)
-	return true
+	if err != nil {
+		log.Printf("taprpc NewAddr err: %v", err)
+		return ""
+	}
+	//log.Printf("%v\n", response)
+	return response.String()
 }
 
 func SendAssets() bool {
 	const (
-		grpcHost = "127.0.0.1:10029"
+		grpcHost = "202.79.173.41:8443"
 	)
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "data/testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := ioutil.ReadFile(macaroonPath)
+	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
 		panic(err)
 	}
 	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := ioutil.ReadFile(tlsCertPath)
+	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		log.Printf("Failed to read cert file: %s", err)
 	}
-
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		log.Printf("Failed to append cert")
 	}
-
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
 		RootCAs:    certPool,
@@ -190,17 +202,25 @@ func SendAssets() bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("did not connect: %v", err)
 	}
-	defer conn.Close()
-
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Fatalf("conn Close err: %v", err)
+		}
+	}(conn)
 	client := taprpc.NewTaprootAssetsClient(conn)
 	request := &taprpc.SendAssetRequest{
 		TapAddrs: []string{"taptb1qqqsqqspqqzzqsczw2wfw56q2d5stk87yzw9vpnzpchaqrqp3y0umaexckc75lhwq5ssxcfat33js52y49pgqzlald48wltsmkse4k5cadnxgug0d7zmecmzqcssy3jra2y3kwd93v399hmpwttke8v6sg09evsvmjdfqmvj06k7335mpqss8jrgusekgysyszexkzlg2lhmmractu9eu8e7qhwx99j7xeennmzhpgqsxrpkw4hxjan9wfek2unsvvaz7tm5v4ehgmn9wsh82mnfwejhyum99ekxjemgw3hxjmn89enxjmnpde3k2w33xqcrywgj07486"},
 		FeeRate:  0,
 	}
 	response, err := client.SendAsset(context.Background(), request)
-	log.Print(response)
+	if err != nil {
+		log.Printf("taprpc SendAsset err: %v", err)
+		return false
+	}
+	log.Printf("%v\n", response)
 	return true
 }
 

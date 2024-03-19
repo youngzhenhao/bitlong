@@ -1342,3 +1342,51 @@ func ConnectPeer(pubkey, host string) *lnrpc.ConnectPeerResponse {
 	}
 	return response
 }
+
+func DecodePayReq(pay_req string) *lnrpc.PayReq {
+	const (
+		grpcHost = "202.79.173.41:10009"
+	)
+	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		log.Fatalf("Failed to read cert file: %s", err)
+	}
+
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		log.Fatalf("Failed to append cert")
+	}
+
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+
+	client := lnrpc.NewLightningClient(conn)
+	request := &lnrpc.PayReqString{
+		PayReq: pay_req,
+	}
+	response, err := client.DecodePayReq(context.Background(), request)
+	if err != nil {
+		log.Fatalf("client.AddInvoice :%v", err)
+	}
+
+	log.Print(response)
+	return response
+}

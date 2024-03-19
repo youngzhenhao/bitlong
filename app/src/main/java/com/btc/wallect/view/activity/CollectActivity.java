@@ -67,9 +67,11 @@ public class CollectActivity extends BaseActivity {
         if (view.getId() == R.id.tv_hand_copy) {
             openActivity(ImportMnemonicWordActivity.class);
         } else if (view.getId() == R.id.tv_cloud_copy) {
-            DialogUtil.showSimpleDialog(this, "提示", "云备份", null);
+           // DialogUtil.showSimpleDialog(this, "提示", "云备份", null);
+            openActivity(MainActivity.class);
         } else if (view.getId() == R.id.tv_later_copy) {
-            DialogUtil.showSimpleDialog(this, "提示", "稍后备份", null);
+          //  DialogUtil.showSimpleDialog(this, "提示", "稍后备份", null);
+            openActivity(MainActivity.class);
         }
     }
 

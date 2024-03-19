@@ -123,7 +123,8 @@ public class ImportMnemonicWordActivity extends BaseActivity {
     @OnClick({R.id.tv_sure})
     public void onClick(View view) {
         if (view.getId() == R.id.tv_sure) {
-            DialogUtil.showSimpleDialog(this, "提示", "确认", null);
+         //   DialogUtil.showSimpleDialog(this, "提示", "确认", null);
+            openActivity(MainActivity.class);
         }
     }
 

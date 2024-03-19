@@ -34,7 +34,8 @@ public class ImportKeyAcivity extends BaseActivity {
     @OnClick({R.id.tv_submit, R.id.tv_paste})
     public void onClick(View view) {
         if (view.getId() == R.id.tv_submit) {
-            DialogUtil.showSimpleDialog(this, "提示", "确认", null);
+         //   DialogUtil.showSimpleDialog(this, "提示", "确认", null);
+          openActivity(AddWalletActivity.class);
         } else if (view.getId() == R.id.tv_paste) {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             if (clipboard.hasPrimaryClip() && clipboard.getPrimaryClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {

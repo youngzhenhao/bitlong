@@ -43,8 +43,8 @@ public class WelcomeAct  extends BaseActivity {
         if (mCompositeDisposable != null) {
             mCompositeDisposable.dispose();
         }
-       // openActivity(SelCreateWalletAct.class);
-        openActivity(MainActivity.class);
+        openActivity(SelCreateWalletAct.class);
+      //+  openActivity(MainActivity.class);
         finish();
     }
 

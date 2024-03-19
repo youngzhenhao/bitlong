@@ -15,6 +15,15 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+
+
+    <uses-permission android:name="android.permission.CAMERA" /> <!-- 摄像头权限 -->
+
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" /> <!-- 自动聚焦权限 -->
+
     <application
         android:name="com.btc.wallect.WallectApp"
         android:allowBackup="true"
@@ -69,6 +78,15 @@
             android:exported="true" />
         <activity
             android:name="com.btc.wallect.view.activity.WallectEditActivity"
+            android:exported="true" />
+        <activity
+            android:name="com.btc.wallect.view.activity.CreateTokenActivity"
+            android:exported="true" />
+        <activity
+            android:name="com.btc.wallect.view.activity.TransferActivity"
+            android:exported="true" />
+        <activity
+            android:name="com.btc.wallect.view.activity.AddWalletActivity"
             android:exported="true" />
     </application>
 

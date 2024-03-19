@@ -55,5 +55,15 @@
     <color name="color_cffc"> #D3CFFC</color>
     <color name="color_a6a6">#A6A6A6</color>
 
+    <color name="black">#383838</color>
+
+    <color name="button">#665AF0</color>
+    <color name="model4">#33BFBCEA</color>
+    <color name="button_cancel">#1A665AF0</color>
+    <color name="textColor">#66383838</color>
+    <color name="dotColor">#2A82E4</color>
+    <color name="logo">#E3E1FC</color>
+    <color name="logotext">#CC383838</color>
+
 
 </resources>

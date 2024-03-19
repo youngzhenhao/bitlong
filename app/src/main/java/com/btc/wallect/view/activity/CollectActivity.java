@@ -14,6 +14,7 @@ import com.btc.wallect.utils.ConStantUtil;
 import com.btc.wallect.utils.CopyUtil;
 import com.btc.wallect.utils.HorizontalDividerItemDecoration;
 import com.btc.wallect.utils.SharedPreferencesHelperUtil;
+import com.btc.wallect.utils.ToastUtils;
 import com.btc.wallect.view.activity.base.BaseActivity;
 import com.btc.wallect.R;
 import com.btc.wallect.model.entity.CollectBean;
@@ -75,13 +76,14 @@ public class CollectActivity extends BaseActivity {
     @OnClick({R.id.tv_hand_copy, R.id.tv_cloud_copy, R.id.tv_later_copy})
     public void onClick(View view) {
         if (view.getId() == R.id.tv_hand_copy) {
+            copyCollect();
             openActivity(ImportMnemonicWordActivity.class);
         } else if (view.getId() == R.id.tv_cloud_copy) {
-            // DialogUtil.showSimpleDialog(this, "提示", "云备份", null);
+            ToastUtils.showToast(this,"开发中...");
             openActivity(MainActivity.class);
         } else if (view.getId() == R.id.tv_later_copy) {
-            //  DialogUtil.showSimpleDialog(this, "提示", "稍后备份", null);
             openActivity(MainActivity.class);
+            finish();
         }
     }
 
@@ -90,8 +92,6 @@ public class CollectActivity extends BaseActivity {
         for (int i = 0; i < fruitList.size(); i++) {
             stringBuilder.append(i + "、" + fruitList.get(i).getName()).append(" ");
         }
-
-
         String result = stringBuilder.toString().trim();
         CopyUtil.copyClicks(result);
     }

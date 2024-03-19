@@ -1,0 +1,5 @@
+<!-- res/drawable/dot_background.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/dotColor" /> <!-- 设置圆点的颜色 -->
+</shape>

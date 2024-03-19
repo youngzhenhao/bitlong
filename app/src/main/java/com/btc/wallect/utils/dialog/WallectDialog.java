@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.btc.wallect.R;
 import com.btc.wallect.adapter.WallectListAdapter;
+import com.btc.wallect.model.Imoder.onListItemListener;
+import com.btc.wallect.model.entity.Wallet;
 import com.btc.wallect.model.entity.WalletListBean;
 
 import java.util.List;
@@ -34,9 +36,9 @@ public class WallectDialog extends Dialog {
     private String yesStr, noStr;
     private onAddWallectClickListener addClickListener;
 
-    public List<WalletListBean> walletList;
+    public List<Wallet> walletList;
 
-    public WallectDialog(@NonNull Context context, List<WalletListBean> walletListBeans) {
+    public WallectDialog(@NonNull Context context, List<Wallet> walletListBeans) {
         super(context, R.style.wallectDialog);
         this.mContext = context;
         this.walletList = walletListBeans;
@@ -90,7 +92,15 @@ public class WallectDialog extends Dialog {
         mRecycler_wallect.setLayoutManager(layoutManager);
         WallectListAdapter mainBtcAdapter = new WallectListAdapter(walletList);
         mRecycler_wallect.setAdapter(mainBtcAdapter);
-
+        mainBtcAdapter.setonItemClickListener(new onListItemListener() {
+            @Override
+            public void onItemClick(Long id) {
+                if (addClickListener != null) {
+                    addClickListener.onitemViewClick(id);
+                }
+                dismiss();
+            }
+        });
 
     }
 
@@ -102,7 +112,7 @@ public class WallectDialog extends Dialog {
             @Override
             public void onClick(View v) {
                 dismiss();
-//                }
+
             }
         });
 
@@ -137,6 +147,7 @@ public class WallectDialog extends Dialog {
 
     public interface onAddWallectClickListener {
         public void onAddWallectClick();
+        public  void onitemViewClick(Long id);
     }
 
 

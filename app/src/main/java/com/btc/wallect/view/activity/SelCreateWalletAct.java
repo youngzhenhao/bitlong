@@ -10,6 +10,7 @@ import com.btc.wallect.db.DBdao;
 import com.btc.wallect.model.entity.Wallet;
 import com.btc.wallect.utils.ConStantUtil;
 import com.btc.wallect.utils.LogUntil;
+import com.btc.wallect.utils.ToastUtils;
 import com.btc.wallect.view.activity.base.BaseActivity;
 import com.google.gson.Gson;
 
@@ -47,7 +48,7 @@ public class SelCreateWalletAct extends BaseActivity {
             openActivityData(CreateWalletActivity.class, ConStantUtil.V_TOACTION_INPUT,ConStantUtil.STATE_TRUE);
 
         } else if (view.getId() == R.id.img_hardWard_wallet) {
-
+            ToastUtils.showToast(this,"开发中...");
         } else if (view.getId() == R.id.img_observer_wallet) {
             openActivity(ImportKeyAcivity.class);
         }

@@ -64,6 +64,9 @@
     <color name="dotColor">#2A82E4</color>
     <color name="logo">#E3E1FC</color>
     <color name="logotext">#CC383838</color>
+    <color name="color_fa76">#1EFA76</color>
+    <color name="color_c300">#FFC300</color>
+    <color name="color_5733">#FF5733</color>
 
 
 </resources>

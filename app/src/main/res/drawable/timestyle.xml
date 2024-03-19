@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- drawable/Time.xml -->
+<selector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:appt="http://schemas.android.com/aapt"
+    android:width="54dp"
+    android:height="18dp"
+    android:viewportWidth="54"
+    android:viewportHeight="18"
+    >
+    <group>
+        <clip-path
+            android:pathData="M0 0H54V18H0V0"
+            />
+
+    </group>
+
+</selector>

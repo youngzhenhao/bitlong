@@ -12,6 +12,8 @@ public class Wallet implements Serializable {
     public String creatDate;
 
     public String show;
+    public String btcKey;
+    public String btcAmount;
 
     //头像
     public byte[] logoHead;
@@ -26,6 +28,8 @@ public class Wallet implements Serializable {
                 ", clazz='" + collect + '\'' +
                 ", creatDate='" + creatDate + '\'' +
                 ", show='" + show + '\'' +
+                ", show='" + btcKey + '\'' +
+                ", show='" + btcAmount + '\'' +
                 '}';
     }
 

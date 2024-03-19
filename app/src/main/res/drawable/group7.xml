@@ -1,0 +1,8 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <size
+        android:width="342dp"
+        android:height="50dp"
+        ></size>
+    <corners android:radius="60dp" /> <!-- 设置四个角为半圆，20dp 是半圆的半径 -->
+    <solid android:color="@color/button" /> <!-- 设置按钮的填充颜色 -->
+</shape>

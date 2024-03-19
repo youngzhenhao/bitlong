@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- drawable/矩形 4.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+<size
+    android:width="358dp"
+    android:height="263dp"
+    ></size>
+<corners android:radius="10dp" /> <!-- 设置四个角为半圆，20dp 是半圆的半径 -->
+<solid android:color="@color/model4" /> <!-- 设置按钮的填充颜色 -->
+</shape>

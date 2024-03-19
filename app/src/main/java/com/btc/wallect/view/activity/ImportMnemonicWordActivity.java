@@ -21,7 +21,9 @@ import com.btc.wallect.utils.GsonUtils;
 import com.btc.wallect.utils.SharedPreferencesHelperUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -107,7 +109,6 @@ public class ImportMnemonicWordActivity extends BaseActivity {
             collectBean.setIndex(i+1);
             collectBean.setState(false);
             inputList1.add(collectBean);
-
             SharedPreferencesHelperUtil.getInstance().putStringValue(ConStantUtil.ADD_MNEMON, GsonUtils.listTojson(inputList1));
         }
     }
@@ -117,6 +118,7 @@ public class ImportMnemonicWordActivity extends BaseActivity {
             CollectBean collectBean = new CollectBean("Collect", i + 1);
             collectList2.add(collectBean);
         }
+        Collections.shuffle(collectList2, new Random(System.currentTimeMillis()));
     }
 
 

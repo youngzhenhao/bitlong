@@ -97,8 +97,10 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
     TextView textViewName;
     @BindView(R.id.tv_btc_amont)
     TextView mTvBtcAmout;
-    IWallectFragmentPresentImpl wallectFragmentPresent;
-
+    @BindView(R.id.tv_btc_key)
+            TextView mTv_btc_key;
+   private IWallectFragmentPresentImpl wallectFragmentPresent;
+    private List<Wallet> walletList;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -139,6 +141,7 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
         setWallectDatail();
         setRequestCode();
         showUIData();
+
     }
 
     private void setRecyclerMianDatailTabView() {
@@ -364,11 +367,17 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
     }
 
     private void setDialogList() {
-        WallectDialog wallectDialog = new WallectDialog(getActivity(), walletListBeans);
+        WallectDialog wallectDialog = new WallectDialog(getActivity(), walletList);
         wallectDialog.setAddOnclickListener(new WallectDialog.onAddWallectClickListener() {
             @Override
             public void onAddWallectClick() {
                 openActivityData(CreateWalletActivity.class, ConStantUtil.V_TOACTION_CREATE,ConStantUtil.STATE_FALSE);
+            }
+
+            @Override
+            public void onitemViewClick(Long id) {
+                wallectDao.setUPDateCurrent(id);
+                showUIData();
             }
 
         });
@@ -392,20 +401,12 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
                             //返回的文本内容
                             String content = data.getStringExtra(Constantes.CODED_CONTENT);
                             Bitmap bitmap = data.getParcelableExtra(Constantes.CODED_BITMAP);
-                            //返回的BitMap图像
-//                Bitmap bitmap = data.getParcelableExtra(DECODED_BITMAP_KEY);
-//                tv_scanResult.setText("你扫描到的内容是：" + content);
 
                             Log.e("扫描到的内容是", "扫描到的内容是：" + content);
-
                             if (!TextUtils.isEmpty(content)) {
-
                                 LogUntil.d("扫描结果： " + content);
                             }
                             if (bitmap != null) {
-//                    ImageView textBitmapIMG = findViewById(R.id.test_Bitmap_IMG);
-//                    textBitmapIMG.setVisibility(View.VISIBLE);
-//                    textBitmapIMG.setImageBitmap(bitmap);
                             } else {
                                 Log.e("扫描到的内容是", "扫描到的内容是：bitmap = null");
                             }
@@ -425,13 +426,21 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
 
 
     public void showUIData() {
-        List<Wallet> walletList = selectWallectData();
+     walletList = selectWallectData();
         for (Wallet wallet : walletList) {
             if (wallet.show.equals(ConStantUtil.TRUE)) {
                 textViewName.setText(wallet.name);
+                mTv_btc_key.setText(wallet.btcKey);
+                mTvBtcAmout.setText(wallet.btcAmount);
             }
 
         }
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
 
     }
 }

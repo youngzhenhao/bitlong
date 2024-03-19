@@ -19,6 +19,7 @@ import com.btc.wallect.utils.ConStantUtil;
 import com.btc.wallect.utils.CopyUtil;
 import com.btc.wallect.utils.DialogUtil;
 import com.btc.wallect.utils.SharedPreferencesHelperUtil;
+import com.btc.wallect.utils.ToastUtils;
 import com.btc.wallect.utils.UiUtils;
 import com.btc.wallect.view.activity.base.BaseActivity;
 import com.btc.wallect.view.interfaceview.LoginView;
@@ -105,11 +106,7 @@ public class CreateWalletActivity extends BaseActivity implements LoginView {
 
 
             setDataSave(account, password, txt, wallectState);
-            if (isCreateWallet()) {
-                openActivity(CollectActivity.class);
-            } else {
-                openActivity(EditMnemonWordActivity.class);
-            }
+
 
         } else if (view.getId() == R.id.img_passWord) {
            setImgPasswordSate();
@@ -161,6 +158,8 @@ public class CreateWalletActivity extends BaseActivity implements LoginView {
             wallet.password = passWord;
             wallet.txt = txt;
             wallet.collect = "";
+            wallet.btcKey="bc362....2dfsvd";
+            wallet.btcAmount="0.33";
             if(isShow){
                 wallet.show = "true";
             }else {
@@ -171,12 +170,16 @@ public class CreateWalletActivity extends BaseActivity implements LoginView {
             Long result = wallectDao.save(wallet);
 
             if (result != -1) {
-                Toast.makeText(getApplication(), "保存数据成功!返回插入id是[" + result + "]", Toast.LENGTH_SHORT).show();
-                //  showToast("保存数据成功!返回插入行号是["+result+"]");
-                SharedPreferencesHelperUtil.getInstance().putIntValue(ConStantUtil.CURRENT_SQL_ID, 1);
+                ToastUtils.showToast(this,"保存数据成功!返回插入id是[" + result + "]");
+                SharedPreferencesHelperUtil.getInstance().putLongValue(ConStantUtil.CURRENT_SQL_ID, result);
+                if (isCreateWallet()) {
+                    openActivity(CollectActivity.class);
+                } else {
+                    openActivity(EditMnemonWordActivity.class);
+                }
             } else {
                 // showToast("保存数据失败result["+result+"]");
-                Toast.makeText(getApplication(), "保存数据失败result[\"+result+\"]", Toast.LENGTH_SHORT).show();
+                ToastUtils.showToast(this,"保存数据失败result[\"+result+\"]");
             }
 
         } catch (Exception e) {

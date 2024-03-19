@@ -1,0 +1,22 @@
+<!-- drawable/Cellular Connection.xml -->
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:appt="http://schemas.android.com/aapt"
+    android:width="17dp"
+    android:height="11dp"
+    android:viewportWidth="17"
+    android:viewportHeight="11"
+    >
+    <group>
+        <clip-path
+            android:pathData="M0 0H17V11H0V0"
+            />
+
+        <path
+            android:pathData="M0 0H17V11H0V0"
+            android:fillColor="#000000"
+            />
+
+    </group>
+
+</vector>

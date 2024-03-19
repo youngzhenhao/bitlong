@@ -22,6 +22,8 @@ public class DBOpenHelper extends SQLiteOpenHelper {
     public static final String TB_CLAZZ = "collect";
     public static final String TB_CREATEDATE = "createDate";
     public static final String TB_ISSHOW_WALLECT = "show";
+    public static final String TB_BTC_KEY = "btcKey";
+    public static final String TB_BTC_AMOUNT = "btcAmount";
 
     /**数据版本号 第一次运行要打开 */
 //    public static final int DB_VERSION = 1;
@@ -54,8 +56,9 @@ public class DBOpenHelper extends SQLiteOpenHelper {
         sql.append(" txt varchar(20),");
         sql.append(" collect varchar(20),");
         sql.append(" createDate varchar(23),");
-        sql.append(" show varchar(23) )");
-
+        sql.append(" show varchar(23),");
+        sql.append(" btcKey varchar(23),");
+        sql.append(" btcAmount varchar(23) )");
 
 //        Log.e("TAG","------"+sql.toString());
 

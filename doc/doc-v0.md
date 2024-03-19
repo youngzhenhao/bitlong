@@ -103,6 +103,20 @@ func UnlockWallet(password string) bool
 
 ### 付款 `pay`
 
+#### DecodePayReq
+
+解码发票  
+解码支付请求字符串,返回发票金额
+
+| 返回参数    | 类型     | 用途          |
+|---------|--------|-------------|
+| pay_req | string | 要解码的支付请求字符串 |
+
+| 返回类型  | 用途                         |
+|-------|----------------------------|
+| int64 | 解码发票的金额. 0：可支付任意金额。-1：解码错误 |
+
+
 #### EstimateRouteFee
 
 计算费用
@@ -117,6 +131,3 @@ func UnlockWallet(password string) bool
 
 ---
 
-#### DecodePayReq
-
-解码发票

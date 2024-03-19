@@ -152,7 +152,7 @@ public class CreateWalletActivity extends BaseActivity implements LoginView {
     /**
      * 保存数据
      */
-    public void setDataSave(String name, String passWord, String txt, String json) {
+    public void setDataSave(String name, String passWord, String txt, String collect) {
         try {
 
             Wallet wallet = new Wallet();
@@ -161,7 +161,7 @@ public class CreateWalletActivity extends BaseActivity implements LoginView {
             wallet.txt = txt;
             wallet.collect = "";
 
-            Long result = studentDao.save(wallet);
+            Long result = wallectDao.save(wallet);
 
             if (result != -1) {
                 Toast.makeText(getApplication(), "保存数据成功!返回插入行号是[" + result + "]", Toast.LENGTH_SHORT).show();
@@ -176,20 +176,7 @@ public class CreateWalletActivity extends BaseActivity implements LoginView {
         }
     }
 
-    /**
-     * 查询数据
-     */
-    public void selectDataByID() {
-//        Long id = etSelectID.getText().toString().equals("") || etSelectID.getText().toString().equals(null) ? null:Long.valueOf(etSelectID.getText().toString());
-        List<Wallet> data = studentDao.select(null);
 
-        if (data.equals(null) || data.size() == 0) {
-            //  textView.setText("没有查到数据！");
-        } else {
-            //  textView.setText(data.toString());
-        }
-
-    }
 
     private boolean isCreateWallet() {
 

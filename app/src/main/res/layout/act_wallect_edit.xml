@@ -144,7 +144,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="16dp"
+                android:layout_marginRight="32dp"
                 android:orientation="vertical">
 
                 <ImageView
@@ -339,7 +339,8 @@
 
         <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="50dp">
 
             <TextView
                 android:id="@+id/tv_submit"
@@ -350,7 +351,7 @@
                 android:layout_gravity="bottom"
 
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="50dp"
+
                 android:background="@mipmap/bg_delete"
                 android:gravity="center"
                 android:text="@string/app_txt68"

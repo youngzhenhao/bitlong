@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".create_token">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="844dp"
+        android:orientation="vertical">
+
+        <!-- 第二个View，例如矩形1 -->
+        <View
+            android:id="@+id/w_状态栏"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            />
+        <LinearLayout
+            android:layout_width="390dp"
+            android:layout_height="44dp"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/backButton"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginLeft="16dp"
+                android:onClick="returnPre"
+                android:src="@drawable/exit"
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/矩形1"
+                android:layout_width="64dp"
+                android:layout_height="44dp"
+                android:layout_marginLeft="115dp"
+                android:gravity="center"
+                android:text="创建"
+                android:textColor="@color/black"
+                android:textSize="16dp" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="342dp"
+            android:layout_height="212dp"
+            android:orientation="vertical"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            >
+            <TextView
+                android:id="@+id/logo"
+                android:layout_width="match_parent"
+                android:layout_height="22dp"
+                />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/backlogo"
+                android:orientation="vertical">
+                >
+                <ImageButton
+                    android:layout_width="63.33dp"
+                    android:layout_height="46.67dp"
+                    android:src="@drawable/logo_01"
+                    android:background="@color/logo"
+                    android:layout_marginTop="37.67dp"
+                    android:layout_marginLeft="141dp"
+                    android:onClick="openGallery"
+                    />
+                <TextView
+                    android:layout_width="98dp"
+                    android:layout_height="22dp"
+                    android:layout_gravity="center"
+                    android:text="上传你的logo"
+                    android:layout_marginTop="11.5dp"
+                    android:textColor="#383838"
+                    android:textSize="16px"
+                    />
+
+                <TextView
+                    android:layout_width="115dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="center"
+                    android:text="支持PNG和JPEG格式"
+                    android:layout_marginTop="12.28dp"
+                    android:textColor="#808080"
+                    android:textSize="12px"
+                    />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="340dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:background="@drawable/create_token_border">
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="37dp"
+                android:layout_height="20dp"
+                android:textSize="15px"
+                android:textStyle="normal"
+                android:fontFamily="sans-serif-medium"
+                android:typeface="sans"
+                android:textColor="@color/black"
+                android:layout_gravity="center"
+                />
+
+            <EditText
+                android:id="@+id/create_token_name"
+                android:layout_width="250dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginLeft="16dp"
+                android:hint="请输入名称"
+                android:textColor="@color/textColor"
+                android:textSize="14px"
+                android:textStyle="normal"
+                android:background="@drawable/create_token_border"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="340dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:background="@drawable/create_token_border">>
+            <TextView
+                android:id="@+id/type"
+                android:layout_width="37dp"
+                android:layout_height="20dp"
+                android:textSize="15px"
+                android:textStyle="normal"
+                android:fontFamily="sans-serif-medium"
+                android:typeface="sans"
+                android:textColor="@color/black"
+                android:layout_gravity="center"
+                />
+            <RadioGroup
+                android:id="@+id/typeGroup"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="60dp"
+                    android:layout_height="19dp"
+                    android:layout_marginLeft="51.2dp"
+                    android:text="TAPR-20"
+                    android:textSize="14px"
+                    android:textColor="@color/logotext"
+                    />
+
+                <RadioButton
+                    android:id="@+id/typeOption1"
+                    android:layout_width="34dp"
+                    android:layout_height="match_parent"
+                    android:text="" />
+
+                <TextView
+                    android:layout_width="28dp"
+                    android:layout_height="19dp"
+                    android:layout_marginLeft="63.42dp"
+                    android:text="NFT"
+                    android:textSize="14px"
+                    android:textColor="@color/logotext"
+                    />
+
+                <RadioButton
+                    android:id="@+id/typeOption2"
+                    android:layout_width="33dp"
+                    android:layout_height="50dp" />
+
+            </RadioGroup>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="340dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:background="@drawable/create_token_border">
+            <TextView
+                android:id="@+id/quantity"
+                android:layout_width="37dp"
+                android:layout_height="20dp"
+                android:textSize="15px"
+                android:textStyle="normal"
+                android:fontFamily="sans-serif-medium"
+                android:typeface="sans"
+                android:textColor="@color/black"
+                android:layout_gravity="center"
+                />
+            <EditText
+                android:id="@+id/create_token_quantity"
+                android:layout_width="250dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/create_token_border"
+                android:hint="请输入数量"
+                android:textColor="@color/textColor"
+                android:textSize="14px"
+                android:textStyle="normal"
+                android:paddingLeft="16dp"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="340dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:background="@drawable/create_token_border">
+            <TextView
+                android:id="@+id/add"
+                android:layout_width="82dp"
+                android:layout_height="20dp"
+                android:textSize="15px"
+                android:textStyle="normal"
+                android:fontFamily="sans-serif-medium"
+                android:typeface="sans"
+                android:textColor="@color/black"
+                android:layout_gravity="center"
+                />
+            <RadioGroup
+                android:id="@+id/addGroup"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="14dp"
+                    android:layout_height="19dp"
+                    android:layout_marginLeft="51.2dp"
+                    android:text="是"
+                    android:textSize="14px"
+                    android:textColor="@color/logotext"
+                    />
+
+                <RadioButton
+                    android:id="@+id/addOption1"
+                    android:layout_width="34dp"
+                    android:layout_height="match_parent"
+                    />
+
+                <TextView
+                    android:layout_width="14dp"
+                    android:layout_height="19dp"
+                    android:layout_marginLeft="77.42dp"
+                    android:text="否"
+                    android:textColor="@color/logotext"
+                    android:textSize="14px" />
+
+                <RadioButton
+                    android:id="@+id/categoryOption2"
+                    android:layout_width="33dp"
+                    android:layout_height="50dp" />
+            </RadioGroup>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="340dp"
+            android:layout_height="125.68dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:background="@drawable/create_token_border">
+            <TextView
+                android:id="@+id/introduce"
+                android:layout_width="37dp"
+                android:layout_height="match_parent"
+                android:textSize="15px"
+                android:textStyle="normal"
+                android:fontFamily="sans-serif-medium"
+                android:typeface="sans"
+                android:textColor="@color/black"
+                android:layout_gravity="top"
+                android:layout_marginTop="15.81dp"
+                />
+            <EditText
+                android:id="@+id/create_token_introduce"
+                android:layout_width="250dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="16dp"
+                android:background="@drawable/create_token_border"
+                android:hint="100字内"
+                android:textColor="@color/textColor"
+                android:textSize="14px"
+                android:textStyle="normal"
+                android:layout_marginTop="16.31dp"
+                android:gravity="top"
+                />
+        </LinearLayout>
+
+            <Button
+                android:id="@+id/分组7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="22.75dp"
+                android:text="确认转账"
+                android:textSize="18dp"
+                android:background="@drawable/group7"
+                android:onClick="Confirm_transfer"/>
+    </LinearLayout>
+</RelativeLayout>
+

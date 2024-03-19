@@ -56,7 +56,7 @@ public class CollectQrCodeActivity extends BaseActivity {
     @OnClick({R.id.img_new_loction, R.id.img_share, R.id.img_copy})
     public void onClick(View view) {
         if (view.getId() == R.id.img_new_loction) {
-
+            openActivity(AddessMangmentActivity.class);
         } else if (view.getId() == R.id.img_share) {
             // 创建分享的Intent
             Intent intent = new Intent(Intent.ACTION_SEND);

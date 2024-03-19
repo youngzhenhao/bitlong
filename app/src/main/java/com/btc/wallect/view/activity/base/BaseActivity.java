@@ -14,11 +14,14 @@ import android.widget.TextView;
 import com.btc.wallect.db.DBOpenHelper;
 import com.btc.wallect.db.DBdao;
 import com.btc.wallect.R;
+import com.btc.wallect.model.entity.Wallet;
 import com.btc.wallect.utils.ConStantUtil;
 import com.btc.wallect.utils.DialogUtil;
 import com.btc.wallect.utils.SharedPreferencesHelperUtil;
 import com.trello.rxlifecycle2.LifecycleTransformer;
 import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
+
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -33,7 +36,7 @@ public abstract class BaseActivity<T extends BaseConstract.IBasePersenter> exten
 
     protected T mPresenter;
     private DBOpenHelper dBhelpUtil;
-    public DBdao studentDao;
+    public DBdao wallectDao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +46,7 @@ public abstract class BaseActivity<T extends BaseConstract.IBasePersenter> exten
         init(mRootView, savedInstanceState);
         attachView();
         dBhelpUtil = new DBOpenHelper(this, DBOpenHelper.DB_NAME, null, DBOpenHelper.DB_VERSION);
-        studentDao = new DBdao(this, dBhelpUtil);
+        wallectDao = new DBdao(this, dBhelpUtil);
         SharedPreferencesHelperUtil.getInstance().init(this);
     }
 
@@ -206,6 +209,35 @@ public abstract class BaseActivity<T extends BaseConstract.IBasePersenter> exten
     @Override
     public <T> LifecycleTransformer<T> bindToLife() {
         return this.<T>bindToLifecycle();
+    }
+
+    /**
+     * 查询数据
+     */
+    public List<Wallet> selectWallectData() {
+
+        List<Wallet> data = wallectDao.select(null);
+
+        if (data.equals(null) || data.size() == 0) {
+            //  textView.setText("没有查到数据！");
+        } else {
+            //  textView.setText(data.toString());
+        }
+        return data;
+
+    }
+
+    public List<Wallet> selectDataByID(Long id) {
+
+        List<Wallet> data = wallectDao.select(id);
+
+        if (data.equals(null) || data.size() == 0) {
+
+        } else {
+
+        }
+        return data;
+
     }
 }
 

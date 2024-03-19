@@ -10,9 +10,11 @@ public class Wallet implements Serializable {
     public String collect;
 
     public String creatDate;
+    public String isShowWallect;
 
     //头像
     public byte[] logoHead;
+
     @Override
     public String toString() {
         return "Student{" +
@@ -22,6 +24,7 @@ public class Wallet implements Serializable {
                 ", age=" + txt +
                 ", clazz='" + collect + '\'' +
                 ", creatDate='" + creatDate + '\'' +
+                ", isShowWallect='" + isShowWallect + '\'' +
                 '}';
     }
 

@@ -68,7 +68,20 @@
     <string name="app_txt66">Nostr地址</string>
     <string name="app_txt67">钱包详情</string>
     <string name="app_txt68">删除钱包</string>
-
+    <string name="app_txt69">搜索Tapr20、NFT</string>
+    <string name="app_txt70"> Tapr20</string>
+    <string name="app_txt71">NFT</string>
+    <string name="app_txt72">我的关注</string>
+    <string name="app_txt73">热门榜</string>
+    <string name="app_txt74">全部</string>
+    <string name="app_txt75">名称/交易额</string>
+    <string name="app_txt76">价格</string>
+    <string name="app_txt77">涨跌幅</string>
+    <string name="app_txt78">普通 - 子地址</string>
+    <string name="app_txt79"> 隔离见证(兼容) - 子地址</string>
+    <string name="app_txt80"> 刷新</string>
+    <string name="app_txt81"> 地址管理</string>
+    <string name="app_txt82"> 比特币生态钱包</string>
 
     <string name="app_wallect">钱包</string>
     <string name="app_btn_sure">确认</string>
@@ -77,5 +90,12 @@
     <string name="app_txt_create_wallect">创建钱包</string>
     <string name="app_tapr">Tapr</string>
     <string name="app_noster">Nostr</string>
+
+    <string-array name="options_array">
+        <item>text1</item>
+        <item>text2</item>
+        <item>text3</item>
+    </string-array>
+
 
 </resources>

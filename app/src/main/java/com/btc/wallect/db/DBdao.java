@@ -22,23 +22,28 @@ public class DBdao {
     private DBOpenHelper dBhelpUtil;
 
 
-    /**相当于获得一个链接数据库的对象*/
+    /**
+     * 相当于获得一个链接数据库的对象
+     */
     private SQLiteDatabase DB;
     private Context context;
-    public DBdao(Context context, DBOpenHelper dBhelpUtil){
-        this.context =context;
+
+    public DBdao(Context context, DBOpenHelper dBhelpUtil) {
+        this.context = context;
         this.dBhelpUtil = dBhelpUtil;
     }
+
     //保存数据
     public Long save(Wallet wallet) {
         /** 获取一个写 操作数据的对象*/
         DB = dBhelpUtil.getWritableDatabase();
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(DBOpenHelper.TB_NAME,wallet.name);
-        contentValues.put(DBOpenHelper.TB_SEX,wallet.password);
-        contentValues.put(DBOpenHelper.TB_AGE,wallet.txt);
-        contentValues.put(DBOpenHelper.TB_CLAZZ,wallet.collect);
+        contentValues.put(DBOpenHelper.TB_NAME, wallet.name);
+        contentValues.put(DBOpenHelper.TB_SEX, wallet.password);
+        contentValues.put(DBOpenHelper.TB_AGE, wallet.txt);
+        contentValues.put(DBOpenHelper.TB_CLAZZ, wallet.collect);
+        contentValues.put(DBOpenHelper.TB_ISSHOW_WALLECT, wallet.isShowWallect);
 
 //        Log.e("TAG","--------------"+student.toString());
 //        Toast.makeText(context,"sql 语句--"+student.toString(),Toast.LENGTH_LONG).show();
@@ -55,15 +60,17 @@ public class DBdao {
          * ContentValues values 数据行数据
          * 返回值 成功插入行号的id  ,插入失败 -1
          */
-        return DB.insert(DBOpenHelper.TABLE_NAME,"空值",contentValues);
+        return DB.insert(DBOpenHelper.TABLE_NAME, "空值", contentValues);
         //INSERT INTO tb_student(id,age,sex,name,clazz,createDate) VALUES (?,?,?,?,?,?)
 
     }
 
-    /**查询数据*/
+    /**
+     * 查询数据
+     */
     public List<Wallet> select(Long id) {
         /** 获取一个读 操作数据的对象*/
-        DB =dBhelpUtil.getReadableDatabase();
+        DB = dBhelpUtil.getReadableDatabase();
 
         /**query() 查询数据
          *String table, 表名
@@ -81,41 +88,45 @@ public class DBdao {
                 DBOpenHelper.TB_SEX,
                 DBOpenHelper.TB_AGE,
                 DBOpenHelper.TB_CLAZZ,
-                DBOpenHelper.TB_CREATEDATE
+                DBOpenHelper.TB_CREATEDATE,
+                DBOpenHelper.TB_ISSHOW_WALLECT
         };
         Cursor cursor = null;
-        if(id == null){
+        if (id == null) {
             //全查
-            cursor = DB.query(DBOpenHelper.TABLE_NAME,columns,null,null,null,null,"id desc");
-        }else {
+            cursor = DB.query(DBOpenHelper.TABLE_NAME, columns, null, null, null, null, "id desc");
+        } else {
             //根据id 查询
-            cursor = DB.query(DBOpenHelper.TABLE_NAME,columns,"id=?",new String[]{String.valueOf(id)},null,null,null);
+            cursor = DB.query(DBOpenHelper.TABLE_NAME, columns, "id=?", new String[]{String.valueOf(id)}, null, null, null);
 
         }
 
-        List<Wallet> studentList = new ArrayList<>();
-        if(cursor != null){
+        List<Wallet> walletList = new ArrayList<>();
+        if (cursor != null) {
             //遍历游标
-            while(cursor.moveToNext()){
-                Wallet student = new Wallet();
+            while (cursor.moveToNext()) {
+                Wallet wallet = new Wallet();
                 // 根据游标找到列  在获取数据
-                student.id = cursor.getLong(cursor.getColumnIndexOrThrow("id"));
-                student.name = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_NAME));
-                student.password = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_SEX));
-                student.txt = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_AGE));
-                student.collect = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_CLAZZ));
-                student.creatDate = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_CREATEDATE));
-
+                wallet.id = cursor.getLong(cursor.getColumnIndexOrThrow("id"));
+                wallet.name = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_NAME));
+                wallet.password = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_SEX));
+                wallet.txt = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_AGE));
+                wallet.collect = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_CLAZZ));
+                wallet.creatDate = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_CREATEDATE));
+                wallet.isShowWallect = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_ISSHOW_WALLECT));
                 //添加到集合
-                studentList.add(student);
+                walletList.add(wallet);
             }
         }
 
         cursor.close();
 
-        return studentList;
+        return walletList;
     }
-    /**删除数据*/
+
+    /**
+     * 删除数据
+     */
     public int delete(Long id) {
         // 获取操作数据库对象
         DB = dBhelpUtil.getWritableDatabase();
@@ -127,15 +138,17 @@ public class DBdao {
          * 返回影响行数，失败 0
          */
         //全部删除
-        if(id == null){
-            return DB.delete(DBOpenHelper.TABLE_NAME,null,null);
+        if (id == null) {
+            return DB.delete(DBOpenHelper.TABLE_NAME, null, null);
         }
         // 条件查询
-        return DB.delete(DBOpenHelper.TABLE_NAME,"id = ?",new String[]{id+""});
+        return DB.delete(DBOpenHelper.TABLE_NAME, "id = ?", new String[]{id + ""});
     }
 
-    /**保存位图*/
-    public void saveBitmap(Wallet student) {
+    /**
+     * 保存位图
+     */
+    public void saveBitmap(Wallet wallet) {
         /** 获取一个写 操作数据的对象*/
         DB = dBhelpUtil.getWritableDatabase();
         //开启事务
@@ -153,7 +166,7 @@ public class DBdao {
          * sql 语句
          * 要插入的数据
          */
-        DB.execSQL(sql,new Object[]{student.password,student.txt,student.name,student.collect,simpleDateFormat.format(date),student.logoHead});
+        DB.execSQL(sql, new Object[]{wallet.password, wallet.txt, wallet.name, wallet.collect, simpleDateFormat.format(date), wallet.logoHead});
 
         //设置事务成功
         DB.setTransactionSuccessful();
@@ -167,7 +180,7 @@ public class DBdao {
     @RequiresApi(api = Build.VERSION_CODES.P)
     public Wallet selectBitmapById(Long id) {
         /** 获取一个读 操作数据的对象*/
-        DB =dBhelpUtil.getReadableDatabase();
+        DB = dBhelpUtil.getReadableDatabase();
         Cursor cursor = null;
 
 
@@ -176,15 +189,15 @@ public class DBdao {
          * String[] selectionArgs,
          * select * from tb_student where id = ?
          */
-        cursor = DB.rawQuery("select * from "+ DBOpenHelper.TABLE_NAME+" where id =?",new String[]{id+""});
+        cursor = DB.rawQuery("select * from " + DBOpenHelper.TABLE_NAME + " where id =?", new String[]{id + ""});
         // 解决报错；android.database.sqlite.SQLiteBlobTooBigException: Row too big to fit into CursorWindow requiredPos=0, totalRows=1
         CursorWindow cw = new CursorWindow("test", 5000000); // 设置CursorWindow的大小为5000000
         AbstractWindowedCursor ac = (AbstractWindowedCursor) cursor;
         ac.setWindow(cw);
 
         Wallet wallet = null;
-        if(cursor != null){
-            if(cursor.moveToNext()){
+        if (cursor != null) {
+            if (cursor.moveToNext()) {
                 wallet = new Wallet();
                 // 根据游标找到列  在获取数据
                 wallet.id = cursor.getLong(cursor.getColumnIndexOrThrow("id"));
@@ -193,8 +206,9 @@ public class DBdao {
                 wallet.txt = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_AGE));
                 wallet.collect = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_CLAZZ));
                 wallet.creatDate = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_CREATEDATE));
+                wallet.isShowWallect=cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_ISSHOW_WALLECT));
                 //图片
-                wallet.logoHead =cursor.getBlob(cursor.getColumnIndexOrThrow("logoHead")) ;
+                wallet.logoHead = cursor.getBlob(cursor.getColumnIndexOrThrow("logoHead"));
             }
         }
         cursor.close();
@@ -204,7 +218,7 @@ public class DBdao {
 
 
     //按条件修改
-    public int updateById(Wallet student, Long id){
+    public int updateById(Wallet wallet, Long id) {
         // 获取写操作数据库对象
         DB = dBhelpUtil.getWritableDatabase();
         //开启事务
@@ -218,10 +232,11 @@ public class DBdao {
          */
         //数据行数据
         ContentValues contentValues = new ContentValues();
-        contentValues.put(DBOpenHelper.TB_NAME,student.name);
-        contentValues.put(DBOpenHelper.TB_SEX,student.password);
-        contentValues.put(DBOpenHelper.TB_AGE,student.txt);
-        contentValues.put(DBOpenHelper.TB_CLAZZ,student.collect);
+        contentValues.put(DBOpenHelper.TB_NAME, wallet.name);
+        contentValues.put(DBOpenHelper.TB_SEX, wallet.password);
+        contentValues.put(DBOpenHelper.TB_AGE, wallet.txt);
+        contentValues.put(DBOpenHelper.TB_CLAZZ, wallet.collect);
+        contentValues.put(DBOpenHelper.TB_ISSHOW_WALLECT,wallet.isShowWallect);
 
         //时间
         Date date = new Date();
@@ -229,7 +244,7 @@ public class DBdao {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         contentValues.put(DBOpenHelper.TB_CREATEDATE, simpleDateFormat.format(date));
 
-        int result = DB.update(DBOpenHelper.TABLE_NAME,contentValues,"id = ?", new String[]{id+""});
+        int result = DB.update(DBOpenHelper.TABLE_NAME, contentValues, "id = ?", new String[]{id + ""});
         //完成事务
         DB.setTransactionSuccessful();
         //结束事务

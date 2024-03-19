@@ -36,16 +36,19 @@
 
         <activity
             android:name="com.btc.wallect.view.activity.MainActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name="com.btc.wallect.view.activity.CreateWalletActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name="com.btc.wallect.view.activity.WelcomeAct"
             android:exported="true"
-            android:theme="@style/SplashTheme">
+            android:theme="@style/SplashTheme"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -54,40 +57,56 @@
         </activity>
         <activity
             android:name="com.btc.wallect.view.activity.SelCreateWalletAct"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"/>
         <activity
             android:name="com.btc.wallect.view.activity.CollectActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"/>
         <activity
             android:name="com.btc.wallect.view.activity.ImportMnemonicWordActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"/>
         <activity
             android:name="com.btc.wallect.view.activity.EditMnemonWordActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"/>
         <activity
             android:name="com.btc.wallect.view.activity.ImportKeyAcivity"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"/>
         <activity
             android:name="com.btc.wallect.view.activity.TokenDetailActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"/>
         <activity
             android:name="com.btc.wallect.view.activity.CollectQrCodeActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"/>
         <activity
             android:name="com.btc.wallect.view.activity.CollectMoreActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"/>
         <activity
             android:name="com.btc.wallect.view.activity.WallectEditActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"/>
         <activity
             android:name="com.btc.wallect.view.activity.CreateTokenActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"/>
         <activity
             android:name="com.btc.wallect.view.activity.TransferActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"/>
         <activity
             android:name="com.btc.wallect.view.activity.AddWalletActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.btc.wallect.view.activity.AddessMangmentActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

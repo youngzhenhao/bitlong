@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".transfer">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="844dp"
+        android:orientation="vertical">
+
+        <!-- 第二个View，例如矩形1 -->
+        <View
+            android:id="@+id/w_状态栏"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            />
+        <LinearLayout
+            android:layout_width="390dp"
+            android:layout_height="44dp"
+            android:orientation="horizontal"
+            >
+            <ImageButton
+                android:src="@drawable/exit"
+                android:id="@+id/backButton"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginLeft="16dp"
+                android:onClick="returnPre"
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/矩形1"
+                android:layout_width="64dp"
+                android:layout_height="44dp"
+                android:layout_marginLeft="115dp"
+                android:gravity="center"
+                android:text="转账"
+                android:textColor="@color/black"
+                android:textSize="16dp" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="107.48dp"
+            android:orientation="vertical"
+            android:background="@drawable/background_01"
+            >
+            <LinearLayout
+                android:layout_width="337.79dp"
+                android:layout_height="40dp"
+                android:layout_gravity="top"
+                android:layout_marginLeft="26dp"
+                android:layout_marginTop="21.13dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/分组3"
+                    android:layout_width="60dp"
+                    android:layout_height="20dp"
+                    android:text="收款地址"
+                    android:textSize="15dp"
+                    android:textStyle="normal"
+                    android:fontFamily="sans-serif-medium"
+                    android:typeface="sans"
+                    android:textColor="@color/black"
+                    android:layout_gravity="center"
+
+                    />
+                <EditText
+                    android:id="@+id/inputAddress"
+                    android:layout_width="242dp"
+                    android:layout_height="40dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/border_background"
+                    android:hint="请手动输入收款地址或扫码识别"
+                    android:textColor="@color/textColor"
+                    android:textSize="14px"
+                    android:textStyle="normal"
+                    android:paddingLeft="11.48dp"
+                    />
+                <ImageButton
+                    android:id="@+id/buttonofQR"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginLeft="9.79dp"
+                    android:layout_marginTop="12.47dp"
+                    android:onClick="startScan"
+                    android:src="@drawable/qr_saoyisao"
+                    />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="245dp"
+                android:layout_height="16dp"
+                android:orientation="horizontal"
+                android:layout_marginLeft="96dp"
+                android:layout_marginTop="6.18dp">
+                <View
+                    android:id="@+id/dot"
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:layout_gravity="center"
+
+                    android:background="@drawable/dot_background" />
+                <TextView
+                    android:layout_width="234dp"
+                    android:layout_height="16dp"
+                    android:layout_marginLeft="8dp"
+                    android:text="请输入发票、LNRUL、闪电地址或BTC地址 "
+                    android:textSize="12px"
+                   />
+            </LinearLayout>
+
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="644.76dp"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="282dp"
+                android:layout_height="40dp"
+                android:layout_gravity="top"
+                android:layout_marginLeft="54dp"
+                android:layout_marginTop="33.01dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/币种"
+                    android:layout_width="30dp"
+                    android:layout_height="20dp"
+                    android:text="币种"
+                    android:textSize="15dp"
+                    android:textStyle="normal"
+                    android:fontFamily="sans-serif-medium"
+                    android:typeface="sans"
+                    android:textColor="@color/black"
+                    android:layout_gravity="center"
+
+                    />
+                <TextView
+                    android:id="@+id/币种_text"
+                    android:layout_width="242dp"
+                    android:layout_height="40dp"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/textbackground"
+                    android:hint="自动显示不用输入"
+                    android:textColor="@color/textColor"
+                    android:textSize="14px"
+                    android:textStyle="normal"
+                    android:paddingLeft="11.48dp"
+                    android:gravity="center_vertical"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="282dp"
+                android:layout_height="40dp"
+                android:layout_gravity="top"
+                android:layout_marginLeft="54dp"
+                android:layout_marginTop="24dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/金额"
+                    android:layout_width="30dp"
+                    android:layout_height="20dp"
+                    android:text="金额"
+                    android:textSize="15dp"
+                    android:textStyle="normal"
+                    android:fontFamily="sans-serif-medium"
+                    android:typeface="sans"
+                    android:textColor="@color/black"
+                    android:layout_gravity="center"
+
+                    />
+                <EditText
+                    android:id="@+id/ed_text_amount"
+                    android:layout_width="242dp"
+                    android:layout_height="40dp"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/textbackground_fa"
+                    android:hint="请输入金额"
+                    android:textColor="@color/textColor"
+                    android:textSize="14px"
+                    android:textStyle="normal"
+                    android:paddingLeft="11.48dp"
+                    android:gravity="center_vertical"
+
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="282dp"
+                android:layout_height="113dp"
+                android:layout_marginLeft="54dp"
+                android:layout_marginTop="24dp"
+                android:orientation="horizontal"
+                >
+
+                <TextView
+                    android:id="@+id/附言"
+                    android:layout_width="30dp"
+                    android:layout_height="match_parent"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="附言"
+                    android:textColor="@color/black"
+                    android:textSize="15px"
+                    android:textStyle="normal"
+                    android:typeface="sans"
+                    android:paddingTop="10dp"/>
+
+                <TextView
+                    android:id="@+id/附言_text"
+                    android:layout_width="242dp"
+                    android:layout_height="113dp"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/textbackground"
+                    android:hint="自动显示不用输入"
+                    android:textColor="@color/textColor"
+                    android:textSize="14px"
+                    android:textStyle="normal"
+                    android:paddingLeft="11.48dp"
+                    android:paddingTop="10.5dp"
+                    android:gravity="top"
+                    />
+            </LinearLayout>
+            <Button
+                android:id="@+id/分组7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="244.05dp"
+                android:text="确认转账"
+                android:textSize="18dp"
+                android:background="@drawable/group7"
+                android:onClick="Confirm_transfer"/>
+        </LinearLayout>
+
+
+
+
+
+    </LinearLayout>
+
+</RelativeLayout>

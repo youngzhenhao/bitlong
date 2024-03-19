@@ -1,20 +1,32 @@
 package com.btc.wallect.view.activity.fragment;
 
+import static android.app.Activity.RESULT_OK;
+
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 
 import com.btc.wallect.R;
 import com.btc.wallect.adapter.AlbumPanoramaAdapter;
@@ -24,16 +36,24 @@ import com.btc.wallect.model.Imoder.onItemClickListener;
 import com.btc.wallect.model.entity.MainDateilBean;
 import com.btc.wallect.model.entity.MainTabListBean;
 import com.btc.wallect.model.entity.WalletListBean;
+import com.btc.wallect.qr.ActivityResultHelper;
 import com.btc.wallect.utils.ConStantUtil;
 import com.btc.wallect.utils.GsonUtils;
 import com.btc.wallect.utils.LogUntil;
 import com.btc.wallect.utils.SharedPreferencesHelperUtil;
 import com.btc.wallect.utils.dialog.ChannelOpeningDialog;
 import com.btc.wallect.utils.dialog.WallectDialog;
+import com.btc.wallect.view.activity.CreateTokenActivity;
+import com.btc.wallect.view.activity.MainActivity;
 import com.btc.wallect.view.activity.TokenDetailActivity;
 import com.btc.wallect.view.activity.WallectEditActivity;
 import com.btc.wallect.view.activity.base.BaseFrament;
+
+import com.example.scanzxing.zxing.android.CaptureActivity;
+import com.example.scanzxing.zxing.common.Constantes;
 import com.google.gson.Gson;
+
+
 import com.jude.rollviewpager.OnItemClickListener;
 import com.jude.rollviewpager.RollPagerView;
 import com.jude.rollviewpager.hintview.ColorPointHintView;
@@ -44,11 +64,11 @@ import java.util.List;
 
 
 public class WallectFragment extends BaseFrament implements View.OnClickListener {
-//    @BindView(R.id.recycler_main_view)
+    //    @BindView(R.id.recycler_main_view)
 //    RecyclerView mRerecyclerMainview;
 //    @BindView(R.id.img_btc_hide)
 //    ImageView mImg_btc_hide;
-
+    public static final int REQUEST_CODE = 1;
 
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private MainBtcAdapter mainBtcAdapter;
@@ -62,10 +82,11 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
     private LinearLayout mLl_main_tab;
     private RollPagerView mBanner;
     private List imagesList = new ArrayList();
-    private ImageView mImg_btc_hide, mImgWallect;
+    private ImageView mImg_btc_hide, mImgWallect, mImg_add_btc, mImg_scan;
     private TextView mTv_btc_datail;
     private boolean isShowNum = true;
     public List<WalletListBean> walletListBeans;
+    private ActivityResultHelper helper;
 
     @Nullable
     @Override
@@ -84,11 +105,15 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
         mBanner = view.findViewById(R.id.banner);
         mImg_btc_hide = view.findViewById(R.id.img_btc_hide);
         mImgWallect = view.findViewById(R.id.img_wallect);
-        mTv_btc_datail=view.findViewById(R.id.tv_btc_datail);
+        mTv_btc_datail = view.findViewById(R.id.tv_btc_datail);
+        mImg_add_btc = view.findViewById(R.id.img_add_btc);
+        mImg_scan = view.findViewById(R.id.img_scan);
         mLl_main_tab.setOnClickListener(this);
         mImg_btc_hide.setOnClickListener(this);
         mImgWallect.setOnClickListener(this);
         mTv_btc_datail.setOnClickListener(this);
+        mImg_add_btc.setOnClickListener(this);
+        mImg_scan.setOnClickListener(this);
         dataList = new ArrayList<>();
         mMainTabList = new ArrayList<>();
         walletListBeans = new ArrayList<>();
@@ -99,6 +124,7 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
         initBanner();
         isShowDatail();
         setWallectDatail();
+        setRequestCode();
     }
 
     private void setRecyclerMianDatailTabView() {
@@ -265,14 +291,22 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
             isShowDatail();
         } else if (v.getId() == R.id.img_wallect) {
             setDialogList();
-        } else if (v.getId()==R.id.tv_btc_datail) {
+        } else if (v.getId() == R.id.tv_btc_datail) {
             openActivity(WallectEditActivity.class);
+        } else if (v.getId() == R.id.img_add_btc) {
+            openActivity(CreateTokenActivity.class);
+        } else if (v.getId() == R.id.img_scan) {
+            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, 1);
+            } else {
+                goScan();
+            }
         }
     }
 
     private void initBanner() {
         imagesList.add(R.mipmap.img_banner);
-        imagesList.add(R.mipmap.img_crate_wallet_one);
+        imagesList.add(R.mipmap.img_banner2);
 
         //设置轮播图下的点的颜色
         mBanner.setHintView(new ColorPointHintView(getActivity(), Color.RED, Color.WHITE));
@@ -324,6 +358,54 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
             }
         });
         wallectDialog.show();
+    }
+
+    private void goScan() {
+        Intent intent = new Intent(getActivity(), CaptureActivity.class);
+        startActivityForResult(intent, Constantes.REQUEST_CODE_SCAN);
+    }
+
+    private void setRequestCode() {
+
+        helper = new ActivityResultHelper(new ActivityResultHelper.OnActivityResultListener() {
+            @Override
+            public void onActivityResult(int requestCode, int resultCode, Intent data) {
+                if (requestCode == REQUEST_CODE) {
+                    // 扫描二维码/条码回传
+                    if (requestCode == Constantes.REQUEST_CODE_SCAN && resultCode == RESULT_OK) {
+                        if (data != null) {
+                            //返回的文本内容
+                            String content = data.getStringExtra(Constantes.CODED_CONTENT);
+                            Bitmap bitmap =  data.getParcelableExtra(Constantes.CODED_BITMAP);
+                            //返回的BitMap图像
+//                Bitmap bitmap = data.getParcelableExtra(DECODED_BITMAP_KEY);
+//                tv_scanResult.setText("你扫描到的内容是：" + content);
+
+                            Log.e("扫描到的内容是" , "扫描到的内容是：" + content);
+
+                            if (!TextUtils.isEmpty(content)){
+
+                                LogUntil.d("扫描结果： " + content);
+                            }
+                            if (bitmap != null){
+//                    ImageView textBitmapIMG = findViewById(R.id.test_Bitmap_IMG);
+//                    textBitmapIMG.setVisibility(View.VISIBLE);
+//                    textBitmapIMG.setImageBitmap(bitmap);
+                            } else {
+                                Log.e("扫描到的内容是" , "扫描到的内容是：bitmap = null" );
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        helper.onActivityResult(requestCode, resultCode, data);
     }
 
 }

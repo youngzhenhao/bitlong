@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import androidx.annotation.Nullable;
 
+import com.btc.wallect.view.activity.WallectEditActivity;
+
 
 public class DBOpenHelper extends SQLiteOpenHelper {
     /**数据库名字*/
@@ -19,6 +21,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
     public static final String TB_AGE = "txt";
     public static final String TB_CLAZZ = "collect";
     public static final String TB_CREATEDATE = "createDate";
+    public static final String TB_ISSHOW_WALLECT = "isShowWallect";
 
     /**数据版本号 第一次运行要打开 */
 //    public static final int DB_VERSION = 1;
@@ -53,6 +56,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
         sql.append(" password varchar(2),");
         sql.append(" txt varchar(20),");
         sql.append(" collect varchar(20),");
+        sql.append(" isshowwallect varchar(2),");
         sql.append(" createDate varchar(23) )");
 
 

@@ -5,8 +5,13 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.btc.wallect.R;
+import com.btc.wallect.model.entity.Wallet;
 import com.btc.wallect.utils.ConStantUtil;
+import com.btc.wallect.utils.LogUntil;
 import com.btc.wallect.view.activity.base.BaseActivity;
+import com.google.gson.Gson;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -26,7 +31,7 @@ public class SelCreateWalletAct extends BaseActivity {
     protected void init(View view, Bundle savedInstanceState) {
         setTitle(" ");
         setTitleHide(false);
-
+        getWallectList();
 
     }
 
@@ -34,8 +39,10 @@ public class SelCreateWalletAct extends BaseActivity {
     public void onClick(View view) {
         if (view.getId() == R.id.img_create_wallet) {
             openActivityData(CreateWalletActivity.class, ConStantUtil.V_TOACTION_CREATE);
+            finish();
         } else if (view.getId() == R.id.img_input_wallet) {
             openActivityData(CreateWalletActivity.class, ConStantUtil.V_TOACTION_INPUT);
+            finish();
         } else if (view.getId() == R.id.img_hardWard_wallet) {
 
         } else if (view.getId() == R.id.img_observer_wallet) {
@@ -45,9 +52,9 @@ public class SelCreateWalletAct extends BaseActivity {
     }
 
 
-    private void toAction() {
-        openActivity(CreateWalletActivity.class);
-
+    private void getWallectList() {
+//        List<Wallet> walletList = selectWallectData();
+//        LogUntil.d(new Gson().toJson(walletList));
     }
 
     @Override

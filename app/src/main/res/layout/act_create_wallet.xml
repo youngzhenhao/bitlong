@@ -20,7 +20,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="30dp"
         android:layout_marginBottom="24dp"
-        android:text="比特币生态钱包"
+        android:text="@string/app_txt82"
         android:textColor="@color/color_3838"
         android:textSize="20sp"
         android:textStyle="bold" />

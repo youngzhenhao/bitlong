@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!--实心，设置形状的填充色-->
+    <solid android:color="@color/color_cffc" />
+    <!--边框，描边-->
+    <stroke
+        android:width="0dp"
+        android:color="#838B83" />
+    <!--圆角,radius是半径-->
+    <corners android:radius="0dp" />
+    <!--渐变-->
+    <gradient
+        android:angle="270"
+        android:startColor="@color/color_cffc"
+        android:endColor="@color/color_cffc"/>
+
+    <!--边距-->
+    <padding
+        android:bottom="10dp"
+        android:left="10dp"
+        android:right="10dp"
+        android:top="10dp" />
+</shape>

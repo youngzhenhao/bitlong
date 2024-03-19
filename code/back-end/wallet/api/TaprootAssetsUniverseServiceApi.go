@@ -30,7 +30,8 @@ func DeleteFederationServer() {}
 //
 //	@Description: 返回一组关于宇宙当前状态的信息
 //	@return *universerpc.InfoResponse
-//func UniverseInfo() *universerpc.InfoResponse {
+//
+// func UniverseInfo() *universerpc.InfoResponse {
 func UniverseInfo() string {
 	const (
 		grpcHost = "202.79.173.41:8443"
@@ -90,7 +91,8 @@ func InsertProof() {}
 //
 //	@Description: 列出了组成本地 Universe 服务器联盟的服务器集。这些服务器用于推送新的证明，并定期从远程服务器同步调用新的证明
 //	@return *universerpc.ListFederationServersResponse
-//func ListFederationServers() *universerpc.ListFederationServersResponse {
+//
+// func ListFederationServers() *universerpc.ListFederationServersResponse {
 func ListFederationServers() string {
 	const (
 		grpcHost = "202.79.173.41:8443"

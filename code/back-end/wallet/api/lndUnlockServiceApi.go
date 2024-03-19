@@ -15,11 +15,18 @@ import (
 	"path/filepath"
 )
 
+// GenSeed
+//
+//	 @Description: 是用于实例化新 lnd 实例的第一个方法。该方法允许调用者根据可选的口令生成新的加密种子。
+//		如果提供了口令，则需要口令来解密密码种子，以显示内部钱包种子。
+//		用户获得并验证密码种子后，应使用 InitWallet 方法提交新生成的种子，并创建钱包
+//	 @return []string
 func GenSeed() []string {
 	const (
-		grpcHost = "202.79.173.41:10009"
+		//grpcHost = "202.79.173.41:10009"
+		grpcHost = "202.79.173.41:10055"
 	)
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
+	tlsCertPath := filepath.Join(base.Configure("lnd2"), "tls.cert")
 	// Load the TLS certificate
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
@@ -68,11 +75,21 @@ func GenSeed() []string {
 	return response.CipherSeedMnemonic
 }
 
-func InitWallet(Psw string) bool {
+// InitWallet
+//
+//	@Description: InitWallet 在 lnd 首次启动时使用，用于完全初始化守护进程及其内部钱包。
+//	至少必须提供一个钱包密码。这将用于加密磁盘上的敏感资料。
+//	在恢复情况下，用户还可以指定自己的密码和口令。如果设置了该密码，守护进程就会使用之前的状态来初始化其内部钱包。
+//	或者，也可以使用 GenSeed RPC 来获取种子，然后将其提交给用户。经用户验证后，可将种子输入此 RPC，以提交新钱包
+//	@param seed
+//	@param password
+//	@return bool
+func InitWallet(seed [24]string, password string) bool {
 	const (
-		grpcHost = "202.79.173.41:10009"
+		//grpcHost = "202.79.173.41:10009"
+		grpcHost = "202.79.173.41:10055"
 	)
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
+	tlsCertPath := filepath.Join(base.Configure("lnd2"), "tls.cert")
 	// Load the TLS certificate
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
@@ -100,11 +117,10 @@ func InitWallet(Psw string) bool {
 	// 创建 WalletUnlocker 客户端
 	client := lnrpc.NewWalletUnlockerClient(conn)
 	passphrase := ""
-	var aezeedPassphrase = []byte(passphrase)
 	request := &lnrpc.InitWalletRequest{
-		WalletPassword:     []byte(Psw),
-		CipherSeedMnemonic: GenSeed(),
-		AezeedPassphrase:   aezeedPassphrase,
+		WalletPassword:     []byte(password),
+		CipherSeedMnemonic: seed[:],
+		AezeedPassphrase:   []byte(passphrase),
 	}
 	response, err := client.InitWallet(context.Background(), request)
 	if err != nil {
@@ -141,7 +157,7 @@ func InitWallet(Psw string) bool {
 	return true
 }
 
-func UnlockWallet(Psw string) bool {
+func UnlockWallet(password string) bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -173,7 +189,7 @@ func UnlockWallet(Psw string) bool {
 	// 创建 WalletUnlocker 客户端
 	client := lnrpc.NewWalletUnlockerClient(conn)
 	request := &lnrpc.UnlockWalletRequest{
-		WalletPassword: []byte(Psw),
+		WalletPassword: []byte(password),
 	}
 	_, err = client.UnlockWallet(context.Background(), request)
 	if err != nil {
@@ -221,11 +237,9 @@ func ChangePassword(currentPassword, newPassword string) bool {
 		}
 	}(conn)
 	client := lnrpc.NewWalletUnlockerClient(conn)
-	_currentPasswordByteSlice, _ := hex.DecodeString(currentPassword)
-	_newPasswordByteSlice, _ := hex.DecodeString(newPassword)
 	request := &lnrpc.ChangePasswordRequest{
-		CurrentPassword: _currentPasswordByteSlice,
-		NewPassword:     _newPasswordByteSlice,
+		CurrentPassword: []byte(currentPassword),
+		NewPassword:     []byte(newPassword),
 	}
 	response, err := client.ChangePassword(context.Background(), request)
 	if err != nil {

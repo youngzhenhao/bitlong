@@ -11,8 +11,7 @@ func TestFinalizeMint(t *testing.T) {
 	FinalizeMint()
 }
 func TestGetTapRootAddr(t *testing.T) {
-	GetTapRootAddr()
-
+	GetTapRootAddr("", 10)
 }
 
 func TestSendAssets(t *testing.T) {

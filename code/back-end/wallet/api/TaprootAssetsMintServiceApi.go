@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 )
 
+// SAME AS MintAsset, HAVE NOT DELETED
 func InitMint() bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
@@ -74,6 +75,7 @@ func InitMint() bool {
 	return true
 }
 
+// SAME AS FinalizeBatch, HAVE NOT DELETED
 func FinalizeMint() bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
@@ -123,7 +125,8 @@ func FinalizeMint() bool {
 	return true
 }
 
-func GetTapRootAddr() string {
+// SAME AS NewAddr IN TaprootAssetsServiceApi, HAVE NOT DELETED
+func GetTapRootAddr(assetId string, amt int) string {
 	const (
 		grpcHost = "202.79.173.41:8443"
 	)
@@ -159,11 +162,11 @@ func GetTapRootAddr() string {
 			log.Fatalf("conn Close err: %v", err)
 		}
 	}(conn)
-	btye, err := hex.DecodeString("58fac0a06471220d3b086d8d35189ad380586ab9260b500f3c060ef549c955e2")
+	_assetIdBtyeSlice, err := hex.DecodeString(assetId)
 	client := taprpc.NewTaprootAssetsClient(conn)
 	request := &taprpc.NewAddrRequest{
-		AssetId: btye,
-		Amt:     10,
+		AssetId: _assetIdBtyeSlice,
+		Amt:     uint64(amt),
 	}
 	response, err := client.NewAddr(context.Background(), request)
 	if err != nil {
@@ -174,6 +177,7 @@ func GetTapRootAddr() string {
 	return response.String()
 }
 
+// SAME AS SendAsset IN TaprootAssetsServiceApi, HAVE NOT DELETED
 func SendAssets() bool {
 	const (
 		grpcHost = "202.79.173.41:8443"

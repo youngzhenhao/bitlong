@@ -1056,8 +1056,9 @@ func OpenChannelSync(nodePubkey string, localFundingAmount int64) string {
 		log.Printf("lnrpc OpenChannelSync err: %v", err)
 		return ""
 	}
-	log.Printf("%v\n", response)
-	return response.GetFundingTxidStr() + strconv.Itoa(int(response.GetOutputIndex()))
+	//log.Printf("%v\n", response)
+	responseStr := hex.EncodeToString(response.GetFundingTxidBytes())
+	return responseStr + strconv.Itoa(int(response.GetOutputIndex()))
 }
 
 // OpenChannel

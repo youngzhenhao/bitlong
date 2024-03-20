@@ -151,6 +151,10 @@ GetWalletBalance() string
 
 连接到另一个lnd节点
 
+```go
+func ConnectPeer(pubkey, host string) bool
+```
+
 |      函数参数      |  类型  |       用途       |
 |:------------------:|:------:|:----------------:|
 | pubkey         | string | 节点公钥         |
@@ -165,6 +169,10 @@ GetWalletBalance() string
 #### OpenChannel
 
 开通道
+
+```go
+func OpenChannel(nodePubkey string, localFundingAmount int64) string
+```
 
 > 会尝试向远程对等方打开请求中指定的单一注资通道。
 > 用户可以指定确认资金交易的目标区块数，或为资金交易手动设定费率。
@@ -183,6 +191,10 @@ GetWalletBalance() string
 #### CloseChannel
 
 关通道
+
+```go
+func CloseChannel(fundingTxidStr string, outputIndex int) bool
+```
 
 > 试图关闭一个由其通道输出点（ChannelPoint）标识的活动通道。
 > 该方法的操作还可以在超时后尝试强制关闭不活动的对等设备。如果请求非强制关闭（合作关闭），
@@ -212,7 +224,12 @@ GetWalletBalance() string
 
 #### GetChanInfo
 
+
 查询通道信息
+
+```go
+func GetChanInfo(chanId int) string
+```
 
 > 返回指定通道的最新认证网络公告，该通道由通道 ID 标识：一个 8 字节整数，用于唯一标识区块链中交易资金输出的位置
 
@@ -226,6 +243,10 @@ GetWalletBalance() string
 | 通道详情数据   | string |
 
 #### ChannelBalance
+
+```go
+func ChannelBalance() string
+```
 
 通道余额
 

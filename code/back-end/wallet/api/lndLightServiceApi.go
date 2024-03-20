@@ -897,9 +897,7 @@ func ExportChannelBackup() bool {
 //	@Description: 返回指定通道的最新认证网络公告，该通道由通道 ID 标识：一个 8 字节整数，用于唯一标识区块链中交易资金输出的位置
 //	@param chanId
 //	@return *lnrpc.ChannelEdge
-//
-// func GetChanInfo(chanId uint64) *lnrpc.ChannelEdge {
-func GetChanInfo(chanId int) string {
+func GetChanInfo(chanId string) string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -939,8 +937,12 @@ func GetChanInfo(chanId int) string {
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
+	chainIdUint64, err := strconv.ParseUint(chanId, 10, 64)
+	if err != nil {
+		log.Printf("string to uint64 err: %v", err)
+	}
 	request := &lnrpc.ChanInfoRequest{
-		ChanId: uint64(chanId),
+		ChanId: chainIdUint64,
 	}
 	response, err := client.GetChanInfo(context.Background(), request)
 	if err != nil {
@@ -1059,7 +1061,7 @@ func OpenChannelSync(nodePubkey string, localFundingAmount int64) string {
 	}
 	//log.Printf("%v\n", response)
 	responseStr := hex.EncodeToString(response.GetFundingTxidBytes())
-	return responseStr + strconv.Itoa(int(response.GetOutputIndex()))
+	return responseStr + ":" + strconv.Itoa(int(response.GetOutputIndex()))
 }
 
 // OpenChannel

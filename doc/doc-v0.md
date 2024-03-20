@@ -258,14 +258,18 @@ func ListChannels() string
 查询通道信息
 
 ```go
-func GetChanInfo(chanId int) string
+func GetChanInfo(chanId string) string
 ```
 
 > 返回指定通道的最新认证网络公告，该通道由通道 ID 标识：一个 8 字节整数，用于唯一标识区块链中交易资金输出的位置
 
+**因为chanId内部为uint64，会超出long可表示最大值，所以该接口使用"在uint64范围内数字的的字符串"进行传参**
+
+*`uint64` 范围: [0 : 18446744073709551615]*
+
 |      函数参数      |  类型  |       用途       |
 |:------------------:|:------:|:----------------:|
-| chanId          | int | 通道的 id         |
+| chanId          | string | 通道的 id         |
 
 
 | 返回参数 |  类型  |

@@ -88,18 +88,47 @@ func UnlockWallet(password string) bool
 ### 发票 `invoice` 收款
 
 #### AddInvoice
+```go    
+> func AddInvoice(value long) string
+```      
+生成发票     
+根据传入的金额生成闪电发票
 
-生成发票
+| 返回参数    | 类型  | 用途      |
+|---------|-----|---------|
+| value | int | 需要收款的金额 |
+
+| 返回类型   | 用途    |
+|--------|-------|
+| string | 生成的发票 |
 
 ---
 
-#### ListInvoices
+#### ListInvoices       
+```go
+func ListInvoices() string
+```
+发票列表     
+列出当前账户下所持有的发票     
+| 返回类型   | 用途    |
+|--------|-------|
+| string | 返回发票列表 |
 
-发票列表
 
 #### lookupInvoice
-
+```go
+>func LookupInvoice(rhash string) string
+```
 查询发票信息
+
+| 返回参数    | 类型     | 用途              |
+|---------|--------|-----------------|
+| string | string | 需要查询的闪电发票支付hash |
+
+| 返回类型   | 用途          |
+|--------|-------------|
+| string | 指定闪电发票的详细信息 |
+
 
 ### 付款 `pay`
 

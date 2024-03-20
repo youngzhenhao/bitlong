@@ -99,9 +99,10 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
     @BindView(R.id.tv_btc_amont)
     TextView mTvBtcAmout;
     @BindView(R.id.tv_btc_key)
-            TextView mTv_btc_key;
-   private IWallectFragmentPresentImpl wallectFragmentPresent;
+    TextView mTv_btc_key;
+    private IWallectFragmentPresentImpl wallectFragmentPresent;
     private List<Wallet> walletList;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -147,9 +148,9 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
 
     private void setRecyclerMianDatailTabView() {
         String tabList = SharedPreferencesHelperUtil.getInstance().getStringValue(ConStantUtil.MAIN_TAB_LIST, "");
-        LogUntil.d(tabList);
-        mMainTabList = GsonUtils.jsonToList(tabList, MainTabListBean.class);
 
+        mMainTabList = GsonUtils.jsonToList(tabList, MainTabListBean.class);
+        LogUntil.d(new Gson().toJson(mMainTabList));
         mRecycler_main_tabl.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
         mainBtcTabAdapter = new AlbumPanoramaAdapter(mMainTabList, getActivity());
         mainBtcTabAdapter.addFooterView(LayoutInflater.from(getActivity()).inflate(R.layout.item_main_btc_tab_newbtn, null));
@@ -162,8 +163,20 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
                 String tabList = SharedPreferencesHelperUtil.getInstance().getStringValue(ConStantUtil.MAIN_TAB_LIST, "");
                 mMainTabList = GsonUtils.jsonToList(tabList, MainTabListBean.class);
                 dataList = mMainTabList.get(position).getDataTabList();
+
+                for (int i = 0; i < mMainTabList.size(); i++) {
+                    mMainTabList.get(i).setSelect(false);
+                    mMainTabList.get(i).setTabTxt(txt);
+                }
+                mMainTabList.get(position).setSelect(true);
+
+
+                LogUntil.d("保存前：" + new Gson().toJson(mMainTabList));
+                SharedPreferencesHelperUtil.getInstance().putStringValue(ConStantUtil.MAIN_TAB_LIST, new Gson().toJson(mMainTabList));
+
                 setRecyclerMianDatailView();
 
+                setRecyclerMianDatailTabView();
 
             }
 
@@ -281,7 +294,6 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
         MainTabListBean mainTabListBean = new MainTabListBean();
         mainTabListBean.setTabTxt("通道0");
         mainTabListBean.setSelect(false);
-
         List<MainDateilBean> dataList = new ArrayList<>();
         MainDateilBean collectBean6 = new MainDateilBean();
         collectBean6.setBtcName("BTC111");
@@ -372,7 +384,7 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
         wallectDialog.setAddOnclickListener(new WallectDialog.onAddWallectClickListener() {
             @Override
             public void onAddWallectClick() {
-                openActivityData(CreateWalletActivity.class, ConStantUtil.V_TOACTION_CREATE,ConStantUtil.STATE_FALSE);
+                openActivityData(CreateWalletActivity.class, ConStantUtil.V_TOACTION_CREATE, ConStantUtil.STATE_FALSE);
             }
 
             @Override
@@ -427,7 +439,7 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
 
 
     public void showUIData() {
-     walletList = selectWallectData();
+        walletList = selectWallectData();
         for (Wallet wallet : walletList) {
             if (wallet.show.equals(ConStantUtil.TRUE)) {
                 textViewName.setText(wallet.name);

@@ -6,7 +6,6 @@
     android:orientation="vertical">
 
 
-
     <ImageView
 
         android:layout_width="match_parent"
@@ -61,10 +60,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
+        <TextView
+            android:id="@+id/tv_to_file"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
 
-            android:layout_alignParentBottom="true" />
+            android:layout_centerHorizontal="true"
+            android:text="文件测试" />
     </RelativeLayout>
 </LinearLayout>

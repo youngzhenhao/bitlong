@@ -14,6 +14,7 @@ import com.btc.wallect.R;
 import com.btc.wallect.model.Imoder.onItemClickListener;
 
 import com.btc.wallect.model.entity.MainTabListBean;
+import com.btc.wallect.utils.LogUntil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,8 +62,17 @@ public class AlbumPanoramaAdapter extends RecyclerView.Adapter<AlbumPanoramaAdap
             TextView mTvtxttab = holder.itemView.findViewById(R.id.tv_txt_tab);
             TextView mTvDownline = holder.itemView.findViewById((R.id.tv_down_line));
             mTvtxttab.setText(data.get(position).getTabTxt());
+
+            LogUntil.e(data.get(position).getTabTxt());
+            if(data.get(position).isSelect()){
+                mTvDownline.setVisibility(View.VISIBLE);
+
+            }else {
+                mTvDownline.setVisibility(View.GONE);
+            }
             int finalPosition = position;
             int finalPosition1 = position;
+
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

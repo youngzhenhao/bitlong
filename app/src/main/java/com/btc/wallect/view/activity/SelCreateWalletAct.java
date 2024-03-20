@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import com.btc.wallect.R;
 import com.btc.wallect.db.DBOpenHelper;
 import com.btc.wallect.db.DBdao;
+import com.btc.wallect.filemanagment.NewFileActivity;
 import com.btc.wallect.model.entity.Wallet;
 import com.btc.wallect.utils.ConStantUtil;
 import com.btc.wallect.utils.LogUntil;
@@ -20,11 +21,11 @@ import butterknife.BindView;
 import butterknife.OnClick;
 
 public class SelCreateWalletAct extends BaseActivity {
-    private DBOpenHelper dBhelpUtil;
-    public DBdao wallectDa;
 
     @BindView(R.id.img_create_wallet)
     ImageView imgCreate;
+
+
 
     @Override
     protected int setContentView() {
@@ -39,7 +40,7 @@ public class SelCreateWalletAct extends BaseActivity {
 
     }
 
-    @OnClick({R.id.img_create_wallet, R.id.img_input_wallet, R.id.img_hardWard_wallet, R.id.img_observer_wallet})
+    @OnClick({R.id.img_create_wallet, R.id.img_input_wallet, R.id.img_hardWard_wallet, R.id.img_observer_wallet,R.id.tv_to_file})
     public void onClick(View view) {
         if (view.getId() == R.id.img_create_wallet) {
             openActivityData(CreateWalletActivity.class, ConStantUtil.V_TOACTION_CREATE,ConStantUtil.STATE_TRUE);
@@ -51,6 +52,8 @@ public class SelCreateWalletAct extends BaseActivity {
             ToastUtils.showToast(this,"开发中...");
         } else if (view.getId() == R.id.img_observer_wallet) {
             openActivity(ImportKeyAcivity.class);
+        }else if (view.getId() == R.id.tv_to_file) {
+            openActivity(NewFileActivity.class);
         }
 
     }

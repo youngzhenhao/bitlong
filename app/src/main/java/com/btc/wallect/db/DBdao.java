@@ -340,7 +340,6 @@ public class DBdao {
     }
 
     public void setUPDateCurrent(Long id) {
-
         List<Wallet> data = select(null);
         for (Wallet wallet1 : data) {
             Wallet wallet = new Wallet();

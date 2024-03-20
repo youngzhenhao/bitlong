@@ -25,7 +25,7 @@ func setupRouter() *gin.Engine {
 	router.POST("/addInvoice", func(c *gin.Context) {
 		amountStr := c.PostForm("amount")
 		amountInt, _ := strconv.Atoi(amountStr)
-		invoiceStr := api.AddInvoice(int64(amountInt))
+		invoiceStr := api.AddInvoice(int64(amountInt), "")
 		c.JSON(http.StatusOK, gin.H{
 			"invoice": invoiceStr,
 		})
@@ -125,6 +125,14 @@ func setupRouter() *gin.Engine {
 			})
 		})
 	}
+	router.GET("/OpenChannelSync", func(c *gin.Context) {
+		txid := c.Param("txid")
+		index := c.Param("index")
+		indexStr, _ := strconv.Atoi(index)
+		c.HTML(http.StatusOK, "pay.html", gin.H{
+			"OpenChannelSync": api.OpenChannelSync(txid, int64(indexStr)),
+		})
+	})
 
 	return router
 }

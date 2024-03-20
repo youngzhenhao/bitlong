@@ -108,7 +108,7 @@ ChangePassword用于更改钱包密码，如果成功，会自动解锁钱包数
 1. 接口
 
 ```go
-func GetNewAddress() bool
+func GetNewAddress() string
 ```
 2. 参数列表
 
@@ -184,7 +184,22 @@ func OpenChannel(nodePubkey string, localFundingAmount int64) string
 
 | 返回参数 |  类型  |
 |:--------:|:------:|
-| 通道id   | string |
+|  是否成功  | boolean |
+
+#### OpenChannelSync
+
+开通道
+
+> 是 OpenChannel RPC 调用的同步版本。该调用供 REST 代理客户端使用。与所有其他同步调用一样，所有字节片都将以十六进制编码字符串的形式填充
+
+|      函数参数      |  类型  |       用途       |
+|:------------------:|:------:|:----------------:|
+| nodePubkey         | string | 节点公钥         |
+| localFundingAmount | long   | 本地注资数量(聪) |
+
+| 返回参数 |  类型  |
+|:--------:|:------:|
+|  资金交易的输出点（txid:index）  | string |
 
 #### CloseChannel
 

@@ -13,9 +13,10 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
-func GetNewAddress() bool {
+func GetNewAddress() string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -60,10 +61,10 @@ func GetNewAddress() bool {
 	response, err := client.NewAddress(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc NewAddress err: %v", err)
-		return false
+		return ""
 	}
-	log.Printf("%v\n", response)
-	return true
+	//log.Printf("%v\n", response)
+	return response.Address
 }
 
 func GetWalletBalance() string {
@@ -906,7 +907,7 @@ func ListChannels() string {
 }
 
 // func OpenChannelSync() *lnrpc.ChannelPoint {
-func OpenChannelSync() bool {
+func OpenChannelSync(nodePubkey string, localFundingAmount int64) string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -946,14 +947,18 @@ func OpenChannelSync() bool {
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
-	request := &lnrpc.OpenChannelRequest{}
+	_nodePubkeyByteSlice, _ := hex.DecodeString(nodePubkey)
+	request := &lnrpc.OpenChannelRequest{
+		NodePubkey:         _nodePubkeyByteSlice,
+		LocalFundingAmount: localFundingAmount,
+	}
 	response, err := client.OpenChannelSync(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc OpenChannelSync err: %v", err)
-		return false
+		return ""
 	}
 	log.Printf("%v\n", response)
-	return true
+	return response.GetFundingTxidStr() + strconv.Itoa(int(response.GetOutputIndex()))
 }
 
 // OpenChannel

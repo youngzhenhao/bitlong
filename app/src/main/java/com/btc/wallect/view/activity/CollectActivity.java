@@ -62,15 +62,28 @@ public class CollectActivity extends BaseActivity {
 
 
     private void initFruits() {
+        CollectBean collectBean = null;
         for (int i = 0; i < 24; i++) {
-            CollectBean collectBean = new CollectBean("collect", i + 1);
+
+            if (i == 0) {
+                collectBean = new CollectBean("coll11", i + 1,false);
+            } else if (i == 1) {
+                collectBean = new CollectBean("colle22", i + 1,false);
+            } else if (i == 1) {
+                collectBean = new CollectBean("colle333", i + 1,false);
+            } else if (i == 1) {
+                collectBean = new CollectBean("colle444", i + 1,false);
+            } else {
+                collectBean = new CollectBean("colle444", i + 1,false);
+            }
+
             fruitList.add(collectBean);
         }
         Wallet wallet = new Wallet();
         String _collect = new Gson().toJson(fruitList);
         wallet.collect = _collect;
-        int id = SharedPreferencesHelperUtil.getInstance().getIntValue(ConStantUtil.CURRENT_SQL_ID, 1);
-        wallectDao.updateCollectById(wallet, Long.valueOf(id));
+        Long id = SharedPreferencesHelperUtil.getInstance().getLongValue(ConStantUtil.CURRENT_SQL_ID, 1);
+        wallectDao.updateCollectById(wallet, id);
     }
 
     @OnClick({R.id.tv_hand_copy, R.id.tv_cloud_copy, R.id.tv_later_copy})
@@ -79,7 +92,7 @@ public class CollectActivity extends BaseActivity {
             copyCollect();
             openActivity(ImportMnemonicWordActivity.class);
         } else if (view.getId() == R.id.tv_cloud_copy) {
-            ToastUtils.showToast(this,"开发中...");
+            ToastUtils.showToast(this, "开发中...");
             openActivity(MainActivity.class);
         } else if (view.getId() == R.id.tv_later_copy) {
             openActivity(MainActivity.class);

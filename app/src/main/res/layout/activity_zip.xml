@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+  >
+    <Button
+        android:id="@+id/btn_Testzip"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="35dp"
+        android:layout_marginRight="35dp"
+        android:background="@drawable/bg_side_f2f2"
+        android:text="生成一个文件夹"
+        android:visibility="gone"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
+    <EditText
+        android:id="@+id/et_user_zipPath"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_side_f2f2"
+        android:gravity="center_vertical"
+        android:hint="压缩后路径"
+        android:paddingLeft="15dp"
+        android:layout_marginHorizontal="20dp"
+        android:singleLine="true"
+        android:textColor="@color/black"
+        android:textSize="14sp" />
+    <!--输入框-->
+    <EditText
+        android:id="@+id/et_unZipPath"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_side_f2f2"
+        android:gravity="center_vertical"
+        android:hint="解压后路径"
+        android:paddingLeft="15dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="10dp"
+
+        android:singleLine="true"
+        android:textColor="@color/black"
+        android:textSize="14sp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_zip"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginLeft="35dp"
+            android:layout_marginRight="35dp"
+            android:background="@drawable/bg_side_f2f2"
+            android:text="压缩文件"
+            android:textColor="@android:color/white"
+            android:textSize="18sp" />
+        <Button
+            android:id="@+id/btn_unzip"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="35dp"
+            android:background="@drawable/bg_side_f2f2"
+            android:text="解压文件"
+            android:textColor="@android:color/white"
+            android:textSize="18sp" />
+    </LinearLayout>
+</LinearLayout>

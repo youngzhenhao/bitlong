@@ -49,7 +49,7 @@ func ReadConfigFile(path string) map[string]string {
 
 }
 func Configure(appName string) string {
-	fileConfig := ReadConfigFile("D:/wallet/config.txt")
+	fileConfig := ReadConfigFile("D:\\share\\bitlong\\code\\back-end\\wallet\\config.txt")
 	dirPath := fileConfig["dirpath"]
 	folderPath := filepath.Join(dirPath, "."+appName)
 	return folderPath

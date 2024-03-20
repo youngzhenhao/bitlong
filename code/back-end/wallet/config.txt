@@ -1,1 +1,1 @@
-dirpath=c:\lane
+dirpath=D:\lane\test

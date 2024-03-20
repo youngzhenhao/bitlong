@@ -15,7 +15,7 @@ import (
 	"path/filepath"
 )
 
-// SAME AS MintAsset, HAVE NOT DELETED
+// InitMint SAME AS MintAsset, HAVE NOT DELETED
 func InitMint() bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
@@ -75,7 +75,7 @@ func InitMint() bool {
 	return true
 }
 
-// SAME AS FinalizeBatch, HAVE NOT DELETED
+// FinalizeMint SAME AS FinalizeBatch, HAVE NOT DELETED
 func FinalizeMint() bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
@@ -125,7 +125,7 @@ func FinalizeMint() bool {
 	return true
 }
 
-// SAME AS NewAddr IN TaprootAssetsServiceApi, HAVE NOT DELETED
+// GetTapRootAddr SAME AS NewAddr IN TaprootAssetsServiceApi, HAVE NOT DELETED
 func GetTapRootAddr(assetId string, amt int) string {
 	const (
 		grpcHost = "202.79.173.41:8443"
@@ -177,7 +177,7 @@ func GetTapRootAddr(assetId string, amt int) string {
 	return response.String()
 }
 
-// SAME AS SendAsset IN TaprootAssetsServiceApi, HAVE NOT DELETED
+// SendAssets SAME AS SendAsset IN TaprootAssetsServiceApi, HAVE NOT DELETED
 func SendAssets() bool {
 	const (
 		grpcHost = "202.79.173.41:8443"

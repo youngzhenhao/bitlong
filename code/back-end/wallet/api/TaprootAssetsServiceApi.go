@@ -415,7 +415,6 @@ func ListUtxos(includeLeased bool) string {
 	return response.String()
 }
 
-// func NewAddr(assetId string, amt uint64) *taprpc.Addr {
 func NewAddr(assetId string, amt int) bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
@@ -477,7 +476,6 @@ func QueryAddrs() {
 
 }
 
-// func SendAsset(tapAddrs []string, feeRate uint32) *taprpc.SendAssetResponse {
 func SendAsset(tapAddrs []string, feeRate int) bool {
 	const (
 		grpcHost = "202.79.173.41:8443"

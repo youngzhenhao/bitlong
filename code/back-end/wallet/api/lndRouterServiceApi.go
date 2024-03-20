@@ -18,9 +18,7 @@ import (
 )
 
 func SendPaymentV2(invoice string, feelimit int64) string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -81,9 +79,7 @@ func SendPaymentV2(invoice string, feelimit int64) string {
 }
 
 func TrackPaymentV2(payhash string) string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -147,9 +143,7 @@ func TrackPaymentV2(payhash string) string {
 }
 
 func SendToRouteV2(payhash []byte, route *lnrpc.Route) {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -200,9 +194,7 @@ func SendToRouteV2(payhash []byte, route *lnrpc.Route) {
 }
 
 func EstimateRouteFee(dest string, amtsat int64) string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")

@@ -33,9 +33,7 @@ func DeleteFederationServer() {}
 //
 // func UniverseInfo() *universerpc.InfoResponse {
 func UniverseInfo() string {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -94,9 +92,7 @@ func InsertProof() {}
 //
 // func ListFederationServers() *universerpc.ListFederationServersResponse {
 func ListFederationServers() string {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")

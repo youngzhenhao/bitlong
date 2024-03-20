@@ -23,9 +23,7 @@ import (
 //
 // func ImportProof(proofFile, genesisPoint string) *tapdevrpc.ImportProofResponse {
 func ImportProof(proofFile, genesisPoint string) bool {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")

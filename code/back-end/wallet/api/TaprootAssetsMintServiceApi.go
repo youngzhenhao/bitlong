@@ -17,9 +17,7 @@ import (
 
 // InitMint SAME AS MintAsset, HAVE NOT DELETED
 func InitMint() bool {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "data/testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -77,9 +75,7 @@ func InitMint() bool {
 
 // FinalizeMint SAME AS FinalizeBatch, HAVE NOT DELETED
 func FinalizeMint() bool {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "data/testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -127,9 +123,7 @@ func FinalizeMint() bool {
 
 // GetTapRootAddr SAME AS NewAddr IN TaprootAssetsServiceApi, HAVE NOT DELETED
 func GetTapRootAddr(assetId string, amt int) string {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "data/testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -179,9 +173,7 @@ func GetTapRootAddr(assetId string, amt int) string {
 
 // SendAssets SAME AS SendAsset IN TaprootAssetsServiceApi, HAVE NOT DELETED
 func SendAssets() bool {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "data/testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -235,9 +227,7 @@ func SendAssets() bool {
 //
 // func CancelBatch() *mintrpc.CancelBatchResponse {
 func CancelBatch() bool {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -293,9 +283,7 @@ func CancelBatch() bool {
 //
 // func FinalizeBatch(shortResponse bool, feeRate uint32) *mintrpc.FinalizeBatchResponse {
 func FinalizeBatch(shortResponse bool, feeRate int) bool {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -355,9 +343,7 @@ func FinalizeBatch(shortResponse bool, feeRate int) bool {
 //
 // func ListBatches() *mintrpc.ListBatchResponse {
 func ListBatches() string {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -414,9 +400,7 @@ func ListBatches() string {
 //
 // func MintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, assetMetaData string, AssetMetaTypeIsJsonNotOpaque bool, amount uint64, newGroupedAsset bool, groupedAsset bool, groupKey string, groupAnchor string, shortResponse bool) *mintrpc.MintAssetResponse {
 func MintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, assetMetaData string, AssetMetaTypeIsJsonNotOpaque bool, amount int, newGroupedAsset bool, groupedAsset bool, groupKey string, groupAnchor string, shortResponse bool) bool {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")

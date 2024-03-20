@@ -17,9 +17,7 @@ import (
 )
 
 func GetNewAddress() string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -68,9 +66,7 @@ func GetNewAddress() string {
 }
 
 func GetWalletBalance() string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -120,9 +116,7 @@ func GetWalletBalance() string {
 // GetIdentityPubkey
 // 获取节点公钥
 func GetIdentityPubkey() string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -174,9 +168,7 @@ func GetIdentityPubkey() string {
 //	@Description: 返回有关闪电节点的一般信息，包括其身份的发布密钥、别名、所连接的链，以及有关打开+待处理通道数量的信息
 //	@return string
 func GetInfoOfLnd() string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -231,9 +223,7 @@ func GetInfoOfLnd() string {
 //
 // func AddInvoice(value int64) *lnrpc.AddInvoiceResponse {
 func AddInvoice(value int64, memo string) string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -290,9 +280,7 @@ func AddInvoice(value int64, memo string) string {
 //	将返回创建的前 100 张发票。还可通过 Reversed 标志支持向后分页
 //	@return string
 func ListInvoices() string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -339,9 +327,7 @@ func ListInvoices() string {
 }
 
 func LookupInvoice(rhash string) string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -391,9 +377,7 @@ func LookupInvoice(rhash string) string {
 }
 
 func AbandonChannel() bool {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -441,9 +425,7 @@ func AbandonChannel() bool {
 }
 
 func BatchOpenChannel() bool {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -491,9 +473,7 @@ func BatchOpenChannel() bool {
 }
 
 func ChannelAcceptor() bool {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -560,9 +540,7 @@ func ChannelAcceptor() bool {
 //
 // func ChannelBalance() *lnrpc.ChannelBalanceResponse {
 func ChannelBalance() string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -610,9 +588,7 @@ func ChannelBalance() string {
 }
 
 func CheckMacaroonPermissions() bool {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -668,9 +644,7 @@ func CheckMacaroonPermissions() bool {
 //	 @param fundingTxidStr
 //	 @param outputIndex
 func CloseChannel(fundingTxidStr string, outputIndex int) bool {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -743,9 +717,7 @@ func CloseChannel(fundingTxidStr string, outputIndex int) bool {
 //
 // func ClosedChannels() *lnrpc.ClosedChannelsResponse {
 func ClosedChannels() string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -793,9 +765,7 @@ func ClosedChannels() string {
 }
 
 func ExportAllChannelBackups() bool {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -843,9 +813,7 @@ func ExportAllChannelBackups() bool {
 }
 
 func ExportChannelBackup() bool {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -898,9 +866,7 @@ func ExportChannelBackup() bool {
 //	@param chanId
 //	@return *lnrpc.ChannelEdge
 func GetChanInfo(chanId string) string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -960,9 +926,7 @@ func GetChanInfo(chanId string) string {
 //
 // func ListChannels() *lnrpc.ListChannelsResponse {
 func ListChannels() string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -1010,9 +974,7 @@ func ListChannels() string {
 }
 
 func OpenChannelSync(nodePubkey string, localFundingAmount int64) string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -1075,9 +1037,7 @@ func OpenChannelSync(nodePubkey string, localFundingAmount int64) string {
 //
 // func OpenChannel(nodePubkey string, localFundingAmount int64) *lnrpc.OpenStatusUpdate {
 func OpenChannel(nodePubkey string, localFundingAmount int64) bool {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -1149,9 +1109,7 @@ func OpenChannel(nodePubkey string, localFundingAmount int64) bool {
 //
 // func PendingChannels() *lnrpc.PendingChannelsResponse {
 func PendingChannels() string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -1199,9 +1157,7 @@ func PendingChannels() string {
 }
 
 func RestoreChannelBackups() bool {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -1249,9 +1205,7 @@ func RestoreChannelBackups() bool {
 }
 
 func SubscribeChannelBackups() bool {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -1312,9 +1266,7 @@ func SubscribeChannelBackups() bool {
 }
 
 func SubscribeChannelEvents() bool {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -1375,9 +1327,7 @@ func SubscribeChannelEvents() bool {
 }
 
 func SubscribeChannelGraph() bool {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -1438,9 +1388,7 @@ func SubscribeChannelGraph() bool {
 }
 
 func UpdateChannelPolicy() bool {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -1488,9 +1436,7 @@ func UpdateChannelPolicy() bool {
 }
 
 func VerifyChanBackup() bool {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -1546,9 +1492,7 @@ func VerifyChanBackup() bool {
 //
 // func ConnectPeer(pubkey, host string) *lnrpc.ConnectPeerResponse {
 func ConnectPeer(pubkey, host string) bool {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -1601,9 +1545,7 @@ func ConnectPeer(pubkey, host string) bool {
 }
 
 func EstimateFee(addr string, amount int64) string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -1655,9 +1597,7 @@ func EstimateFee(addr string, amount int64) string {
 }
 
 func DecodePayReq(payReq string) int64 {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -1707,9 +1647,7 @@ func DecodePayReq(payReq string) int64 {
 }
 
 func SendPaymentSync(invoice string) string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -1757,9 +1695,7 @@ func SendPaymentSync(invoice string) string {
 }
 
 func SendPaymentSync0amt(invoice string, amt int64) string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -1807,9 +1743,7 @@ func SendPaymentSync0amt(invoice string, amt int64) string {
 }
 
 func SendCoins(addr string, amount int64) string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")

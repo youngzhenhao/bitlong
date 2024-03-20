@@ -50,6 +50,7 @@ public class DBdao {
         contentValues.put(DBOpenHelper.TB_BTC_KEY, wallet.btcKey);
         contentValues.put(DBOpenHelper.TB_BTC_AMOUNT, wallet.btcAmount);
         contentValues.put(DBOpenHelper.TB__VERFY, wallet.verify);
+        contentValues.put(DBOpenHelper.TB__CREATE_TYPE, wallet.createType);
 
 //        Log.e("TAG","--------------"+student.toString());
 //        Toast.makeText(context,"sql 语句--"+student.toString(),Toast.LENGTH_LONG).show();
@@ -99,7 +100,8 @@ public class DBdao {
                 DBOpenHelper.TB_ISSHOW_WALLECT,
                 DBOpenHelper.TB_BTC_KEY,
                 DBOpenHelper.TB_BTC_AMOUNT,
-                DBOpenHelper.TB__VERFY
+                DBOpenHelper.TB__VERFY,
+                DBOpenHelper.TB__CREATE_TYPE
         };
         Cursor cursor = null;
         if (id == null) {
@@ -127,6 +129,7 @@ public class DBdao {
                 wallet.btcKey = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_BTC_KEY));
                 wallet.btcAmount = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_BTC_AMOUNT));
                 wallet.verify = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB__VERFY));
+                wallet.createType = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB__CREATE_TYPE));
                 //添加到集合
                 walletList.add(wallet);
             }
@@ -222,6 +225,7 @@ public class DBdao {
                 wallet.logoHead = cursor.getBlob(cursor.getColumnIndexOrThrow("logoHead"));
                 wallet.show = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_ISSHOW_WALLECT));
                 wallet.verify=cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB__VERFY));
+                wallet.createType=cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB__VERFY));
             }
         }
         cursor.close();

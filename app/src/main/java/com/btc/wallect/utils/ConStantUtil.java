@@ -21,4 +21,6 @@ public class ConStantUtil {
     public static String WALLECT_STATE="wallect_state";
     public static String WALLECT_VERIFY="wallect_verify";
 
+    public static String WALLECT_CREATE="wallect_create";
+    public static String WALLECT_IMPORT="wallect_import";
 }

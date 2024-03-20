@@ -15,6 +15,7 @@ public class Wallet implements Serializable {
     public String btcKey;
     public String btcAmount;
     public String verify;
+    public String createType;
     //头像
     public byte[] logoHead;
 
@@ -31,6 +32,7 @@ public class Wallet implements Serializable {
                 ", show='" + btcKey + '\'' +
                 ", show='" + btcAmount + '\'' +
                 ", verify='" + verify + '\'' +
+                ", verify='" + createType + '\'' +
                 '}';
     }
 

@@ -166,6 +166,11 @@ public class CreateWalletActivity extends BaseActivity implements LoginView {
             } else {
                 wallet.show = "false";
             }
+            if (page.equals(ConStantUtil.V_TOACTION_CREATE)) {
+                wallet.createType=ConStantUtil.WALLECT_CREATE;
+            }else {
+                wallet.createType=ConStantUtil.WALLECT_IMPORT;
+            }
 
             Long result = wallectDao.save(wallet);
 

@@ -47,9 +47,9 @@ public class WelcomeAct extends BaseActivity {
         if (mCompositeDisposable != null) {
             mCompositeDisposable.dispose();
         }
-       getWallectList();
+        getWallectList();
 
-       //  openActivity(ImportMnemonicWordActivity.class);
+        //  openActivity(ImportMnemonicWordActivity.class);
         finish();
     }
 
@@ -61,10 +61,15 @@ public class WelcomeAct extends BaseActivity {
             for (int i = 0; i < walletList.size(); i++) {
 
             }
-            if(walletList.get(0).verify.equals(ConStantUtil.TRUE)){
+            if (walletList.get(0).verify.equals(ConStantUtil.TRUE)) {
                 openActivity(MainActivity.class);
-            }else {
-                openActivity(ImportMnemonicWordActivity.class);
+            } else {
+                if (walletList.get(0).createType.equals(ConStantUtil.WALLECT_CREATE)) {
+                    openActivity(ImportMnemonicWordActivity.class);
+                } else {
+                    openActivity(EditMnemonWordActivity.class);
+                }
+
             }
 
 

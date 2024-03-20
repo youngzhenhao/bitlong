@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import android.view.View;
 import android.widget.GridLayout;
+import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -12,6 +13,7 @@ import com.btc.wallect.adapter.EditMnemontWordAapter;
 import com.btc.wallect.adapter.ImportSelAdapter;
 import com.btc.wallect.model.Imoder.onClickitemToEditListener;
 import com.btc.wallect.model.Imoder.onItemClickListener;
+import com.btc.wallect.model.entity.Wallet;
 import com.btc.wallect.utils.ConStantUtil;
 import com.btc.wallect.utils.DialogUtil;
 import com.btc.wallect.view.activity.base.BaseActivity;
@@ -32,7 +34,10 @@ public class EditMnemonWordActivity extends BaseActivity {
     RecyclerView recyclerView1;
     @BindView(R.id.recycler_view2)
     RecyclerView recyclerView2;
-
+    @BindView(R.id.tv_one)
+    TextView mTvone;
+    @BindView(R.id.tv_two)
+    TextView mTvtwo;
 
     private List<AddMnemonBean> inputList1 ;
     private List<AddMnemonBean> collectList2 ;
@@ -49,6 +54,8 @@ public class EditMnemonWordActivity extends BaseActivity {
     protected void init(View view, Bundle savedInstanceState) {
         setTitle("导入助记词");
         setImgBack(true);
+        mTvone.setText(R.string.app_txt8);
+        mTvtwo.setText(R.string.app_txt9);
         inputList1 = new ArrayList<>();
         collectList2 = new ArrayList<>();
         mqueryList=new ArrayList<>();
@@ -80,7 +87,7 @@ public class EditMnemonWordActivity extends BaseActivity {
                     addMnemonBean.setIndex(addMnemonlist.get(i).getIndex());
                     collectList2.add(addMnemonBean);
 
-//                    collectList2=addMnemonlist;
+
                 }
 
                 inputSelAdapter.notifyDataSetChanged();
@@ -123,7 +130,7 @@ public class EditMnemonWordActivity extends BaseActivity {
 
 
     private void initCollectTest() {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 24; i++) {
             if (i==0){
                 AddMnemonBean collectBean = new AddMnemonBean();
                 collectBean.setCollect("collect");
@@ -165,7 +172,7 @@ public class EditMnemonWordActivity extends BaseActivity {
 
 
         }
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 24; i++) {
             AddMnemonBean collectBean = new AddMnemonBean();
             collectBean.setCollect("");
             collectBean.setIndex(i+1);
@@ -187,7 +194,10 @@ public class EditMnemonWordActivity extends BaseActivity {
     @OnClick({R.id.tv_sure})
     public void onClick(View view) {
         if (view.getId() == R.id.tv_sure) {
-
+            Wallet wallet = new Wallet();
+            wallet.verify = ConStantUtil.TRUE;
+            wallectDao.updateVerfy(wallet, SharedPreferencesHelperUtil.getInstance().getLongValue(ConStantUtil.CURRENT_SQL_ID, 0));
+            openActivity(MainActivity.class);
             openActivity(MainActivity.class);
         }
     }

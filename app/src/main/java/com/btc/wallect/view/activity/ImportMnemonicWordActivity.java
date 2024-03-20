@@ -16,6 +16,7 @@ import com.btc.wallect.model.entity.Wallet;
 import com.btc.wallect.utils.ConStantUtil;
 import com.btc.wallect.utils.DialogUtil;
 import com.btc.wallect.utils.LogUntil;
+import com.btc.wallect.utils.StringUtils;
 import com.btc.wallect.utils.ToastUtils;
 import com.btc.wallect.view.activity.base.BaseActivity;
 import com.btc.wallect.R;
@@ -155,13 +156,15 @@ public class ImportMnemonicWordActivity extends BaseActivity {
         Long id = SharedPreferencesHelperUtil.getInstance().getLongValue(ConStantUtil.CURRENT_SQL_ID, 0);
 
         List<Wallet> walletList = selectDataByID(id);
-        sqlCollectList = GsonUtils.jsonToList(walletList.get(0).collect, CollectBean.class);
-        for (CollectBean collectBean : sqlCollectList) {
-            AddMnemonBean addMnemonBean = new AddMnemonBean();
-            addMnemonBean.setCollect(collectBean.getName());
-            addMnemonBean.setState(false);
-            addMnemonBean.setIndex(collectBean.getImageId());
-            collectList2.add(addMnemonBean);
+        if(!StringUtils.isStrEmpty(walletList.get(0).collect)) {
+            sqlCollectList = GsonUtils.jsonToList(walletList.get(0).collect, CollectBean.class);
+            for (CollectBean collectBean : sqlCollectList) {
+                AddMnemonBean addMnemonBean = new AddMnemonBean();
+                addMnemonBean.setCollect(collectBean.getName());
+                addMnemonBean.setState(false);
+                addMnemonBean.setIndex(collectBean.getImageId());
+                collectList2.add(addMnemonBean);
+            }
         }
         LogUntil.e(new Gson().toJson(sqlCollectList));
 

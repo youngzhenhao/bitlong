@@ -123,7 +123,7 @@ func GetWalletBalance() string {
 //	@return string
 //
 // func AddInvoice(value int64) *lnrpc.AddInvoiceResponse {
-func AddInvoice(value int64) string {
+func AddInvoice(value int64, memo string) string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -165,13 +165,14 @@ func AddInvoice(value int64) string {
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.Invoice{
 		Value: value,
+		Memo:  memo,
 	}
 	response, err := client.AddInvoice(context.Background(), request)
 	if err != nil {
 		log.Printf("client.AddInvoice :%v", err)
 		return ""
 	}
-	return response.PaymentRequest
+	return response.String()
 }
 
 // ListInvoices
@@ -230,7 +231,7 @@ func ListInvoices() string {
 	return response.String()
 }
 
-func lookupInvoice(rhash []byte) string {
+func LookupInvoice(rhash []byte) string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)

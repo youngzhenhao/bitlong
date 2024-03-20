@@ -143,7 +143,7 @@ GetWalletBalance() string
 
 
 
-### 通道 `channel`
+# 通道 `channel`
 
 #### ConnectPeer
 
@@ -169,7 +169,7 @@ func ConnectPeer(pubkey, host string) bool
 开通道
 
 ```go
-func OpenChannel(nodePubkey string, localFundingAmount int64) string
+func OpenChannel(nodePubkey string, localFundingAmount long) string
 ```
 
 > 会尝试向远程对等方打开请求中指定的单一注资通道。
@@ -354,7 +354,7 @@ func ListInvoices() string
 ### 付款 `pay`
 
 #### DecodePayReq
->func DecodePayReq(pay_req string) int64   
+>func DecodePayReq(pay_req string) long   
 
 解码发票  
 解码支付请求字符串,返回发票金额
@@ -365,11 +365,11 @@ func ListInvoices() string
 
 | 返回类型  | 用途                         |
 |-------|----------------------------|
-| int64 | 解码发票的金额. 0：可支付任意金额。-1：解码错误 |
+| long | 解码发票的金额. 0：可支付任意金额。-1：解码错误 |
 
 
 #### EstimateRouteFee
->EstimateRouteFee(dest string, amtsat int64) string  
+>EstimateRouteFee(dest string, amtsat long) string  
 
 计算费用  
 允许测试发送到目标节点指定金额是否成功
@@ -377,7 +377,7 @@ func ListInvoices() string
 | 参数   | 类型     | 用途       |
 |--------|--------|----------|
 | dest   | string | 目标节点地址   |
-| amtsat | int64  | 要测试发送的金额 |
+| amtsat | long  | 要测试发送的金额 |
 
 | 返回类型   | 用途     |
 |--------|--------|
@@ -386,13 +386,15 @@ func ListInvoices() string
 #### SendPaymentSync
 
 >func SendPaymentSync(invoice string) string  
+> func SendPaymentSync0amt(invoice string, amt int64) string
 
 支付发票  
 支付闪电发票请求  
 
-| 参数    | 类型     | 用途         |
-|---------|--------|------------|
-| invoice | string | 要支付的闪电发票请求 |
+| 参数      | 类型     | 用途              |
+|---------|--------|-----------------|
+| invoice | string | 要支付的闪电发票请求      |
+| amt     | string | 支付零闪电发票请求时填入的金额 |
 
 | 返回类型   | 用途                 |
 |--------|--------------------|
@@ -414,7 +416,7 @@ func ListInvoices() string
 | string | 返回支付状态 |
 
 #### SendCoins
->func SendCoins(addr string, amount int64) string
+>func SendCoins(addr string, amount long) string
 
 发送至链上  
 向指定比特币地址发送金额。
@@ -422,7 +424,7 @@ func ListInvoices() string
 | 参数   | 类型     | 用途   |
 |--------|--------|------|
 | addr   | string | 目的地址 |
-| amount | string | 发送金额 |
+| amount | long   | 发送金额 |
 
 | 返回类型   | 用途     |
 |--------|--------|

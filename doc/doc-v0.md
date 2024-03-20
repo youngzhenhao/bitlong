@@ -38,6 +38,7 @@ func InitWallet(seed [24]string, password string) bool
 | 输入参数 | 类型 | 用途|
 |--------|----|----|
 | seed | string[24] | 助记词 |
+| password | string | 钱包密码 |
 
 | 返回类型 | 用途 |
 |--------|---------|

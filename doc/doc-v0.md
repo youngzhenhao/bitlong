@@ -111,7 +111,7 @@ func GetNewAddress() string
 
 |返回类型|用途|
 |----|----|
-|bool|是否生成新地址|
+|string|返回生成的新地址|
 
 3. 详细解释
 

@@ -454,7 +454,7 @@ func ChannelAcceptor() bool {
 //	@return bool
 //
 // func ChannelBalance() *lnrpc.ChannelBalanceResponse {
-func ChannelBalance() bool {
+func ChannelBalance() string {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -498,10 +498,10 @@ func ChannelBalance() bool {
 	response, err := client.ChannelBalance(context.Background(), request)
 	if err != nil {
 		log.Printf("lnrpc ChannelBalance err: %v", err)
-		return false
+		return ""
 	}
 	log.Printf("%v\n", response)
-	return true
+	return response.String()
 }
 
 // func CheckMacaroonPermissions() *lnrpc.CheckMacPermResponse {

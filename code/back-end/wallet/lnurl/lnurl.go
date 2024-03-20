@@ -102,5 +102,29 @@ func setupRouter() *gin.Engine {
 
 	}
 
+	walletUnlockGroup := router.Group("/walletUnlock")
+	{
+		walletUnlockGroup.GET("/GenSeed", func(c *gin.Context) {
+			seed := api.GenSeed()
+			c.JSON(http.StatusOK, gin.H{
+				"GenSeed": seed,
+				"length":  len(seed),
+			})
+		})
+		walletUnlockGroup.GET("/GenSeed", func(c *gin.Context) {
+
+			c.JSON(http.StatusOK, gin.H{
+				"GenSeed": api.UnlockWallet(""),
+			})
+		})
+		walletUnlockGroup.GET("/GenSeed", func(c *gin.Context) {
+			seed := api.GenSeed()
+			c.JSON(http.StatusOK, gin.H{
+				"GenSeed": seed,
+				"length":  len(seed),
+			})
+		})
+	}
+
 	return router
 }

@@ -12,14 +12,14 @@
 
 1.  接口
 ```go
-func GenSeed() string
+func GenSeed() [24]string
 ```
 
 2.  参数列表
 
 |返回类型|用途|
 |----|----|
-|string|助记词|
+|string[24]|助记词|
 
 3.  详细解释
 
@@ -34,18 +34,18 @@ func GenSeed() string
 1. 接口
 
 ```go
-func InitWallet(seed string, password string) bool
+func InitWallet(seed [24]string, password string) bool
 ```
 
 2. 参数列表
 
 | 输入参数 | 类型 | 用途|
 |--------|----|----|
-| seed | string | 助记词 |
+| seed | string[24] | 助记词 |
 
 | 返回类型 | 用途 |
 |--------|---------|
-|bool|是否初始化成功|
+|boolean|是否初始化成功|
 
 3. 详细解释
 
@@ -216,11 +216,31 @@ func CloseChannel(fundingTxidStr string, outputIndex int) bool
 
 #### PendingChannels
 
-等待中的通道
+查询pending等待中的通道
+
+```go
+func PendingChannels() string
+```
+
+| 返回参数 |  类型  |
+|:--------:|:------:|
+| 查询到的数据   | string |
+
 
 #### ListChannels
 
 列出通道
+
+> 返回该节点参与的所有开放通道的描述。
+
+```go
+func ListChannels() string
+```
+
+| 返回参数 |  类型  |
+|:--------:|:------:|
+| 查询到的数据   | string |
+
 
 #### GetChanInfo
 
@@ -259,6 +279,17 @@ func ChannelBalance() string
 #### ClosedChannels
 
 已关闭通道
+
+> 返回该节点参与的所有封闭通道的描述
+
+```go
+func ClosedChannels() string
+```
+
+| 返回参数 |  类型  |
+|:--------:|:------:|
+| 查询到的数据   | string |
+
 
 ### 发票 `invoice` 收款
 

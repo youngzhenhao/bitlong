@@ -21,7 +21,7 @@ import (
 //		如果提供了口令，则需要口令来解密密码种子，以显示内部钱包种子。
 //		用户获得并验证密码种子后，应使用 InitWallet 方法提交新生成的种子，并创建钱包
 //	 @return []string
-func GenSeed() []string {
+func GenSeed() [24]string {
 	const (
 		//grpcHost = "202.79.173.41:10009"
 		grpcHost = "202.79.173.41:10055"
@@ -72,7 +72,7 @@ func GenSeed() []string {
 		log.Printf("Error calling InitWallet: %v", err)
 	}
 	// 处理 gRPC 响应
-	return response.CipherSeedMnemonic
+	return [24]string(response.CipherSeedMnemonic)
 }
 
 // InitWallet

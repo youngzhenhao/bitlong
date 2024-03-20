@@ -262,14 +262,15 @@ func ChannelBalance() string
 
 #### AddInvoice
 ```go    
-> func AddInvoice(value long) string
+> func AddInvoice(value long,memo string) string
 ```      
 生成发票     
 根据传入的金额生成闪电发票
 
-| 参数    | 类型  | 用途      |
-|---------|-----|---------|
-| value | int | 需要收款的金额 |
+| 参数    | 类型     | 用途      |
+|-------|--------|---------|
+| value | long   | 需要收款的金额 |
+| memo  | string | 发票附带的信息 |
 
 | 返回类型   | 用途    |
 |--------|-------|
@@ -283,6 +284,7 @@ func ListInvoices() string
 ```
 发票列表     
 列出当前账户下所持有的发票     
+
 | 返回类型   | 用途    |
 |--------|-------|
 | string | 返回发票列表 |

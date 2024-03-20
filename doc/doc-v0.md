@@ -1,12 +1,8 @@
-## 业务流程
+# 业务流程
 
-### TODO
+## 钱包解锁 `unlock`
 
-- 为每个函数添加接口及详细描述
-
-### 钱包解锁 `unlock`
-
-#### GenSeed
+### GenSeed
 
 助记词生成
 
@@ -27,7 +23,7 @@ func GenSeed() [24]string
 
 用户获得并验证密码种子后，应使用 InitWallet 方法提交新生成的种子，并创建钱包。
 
-#### InitWallet
+### InitWallet
 
 初始化钱包
 
@@ -42,6 +38,7 @@ func InitWallet(seed [24]string, password string) bool
 | 输入参数 | 类型 | 用途|
 |--------|----|----|
 | seed | string[24] | 助记词 |
+| password | string | 钱包密码 |
 
 | 返回类型 | 用途 |
 |--------|---------|
@@ -55,7 +52,7 @@ func InitWallet(seed [24]string, password string) bool
 
 或者，也可以使用 GenSeed RPC 来获取种子，然后将其提交给用户。经用户验证后，可将种子输入此 RPC，以提交新钱包。
 
-#### UnlockWallet
+### UnlockWallet
 
 解锁钱包
 
@@ -80,7 +77,7 @@ func UnlockWallet(password string) bool
 在lnd启动时，UnlockWallet使用提供的解锁密码解锁钱包数据库。
 
 
-#### ChangePassword
+### ChangePassword
 
 更改密码
 
@@ -101,7 +98,7 @@ func ChangePassword(currentPassword, newPassword string) bool
 3. 详细解释
 
 ChangePassword用于更改钱包密码，如果成功，会自动解锁钱包数据库。
-#### GetNewAddress
+### GetNewAddress
 
 生成新地址
 
@@ -114,13 +111,13 @@ func GetNewAddress() string
 
 |返回类型|用途|
 |----|----|
-|bool|是否生成新地址|
+|string|返回生成的新地址|
 
 3. 详细解释
 
 NewAddress在本地钱包的控制下创建一个新地址。
 
-#### GetWalletBalance
+### GetWalletBalance
 
 查询钱包余额
 
@@ -143,9 +140,9 @@ GetWalletBalance() string
 
 
 
-# 通道 `channel`
+## 通道 `channel`
 
-#### ConnectPeer
+### ConnectPeer
 
 连接到另一个lnd节点
 
@@ -164,12 +161,12 @@ func ConnectPeer(pubkey, host string) bool
 | 是否成功   | boolean |
 
 
-#### OpenChannel
+### OpenChannel
 
 开通道
 
 ```go
-func OpenChannel(nodePubkey string, localFundingAmount long) string
+func OpenChannel(nodePubkey string, localFundingAmount int64) string
 ```
 
 > 会尝试向远程对等方打开请求中指定的单一注资通道。
@@ -186,7 +183,7 @@ func OpenChannel(nodePubkey string, localFundingAmount long) string
 |:--------:|:------:|
 |  是否成功  | boolean |
 
-#### OpenChannelSync
+### OpenChannelSync
 
 开通道
 
@@ -201,7 +198,7 @@ func OpenChannel(nodePubkey string, localFundingAmount long) string
 |:--------:|:------:|
 |  资金交易的输出点（txid:index）  | string |
 
-#### CloseChannel
+### CloseChannel
 
 关通道
 
@@ -227,7 +224,7 @@ func CloseChannel(fundingTxidStr string, outputIndex int) bool
 
 ---
 
-#### PendingChannels
+### PendingChannels
 
 查询pending等待中的通道
 
@@ -240,7 +237,7 @@ func PendingChannels() string
 | 查询到的数据   | string |
 
 
-#### ListChannels
+### ListChannels
 
 列出通道
 
@@ -255,7 +252,7 @@ func ListChannels() string
 | 查询到的数据   | string |
 
 
-#### GetChanInfo
+### GetChanInfo
 
 
 查询通道信息
@@ -275,7 +272,7 @@ func GetChanInfo(chanId int) string
 |:--------:|:------:|
 | 通道详情数据   | string |
 
-#### ChannelBalance
+### ChannelBalance
 
 ```go
 func ChannelBalance() string
@@ -289,7 +286,7 @@ func ChannelBalance() string
 |:--------:|:------:|
 | 所有通道余额详情数据   | string |
 
-#### ClosedChannels
+### ClosedChannels
 
 已关闭通道
 
@@ -304,9 +301,9 @@ func ClosedChannels() string
 | 查询到的数据   | string |
 
 
-### 发票 `invoice` 收款
+## 发票 `invoice` 收款
 
-#### AddInvoice
+### AddInvoice
 ```go    
 > func AddInvoice(value long,memo string) string
 ```      
@@ -324,7 +321,7 @@ func ClosedChannels() string
 
 ---
 
-#### ListInvoices       
+### ListInvoices       
 ```go
 func ListInvoices() string
 ```
@@ -336,7 +333,7 @@ func ListInvoices() string
 | string | 返回发票列表 |
 
 
-#### lookupInvoice
+### lookupInvoice
 ```go
 >func LookupInvoice(rhash string) string
 ```
@@ -351,10 +348,10 @@ func ListInvoices() string
 | string | 指定闪电发票的详细信息 |
 
 
-### 付款 `pay`
+## 付款 `pay`
 
-#### DecodePayReq
->func DecodePayReq(pay_req string) long   
+### DecodePayReq
+>func DecodePayReq(pay_req string) int64   
 
 解码发票  
 解码支付请求字符串,返回发票金额
@@ -368,8 +365,8 @@ func ListInvoices() string
 | long | 解码发票的金额. 0：可支付任意金额。-1：解码错误 |
 
 
-#### EstimateRouteFee
->EstimateRouteFee(dest string, amtsat long) string  
+### EstimateRouteFee
+>EstimateRouteFee(dest string, amtsat int64) string  
 
 计算费用  
 允许测试发送到目标节点指定金额是否成功
@@ -383,10 +380,9 @@ func ListInvoices() string
 |--------|--------|
 | string | 返回测试信息 |
 
-#### SendPaymentSync
+### SendPaymentSync
 
 >func SendPaymentSync(invoice string) string  
-> func SendPaymentSync0amt(invoice string, amt int64) string
 
 支付发票  
 支付闪电发票请求  
@@ -400,7 +396,7 @@ func ListInvoices() string
 |--------|--------------------|
 | string | 返回支付hash,可用于跟踪付款进度 |
 
-#### TrackPaymentV2
+### TrackPaymentV2
 >func TrackPaymentV2(payhash string) string
 
 交易信息  
@@ -415,8 +411,8 @@ func ListInvoices() string
 |--------|--------|
 | string | 返回支付状态 |
 
-#### SendCoins
->func SendCoins(addr string, amount long) string
+### SendCoins
+>func SendCoins(addr string, amount int64) string
 
 发送至链上  
 向指定比特币地址发送金额。

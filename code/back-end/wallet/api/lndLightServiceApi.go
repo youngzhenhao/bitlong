@@ -117,6 +117,112 @@ func GetWalletBalance() string {
 	return response.String()
 }
 
+// GetIdentityPubkey
+// 获取节点公钥
+func GetIdentityPubkey() string {
+	const (
+		grpcHost = "202.79.173.41:10009"
+	)
+	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		log.Printf("Failed to read cert file: %s", err)
+	}
+
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		log.Printf("Failed to append cert")
+	}
+
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		log.Printf("did not connect: %v", err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close err: %v", err)
+		}
+	}(conn)
+	client := lnrpc.NewLightningClient(conn)
+	request := &lnrpc.GetInfoRequest{}
+	response, err := client.GetInfo(context.Background(), request)
+	if err != nil {
+		log.Printf("lnrpc ListChannels err: %v", err)
+		return ""
+	}
+	//log.Printf("%v\n", response)
+	return response.GetIdentityPubkey()
+}
+
+// GetInfoOfLnd
+//
+//	@Description: 返回有关闪电节点的一般信息，包括其身份的发布密钥、别名、所连接的链，以及有关打开+待处理通道数量的信息
+//	@return string
+func GetInfoOfLnd() string {
+	const (
+		grpcHost = "202.79.173.41:10009"
+	)
+	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		log.Printf("Failed to read cert file: %s", err)
+	}
+
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		log.Printf("Failed to append cert")
+	}
+
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		log.Printf("did not connect: %v", err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close err: %v", err)
+		}
+	}(conn)
+	client := lnrpc.NewLightningClient(conn)
+	request := &lnrpc.GetInfoRequest{}
+	response, err := client.GetInfo(context.Background(), request)
+	if err != nil {
+		log.Printf("lnrpc ListChannels err: %v", err)
+		return ""
+	}
+	//log.Printf("%v\n", response)
+	return response.String()
+}
+
 // AddInvoice
 //
 //	@Description: 试图在发票数据库中添加新发票。任何重复的发票都会被拒绝，因此所有发票都必须有唯一的付款预图像
@@ -284,7 +390,6 @@ func LookupInvoice(rhash string) string {
 	return response.String()
 }
 
-// func AbandonChannel() *lnrpc.AbandonChannelResponse {
 func AbandonChannel() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
@@ -335,7 +440,6 @@ func AbandonChannel() bool {
 	return true
 }
 
-// func BatchOpenChannel() *lnrpc.BatchOpenChannelResponse {
 func BatchOpenChannel() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
@@ -386,7 +490,6 @@ func BatchOpenChannel() bool {
 	return true
 }
 
-// func ChannelAcceptor() *lnrpc.Lightning_ChannelAcceptorClient {
 func ChannelAcceptor() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
@@ -506,7 +609,6 @@ func ChannelBalance() string {
 	return response.String()
 }
 
-// func CheckMacaroonPermissions() *lnrpc.CheckMacPermResponse {
 func CheckMacaroonPermissions() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
@@ -690,7 +792,6 @@ func ClosedChannels() string {
 	return response.String()
 }
 
-// func ExportAllChannelBackups() *lnrpc.ChanBackupSnapshot {
 func ExportAllChannelBackups() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
@@ -741,7 +842,6 @@ func ExportAllChannelBackups() bool {
 	return true
 }
 
-// func ExportChannelBackup() *lnrpc.ChannelBackup {
 func ExportChannelBackup() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
@@ -907,7 +1007,6 @@ func ListChannels() string {
 	return response.String()
 }
 
-// func OpenChannelSync() *lnrpc.ChannelPoint {
 func OpenChannelSync(nodePubkey string, localFundingAmount int64) string {
 	const (
 		grpcHost = "202.79.173.41:10009"
@@ -958,8 +1057,9 @@ func OpenChannelSync(nodePubkey string, localFundingAmount int64) string {
 		log.Printf("lnrpc OpenChannelSync err: %v", err)
 		return ""
 	}
-	log.Printf("%v\n", response)
-	return response.GetFundingTxidStr() + strconv.Itoa(int(response.GetOutputIndex()))
+	//log.Printf("%v\n", response)
+	responseStr := hex.EncodeToString(response.GetFundingTxidBytes())
+	return responseStr + strconv.Itoa(int(response.GetOutputIndex()))
 }
 
 // OpenChannel
@@ -1096,7 +1196,6 @@ func PendingChannels() string {
 	return response.String()
 }
 
-// func RestoreChannelBackups() *lnrpc.RestoreBackupResponse {
 func RestoreChannelBackups() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
@@ -1147,7 +1246,6 @@ func RestoreChannelBackups() bool {
 	return true
 }
 
-// func SubscribeChannelBackups() *lnrpc.Lightning_SubscribeChannelBackupsClient {
 func SubscribeChannelBackups() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
@@ -1211,7 +1309,6 @@ func SubscribeChannelBackups() bool {
 
 }
 
-// func SubscribeChannelEvents() *lnrpc.Lightning_SubscribeChannelEventsClient {
 func SubscribeChannelEvents() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
@@ -1275,7 +1372,6 @@ func SubscribeChannelEvents() bool {
 
 }
 
-// func SubscribeChannelGraph() *lnrpc.Lightning_SubscribeChannelGraphClient {
 func SubscribeChannelGraph() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
@@ -1339,7 +1435,6 @@ func SubscribeChannelGraph() bool {
 
 }
 
-// func UpdateChannelPolicy() *lnrpc.PolicyUpdateResponse {
 func UpdateChannelPolicy() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
@@ -1390,7 +1485,6 @@ func UpdateChannelPolicy() bool {
 	return true
 }
 
-// func VerifyChanBackup() *lnrpc.VerifyChanBackupResponse {
 func VerifyChanBackup() bool {
 	const (
 		grpcHost = "202.79.173.41:10009"
@@ -1504,7 +1598,6 @@ func ConnectPeer(pubkey, host string) bool {
 	return true
 }
 
-// func EstimateFee(addr string, amount int64) *lnrpc.EstimateFeeResponse {
 func EstimateFee(addr string, amount int64) string {
 	const (
 		grpcHost = "202.79.173.41:10009"
@@ -1559,8 +1652,7 @@ func EstimateFee(addr string, amount int64) string {
 	return response.String()
 }
 
-// func DecodePayReq(pay_req string) *lnrpc.PayReq {
-func DecodePayReq(pay_req string) int64 {
+func DecodePayReq(payReq string) int64 {
 	const (
 		grpcHost = "202.79.173.41:10009"
 	)
@@ -1601,7 +1693,7 @@ func DecodePayReq(pay_req string) int64 {
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.PayReqString{
-		PayReq: pay_req,
+		PayReq: payReq,
 	}
 	response, err := client.DecodePayReq(context.Background(), request)
 	if err != nil {

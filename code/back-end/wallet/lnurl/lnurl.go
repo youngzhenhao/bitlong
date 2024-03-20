@@ -111,17 +111,17 @@ func setupRouter() *gin.Engine {
 				"length":  len(seed),
 			})
 		})
-		walletUnlockGroup.GET("/GenSeed", func(c *gin.Context) {
-
+		walletUnlockGroup.GET("/UnlockWallet", func(c *gin.Context) {
+			password := c.Param("password")
 			c.JSON(http.StatusOK, gin.H{
-				"GenSeed": api.UnlockWallet(""),
+				"GenSeed": api.UnlockWallet(password),
 			})
 		})
-		walletUnlockGroup.GET("/GenSeed", func(c *gin.Context) {
-			seed := api.GenSeed()
+		walletUnlockGroup.GET("/ChangePassword", func(c *gin.Context) {
+			currentPassword := c.Param("currentPassword")
+			newPassword := c.Param("newPassword")
 			c.JSON(http.StatusOK, gin.H{
-				"GenSeed": seed,
-				"length":  len(seed),
+				"GenSeed": api.ChangePassword(currentPassword, newPassword),
 			})
 		})
 	}

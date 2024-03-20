@@ -26,7 +26,7 @@ func DeleteAssetRoot() {}
 
 func DeleteFederationServer() {}
 
-// Info
+// UniverseInfo
 //
 //	@Description: 返回一组关于宇宙当前状态的信息
 //	@return *universerpc.InfoResponse

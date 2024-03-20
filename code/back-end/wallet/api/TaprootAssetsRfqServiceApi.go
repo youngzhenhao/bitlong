@@ -15,7 +15,6 @@ import (
 	"path/filepath"
 )
 
-// func AddAssetBuyOrder() *rfqrpc.AddAssetBuyOrderResponse {
 func AddAssetBuyOrder() bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
@@ -69,7 +68,6 @@ func AddAssetBuyOrder() bool {
 	return true
 }
 
-// func AddAssetSellOffer() *rfqrpc.AddAssetSellOfferResponse {
 func AddAssetSellOffer() bool {
 	const (
 		grpcHost = "202.79.173.41:8443"
@@ -123,7 +121,6 @@ func AddAssetSellOffer() bool {
 	return true
 }
 
-// func QueryRfqAcceptedQuotes() *rfqrpc.QueryRfqAcceptedQuotesResponse {
 func QueryRfqAcceptedQuotes() string {
 	const (
 		grpcHost = "202.79.173.41:8443"
@@ -177,7 +174,6 @@ func QueryRfqAcceptedQuotes() string {
 	return response.String()
 }
 
-// func SubscribeRfqEventNtfns() *rfqrpc.Rfq_SubscribeRfqEventNtfnsClient {
 func SubscribeRfqEventNtfns() bool {
 	const (
 		grpcHost = "202.79.173.41:8443"

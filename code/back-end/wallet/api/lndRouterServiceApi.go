@@ -146,7 +146,6 @@ func TrackPaymentV2(payhash string) string {
 	}
 }
 
-// route *lnrpc.Route
 func SendToRouteV2(payhash []byte, route *lnrpc.Route) {
 	const (
 		grpcHost = "202.79.173.41:10009"

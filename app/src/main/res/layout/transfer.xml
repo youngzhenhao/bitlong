@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".transfer">
+    >
 
     <!-- TODO: Update blank fragment layout -->
 
@@ -41,7 +41,8 @@
                 android:gravity="center"
                 android:text="转账"
                 android:textColor="@color/black"
-                android:textSize="16dp" />
+                android:textSize="16sp"
+                android:textStyle="bold"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
@@ -61,13 +62,10 @@
                     android:layout_width="60dp"
                     android:layout_height="20dp"
                     android:text="收款地址"
-                    android:textSize="15dp"
-                    android:textStyle="normal"
-                    android:fontFamily="sans-serif-medium"
-                    android:typeface="sans"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
                     android:textColor="@color/black"
                     android:layout_gravity="center"
-
                     />
                 <EditText
                     android:id="@+id/inputAddress"
@@ -112,8 +110,8 @@
                     android:layout_height="16dp"
                     android:layout_marginLeft="8dp"
                     android:text="请输入发票、LNRUL、闪电地址或BTC地址 "
-                    android:textSize="12px"
-                   />
+                    android:textSize="12sp"
+                    />
             </LinearLayout>
 
 
@@ -134,10 +132,8 @@
                     android:layout_width="30dp"
                     android:layout_height="20dp"
                     android:text="币种"
-                    android:textSize="15dp"
-                    android:textStyle="normal"
-                    android:fontFamily="sans-serif-medium"
-                    android:typeface="sans"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
                     android:textColor="@color/black"
                     android:layout_gravity="center"
 
@@ -150,7 +146,7 @@
                     android:background="@drawable/textbackground"
                     android:hint="自动显示不用输入"
                     android:textColor="@color/textColor"
-                    android:textSize="14px"
+                    android:textSize="14sp"
                     android:textStyle="normal"
                     android:paddingLeft="11.48dp"
                     android:gravity="center_vertical"
@@ -168,8 +164,8 @@
                     android:layout_width="30dp"
                     android:layout_height="20dp"
                     android:text="金额"
-                    android:textSize="15dp"
-                    android:textStyle="normal"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
                     android:fontFamily="sans-serif-medium"
                     android:typeface="sans"
                     android:textColor="@color/black"
@@ -177,14 +173,14 @@
 
                     />
                 <EditText
-                    android:id="@+id/ed_text_amount"
+                    android:id="@+id/金额_text"
                     android:layout_width="242dp"
                     android:layout_height="40dp"
                     android:layout_marginLeft="10dp"
                     android:background="@drawable/textbackground_fa"
                     android:hint="请输入金额"
                     android:textColor="@color/textColor"
-                    android:textSize="14px"
+                    android:textSize="14sp"
                     android:textStyle="normal"
                     android:paddingLeft="11.48dp"
                     android:gravity="center_vertical"
@@ -206,8 +202,8 @@
                     android:fontFamily="sans-serif-medium"
                     android:text="附言"
                     android:textColor="@color/black"
-                    android:textSize="15px"
-                    android:textStyle="normal"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
                     android:typeface="sans"
                     android:paddingTop="10dp"/>
 
@@ -219,8 +215,7 @@
                     android:background="@drawable/textbackground"
                     android:hint="自动显示不用输入"
                     android:textColor="@color/textColor"
-                    android:textSize="14px"
-                    android:textStyle="normal"
+                    android:textSize="14sp"
                     android:paddingLeft="11.48dp"
                     android:paddingTop="10.5dp"
                     android:gravity="top"
@@ -233,15 +228,12 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="244.05dp"
                 android:text="确认转账"
-                android:textSize="18dp"
+                android:textSize="18sp"
+                android:textColor="@color/white"
                 android:background="@drawable/group7"
                 android:onClick="Confirm_transfer"/>
         </LinearLayout>
 
-
-
-
-
     </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>

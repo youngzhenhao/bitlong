@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".create_token">
+    >
 
     <!-- TODO: Update blank fragment layout -->
 
@@ -39,8 +39,9 @@
                 android:layout_marginLeft="115dp"
                 android:gravity="center"
                 android:text="创建"
+                android:textStyle="bold"
                 android:textColor="@color/black"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
         </LinearLayout>
         <LinearLayout
             android:layout_width="342dp"
@@ -76,7 +77,8 @@
                     android:text="上传你的logo"
                     android:layout_marginTop="11.5dp"
                     android:textColor="#383838"
-                    android:textSize="16px"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
                     />
 
                 <TextView
@@ -86,7 +88,7 @@
                     android:text="支持PNG和JPEG格式"
                     android:layout_marginTop="12.28dp"
                     android:textColor="#808080"
-                    android:textSize="12px"
+                    android:textSize="12sp"
                     />
             </LinearLayout>
         </LinearLayout>
@@ -102,8 +104,8 @@
                 android:id="@+id/name"
                 android:layout_width="37dp"
                 android:layout_height="20dp"
-                android:textSize="15px"
-                android:textStyle="normal"
+                android:textSize="15sp"
+                android:textStyle="bold"
                 android:fontFamily="sans-serif-medium"
                 android:typeface="sans"
                 android:textColor="@color/black"
@@ -118,7 +120,7 @@
                 android:layout_marginLeft="16dp"
                 android:hint="请输入名称"
                 android:textColor="@color/textColor"
-                android:textSize="14px"
+                android:textSize="14sp"
                 android:textStyle="normal"
                 android:background="@drawable/create_token_border"/>
         </LinearLayout>
@@ -134,8 +136,8 @@
                 android:id="@+id/type"
                 android:layout_width="37dp"
                 android:layout_height="20dp"
-                android:textSize="15px"
-                android:textStyle="normal"
+                android:textSize="15sp"
+                android:textStyle="bold"
                 android:fontFamily="sans-serif-medium"
                 android:typeface="sans"
                 android:textColor="@color/black"
@@ -151,7 +153,7 @@
                     android:layout_height="19dp"
                     android:layout_marginLeft="51.2dp"
                     android:text="TAPR-20"
-                    android:textSize="14px"
+                    android:textSize="14sp"
                     android:textColor="@color/logotext"
                     />
 
@@ -166,7 +168,7 @@
                     android:layout_height="19dp"
                     android:layout_marginLeft="63.42dp"
                     android:text="NFT"
-                    android:textSize="14px"
+                    android:textSize="14sp"
                     android:textColor="@color/logotext"
                     />
 
@@ -189,10 +191,8 @@
                 android:id="@+id/quantity"
                 android:layout_width="37dp"
                 android:layout_height="20dp"
-                android:textSize="15px"
-                android:textStyle="normal"
-                android:fontFamily="sans-serif-medium"
-                android:typeface="sans"
+                android:textSize="15sp"
+                android:textStyle="bold"
                 android:textColor="@color/black"
                 android:layout_gravity="center"
                 />
@@ -203,7 +203,7 @@
                 android:background="@drawable/create_token_border"
                 android:hint="请输入数量"
                 android:textColor="@color/textColor"
-                android:textSize="14px"
+                android:textSize="14sp"
                 android:textStyle="normal"
                 android:paddingLeft="16dp"
                 />
@@ -220,10 +220,8 @@
                 android:id="@+id/add"
                 android:layout_width="82dp"
                 android:layout_height="20dp"
-                android:textSize="15px"
-                android:textStyle="normal"
-                android:fontFamily="sans-serif-medium"
-                android:typeface="sans"
+                android:textSize="15sp"
+                android:textStyle="bold"
                 android:textColor="@color/black"
                 android:layout_gravity="center"
                 />
@@ -237,7 +235,7 @@
                     android:layout_height="19dp"
                     android:layout_marginLeft="51.2dp"
                     android:text="是"
-                    android:textSize="14px"
+                    android:textSize="14sp"
                     android:textColor="@color/logotext"
                     />
 
@@ -253,7 +251,7 @@
                     android:layout_marginLeft="77.42dp"
                     android:text="否"
                     android:textColor="@color/logotext"
-                    android:textSize="14px" />
+                    android:textSize="14sp" />
 
                 <RadioButton
                     android:id="@+id/categoryOption2"
@@ -274,10 +272,8 @@
                 android:id="@+id/introduce"
                 android:layout_width="37dp"
                 android:layout_height="match_parent"
-                android:textSize="15px"
-                android:textStyle="normal"
-                android:fontFamily="sans-serif-medium"
-                android:typeface="sans"
+                android:textSize="15sp"
+                android:textStyle="bold"
                 android:textColor="@color/black"
                 android:layout_gravity="top"
                 android:layout_marginTop="15.81dp"
@@ -290,23 +286,23 @@
                 android:background="@drawable/create_token_border"
                 android:hint="100字内"
                 android:textColor="@color/textColor"
-                android:textSize="14px"
-                android:textStyle="normal"
+                android:textSize="14sp"
                 android:layout_marginTop="16.31dp"
                 android:gravity="top"
                 />
         </LinearLayout>
 
-            <Button
-                android:id="@+id/分组7"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="22.75dp"
-                android:text="确认转账"
-                android:textSize="18dp"
-                android:background="@drawable/group7"
-                android:onClick="Confirm_transfer"/>
+        <Button
+            android:id="@+id/分组7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="22.75dp"
+            android:text="确认转账"
+            android:textSize="18sp"
+            android:textColor="@color/white"
+            android:background="@drawable/group7"
+            android:onClick="Confirm_transfer"/>
     </LinearLayout>
-</RelativeLayout>
+</LinearLayout>
 

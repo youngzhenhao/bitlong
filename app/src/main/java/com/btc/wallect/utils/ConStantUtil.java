@@ -19,5 +19,6 @@ public class ConStantUtil {
     public static boolean STATE_TRUE=true;
     public static boolean STATE_FALSE=false;
     public static String WALLECT_STATE="wallect_state";
+    public static String WALLECT_VERIFY="wallect_verify";
 
 }

@@ -141,7 +141,6 @@ public abstract class BaseFrament  extends Fragment{
     }
 
     public List<Wallet> selectWallectData() {
-
         List<Wallet> data = wallectDao.select(null);
         if (data.equals(null) || data.size() == 0) {
             //  textView.setText("没有查到数据！");

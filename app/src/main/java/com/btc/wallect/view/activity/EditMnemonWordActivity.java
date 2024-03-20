@@ -35,7 +35,7 @@ public class EditMnemonWordActivity extends BaseActivity {
 
 
     private List<AddMnemonBean> inputList1 ;
-    private List<CollectBean> collectList2 ;
+    private List<AddMnemonBean> collectList2 ;
     public List<AddMnemonBean> mqueryList;
     private EditMnemontWordAapter fruitAdapter;
     private ImportSelAdapter inputSelAdapter;
@@ -73,9 +73,16 @@ public class EditMnemonWordActivity extends BaseActivity {
             public void onToListData(List<AddMnemonBean> addMnemonlist, int pos) {
                 collectList2.clear();
                 for (int i = 0; i < addMnemonlist.size(); i++) {
-                    CollectBean collectBean = new CollectBean(addMnemonlist.get(i).getCollect(), i + 1);
-                    collectList2.add(collectBean);
+                    CollectBean collectBean = new CollectBean(addMnemonlist.get(i).getCollect(), i + 1,false);
+                    AddMnemonBean addMnemonBean=new AddMnemonBean();
+                    addMnemonBean.setState(addMnemonlist.get(i).isState());
+                    addMnemonBean.setCollect(addMnemonlist.get(i).getCollect());
+                    addMnemonBean.setIndex(addMnemonlist.get(i).getIndex());
+                    collectList2.add(addMnemonBean);
+
+//                    collectList2=addMnemonlist;
                 }
+
                 inputSelAdapter.notifyDataSetChanged();
             }
 
@@ -180,8 +187,8 @@ public class EditMnemonWordActivity extends BaseActivity {
     @OnClick({R.id.tv_sure})
     public void onClick(View view) {
         if (view.getId() == R.id.tv_sure) {
-            DialogUtil.showSimpleDialog(this, "提示", "确认", null);
-            openActivity(ImportKeyAcivity.class);
+
+            openActivity(MainActivity.class);
         }
     }
 }

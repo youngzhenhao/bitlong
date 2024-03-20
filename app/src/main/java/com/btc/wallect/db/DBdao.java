@@ -13,6 +13,7 @@ import androidx.annotation.RequiresApi;
 
 import com.btc.wallect.model.entity.Wallet;
 import com.btc.wallect.utils.ConStantUtil;
+import com.btc.wallect.utils.LogUntil;
 import com.btc.wallect.utils.SharedPreferencesHelperUtil;
 
 import java.text.SimpleDateFormat;
@@ -48,7 +49,7 @@ public class DBdao {
         contentValues.put(DBOpenHelper.TB_ISSHOW_WALLECT, wallet.show);
         contentValues.put(DBOpenHelper.TB_BTC_KEY, wallet.btcKey);
         contentValues.put(DBOpenHelper.TB_BTC_AMOUNT, wallet.btcAmount);
-
+        contentValues.put(DBOpenHelper.TB__VERFY, wallet.verify);
 
 //        Log.e("TAG","--------------"+student.toString());
 //        Toast.makeText(context,"sql 语句--"+student.toString(),Toast.LENGTH_LONG).show();
@@ -97,7 +98,8 @@ public class DBdao {
                 DBOpenHelper.TB_CREATEDATE,
                 DBOpenHelper.TB_ISSHOW_WALLECT,
                 DBOpenHelper.TB_BTC_KEY,
-                DBOpenHelper.TB_BTC_AMOUNT
+                DBOpenHelper.TB_BTC_AMOUNT,
+                DBOpenHelper.TB__VERFY
         };
         Cursor cursor = null;
         if (id == null) {
@@ -124,6 +126,7 @@ public class DBdao {
                 wallet.show = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_ISSHOW_WALLECT));
                 wallet.btcKey = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_BTC_KEY));
                 wallet.btcAmount = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_BTC_AMOUNT));
+                wallet.verify = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB__VERFY));
                 //添加到集合
                 walletList.add(wallet);
             }
@@ -216,9 +219,9 @@ public class DBdao {
                 wallet.txt = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_AGE));
                 wallet.collect = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_CLAZZ));
                 wallet.creatDate = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_CREATEDATE));
-
                 wallet.logoHead = cursor.getBlob(cursor.getColumnIndexOrThrow("logoHead"));
                 wallet.show = cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB_ISSHOW_WALLECT));
+                wallet.verify=cursor.getString(cursor.getColumnIndexOrThrow(DBOpenHelper.TB__VERFY));
             }
         }
         cursor.close();
@@ -247,7 +250,7 @@ public class DBdao {
         contentValues.put(DBOpenHelper.TB_AGE, wallet.txt);
         contentValues.put(DBOpenHelper.TB_CLAZZ, wallet.collect);
         contentValues.put(DBOpenHelper.TB_ISSHOW_WALLECT, wallet.show);
-
+        contentValues.put(DBOpenHelper.TB_ISSHOW_WALLECT, wallet.verify);
         //时间
         Date date = new Date();
         //格式化
@@ -308,6 +311,29 @@ public class DBdao {
 
         return result;
     }
+    public int updateVerfy(Wallet wallet, Long id) {
+
+        // 获取写操作数据库对象
+        DB = dBhelpUtil.getWritableDatabase();
+        //开启事务
+        DB.beginTransaction();
+        //数据行数据
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBOpenHelper.TB__VERFY, wallet.verify);
+        //时间
+        Date date = new Date();
+        //格式化
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        contentValues.put(DBOpenHelper.TB_CREATEDATE, simpleDateFormat.format(date));
+
+        int result = DB.update(DBOpenHelper.TABLE_NAME, contentValues, "id = ?", new String[]{id + ""});
+        //完成事务
+        DB.setTransactionSuccessful();
+        //结束事务
+        DB.endTransaction();
+
+        return result;
+    }
 
     public void setUPDateCurrent(Long id) {
 
@@ -323,4 +349,14 @@ public class DBdao {
         SharedPreferencesHelperUtil.getInstance().putLongValue(ConStantUtil.CURRENT_SQL_ID, id);
     }
 
+    public List<Wallet> selectWallectData() {
+        List<Wallet> data = select(null);
+        if (data.equals(null) || data.size() == 0) {
+            //  textView.setText("没有查到数据！");
+        } else {
+            //  textView.setText(data.toString());
+        }
+        return data;
+
+    }
 }

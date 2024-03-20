@@ -60,7 +60,7 @@ public class CreateWalletActivity extends BaseActivity implements LoginView {
         setImgBack(true);
         Intent in = getIntent();
         page = in.getStringExtra(ConStantUtil.KEY_TOACTION);
-        wallectState=in.getBooleanExtra(ConStantUtil.WALLECT_STATE,false);
+        wallectState = in.getBooleanExtra(ConStantUtil.WALLECT_STATE, false);
         isCreateWallet();
 
 
@@ -96,7 +96,7 @@ public class CreateWalletActivity extends BaseActivity implements LoginView {
                 DialogUtil.showSimpleDialog(this, "提示", "密码不一致", null);
                 return;
             }
-                String txt = remindTxt.getText().toString().trim();
+            String txt = remindTxt.getText().toString().trim();
 
 //            if (!TextUtils.isEmpty(account) && !TextUtils.isEmpty(password)){
 //                presenter.loginSubmit(account, password);
@@ -109,7 +109,7 @@ public class CreateWalletActivity extends BaseActivity implements LoginView {
 
 
         } else if (view.getId() == R.id.img_passWord) {
-           setImgPasswordSate();
+            setImgPasswordSate();
         }
     }
 
@@ -158,19 +158,19 @@ public class CreateWalletActivity extends BaseActivity implements LoginView {
             wallet.password = passWord;
             wallet.txt = txt;
             wallet.collect = "";
-            wallet.btcKey="bc362....2dfsvd";
-            wallet.btcAmount="0.33";
-            if(isShow){
+            wallet.btcKey = "bc362....2dfsvd";
+            wallet.btcAmount = "0.33";
+            wallet.verify = ConStantUtil.FALSE;
+            if (isShow) {
                 wallet.show = "true";
-            }else {
+            } else {
                 wallet.show = "false";
             }
-
 
             Long result = wallectDao.save(wallet);
 
             if (result != -1) {
-                ToastUtils.showToast(this,"保存数据成功!返回插入id是[" + result + "]");
+                ToastUtils.showToast(this, "保存数据成功!返回插入id是[" + result + "]");
                 SharedPreferencesHelperUtil.getInstance().putLongValue(ConStantUtil.CURRENT_SQL_ID, result);
                 if (isCreateWallet()) {
                     openActivity(CollectActivity.class);
@@ -179,7 +179,7 @@ public class CreateWalletActivity extends BaseActivity implements LoginView {
                 }
             } else {
                 // showToast("保存数据失败result["+result+"]");
-                ToastUtils.showToast(this,"保存数据失败result[\"+result+\"]");
+                ToastUtils.showToast(this, "保存数据失败result[\"+result+\"]");
             }
 
         } catch (Exception e) {

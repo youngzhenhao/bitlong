@@ -47,9 +47,9 @@ public class WelcomeAct extends BaseActivity {
         if (mCompositeDisposable != null) {
             mCompositeDisposable.dispose();
         }
-        getWallectList();
+       getWallectList();
 
-        //+  openActivity(MainActivity.class);
+       //  openActivity(ImportMnemonicWordActivity.class);
         finish();
     }
 
@@ -61,7 +61,13 @@ public class WelcomeAct extends BaseActivity {
             for (int i = 0; i < walletList.size(); i++) {
 
             }
-            openActivity(MainActivity.class);
+            if(walletList.get(0).verify.equals(ConStantUtil.TRUE)){
+                openActivity(MainActivity.class);
+            }else {
+                openActivity(ImportMnemonicWordActivity.class);
+            }
+
+
         } else {
             openActivity(SelCreateWalletAct.class);
         }

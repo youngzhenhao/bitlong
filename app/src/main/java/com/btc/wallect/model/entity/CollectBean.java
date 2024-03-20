@@ -4,10 +4,12 @@ public class CollectBean {
     private String name;
 
     private int imageId;
+    public boolean isvarify;
 
-    public CollectBean(String name, int imageId) {
+    public CollectBean(String name, int imageId,boolean varify) {
         this.name = name;
         this.imageId = imageId;
+        this.isvarify=varify;
     }
 
     public String getName() {
@@ -18,4 +20,7 @@ public class CollectBean {
         return imageId;
     }
 
+    public boolean isVarify() {
+        return isvarify;
+    }
 }

@@ -27,8 +27,11 @@ import com.btc.wallect.model.entity.HistoryBean;
 import com.btc.wallect.model.entity.TaprTabListBean;
 import com.btc.wallect.utils.ConStantUtil;
 import com.btc.wallect.utils.DateTimeUtil;
+import com.btc.wallect.view.activity.CreateTokenActivity;
 import com.btc.wallect.view.activity.CreateWalletActivity;
 import com.btc.wallect.view.activity.ImportKeyAcivity;
+import com.btc.wallect.view.activity.base.BaseActivity;
+import com.btc.wallect.view.activity.base.BaseFrament;
 import com.google.android.material.tabs.TabLayout;
 import com.jude.rollviewpager.OnItemClickListener;
 import com.jude.rollviewpager.RollPagerView;
@@ -42,7 +45,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 
-public class TaprFragment extends Fragment {
+public class TaprFragment extends BaseFrament {
     @BindView(R.id.tapr_tabLayout)
     TabLayout mTabLayout;
     @BindView(R.id.tapr_viewPager)
@@ -66,7 +69,7 @@ public class TaprFragment extends Fragment {
 
     private TabLayout.Tab one;
     private TabLayout.Tab two;
-private TaprTabAdapter taprTabAdapter;
+    private TaprTabAdapter taprTabAdapter;
     public List<TaprTabListBean> taprTabList;
 
 
@@ -127,13 +130,14 @@ private TaprTabAdapter taprTabAdapter;
         two = mTabLayout.getTabAt(1);
 
     }
-    private void setTaprTabAdapter(){
+
+    private void setTaprTabAdapter() {
 
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         mRecyclerTaprDetail.setLayoutManager(layoutManager);
         View headerView = getLayoutInflater().inflate(R.layout.item_history_head, mRecyclerTaprDetail, false);
-        TaprTabAdapter taprTabAdapter1 = new TaprTabAdapter(getActivity(),taprTabList, headerView);
+        TaprTabAdapter taprTabAdapter1 = new TaprTabAdapter(getActivity(), taprTabList, headerView);
         mRecyclerTaprDetail.setNestedScrollingEnabled(false);
         mRecyclerTaprDetail.setAdapter(taprTabAdapter1);
     }
@@ -147,47 +151,48 @@ private TaprTabAdapter taprTabAdapter;
         } else if (view.getId() == R.id.tv_all_list) {
             setStatelist(3);
         } else if (view.getId() == R.id.ll_btn_create) {
-
+            openActivity(CreateTokenActivity.class);
         }
 
     }
 
     private void setStatelist(int pistion) {
-      switch (pistion){
-          case 1:
-              mTv_me_attention_list.setTextColor(Color.parseColor("#383838"));
-              mTv_hot_list.setTextColor(Color.parseColor("#808080"));
-              mTv_all_list.setTextColor(Color.parseColor("#808080"));
-              break;
-          case 2:
-              mTv_me_attention_list.setTextColor(Color.parseColor("#808080"));
-              mTv_hot_list.setTextColor(Color.parseColor("#383838"));
-              mTv_all_list.setTextColor(Color.parseColor("#808080"));
-              break;
-          case 3:
-              mTv_me_attention_list.setTextColor(Color.parseColor("#808080"));
-              mTv_hot_list.setTextColor(Color.parseColor("#808080"));
-              mTv_all_list.setTextColor(Color.parseColor("#383838"));
-              break;
-      }
+        switch (pistion) {
+            case 1:
+                mTv_me_attention_list.setTextColor(Color.parseColor("#383838"));
+                mTv_hot_list.setTextColor(Color.parseColor("#808080"));
+                mTv_all_list.setTextColor(Color.parseColor("#808080"));
+                break;
+            case 2:
+                mTv_me_attention_list.setTextColor(Color.parseColor("#808080"));
+                mTv_hot_list.setTextColor(Color.parseColor("#383838"));
+                mTv_all_list.setTextColor(Color.parseColor("#808080"));
+                break;
+            case 3:
+                mTv_me_attention_list.setTextColor(Color.parseColor("#808080"));
+                mTv_hot_list.setTextColor(Color.parseColor("#808080"));
+                mTv_all_list.setTextColor(Color.parseColor("#383838"));
+                break;
+        }
     }
+
     private void initTabTest() {
 
         for (int i = 0; i < 15; i++) {
-            if(i==0){
+            if (i == 0) {
                 TaprTabListBean taprTabListBean = new TaprTabListBean();
                 taprTabListBean.setDealName("stax");
                 taprTabListBean.setState(0);
-                taprTabListBean.setDealAmount(663.14+i);
+                taprTabListBean.setDealAmount(663.14 + i);
                 taprTabListBean.setDealPrice(6.15151515);
                 taprTabListBean.setDealdDetailPrice(66314);
                 taprTabListBean.setRose(663.222);
                 taprTabList.add(taprTabListBean);
-            }else {
+            } else {
                 TaprTabListBean taprTabListBean = new TaprTabListBean();
                 taprTabListBean.setDealName("stax");
                 taprTabListBean.setState(1);
-                taprTabListBean.setDealAmount(663.14+i);
+                taprTabListBean.setDealAmount(663.14 + i);
                 taprTabListBean.setDealPrice(6.15151515);
                 taprTabListBean.setDealdDetailPrice(66314);
                 taprTabListBean.setRose(663.222);
@@ -198,5 +203,6 @@ private TaprTabAdapter taprTabAdapter;
 
 
     }
+
 
 }

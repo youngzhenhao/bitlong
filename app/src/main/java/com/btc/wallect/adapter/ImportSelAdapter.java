@@ -12,12 +12,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.btc.wallect.model.Imoder.onItemClickListener;
 import com.btc.wallect.R;
+import com.btc.wallect.model.entity.AddMnemonBean;
 import com.btc.wallect.model.entity.CollectBean;
 
 import java.util.List;
 
 public class ImportSelAdapter extends RecyclerView.Adapter<ImportSelAdapter.ViewHolder> {
-    private List<CollectBean> mFruitList;
+    private List<AddMnemonBean> mFruitList;
     public onItemClickListener listener;
     public void setonItemClickListener(onItemClickListener listener) {
         this.listener = listener;
@@ -38,7 +39,7 @@ public class ImportSelAdapter extends RecyclerView.Adapter<ImportSelAdapter.View
 
     }
 
-    public ImportSelAdapter(List<CollectBean> fruitList) {
+    public ImportSelAdapter(List<AddMnemonBean> fruitList) {
         mFruitList = fruitList;
     }
 
@@ -56,9 +57,9 @@ public class ImportSelAdapter extends RecyclerView.Adapter<ImportSelAdapter.View
 
 
     public void onBindViewHolder(ImportSelAdapter.ViewHolder viewHolder, int i) {
-        CollectBean fruit = mFruitList.get(i);      //获取实体类数组中数据
+        AddMnemonBean fruit = mFruitList.get(i);      //获取实体类数组中数据
         //将数据bind到子项中控件（子项控件已缓存到了ViewHolder了）
-        viewHolder.fruitName.setText(fruit.getName());
+        viewHolder.fruitName.setText(fruit.getCollect());
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("SuspiciousIndentation")
             @Override
@@ -66,7 +67,7 @@ public class ImportSelAdapter extends RecyclerView.Adapter<ImportSelAdapter.View
                 if(listener != null) {
                     int position = viewHolder.getAdapterPosition();
                     if(position != RecyclerView.NO_POSITION)
-                        listener.onItemClick(position,fruit.getName());
+                        listener.onItemClick(position,fruit.getCollect());
                 }
             }
         });

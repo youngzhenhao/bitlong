@@ -82,6 +82,8 @@
     <string name="app_txt80"> 刷新</string>
     <string name="app_txt81"> 地址管理</string>
     <string name="app_txt82"> 比特币生态钱包</string>
+    <string name="app_txt83"> 请完成验证</string>
+    <string name="app_txt84"> 验证完成</string>
 
     <string name="app_wallect">钱包</string>
     <string name="app_btn_sure">确认</string>

@@ -47,6 +47,7 @@ import com.btc.wallect.utils.SharedPreferencesHelperUtil;
 import com.btc.wallect.utils.UiUtils;
 import com.btc.wallect.utils.dialog.ChannelOpeningDialog;
 import com.btc.wallect.utils.dialog.WallectDialog;
+import com.btc.wallect.view.activity.AddWalletActivity;
 import com.btc.wallect.view.activity.CreateTokenActivity;
 import com.btc.wallect.view.activity.CreateWalletActivity;
 import com.btc.wallect.view.activity.MainActivity;
@@ -309,7 +310,7 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
         } else if (v.getId() == R.id.tv_btc_datail) {
             openActivity(WallectEditActivity.class);
         } else if (v.getId() == R.id.img_add_btc) {
-            openActivity(CreateTokenActivity.class);
+            openActivity(AddWalletActivity.class);
         } else if (v.getId() == R.id.img_scan) {
             if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, 1);

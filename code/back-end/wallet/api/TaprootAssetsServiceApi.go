@@ -49,9 +49,7 @@ func FetchAssetMeta() {
 //
 // func TapGetInfo() *taprpc.GetInfoResponse {
 func TapGetInfo() string {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -109,9 +107,7 @@ func TapGetInfo() string {
 //
 // func ListAssets(withWitness, includeSpent, includeLeased bool) *taprpc.ListAssetResponse {
 func ListAssets(withWitness, includeSpent, includeLeased bool) string {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -173,9 +169,7 @@ func ListAssets(withWitness, includeSpent, includeLeased bool) string {
 //
 // func ListBalances(isListAssetIdNotGroupKey bool) *taprpc.ListBalancesResponse {
 func ListBalances(isListAssetIdNotGroupKey bool) string {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -242,9 +236,7 @@ func ListBalances(isListAssetIdNotGroupKey bool) string {
 //
 // func ListGroups() *taprpc.ListGroupsResponse {
 func ListGroups() string {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -301,9 +293,7 @@ func ListGroups() string {
 //
 // func ListTransfers() *taprpc.ListTransfersResponse {
 func ListTransfers() string {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -361,9 +351,7 @@ func ListTransfers() string {
 //
 // func ListUtxos(includeLeased bool) *taprpc.ListUtxosResponse {
 func ListUtxos(includeLeased bool) string {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -416,9 +404,7 @@ func ListUtxos(includeLeased bool) string {
 }
 
 func NewAddr(assetId string, amt int) bool {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -477,9 +463,7 @@ func QueryAddrs() {
 }
 
 func SendAsset(tapAddrs []string, feeRate int) bool {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")

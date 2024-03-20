@@ -1,1 +1,3 @@
 dirpath=D:\lane\test
+lndhost=202.79.173.41:10009
+taproothost=202.79.173.41:8443

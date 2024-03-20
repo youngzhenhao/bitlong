@@ -15,9 +15,7 @@ import (
 )
 
 func ListAddress() string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -84,9 +82,7 @@ func (c *macaroonCredential) RequireTransportSecurity() bool {
 //
 // func ListAccounts() *walletrpc.ListAccountsResponse {
 func ListAccounts() string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -137,9 +133,7 @@ func ListAccounts() string {
 //
 // func ListLeases() *walletrpc.ListLeasesResponse {
 func ListLeases() string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -190,9 +184,7 @@ func ListLeases() string {
 //
 // func ListSweeps() *walletrpc.ListSweepsResponse {
 func ListSweeps() string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -244,9 +236,7 @@ func ListSweeps() string {
 //
 // func ListUnspent() *walletrpc.ListUnspentResponse {
 func ListUnspent() string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -297,9 +287,7 @@ func ListUnspent() string {
 //
 // func NextAddr() *walletrpc.AddrResponse {
 func NextAddr() string {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")

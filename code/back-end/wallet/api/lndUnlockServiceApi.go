@@ -158,9 +158,7 @@ func InitWallet(seed [24]string, password string) bool {
 }
 
 func UnlockWallet(password string) bool {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	// Load the TLS certificate
 	cert, err := os.ReadFile(tlsCertPath)
@@ -201,9 +199,7 @@ func UnlockWallet(password string) bool {
 }
 
 func ChangePassword(currentPassword, newPassword string) bool {
-	const (
-		grpcHost = "202.79.173.41:10009"
-	)
+	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")

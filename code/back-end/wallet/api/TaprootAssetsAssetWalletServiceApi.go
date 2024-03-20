@@ -17,9 +17,7 @@ import (
 // AnchorVirtualPsbts NOT COMPLETED
 // func AnchorVirtualPsbts(virtualPsbts [][]byte) *taprpc.SendAssetResponse {
 func AnchorVirtualPsbts(virtualPsbts []string) bool {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -79,9 +77,7 @@ func AnchorVirtualPsbts(virtualPsbts []string) bool {
 // FundVirtualPsbt NOT COMPLETED
 // func FundVirtualPsbt(isPsbtNotRaw bool, psbt ...string) *assetwalletrpc.FundVirtualPsbtResponse { // 读取参数
 func FundVirtualPsbt(isPsbtNotRaw bool, psbt ...string) bool { // 读取参数
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -151,9 +147,7 @@ func FundVirtualPsbt(isPsbtNotRaw bool, psbt ...string) bool { // 读取参数
 //	 @return *assetwalletrpc.NextInternalKeyResponse
 func NextInternalKey(keyFamily int) string { // 读取参数
 	//func NextInternalKey(keyFamily uint32) *assetwalletrpc.NextInternalKeyResponse { // 读取参数
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -213,9 +207,7 @@ func NextInternalKey(keyFamily int) string { // 读取参数
 //
 // func NextScriptKey(keyFamily uint32) *assetwalletrpc.NextScriptKeyResponse { // 读取参数
 func NextScriptKey(keyFamily int) string { // 读取参数
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -277,9 +269,7 @@ func NextScriptKey(keyFamily int) string { // 读取参数
 //
 // func ProveAssetOwnership(assetId, scriptKey string) *assetwalletrpc.ProveAssetOwnershipResponse {
 func ProveAssetOwnership(assetId, scriptKey string) bool {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -344,9 +334,7 @@ func ProveAssetOwnership(assetId, scriptKey string) bool {
 //
 // func QueryInternalKey(internalKey string) *assetwalletrpc.QueryInternalKeyResponse {
 func QueryInternalKey(internalKey string) string {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -408,9 +396,7 @@ func QueryInternalKey(internalKey string) string {
 //
 // func QueryScriptKey(tweakedScriptKey string) *assetwalletrpc.QueryScriptKeyResponse {
 func QueryScriptKey(tweakedScriptKey string) string {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -470,9 +456,7 @@ func QueryScriptKey(tweakedScriptKey string) string {
 //
 // func RemoveUTXOLease() *assetwalletrpc.RemoveUTXOLeaseResponse {
 func RemoveUTXOLease() bool {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -532,9 +516,7 @@ func RemoveUTXOLease() bool {
 //
 // func SignVirtualPsbt(fundedPsbt string) *assetwalletrpc.SignVirtualPsbtResponse {
 func SignVirtualPsbt(fundedPsbt string) bool {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
@@ -596,9 +578,7 @@ func SignVirtualPsbt(fundedPsbt string) bool {
 //
 // func VerifyAssetOwnership(proofWithWitness string) *assetwalletrpc.VerifyAssetOwnershipResponse {
 func VerifyAssetOwnership(proofWithWitness string) bool {
-	const (
-		grpcHost = "202.79.173.41:8443"
-	)
+	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")

@@ -62,7 +62,6 @@ public class SelCreateWalletAct extends BaseActivity {
     private void getWallectList() {
 
         List<Wallet> walletList = selectWallectData();
-        LogUntil.d(new Gson().toJson(walletList));
     }
 
     @Override

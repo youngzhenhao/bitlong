@@ -18,32 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="44dp"
             />
-        <LinearLayout
-            android:layout_width="390dp"
-            android:layout_height="44dp"
-            android:orientation="horizontal"
-            >
-            <ImageButton
-                android:src="@drawable/exit"
-                android:id="@+id/backButton"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_marginTop="6dp"
-                android:layout_marginLeft="16dp"
-                android:onClick="returnPre"
-                android:background="#FFFFFF"/>
 
-            <TextView
-                android:id="@+id/矩形1"
-                android:layout_width="64dp"
-                android:layout_height="44dp"
-                android:layout_marginLeft="115dp"
-                android:gravity="center"
-                android:text="转账"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
-        </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="107.48dp"
@@ -75,19 +50,19 @@
                     android:layout_gravity="center"
                     android:background="@drawable/border_background"
                     android:hint="请手动输入收款地址或扫码识别"
-                    android:textColor="@color/textColor"
-                    android:textSize="14px"
-                    android:textStyle="normal"
+                    android:textColor="@color/color_3838"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
                     android:paddingLeft="11.48dp"
                     />
-                <ImageButton
+                <ImageView
                     android:id="@+id/buttonofQR"
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:layout_marginLeft="9.79dp"
                     android:layout_marginTop="12.47dp"
-                    android:onClick="startScan"
-                    android:src="@drawable/qr_saoyisao"
+
+                    android:src="@mipmap/icon_scan2"
                     />
 
             </LinearLayout>
@@ -173,12 +148,13 @@
 
                     />
                 <EditText
-                    android:id="@+id/金额_text"
+                    android:id="@+id/ed_text_amount"
                     android:layout_width="242dp"
                     android:layout_height="40dp"
                     android:layout_marginLeft="10dp"
-                    android:background="@drawable/textbackground_fa"
+                    android:background="@drawable/bg_side_5af0"
                     android:hint="请输入金额"
+
                     android:textColor="@color/textColor"
                     android:textSize="14sp"
                     android:textStyle="normal"
@@ -226,7 +202,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="244.05dp"
+                android:layout_marginTop="144.05dp"
                 android:text="确认转账"
                 android:textSize="18sp"
                 android:textColor="@color/white"

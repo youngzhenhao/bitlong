@@ -100,6 +100,8 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
     TextView mTvBtcAmout;
     @BindView(R.id.tv_btc_key)
     TextView mTv_btc_key;
+    @BindView(R.id.tv_line)
+    TextView mLinear;
     private IWallectFragmentPresentImpl wallectFragmentPresent;
     private List<Wallet> walletList;
 
@@ -159,11 +161,10 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
         mainBtcTabAdapter.setonItemClickListener(new onItemClickListener() {
             @Override
             public void onItemClick(int position, String txt) {
-
+                setUnderLine(2);
                 String tabList = SharedPreferencesHelperUtil.getInstance().getStringValue(ConStantUtil.MAIN_TAB_LIST, "");
                 mMainTabList = GsonUtils.jsonToList(tabList, MainTabListBean.class);
                 dataList = mMainTabList.get(position).getDataTabList();
-
                 for (int i = 0; i < mMainTabList.size(); i++) {
                     mMainTabList.get(i).setSelect(false);
                     mMainTabList.get(i).setTabTxt(txt);
@@ -171,7 +172,7 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
                 mMainTabList.get(position).setSelect(true);
 
 
-                LogUntil.d("保存前：" + new Gson().toJson(mMainTabList));
+
                 SharedPreferencesHelperUtil.getInstance().putStringValue(ConStantUtil.MAIN_TAB_LIST, new Gson().toJson(mMainTabList));
 
                 setRecyclerMianDatailView();
@@ -313,6 +314,7 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.ll_main_tab) {
+            setUnderLine(1);
             initCollectTest();
             setRecyclerMianDatailView();
         } else if (v.getId() == R.id.img_btc_hide) {
@@ -324,11 +326,8 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
         } else if (v.getId() == R.id.img_add_btc) {
             openActivity(AddWalletActivity.class);
         } else if (v.getId() == R.id.img_scan) {
-            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, 1);
-            } else {
-                goScan();
-            }
+            helper.goScan(getActivity());
+
         }
     }
 
@@ -397,10 +396,6 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
         wallectDialog.show();
     }
 
-    private void goScan() {
-        Intent intent = new Intent(getActivity(), CaptureActivity.class);
-        startActivityForResult(intent, Constantes.REQUEST_CODE_SCAN);
-    }
 
     private void setRequestCode() {
 
@@ -449,6 +444,27 @@ public class WallectFragment extends BaseFrament implements View.OnClickListener
 
         }
 
+    }
+
+    private void setUnderLine(int index) {
+        switch (index) {
+            case 1:
+                mLinear.setVisibility(View.VISIBLE);
+                String tabList = SharedPreferencesHelperUtil.getInstance().getStringValue(ConStantUtil.MAIN_TAB_LIST, "");
+                mMainTabList = GsonUtils.jsonToList(tabList, MainTabListBean.class);
+                for (int i = 0; i < mMainTabList.size(); i++) {
+                    mMainTabList.get(i).setSelect(false);
+
+                }
+                LogUntil.d("保存前：" + new Gson().toJson(mMainTabList));
+                SharedPreferencesHelperUtil.getInstance().putStringValue(ConStantUtil.MAIN_TAB_LIST, new Gson().toJson(mMainTabList));
+                setRecyclerMianDatailTabView();
+                break;
+            case 2:
+                mLinear.setVisibility(View.GONE);
+
+                break;
+        }
     }
 
     @Override

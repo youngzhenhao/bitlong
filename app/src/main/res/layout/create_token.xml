@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     >
 
     <!-- TODO: Update blank fragment layout -->
@@ -18,31 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="44dp"
             />
-        <LinearLayout
-            android:layout_width="390dp"
-            android:layout_height="44dp"
-            android:orientation="horizontal">
-            <ImageButton
-                android:id="@+id/backButton"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_marginTop="6dp"
-                android:layout_marginLeft="16dp"
-                android:onClick="returnPre"
-                android:src="@drawable/exit"
-                android:background="#FFFFFF"/>
 
-            <TextView
-                android:id="@+id/矩形1"
-                android:layout_width="64dp"
-                android:layout_height="44dp"
-                android:layout_marginLeft="115dp"
-                android:gravity="center"
-                android:text="创建"
-                android:textStyle="bold"
-                android:textColor="@color/black"
-                android:textSize="16sp" />
-        </LinearLayout>
         <LinearLayout
             android:layout_width="342dp"
             android:layout_height="212dp"
@@ -56,6 +33,7 @@
                 android:layout_height="22dp"
                 />
             <LinearLayout
+                android:id="@+id/ll_upimg"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/backlogo"

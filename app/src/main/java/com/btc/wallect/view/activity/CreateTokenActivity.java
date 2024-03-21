@@ -15,15 +15,25 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.btc.wallect.R;
+import com.btc.wallect.view.activity.base.BaseActivity;
 
-public class CreateTokenActivity extends AppCompatActivity {
+public class CreateTokenActivity extends BaseActivity {
     private int PICK_IMAGE_REQUEST_CODE = 1;
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        // 隐藏状态栏和导航栏
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.create_token);
+
+    @Override
+    protected int setContentView() {
+        return R.layout.create_token;
+    }
+
+    @Override
+    protected void init(View view, Bundle savedInstanceState) {
+        setTitle("创建");
+        setTitleTxtColor(2);
+        setTitleBackgroundColor(1);
+        setImgBack(true);
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+//                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//        setContentView(R.layout.create_token);
         TextView textView1 = findViewById(R.id.logo);
         TextView textView2 = findViewById(R.id.name);
         TextView textView3 = findViewById(R.id.type);
@@ -37,6 +47,7 @@ public class CreateTokenActivity extends AppCompatActivity {
         setRequiredText(textView2,"*名称");
         setRequiredText(textView3,"*类别");
     }
+
     private void setRequiredText(TextView textView, String text) {
         SpannableString spannableString = new SpannableString(text);
         int starIndex = text.indexOf("*");

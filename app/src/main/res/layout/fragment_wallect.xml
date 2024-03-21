@@ -196,21 +196,40 @@
 
         <LinearLayout
             android:id="@+id/ll_main_tab"
-            android:layout_width="60dp"
-            android:layout_height="wrap_content"
+            android:layout_width="70dp"
+            android:layout_height="40dp"
             android:orientation="vertical">
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginHorizontal="8dp"
-                android:src="@mipmap/icon_main_btc" />
+            <LinearLayout
 
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="center_vertical"
+                    android:src="@mipmap/icon_btc3" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_txt85"
+                    android:textColor="@color/color_3838"
+                    android:layout_gravity="center_vertical"
+                    android:textSize="16dp"
+                    android:textStyle="bold" />
+
+
+            </LinearLayout>
 
             <TextView
-                android:layout_width="40dp"
+                android:id="@+id/tv_line"
+                android:layout_width="30dp"
                 android:layout_height="3dp"
                 android:layout_gravity="center_horizontal"
+
                 android:background="@drawable/bg_71f2" />
         </LinearLayout>
 
@@ -218,7 +237,7 @@
             android:id="@+id/recycler_main_tab"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
+            android:layout_centerVertical="true"
 
             android:layout_marginEnd="25dp"
 
@@ -239,6 +258,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/rl_tab"
+
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="11dp"
         android:background="@drawable/bg_6af1"

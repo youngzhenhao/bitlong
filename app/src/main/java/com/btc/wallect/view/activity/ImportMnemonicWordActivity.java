@@ -172,7 +172,7 @@ public class ImportMnemonicWordActivity extends BaseActivity {
 
     private void setVerify(String txt) {
         int postion = SharedPreferencesHelperUtil.getInstance().getIntValue(ConStantUtil.WALLECT_VERIFY, 0);
-        LogUntil.e("LZ>>>" + postion);
+
         if (postion < sqlCollectList.size()) {
             String collect = sqlCollectList.get(postion).getName();
             if (collect.equals(txt)) {

@@ -1,8 +1,12 @@
 package com.btc.wallect.utils;
 
 
+import android.os.Environment;
+
+import java.io.File;
 
 public class ConStantUtil {
+    public static String FILE_PAGE="file_page";
     public static String ACC="123456";
     public static String TRUE="true";
     public static String FALSE="false";
@@ -55,5 +59,11 @@ public class ConStantUtil {
 
         return t1 + t2;
     }
+    public static String getPathFile(){
+        File externalStorage = Environment.getExternalStorageDirectory();
+        String path = externalStorage.getAbsolutePath();
+        return path;
+    }
+
 
 }

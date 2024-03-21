@@ -29,6 +29,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import api.Api;
+
 
 public class NewFileActivity extends Activity {
     private static final int REQUEST_READ_EXTERNAL_STORAGE = 1;
@@ -71,7 +73,6 @@ public class NewFileActivity extends Activity {
         findViewById(R.id.btn_createFileTxt).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 //  String txt = "dirpath=" + SpUtils.readPath(NewFileActivity.this);
                 String newTXT = ConStantUtil.ConfigTxt();
 
@@ -126,27 +127,15 @@ public class NewFileActivity extends Activity {
         findViewById(R.id.btn_startaar).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//
-//                    }
-//                }).start();
+
                 ThreadPoolUtils.execute(new Runnable() {
                     @Override
                     public void run() {
                         findViewById(R.id.btn_startaar).setClickable(false);
-                        //  Api.starLnd();
+                         Api.starLnd();
                     }
                 });
 
-//                ThreadPool t=new ThreadPool();
-//                t.execute(new Runnable() {
-//                    @Override
-//                    public void run() {
-//
-//                    }
-//                });
             }
 
         });

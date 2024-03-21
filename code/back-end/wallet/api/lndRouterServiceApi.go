@@ -33,7 +33,7 @@ func SendPaymentV2(invoice string, feelimit int64) string {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -95,7 +95,7 @@ func TrackPaymentV2(payhash string) string {
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 
 	config := &tls.Config{
@@ -158,7 +158,7 @@ func SendToRouteV2(payhash []byte, route *lnrpc.Route) {
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -206,7 +206,7 @@ func EstimateRouteFee(dest string, amtsat int64) string {
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 
 	config := &tls.Config{

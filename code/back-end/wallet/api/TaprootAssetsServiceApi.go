@@ -58,7 +58,7 @@ func TapGetInfo() string {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -103,7 +103,7 @@ func ListAssets(withWitness, includeSpent, includeLeased bool) string {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -152,7 +152,7 @@ func ListBalances(isListAssetIdNotGroupKey bool) string {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -205,7 +205,7 @@ func ListGroups() string {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -250,7 +250,7 @@ func ListTransfers() string {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -295,7 +295,7 @@ func ListUtxos(includeLeased bool) string {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -342,7 +342,7 @@ func NewAddr(assetId string, amt int) bool {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -396,7 +396,7 @@ func SendAsset(tapAddrs []string, feeRate int) bool {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,

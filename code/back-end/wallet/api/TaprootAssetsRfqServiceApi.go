@@ -31,7 +31,7 @@ func AddAssetBuyOrder() bool {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -77,7 +77,7 @@ func AddAssetSellOffer() bool {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -123,7 +123,7 @@ func QueryRfqAcceptedQuotes() string {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -168,7 +168,7 @@ func SubscribeRfqEventNtfns() bool {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,

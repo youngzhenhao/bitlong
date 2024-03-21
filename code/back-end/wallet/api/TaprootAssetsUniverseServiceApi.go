@@ -42,7 +42,7 @@ func UniverseInfo() string {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -89,7 +89,7 @@ func ListFederationServers() string {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,

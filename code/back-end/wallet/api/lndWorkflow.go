@@ -1,6 +1,8 @@
 package api
 
-import "log"
+import (
+	"fmt"
+)
 
 type WalletStatus string
 
@@ -11,34 +13,34 @@ const (
 )
 
 func LndWorkflowCreateWallet(password string) bool {
-	log.Println(WALLET_EMPTY, "Starting to generate random mnemonics to create wallet...")
+	fmt.Printf("%s %sStarting to generate random mnemonics to create wallet...\n", GetTimeNow(), WALLET_EMPTY)
 	seed := GenSeed()
-	log.Println("Cipher seed mnemonic have been generated:\n", seed)
-	log.Println("Initializing wallet with this mnemonic and password...")
+	fmt.Printf("%s Cipher seed mnemonic have been generated:\n", GetTimeNow())
+	fmt.Printf("%s Initializing wallet with this mnemonic and password...\n", GetTimeNow())
 	result := InitWallet(seed, password)
 	if result {
-		log.Println(WALLET_UNLOCKED, "Wallet created successfully!")
+		fmt.Printf("%s %sWallet created successfully!\n", GetTimeNow(), WALLET_UNLOCKED)
 	}
-	log.Println(WALLET_UNLOCKED, "Wallet created!")
+	fmt.Printf("%s %sWallet created!\n", GetTimeNow(), WALLET_UNLOCKED)
 	return result
 }
 
 func LndWorkflowUnlockWallet(password string) bool {
-	log.Println(WALLET_LOCKED, "Unlocking...")
+	fmt.Printf("%s %sUnlocking...\n", GetTimeNow(), WALLET_LOCKED)
 	result := UnlockWallet(password)
 	if result {
-		log.Println(WALLET_UNLOCKED, "Wallet unlocked successfully!")
+		fmt.Printf("%s %sWallet unlocked successfully!\n", GetTimeNow(), WALLET_UNLOCKED)
 	}
 	return result
 }
 
 func LndWorkflowChangeWalletPassword(currentPassword string, newPassword string) bool {
-	log.Println(WALLET_LOCKED, "Changing password...")
+	fmt.Printf("%s %sChanging password...\n", GetTimeNow(), WALLET_LOCKED)
 	result := ChangePassword(currentPassword, newPassword)
 	if result {
-		log.Println(WALLET_UNLOCKED, "Password changed successfully!")
+		fmt.Printf("%s %sPassword changed successfully!\n", GetTimeNow(), WALLET_UNLOCKED)
 	}
-	log.Println(WALLET_UNLOCKED, "Password changed!")
+	fmt.Printf("%s %sPassword changed!\n", GetTimeNow(), WALLET_UNLOCKED)
 	return result
 }
 

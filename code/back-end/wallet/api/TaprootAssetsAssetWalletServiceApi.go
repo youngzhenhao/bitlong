@@ -30,7 +30,7 @@ func AnchorVirtualPsbts(virtualPsbts []string) bool {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -83,7 +83,7 @@ func FundVirtualPsbt(isPsbtNotRaw bool, psbt ...string) bool {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -139,7 +139,7 @@ func NextInternalKey(keyFamily int) string {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -186,7 +186,7 @@ func NextScriptKey(keyFamily int) string {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -233,7 +233,7 @@ func ProveAssetOwnership(assetId, scriptKey string) bool {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -285,7 +285,7 @@ func QueryInternalKey(internalKey string) string {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -334,7 +334,7 @@ func QueryScriptKey(tweakedScriptKey string) string {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -382,7 +382,7 @@ func RemoveUTXOLease() bool {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -430,7 +430,7 @@ func SignVirtualPsbt(fundedPsbt string) bool {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -479,7 +479,7 @@ func VerifyAssetOwnership(proofWithWitness string) bool {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,

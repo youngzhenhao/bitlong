@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -24,7 +25,8 @@ func StartTapRoot() {
 	// function will also set up logging properly.
 	cfg, cfgLogger, err := tapcfg.LoadConfig(shutdownInterceptor)
 	if err != nil {
-		if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
+		var e *flags.Error
+		if !errors.As(err, &e) || e.Type != flags.ErrHelp {
 			// Print error if not due to help request.
 			err = fmt.Errorf("failed to load config: %w", err)
 			_, _ = fmt.Fprintln(os.Stderr, err)
@@ -55,7 +57,12 @@ func StartTapRoot() {
 			os.Exit(1)
 		}
 		_ = pprof.StartCPUProfile(f)
-		defer f.Close()
+		defer func(f *os.File) {
+			err := f.Close()
+			if err != nil {
+				fmt.Printf("%s f.Close Error: %v\n", GetTimeNow(), err)
+			}
+		}(f)
 		defer pprof.StopCPUProfile()
 	}
 

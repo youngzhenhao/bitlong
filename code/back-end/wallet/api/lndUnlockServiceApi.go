@@ -24,7 +24,7 @@ func GenSeed() [24]string {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -69,7 +69,7 @@ func InitWallet(seed [24]string, password string) bool {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -119,7 +119,7 @@ func InitWallet(seed [24]string, password string) bool {
 		fmt.Printf("%s Error calling InitWallet: %v\n", GetTimeNow(), err)
 		return false
 	}
-	fmt.Printf("%s successful", GetTimeNow())
+	fmt.Printf("%s successful\n", GetTimeNow())
 	err = f.Close()
 	if err != nil {
 		fmt.Printf("%s Error calling InitWallet: %v\n", GetTimeNow(), err)
@@ -137,7 +137,7 @@ func UnlockWallet(password string) bool {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -163,7 +163,7 @@ func UnlockWallet(password string) bool {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 		return false
 	}
-	fmt.Printf("%s unlockSuccess", GetTimeNow())
+	fmt.Printf("%s unlockSuccess\n", GetTimeNow())
 	return true
 }
 
@@ -183,7 +183,7 @@ func ChangePassword(currentPassword, newPassword string) bool {
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -211,6 +211,6 @@ func ChangePassword(currentPassword, newPassword string) bool {
 		fmt.Printf("%s lnrpc ChangePassword err: %v\n", GetTimeNow(), err)
 		return false
 	}
-	fmt.Printf("%s ChangePassword Successfully", GetTimeNow())
+	fmt.Printf("%s ChangePassword Successfully\n", GetTimeNow())
 	return true
 }

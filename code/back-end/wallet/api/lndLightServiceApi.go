@@ -1793,3 +1793,51 @@ func SendCoins(addr string, amount int64) string {
 	log.Printf("%v\n", response)
 	return response.Txid
 }
+
+func LndStopDaemon() bool {
+	grpcHost := base.QueryConfigByKey("lndhost")
+	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		log.Printf("Failed to read cert file: %s", err)
+	}
+
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		log.Printf("Failed to append cert")
+	}
+
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		log.Printf("did not connect: %v", err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("conn Close err: %v", err)
+		}
+	}(conn)
+	client := lnrpc.NewLightningClient(conn)
+	request := &lnrpc.StopRequest{}
+	response, err := client.StopDaemon(context.Background(), request)
+	if err != nil {
+		log.Printf("lnrpc AbandonChannel err: %v", err)
+		return false
+	}
+	log.Printf("%v\n", response)
+	return true
+}

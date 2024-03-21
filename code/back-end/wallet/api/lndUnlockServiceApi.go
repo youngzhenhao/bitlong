@@ -22,11 +22,8 @@ import (
 //		用户获得并验证密码种子后，应使用 InitWallet 方法提交新生成的种子，并创建钱包
 //	 @return []string
 func GenSeed() [24]string {
-	const (
-		//grpcHost = "202.79.173.41:10009"
-		grpcHost = "202.79.173.41:10055"
-	)
-	tlsCertPath := filepath.Join(base.Configure("lnd2"), "tls.cert")
+	grpcHost := base.QueryConfigByKey("lndhost")
+	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	// Load the TLS certificate
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
@@ -85,11 +82,8 @@ func GenSeed() [24]string {
 //	@param password
 //	@return bool
 func InitWallet(seed [24]string, password string) bool {
-	const (
-		//grpcHost = "202.79.173.41:10009"
-		grpcHost = "202.79.173.41:10055"
-	)
-	tlsCertPath := filepath.Join(base.Configure("lnd2"), "tls.cert")
+	grpcHost := base.QueryConfigByKey("lndhost")
+	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	// Load the TLS certificate
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {

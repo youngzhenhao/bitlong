@@ -49,6 +49,7 @@ func ReadConfigFile(path string) map[string]string {
 
 }
 func Configure(appName string) string {
+	//fileConfig := ReadConfigFile("/data/user/0/com.btc.wallect/files/NewFolderBit/config.txt")
 	fileConfig := ReadConfigFile("C:\\mySpace\\bitlong\\code\\back-end\\wallet\\config.txt")
 	dirPath := fileConfig["dirpath"]
 	folderPath := filepath.Join(dirPath, "."+appName)

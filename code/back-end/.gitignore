@@ -10,5 +10,6 @@ wallet/lnurl/temp.go
 wallet/api/api.aar
 wallet/api/api-sources.jar
 wallet/api.backup.zip
-wallet/main.go
 wallet/file
+wallet/*_test.go
+wallet/api/*_test.go

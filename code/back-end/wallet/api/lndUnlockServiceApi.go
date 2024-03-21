@@ -5,33 +5,26 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
+	"fmt"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/wallet/base"
 	"golang.org/x/exp/rand"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"log"
 	"os"
 	"path/filepath"
 )
 
-// GenSeed
-//
-//	 @Description: 是用于实例化新 lnd 实例的第一个方法。该方法允许调用者根据可选的口令生成新的加密种子。
-//		如果提供了口令，则需要口令来解密密码种子，以显示内部钱包种子。
-//		用户获得并验证密码种子后，应使用 InitWallet 方法提交新生成的种子，并创建钱包
-//	 @return []string
 func GenSeed() [24]string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	// Load the TLS certificate
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf("%s Failed to append cert", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -40,58 +33,43 @@ func GenSeed() [24]string {
 	creds := credentials.NewTLS(config)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
-	// 创建 WalletUnlocker 客户端
 	client := lnrpc.NewWalletUnlockerClient(conn)
 	passphrase := ""
 	var aezeedPassphrase = []byte(passphrase)
-	// Generating random seed entropy:
 	seedEntropy := make([]byte, 16)
 	_, err = rand.Read(seedEntropy)
 	if err != nil {
-		log.Printf("could not generate seed entropy: %v", err)
+		fmt.Printf("%s could not generate seed entropy: %v\n", GetTimeNow(), err)
 	}
-	// 准备 WalletUnlocker 请求
 	request := &lnrpc.GenSeedRequest{
 		AezeedPassphrase: aezeedPassphrase,
 		SeedEntropy:      seedEntropy,
 	}
-	// 调用 InitWallet gRPC 方法
 	response, err := client.GenSeed(context.Background(), request)
 	if err != nil {
-		log.Printf("Error calling InitWallet: %v", err)
+		fmt.Printf("%s Error calling InitWallet: %v\n", GetTimeNow(), err)
 	}
-	// 处理 gRPC 响应
 	return [24]string(response.CipherSeedMnemonic)
 }
 
-// InitWallet
-//
-//	@Description: InitWallet 在 lnd 首次启动时使用，用于完全初始化守护进程及其内部钱包。
-//	至少必须提供一个钱包密码。这将用于加密磁盘上的敏感资料。
-//	在恢复情况下，用户还可以指定自己的密码和口令。如果设置了该密码，守护进程就会使用之前的状态来初始化其内部钱包。
-//	或者，也可以使用 GenSeed RPC 来获取种子，然后将其提交给用户。经用户验证后，可将种子输入此 RPC，以提交新钱包
-//	@param seed
-//	@param password
-//	@return bool
 func InitWallet(seed [24]string, password string) bool {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	// Load the TLS certificate
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf("%s Failed to append cert", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -100,15 +78,14 @@ func InitWallet(seed [24]string, password string) bool {
 	creds := credentials.NewTLS(config)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
-	// 创建 WalletUnlocker 客户端
 	client := lnrpc.NewWalletUnlockerClient(conn)
 	passphrase := ""
 	request := &lnrpc.InitWalletRequest{
@@ -118,34 +95,34 @@ func InitWallet(seed [24]string, password string) bool {
 	}
 	response, err := client.InitWallet(context.Background(), request)
 	if err != nil {
-		log.Printf("Error calling InitWallet: %v", err)
+		fmt.Printf("%s Error calling InitWallet: %v\n", GetTimeNow(), err)
 	}
 	d1 := response.AdminMacaroon
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	err = os.MkdirAll(newFilePath, os.ModePerm)
 	if err != nil {
-		log.Printf("Error calling InitWallet: %v", err)
+		fmt.Printf("%s Error calling InitWallet: %v\n", GetTimeNow(), err)
 	}
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	f, err := os.Create(macaroonPath)
 	if err != nil {
-		log.Printf("Error calling InitWallet: %v", err)
+		fmt.Printf("%s Error calling InitWallet: %v\n", GetTimeNow(), err)
 		return false
 	}
 	_, err = f.Write(d1)
 	if err != nil {
 		err := f.Close()
 		if err != nil {
-			log.Printf("f Close err: %v\n", err)
+			fmt.Printf("%s f Close err: %v\n", GetTimeNow(), err)
 			return false
 		}
-		log.Printf("Error calling InitWallet: %v", err)
+		fmt.Printf("%s Error calling InitWallet: %v\n", GetTimeNow(), err)
 		return false
 	}
-	log.Println("successful")
+	fmt.Printf("%s successful", GetTimeNow())
 	err = f.Close()
 	if err != nil {
-		log.Printf("Error calling InitWallet: %v", err)
+		fmt.Printf("%s Error calling InitWallet: %v\n", GetTimeNow(), err)
 		return false
 	}
 	return true
@@ -154,14 +131,13 @@ func InitWallet(seed [24]string, password string) bool {
 func UnlockWallet(password string) bool {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	// Load the TLS certificate
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf("%s Failed to append cert", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -170,25 +146,24 @@ func UnlockWallet(password string) bool {
 	creds := credentials.NewTLS(config)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
-	// 创建 WalletUnlocker 客户端
 	client := lnrpc.NewWalletUnlockerClient(conn)
 	request := &lnrpc.UnlockWalletRequest{
 		WalletPassword: []byte(password),
 	}
 	_, err = client.UnlockWallet(context.Background(), request)
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 		return false
 	}
-	log.Println("unlockSuccess")
+	fmt.Printf("%s unlockSuccess", GetTimeNow())
 	return true
 }
 
@@ -204,11 +179,11 @@ func ChangePassword(currentPassword, newPassword string) bool {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf("%s Failed to append cert", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -218,12 +193,12 @@ func ChangePassword(currentPassword, newPassword string) bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewWalletUnlockerClient(conn)
@@ -231,11 +206,11 @@ func ChangePassword(currentPassword, newPassword string) bool {
 		CurrentPassword: []byte(currentPassword),
 		NewPassword:     []byte(newPassword),
 	}
-	response, err := client.ChangePassword(context.Background(), request)
+	_, err = client.ChangePassword(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc ChangePassword err: %v", err)
+		fmt.Printf("%s lnrpc ChangePassword err: %v\n", GetTimeNow(), err)
 		return false
 	}
-	log.Printf("%v\n", response)
+	fmt.Printf("%s ChangePassword Successfully", GetTimeNow())
 	return true
 }

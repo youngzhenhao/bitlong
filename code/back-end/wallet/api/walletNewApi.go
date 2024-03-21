@@ -6,14 +6,13 @@ import (
 	"github.com/wallet/config"
 )
 
-// 返回数据结构
 type AddrData struct {
-	LegacyAddress      string `json:"legacyAddress"`      //老地址
-	LegacyPriKey       string `json:"legacyPriKey"`       //老地址私钥
-	NativeSegWitAddr   string `json:"nativeSegWitAddr"`   //原生地址
-	NativeSegWitPriKey string `json:"nativeSegWitPriKey"` //原生地址私钥
-	NestedSegWitAddr   string `json:"nestedSegWitAddr"`   //原生兼容地址
-	NestedSegWitPriKey string `json:"nestedSegWitPriKey"` //原生兼容地址私钥
+	LegacyAddress      string `json:"legacyAddress"`
+	LegacyPriKey       string `json:"legacyPriKey"`
+	NativeSegWitAddr   string `json:"nativeSegWitAddr"`
+	NativeSegWitPriKey string `json:"nativeSegWitPriKey"`
+	NestedSegWitAddr   string `json:"nestedSegWitAddr"`
+	NestedSegWitPriKey string `json:"nestedSegWitPriKey"`
 }
 
 func GetAddr(Mnemonic string, Account int64, addressIndex int64) string {
@@ -23,7 +22,7 @@ func GetAddr(Mnemonic string, Account int64, addressIndex int64) string {
 		Account:      Account,
 		AddressIndex: addressIndex,
 	}
-	master, _ := address.HdNewKey(getK) //构造注入参数
+	master, _ := address.HdNewKey(getK)
 	LegacyAddress, _ := master.LegacyAddress()
 	LegacyPriKey, _ := master.GetPriKey(1)
 	NativeSegWitAddr, _ := master.NativeSegWitAddr()

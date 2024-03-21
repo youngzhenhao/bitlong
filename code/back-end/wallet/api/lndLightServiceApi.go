@@ -5,12 +5,12 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
+	"fmt"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -29,12 +29,12 @@ func GetNewAddress() string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -45,23 +45,21 @@ func GetNewAddress() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
-	// 创建 WalletUnlocker 客户端
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.NewAddressRequest{}
 	response, err := client.NewAddress(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc NewAddress err: %v", err)
+		fmt.Printf("%s lnrpc NewAddress err: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	//log.Printf("%v\n", response)
 	return response.Address
 }
 
@@ -78,12 +76,12 @@ func GetWalletBalance() string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -94,27 +92,24 @@ func GetWalletBalance() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.WalletBalanceRequest{}
 	response, err := client.WalletBalance(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc WalletBalance err: %v", err)
+		fmt.Printf("%s lnrpc WalletBalance err: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	//log.Printf("%v\n", response)
 	return response.String()
 }
 
-// GetIdentityPubkey
-// 获取节点公钥
 func GetIdentityPubkey() string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -128,12 +123,12 @@ func GetIdentityPubkey() string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -144,29 +139,24 @@ func GetIdentityPubkey() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.GetInfoRequest{}
 	response, err := client.GetInfo(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc ListChannels err: %v", err)
+		fmt.Printf("%s lnrpc ListChannels err: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	//log.Printf("%v\n", response)
 	return response.GetIdentityPubkey()
 }
 
-// GetInfoOfLnd
-//
-//	@Description: 返回有关闪电节点的一般信息，包括其身份的发布密钥、别名、所连接的链，以及有关打开+待处理通道数量的信息
-//	@return string
 func GetInfoOfLnd() string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -180,12 +170,12 @@ func GetInfoOfLnd() string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -196,32 +186,24 @@ func GetInfoOfLnd() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.GetInfoRequest{}
 	response, err := client.GetInfo(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc ListChannels err: %v", err)
+		fmt.Printf("%s lnrpc ListChannels err: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	//log.Printf("%v\n", response)
 	return response.String()
 }
 
-// AddInvoice
-//
-//	@Description: 试图在发票数据库中添加新发票。任何重复的发票都会被拒绝，因此所有发票都必须有唯一的付款预图像
-//	@param value
-//	@return string
-//
-// func AddInvoice(value int64) *lnrpc.AddInvoiceResponse {
 func AddInvoice(value int64, memo string) string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -235,12 +217,12 @@ func AddInvoice(value int64, memo string) string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -251,12 +233,12 @@ func AddInvoice(value int64, memo string) string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
@@ -266,19 +248,12 @@ func AddInvoice(value int64, memo string) string {
 	}
 	response, err := client.AddInvoice(context.Background(), request)
 	if err != nil {
-		log.Printf("client.AddInvoice :%v", err)
+		fmt.Printf("%s client.AddInvoice :%v\n", GetTimeNow(), err)
 		return ""
 	}
 	return response.String()
 }
 
-// ListInvoices
-//
-//	@Description: 返回数据库中当前存储的所有发票的列表。任何活动的调试发票都会被忽略。
-//	它完全支持分页响应，允许用户通过 add_index 查询特定发票。
-//	可以使用响应中包含的 first_index_offset 或 last_index_offset 字段作为下一个请求的 index_offset。默认情况下，
-//	将返回创建的前 100 张发票。还可通过 Reversed 标志支持向后分页
-//	@return string
 func ListInvoices() string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -292,12 +267,12 @@ func ListInvoices() string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -308,19 +283,19 @@ func ListInvoices() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ListInvoiceRequest{}
 	response, err := client.ListInvoices(context.Background(), request)
 	if err != nil {
-		log.Printf("client.ListInvoice :%v", err)
+		fmt.Printf("%s client.ListInvoice :%v\n", GetTimeNow(), err)
 		return ""
 	}
 	return response.String()
@@ -339,12 +314,12 @@ func LookupInvoice(rhash string) string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -355,12 +330,12 @@ func LookupInvoice(rhash string) string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
@@ -370,7 +345,7 @@ func LookupInvoice(rhash string) string {
 	}
 	response, err := client.LookupInvoice(context.Background(), request)
 	if err != nil {
-		log.Printf("client.ListInvoice :%v", err)
+		fmt.Printf("%s client.ListInvoice :%v\n", GetTimeNow(), err)
 		return ""
 	}
 	return response.String()
@@ -389,12 +364,12 @@ func AbandonChannel() bool {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -405,22 +380,22 @@ func AbandonChannel() bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.AbandonChannelRequest{}
 	response, err := client.AbandonChannel(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc AbandonChannel err: %v", err)
+		fmt.Printf("%s lnrpc AbandonChannel err: %v\n", GetTimeNow(), err)
 		return false
 	}
-	log.Printf("%v\n", response)
+	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return true
 }
 
@@ -437,12 +412,12 @@ func BatchOpenChannel() bool {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -453,22 +428,22 @@ func BatchOpenChannel() bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.BatchOpenChannelRequest{}
 	response, err := client.BatchOpenChannel(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc BatchOpenChannel err: %v", err)
+		fmt.Printf("%s lnrpc BatchOpenChannel err: %v\n", GetTimeNow(), err)
 		return false
 	}
-	log.Printf("%v\n", response)
+	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return true
 }
 
@@ -485,12 +460,12 @@ func ChannelAcceptor() bool {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -501,44 +476,35 @@ func ChannelAcceptor() bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
-	//request := &lnrpc.ChannelAcceptRequest{}
-	//response, err := client.ChannelAcceptor(context.Background(), request)
 	stream, err := client.ChannelAcceptor(context.Background())
 	if err != nil {
-		log.Printf("lnrpc ChannelAcceptor err: %v", err)
+		fmt.Printf("%s lnrpc ChannelAcceptor err: %v\n", GetTimeNow(), err)
 		return false
 	}
 	for {
 		response, err := stream.Recv()
 		if err != nil {
 			if err == io.EOF {
-				// 流已经关闭，退出循环
-				log.Printf("err == io.EOF, err: %v\n", err)
+				fmt.Printf("%s err == io.EOF, err: %v\n", GetTimeNow(), err)
 				return false
 			}
-			log.Printf("stream Recv err: %v\n", err)
+			fmt.Printf("%s stream Recv err: %v\n", GetTimeNow(), err)
 			return false
 		}
-		log.Printf("%v\n", response)
+		fmt.Printf("%s %v\n", GetTimeNow(), response)
 		return true
 	}
 }
 
-// ChannelBalance
-//
-//	@Description: 返回所有开放渠道的资金总额报告，按本地/远程、待结算的本地/远程和未结算的本地/远程余额分类
-//	@return bool
-//
-// func ChannelBalance() *lnrpc.ChannelBalanceResponse {
 func ChannelBalance() string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -552,12 +518,12 @@ func ChannelBalance() string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -568,22 +534,22 @@ func ChannelBalance() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ChannelBalanceRequest{}
 	response, err := client.ChannelBalance(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc ChannelBalance err: %v", err)
+		fmt.Printf("%s lnrpc ChannelBalance err: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	log.Printf("%v\n", response)
+	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return response.String()
 }
 
@@ -600,12 +566,12 @@ func CheckMacaroonPermissions() bool {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -616,33 +582,25 @@ func CheckMacaroonPermissions() bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.CheckMacPermRequest{}
 	response, err := client.CheckMacaroonPermissions(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc CheckMacaroonPermissions err: %v", err)
+		fmt.Printf("%s lnrpc CheckMacaroonPermissions err: %v\n", GetTimeNow(), err)
 		return false
 	}
-	log.Printf("%v\n", response)
+	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return true
 }
 
-// CloseChannel
-//
-//	 @Description: 试图关闭一个由其通道输出点（ChannelPoint）标识的活动通道。
-//		该方法的操作还可以在超时后尝试强制关闭不活动的对等设备。如果请求非强制关闭（合作关闭），
-//		用户可以指定关闭交易确认前的目标区块数或手动费率。
-//		如果两者都未指定，则使用默认的宽松区块确认目标。
-//	 @param fundingTxidStr
-//	 @param outputIndex
 func CloseChannel(fundingTxidStr string, outputIndex int) bool {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -656,12 +614,12 @@ func CloseChannel(fundingTxidStr string, outputIndex int) bool {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -672,12 +630,12 @@ func CloseChannel(fundingTxidStr string, outputIndex int) bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
@@ -690,32 +648,25 @@ func CloseChannel(fundingTxidStr string, outputIndex int) bool {
 	}
 	stream, err := client.CloseChannel(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc CloseChannel err: %v", err)
+		fmt.Printf("%s lnrpc CloseChannel err: %v\n", GetTimeNow(), err)
 		return false
 	}
 	for {
 		response, err := stream.Recv()
 		if err != nil {
 			if err == io.EOF {
-				// 流已经关闭，退出循环
-				log.Printf("err == io.EOF, err: %v\n", err)
+				fmt.Printf("%s err == io.EOF, err: %v\n", GetTimeNow(), err)
 				return false
 			}
-			log.Printf("stream Recv err: %v\n", err)
+			fmt.Printf("%s stream Recv err: %v\n", GetTimeNow(), err)
 			return false
 		}
-		log.Printf("%v\n", response)
+		fmt.Printf("%s %v\n", GetTimeNow(), response)
 		return true
 	}
 
 }
 
-// ClosedChannels
-//
-//	@Description: 返回该节点参与的所有封闭通道的描述
-//	@return *lnrpc.ClosedChannelsResponse
-//
-// func ClosedChannels() *lnrpc.ClosedChannelsResponse {
 func ClosedChannels() string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -729,12 +680,12 @@ func ClosedChannels() string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -745,22 +696,21 @@ func ClosedChannels() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ClosedChannelsRequest{}
 	response, err := client.ClosedChannels(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc ClosedChannels err: %v", err)
+		fmt.Printf("%s lnrpc ClosedChannels err: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	//log.Printf("%v\n", response)
 	return response.String()
 }
 
@@ -777,12 +727,12 @@ func ExportAllChannelBackups() bool {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -793,22 +743,22 @@ func ExportAllChannelBackups() bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ChanBackupExportRequest{}
 	response, err := client.ExportAllChannelBackups(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc ChanBackupExportRequest err: %v", err)
+		fmt.Printf("%s lnrpc ChanBackupExportRequest err: %v\n", GetTimeNow(), err)
 		return false
 	}
-	log.Printf("%v\n", response)
+	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return true
 }
 
@@ -825,12 +775,12 @@ func ExportChannelBackup() bool {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -841,30 +791,25 @@ func ExportChannelBackup() bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ExportChannelBackupRequest{}
 	response, err := client.ExportChannelBackup(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc ExportChannelBackup err: %v", err)
+		fmt.Printf("%s lnrpc ExportChannelBackup err: %v\n", GetTimeNow(), err)
 		return false
 	}
-	log.Printf("%v\n", response)
+	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return true
 }
 
-// GetChanInfo
-//
-//	@Description: 返回指定通道的最新认证网络公告，该通道由通道 ID 标识：一个 8 字节整数，用于唯一标识区块链中交易资金输出的位置
-//	@param chanId
-//	@return *lnrpc.ChannelEdge
 func GetChanInfo(chanId string) string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -878,12 +823,12 @@ func GetChanInfo(chanId string) string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -894,37 +839,30 @@ func GetChanInfo(chanId string) string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	chainIdUint64, err := strconv.ParseUint(chanId, 10, 64)
 	if err != nil {
-		log.Printf("string to uint64 err: %v", err)
+		fmt.Printf("%s string to uint64 err: %v\n", GetTimeNow(), err)
 	}
 	request := &lnrpc.ChanInfoRequest{
 		ChanId: chainIdUint64,
 	}
 	response, err := client.GetChanInfo(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc GetChanInfo err: %v", err)
+		fmt.Printf("%s lnrpc GetChanInfo err: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	//log.Printf("%v\n", response)
 	return response.String()
 }
 
-// ListChannels
-//
-//	@Description: 返回该节点参与的所有开放通道的描述。
-//	@return *lnrpc.ListChannelsResponse
-//
-// func ListChannels() *lnrpc.ListChannelsResponse {
 func ListChannels() string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -938,12 +876,12 @@ func ListChannels() string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -954,22 +892,21 @@ func ListChannels() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ListChannelsRequest{}
 	response, err := client.ListChannels(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc ListChannels err: %v", err)
+		fmt.Printf("%s lnrpc ListChannels err: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	//log.Printf("%v\n", response)
 	return response.String()
 }
 
@@ -986,12 +923,12 @@ func OpenChannelSync(nodePubkey string, localFundingAmount int64) string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1002,12 +939,12 @@ func OpenChannelSync(nodePubkey string, localFundingAmount int64) string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
@@ -1018,24 +955,13 @@ func OpenChannelSync(nodePubkey string, localFundingAmount int64) string {
 	}
 	response, err := client.OpenChannelSync(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc OpenChannelSync err: %v", err)
+		fmt.Printf("%s lnrpc OpenChannelSync err: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	//log.Printf("%v\n", response)
 	responseStr := hex.EncodeToString(response.GetFundingTxidBytes())
 	return responseStr + ":" + strconv.Itoa(int(response.GetOutputIndex()))
 }
 
-// OpenChannel
-//
-//	@Description: 会尝试向远程对等方打开请求中指定的单一注资通道。
-//	用户可以指定确认资金交易的目标区块数，或为资金交易手动设定费率。
-//	如果两者都未指定，则使用宽松的区块确认目标。每次 OpenStatusUpdate 都会返回正在进行的通道的待定通道 ID。
-//	根据 OpenChannelRequest 中指定的参数，该待定通道 ID 可用于手动推进通道资金流。
-//	@param nodePubkey
-//	@param localFundingAmount
-//
-// func OpenChannel(nodePubkey string, localFundingAmount int64) *lnrpc.OpenStatusUpdate {
 func OpenChannel(nodePubkey string, localFundingAmount int64) bool {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -1049,12 +975,12 @@ func OpenChannel(nodePubkey string, localFundingAmount int64) bool {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1065,12 +991,12 @@ func OpenChannel(nodePubkey string, localFundingAmount int64) bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
@@ -1081,33 +1007,24 @@ func OpenChannel(nodePubkey string, localFundingAmount int64) bool {
 	}
 	stream, err := client.OpenChannel(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc OpenChannel err: %v", err)
+		fmt.Printf("%s lnrpc OpenChannel err: %v\n", GetTimeNow(), err)
 		return false
 	}
 	for {
 		response, err := stream.Recv()
 		if err != nil {
 			if err == io.EOF {
-				// 流已经关闭，退出循环
-				log.Printf("err == io.EOF, err: %v\n", err)
+				fmt.Printf("%s err == io.EOF, err: %v\n", GetTimeNow(), err)
 				return false
 			}
-			log.Printf("stream Recv err: %v\n", err)
+			fmt.Printf("%s stream Recv err: %v\n", GetTimeNow(), err)
 			return false
 		}
-		log.Printf("%v\n", response)
+		fmt.Printf("%s %v\n", GetTimeNow(), response)
 		return true
 	}
 }
 
-// PendingChannels
-//
-//	 @Description: 返回当前被视为 "待定 "的所有通道的列表。
-//		如果一个通道已完成筹资工作流程，正在等待筹资 txn 的确认，
-//		或正在关闭（合作或非合作启动），则该通道为 "待定 "通道。
-//	 @return *lnrpc.PendingChannelsResponse
-//
-// func PendingChannels() *lnrpc.PendingChannelsResponse {
 func PendingChannels() string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -1121,12 +1038,12 @@ func PendingChannels() string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1137,22 +1054,21 @@ func PendingChannels() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.PendingChannelsRequest{}
 	response, err := client.PendingChannels(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc PendingChannels err: %v", err)
+		fmt.Printf("%s lnrpc PendingChannels err: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	//log.Printf("%v\n", response)
 	return response.String()
 }
 
@@ -1169,12 +1085,12 @@ func RestoreChannelBackups() bool {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1185,22 +1101,22 @@ func RestoreChannelBackups() bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.RestoreChanBackupRequest{}
 	response, err := client.RestoreChannelBackups(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc RestoreChannelBackups err: %v", err)
+		fmt.Printf("%s lnrpc RestoreChannelBackups err: %v\n", GetTimeNow(), err)
 		return false
 	}
-	log.Printf("%v\n", response)
+	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return true
 }
 
@@ -1217,12 +1133,12 @@ func SubscribeChannelBackups() bool {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1233,33 +1149,32 @@ func SubscribeChannelBackups() bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ChannelBackupSubscription{}
 	stream, err := client.SubscribeChannelBackups(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc SubscribeChannelBackups err: %v", err)
+		fmt.Printf("%s lnrpc SubscribeChannelBackups err: %v\n", GetTimeNow(), err)
 		return false
 	}
 	for {
 		response, err := stream.Recv()
 		if err != nil {
 			if err == io.EOF {
-				// 流已经关闭，退出循环
-				log.Printf("err == io.EOF, err: %v\n", err)
+				fmt.Printf("%s err == io.EOF, err: %v\n", GetTimeNow(), err)
 				return false
 			}
-			log.Printf("stream Recv err: %v\n", err)
+			fmt.Printf("%s stream Recv err: %v\n", GetTimeNow(), err)
 			return false
 		}
-		log.Printf("%v\n", response)
+		fmt.Printf("%s %v\n", GetTimeNow(), response)
 		return true
 	}
 
@@ -1278,12 +1193,12 @@ func SubscribeChannelEvents() bool {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1294,33 +1209,32 @@ func SubscribeChannelEvents() bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ChannelEventSubscription{}
 	stream, err := client.SubscribeChannelEvents(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc  err: %v", err)
+		fmt.Printf("%s lnrpc  err: %v\n", GetTimeNow(), err)
 		return false
 	}
 	for {
 		response, err := stream.Recv()
 		if err != nil {
 			if err == io.EOF {
-				// 流已经关闭，退出循环
-				log.Printf("err == io.EOF, err: %v\n", err)
+				fmt.Printf("%s err == io.EOF, err: %v\n", GetTimeNow(), err)
 				return false
 			}
-			log.Printf("stream Recv err: %v\n", err)
+			fmt.Printf("%s stream Recv err: %v\n", GetTimeNow(), err)
 			return false
 		}
-		log.Printf("%v\n", response)
+		fmt.Printf("%s %v\n", GetTimeNow(), response)
 		return true
 	}
 
@@ -1339,12 +1253,12 @@ func SubscribeChannelGraph() bool {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1355,33 +1269,32 @@ func SubscribeChannelGraph() bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.GraphTopologySubscription{}
 	stream, err := client.SubscribeChannelGraph(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc SubscribeChannelGraph err: %v", err)
+		fmt.Printf("%s lnrpc SubscribeChannelGraph err: %v\n", GetTimeNow(), err)
 		return false
 	}
 	for {
 		response, err := stream.Recv()
 		if err != nil {
 			if err == io.EOF {
-				// 流已经关闭，退出循环
-				log.Printf("err == io.EOF, err: %v\n", err)
+				fmt.Printf("%s err == io.EOF, err: %v\n", GetTimeNow(), err)
 				return false
 			}
-			log.Printf("stream Recv err: %v\n", err)
+			fmt.Printf("%s stream Recv err: %v\n", GetTimeNow(), err)
 			return false
 		}
-		log.Printf("%v\n", response)
+		fmt.Printf("%s %v\n", GetTimeNow(), response)
 		return true
 	}
 
@@ -1400,12 +1313,12 @@ func UpdateChannelPolicy() bool {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1416,22 +1329,22 @@ func UpdateChannelPolicy() bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.PolicyUpdateRequest{}
 	response, err := client.UpdateChannelPolicy(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc UpdateChannelPolicy err: %v", err)
+		fmt.Printf("%s lnrpc UpdateChannelPolicy err: %v\n", GetTimeNow(), err)
 		return false
 	}
-	log.Printf("%v\n", response)
+	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return true
 }
 
@@ -1448,12 +1361,12 @@ func VerifyChanBackup() bool {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1464,33 +1377,25 @@ func VerifyChanBackup() bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ChanBackupSnapshot{}
 	response, err := client.VerifyChanBackup(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc VerifyChanBackup err: %v", err)
+		fmt.Printf("%s lnrpc VerifyChanBackup err: %v\n", GetTimeNow(), err)
 		return false
 	}
-	log.Printf("%v\n", response)
+	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return true
 }
 
-// ConnectPeer
-//
-//	@Description: 试图建立与远程对等节点的连接。这属于网络层面，用于节点之间的通信。这有别于与对等节点建立通道。
-//	@param pubkey
-//	@param host
-//	@return *lnrpc.ConnectPeerResponse
-//
-// func ConnectPeer(pubkey, host string) *lnrpc.ConnectPeerResponse {
 func ConnectPeer(pubkey, host string) bool {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -1504,12 +1409,12 @@ func ConnectPeer(pubkey, host string) bool {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1520,12 +1425,12 @@ func ConnectPeer(pubkey, host string) bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
@@ -1537,10 +1442,10 @@ func ConnectPeer(pubkey, host string) bool {
 	}
 	response, err := client.ConnectPeer(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc ConnectPeer err: %v", err)
+		fmt.Printf("%s lnrpc ConnectPeer err: %v\n", GetTimeNow(), err)
 		return false
 	}
-	log.Printf("%v\n", response)
+	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return true
 }
 
@@ -1557,12 +1462,12 @@ func EstimateFee(addr string, amount int64) string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1573,12 +1478,12 @@ func EstimateFee(addr string, amount int64) string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
@@ -1589,10 +1494,9 @@ func EstimateFee(addr string, amount int64) string {
 	}
 	response, err := client.EstimateFee(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc ConnectPeer err: %v", err)
+		fmt.Printf("%s lnrpc ConnectPeer err: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	//log.Printf("%v\n", response)
 	return response.String()
 }
 
@@ -1609,12 +1513,12 @@ func DecodePayReq(payReq string) int64 {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1625,12 +1529,12 @@ func DecodePayReq(payReq string) int64 {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
@@ -1639,10 +1543,9 @@ func DecodePayReq(payReq string) int64 {
 	}
 	response, err := client.DecodePayReq(context.Background(), request)
 	if err != nil {
-		log.Printf("client.AddInvoice :%v", err)
+		fmt.Printf("%s client.AddInvoice :%v\n", GetTimeNow(), err)
 		return -1
 	}
-	//log.Printf("%v\n", response)
 	return response.NumSatoshis
 }
 
@@ -1658,11 +1561,11 @@ func SendPaymentSync(invoice string) string {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -1672,25 +1575,24 @@ func SendPaymentSync(invoice string) string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.SendRequest{
 		PaymentRequest: invoice,
-		//Amt:            amt,
 	}
 	stream, err := client.SendPaymentSync(context.Background(), request)
 	if err != nil {
-		log.Printf("client.SendPaymentSync :%v", err)
+		fmt.Printf("%s client.SendPaymentSync :%v\n", GetTimeNow(), err)
 		return "false"
 	}
-	log.Printf(stream.String())
+	fmt.Printf(GetTimeNow() + stream.String())
 	return hex.EncodeToString(stream.PaymentHash)
 }
 
@@ -1706,11 +1608,11 @@ func SendPaymentSync0amt(invoice string, amt int64) string {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -1720,12 +1622,12 @@ func SendPaymentSync0amt(invoice string, amt int64) string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
@@ -1735,10 +1637,10 @@ func SendPaymentSync0amt(invoice string, amt int64) string {
 	}
 	stream, err := client.SendPaymentSync(context.Background(), request)
 	if err != nil {
-		log.Printf("client.SendPaymentSync :%v", err)
+		fmt.Printf("%s client.SendPaymentSync :%v\n", GetTimeNow(), err)
 		return "false"
 	}
-	log.Printf(stream.String())
+	fmt.Printf(GetTimeNow() + stream.String())
 	return hex.EncodeToString(stream.PaymentHash)
 }
 
@@ -1755,12 +1657,12 @@ func SendCoins(addr string, amount int64) string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1771,12 +1673,12 @@ func SendCoins(addr string, amount int64) string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 
@@ -1787,10 +1689,10 @@ func SendCoins(addr string, amount int64) string {
 	}
 	response, err := client.SendCoins(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc ConnectPeer err: %v", err)
+		fmt.Printf("%s lnrpc ConnectPeer err: %v\n", GetTimeNow(), err)
 		return "false"
 	}
-	log.Printf("%v\n", response)
+	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return response.Txid
 }
 
@@ -1807,12 +1709,12 @@ func LndStopDaemon() bool {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
 	}
 
 	config := &tls.Config{
@@ -1823,21 +1725,21 @@ func LndStopDaemon() bool {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.StopRequest{}
 	response, err := client.StopDaemon(context.Background(), request)
 	if err != nil {
-		log.Printf("lnrpc AbandonChannel err: %v", err)
+		fmt.Printf("%s lnrpc AbandonChannel err: %v\n", GetTimeNow(), err)
 		return false
 	}
-	log.Printf("%v\n", response)
+	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return true
 }

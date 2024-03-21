@@ -5,22 +5,16 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
+	"fmt"
 
 	"github.com/lightningnetwork/lnd/lnrpc/watchtowerrpc"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"log"
 	"os"
 	"path/filepath"
 )
 
-// WatchtowerGetInfo
-//
-//	@Description: 返回有关同伴监视塔的一般信息，包括其公钥和服务器当前正在监听客户端的 URI
-//	@return *watchtowerrpc.GetInfoResponse
-//
-// func WatchtowerGetInfo() *watchtowerrpc.GetInfoResponse {
 func WatchtowerGetInfo() string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -33,11 +27,11 @@ func WatchtowerGetInfo() string {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Fatalf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %v\n", GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Fatalf("Failed to append cert")
+		fmt.Printf("%s Failed to append cert", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -47,21 +41,20 @@ func WatchtowerGetInfo() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Fatalf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := watchtowerrpc.NewWatchtowerClient(conn)
 	request := &watchtowerrpc.GetInfoRequest{}
 	response, err := client.GetInfo(context.Background(), request)
 	if err != nil {
-		log.Printf("watchtowerrpc GetInfo err: %v", err)
+		fmt.Printf("%s watchtowerrpc GetInfo err: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	//log.Printf("%v\n", response)
 	return response.String()
 }

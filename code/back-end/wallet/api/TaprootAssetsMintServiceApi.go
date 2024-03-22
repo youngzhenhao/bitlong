@@ -64,7 +64,7 @@ func CancelBatch() bool {
 	return true
 }
 
-func finalizeBatch(shortResponse bool, feeRate int) bool {
+func finalizeBatch(shortResponse bool, feeRate int) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
@@ -106,10 +106,10 @@ func finalizeBatch(shortResponse bool, feeRate int) bool {
 	response, err := client.FinalizeBatch(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s mintrpc FinalizeBatch Error: %v\n", GetTimeNow(), err)
-		return false
+		return ""
 	}
-	fmt.Printf("%s %v\n", GetTimeNow(), response)
-	return true
+	//fmt.Printf("%s %v\n", GetTimeNow(), response)
+	return response.String()
 }
 
 // FinalizeBatch
@@ -118,7 +118,7 @@ func finalizeBatch(shortResponse bool, feeRate int) bool {
 //	@param shortResponse
 //	@param feeRate
 //	@return bool
-func FinalizeBatch(feeRate int) bool {
+func FinalizeBatch(feeRate int) string {
 	return finalizeBatch(false, feeRate)
 }
 

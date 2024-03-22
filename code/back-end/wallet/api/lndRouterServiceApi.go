@@ -5,13 +5,13 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
+	"fmt"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/lightningnetwork/lnd/lnrpc/routerrpc"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"io"
-	"log"
 	"os"
 
 	"path/filepath"
@@ -29,11 +29,11 @@ func SendPaymentV2(invoice string, feelimit int64) string {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -43,12 +43,12 @@ func SendPaymentV2(invoice string, feelimit int64) string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := routerrpc.NewRouterClient(conn)
@@ -59,21 +59,20 @@ func SendPaymentV2(invoice string, feelimit int64) string {
 	}
 	stream, err := client.SendPaymentV2(context.Background(), request)
 	if err != nil {
-		log.Printf("client.SendPaymentV2 :%v", err)
+		fmt.Printf("%s client.SendPaymentV2 :%v\n", GetTimeNow(), err)
 		return "false"
 	}
 	for {
 		response, err := stream.Recv()
 		if err != nil {
 			if err == io.EOF {
-				// 流已经关闭，退出循环
-				log.Printf("err == io.EOF, err: %v\n", err)
+				fmt.Printf("%s err == io.EOF, err: %v\n", GetTimeNow(), err)
 				return "false"
 			}
-			log.Printf("stream Recv err: %v\n", err)
+			fmt.Printf("%s stream Recv err: %v\n", GetTimeNow(), err)
 			return "false"
 		}
-		log.Printf("%v\n", response)
+		fmt.Printf("%s %v\n", GetTimeNow(), response)
 		return response.PaymentHash
 	}
 }
@@ -91,12 +90,12 @@ func TrackPaymentV2(payhash string) string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 
 	config := &tls.Config{
@@ -107,12 +106,12 @@ func TrackPaymentV2(payhash string) string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := routerrpc.NewRouterClient(conn)
@@ -123,21 +122,20 @@ func TrackPaymentV2(payhash string) string {
 	stream, err := client.TrackPaymentV2(context.Background(), request)
 
 	if err != nil {
-		log.Printf("client.SendPaymentV2 :%v", err)
+		fmt.Printf("%s client.SendPaymentV2 :%v\n", GetTimeNow(), err)
 		return "false"
 	}
 	for {
 		response, err := stream.Recv()
 		if err != nil {
 			if err == io.EOF {
-				// 流已经关闭，退出循环
-				log.Printf("err == io.EOF, err: %v\n", err)
+				fmt.Printf("%s err == io.EOF, err: %v\n", GetTimeNow(), err)
 				return "false"
 			}
-			log.Printf("stream Recv err: %v\n", err)
+			fmt.Printf("%s stream Recv err: %v\n", GetTimeNow(), err)
 			return "false"
 		}
-		log.Printf("%v\n", response)
+		fmt.Printf("%s %v\n", GetTimeNow(), response)
 		return response.Status.String()
 	}
 }
@@ -155,14 +153,13 @@ func SendToRouteV2(payhash []byte, route *lnrpc.Route) {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
-
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
 		RootCAs:    certPool,
@@ -171,12 +168,12 @@ func SendToRouteV2(payhash []byte, route *lnrpc.Route) {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := routerrpc.NewRouterClient(conn)
@@ -185,12 +182,10 @@ func SendToRouteV2(payhash []byte, route *lnrpc.Route) {
 		Route:       route,
 	}
 	response, err := client.SendToRouteV2(context.Background(), request)
-
 	if err != nil {
-		log.Printf("client.SendPaymentV2 :%v", err)
+		fmt.Printf("%s client.SendPaymentV2 :%v\n", GetTimeNow(), err)
 	}
-
-	log.Print(response)
+	fmt.Printf("%s %v\n", GetTimeNow(), response)
 }
 
 func EstimateRouteFee(dest string, amtsat int64) string {
@@ -206,12 +201,12 @@ func EstimateRouteFee(dest string, amtsat int64) string {
 
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 
 	config := &tls.Config{
@@ -222,12 +217,12 @@ func EstimateRouteFee(dest string, amtsat int64) string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := routerrpc.NewRouterClient(conn)
@@ -239,8 +234,8 @@ func EstimateRouteFee(dest string, amtsat int64) string {
 	}
 	response, err := client.EstimateRouteFee(context.Background(), request)
 	if err != nil {
-		log.Printf("client.Sen下dPaymentV2 :%v", err)
+		fmt.Printf("%s client.Sen下dPaymentV2 :%v\n", GetTimeNow(), err)
 	}
-	log.Print(response.RoutingFeeMsat)
+	fmt.Printf("%s  %v\n", GetTimeNow(), response.RoutingFeeMsat)
 	return response.String()
 }

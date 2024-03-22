@@ -5,11 +5,11 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
+	"fmt"
 	"github.com/lightninglabs/taproot-assets/taprpc/universerpc"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"log"
 	"os"
 	"path/filepath"
 )
@@ -26,12 +26,6 @@ func DeleteAssetRoot() {}
 
 func DeleteFederationServer() {}
 
-// UniverseInfo
-//
-//	@Description: 返回一组关于宇宙当前状态的信息
-//	@return *universerpc.InfoResponse
-//
-// func UniverseInfo() *universerpc.InfoResponse {
 func UniverseInfo() string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -44,11 +38,11 @@ func UniverseInfo() string {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -56,41 +50,29 @@ func UniverseInfo() string {
 	}
 	creds := credentials.NewTLS(config)
 
-	// 连接到grpc服务器
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: grpc.Dial: %v", err)
+		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
-	// 匿名函数延迟关闭grpc连接
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close Error: %v", err)
+			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
-	// 创建客户端
 	client := universerpc.NewUniverseClient(conn)
-	// 构建请求
 	request := &universerpc.InfoRequest{}
-	// 得到响应
 	response, err := client.Info(context.Background(), request)
 	if err != nil {
-		log.Printf("universerpc Info Error: %v", err)
+		fmt.Printf("%s universerpc Info Error: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	//log.Printf("%v\n", response)
 	return response.String()
 }
 
 func InsertProof() {}
 
-// ListFederationServers
-//
-//	@Description: 列出了组成本地 Universe 服务器联盟的服务器集。这些服务器用于推送新的证明，并定期从远程服务器同步调用新的证明
-//	@return *universerpc.ListFederationServersResponse
-//
-// func ListFederationServers() *universerpc.ListFederationServersResponse {
 func ListFederationServers() string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -103,11 +85,11 @@ func ListFederationServers() string {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -115,30 +97,24 @@ func ListFederationServers() string {
 	}
 	creds := credentials.NewTLS(config)
 
-	// 连接到grpc服务器
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: grpc.Dial: %v", err)
+		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
-	// 匿名函数延迟关闭grpc连接
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close Error: %v", err)
+			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
-	// 创建客户端
 	client := universerpc.NewUniverseClient(conn)
-	// 构建请求
 	request := &universerpc.ListFederationServersRequest{}
-	// 得到响应
 	response, err := client.ListFederationServers(context.Background(), request)
 	if err != nil {
-		log.Printf("universerpc ListFederationServers Error: %v", err)
+		fmt.Printf("%s universerpc ListFederationServers Error: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	//log.Printf("%v\n", response)
 	return response.String()
 }
 

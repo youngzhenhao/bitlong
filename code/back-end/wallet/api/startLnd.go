@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"github.com/lightningnetwork/lnd"
@@ -20,7 +21,8 @@ func StarLnd() {
 	// function will also set up logging properly.
 	loadedConfig, err := lnd.LoadConfig(shutdownInterceptor)
 	if err != nil {
-		if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
+		var e *flags.Error
+		if !errors.As(err, &e) || e.Type != flags.ErrHelp {
 			// Print error if not due to help request.
 			err = fmt.Errorf("failed to load config: %w", err)
 			_, _ = fmt.Fprintln(os.Stderr, err)

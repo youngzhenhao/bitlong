@@ -34,7 +34,7 @@ func setupRouter() *gin.Engine {
 	channelGroup := router.Group("/channel")
 	{
 		channelGroup.GET("/GetChanInfo", func(c *gin.Context) {
-			chanIdStr, _ := strconv.Atoi(c.Query("chanId"))
+			chanIdStr := c.Query("chanId")
 			c.JSON(http.StatusOK, gin.H{
 				"GetChanInfo": api.GetChanInfo(chanIdStr),
 			})

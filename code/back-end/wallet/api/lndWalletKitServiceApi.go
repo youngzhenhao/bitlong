@@ -5,13 +5,14 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
+	"fmt"
 	"github.com/lightningnetwork/lnd/lnrpc/walletrpc"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"log"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 func ListAddress() string {
@@ -26,11 +27,11 @@ func ListAddress() string {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -40,22 +41,22 @@ func ListAddress() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := walletrpc.NewWalletKitClient(conn)
 	request := &walletrpc.ListAddressesRequest{}
 	response, err := client.ListAddresses(context.Background(), request)
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	log.Printf("%v\n", response)
+	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return response.String()
 }
 
@@ -75,12 +76,16 @@ func (c *macaroonCredential) RequireTransportSecurity() bool {
 	return true
 }
 
+func GetTimeNow() string {
+	return time.Now().Format("2006/01/02 15:04:05")
+}
+
 // ListAccounts
 //
-//	@Description: 默认情况下会检索属于该钱包的所有账户。可以提供名称和密钥范围过滤器来过滤所有钱包账户，并只返回符合以下条件的账户
-//	@return *walletrpc.ListAccountsResponse
-//
-// func ListAccounts() *walletrpc.ListAccountsResponse {
+//	@Description: ListAddresses retrieves all the addresses along with their balance.
+//	An account name filter can be provided to filter through all the wallet accounts
+//	and return the addresses of only those matching.
+//	@return string
 func ListAccounts() string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -93,11 +98,11 @@ func ListAccounts() string {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -107,31 +112,28 @@ func ListAccounts() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := walletrpc.NewWalletKitClient(conn)
 	request := &walletrpc.ListAccountsRequest{}
 	response, err := client.ListAccounts(context.Background(), request)
 	if err != nil {
-		log.Printf("watchtowerrpc ListAccounts err: %v", err)
+		fmt.Printf("%s watchtowerrpc ListAccounts err: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	//log.Printf("%v", response)
 	return response.String()
 }
 
 // ListLeases
 //
-//	@Description: 列出当前锁定的所有实用程序
-//	@return *walletrpc.ListLeasesResponse
-//
-// func ListLeases() *walletrpc.ListLeasesResponse {
+//	@Description: ListLeases lists all currently locked utxos.
+//	@return string
 func ListLeases() string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -144,11 +146,11 @@ func ListLeases() string {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -158,31 +160,29 @@ func ListLeases() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := walletrpc.NewWalletKitClient(conn)
 	request := &walletrpc.ListLeasesRequest{}
 	response, err := client.ListLeases(context.Background(), request)
 	if err != nil {
-		log.Printf("watchtowerrpc ListLeases err: %v", err)
+		fmt.Printf("%s watchtowerrpc ListLeases err: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	//log.Printf("%v", response)
 	return response.String()
 }
 
 // ListSweeps
 //
-//	@Description: 返回我们的节点产生的扫描事务列表。请注意，这些清扫事务可能尚未得到确认，因为我们是通过广播而非确认来记录清扫事务的
-//	@return *walletrpc.ListSweepsResponse
-//
-// func ListSweeps() *walletrpc.ListSweepsResponse {
+//	@Description: ListSweeps returns a list of the sweep transactions our node has produced.
+//	Note that these sweeps may not be confirmed yet, as we record sweeps on broadcast, not confirmation.
+//	@return string
 func ListSweeps() string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -195,11 +195,11 @@ func ListSweeps() string {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -209,32 +209,30 @@ func ListSweeps() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := walletrpc.NewWalletKitClient(conn)
 	request := &walletrpc.ListSweepsRequest{}
 	response, err := client.ListSweeps(context.Background(), request)
 	if err != nil {
-		log.Printf("watchtowerrpc ListSweeps err: %v", err)
+		fmt.Printf("%s watchtowerrpc ListSweeps err: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	//log.Printf("%v", response)
 	return response.String()
 }
 
 // ListUnspent
 //
-//	 @Description: 返回钱包可使用的所有 utxos 的列表，确认次数介于指定的最小值和最大值之间。
-//		默认情况下，会列出所有 utxos。要只列出未确认的 utxos，请将 unconfirmed_only 设为 true
-//	 @return *walletrpc.ListUnspentResponse
-//
-// func ListUnspent() *walletrpc.ListUnspentResponse {
+//	@Description: ListUnspent returns a list of all utxos spendable by the wallet
+//	with a number of confirmations between the specified minimum and maximum.
+//	By default, all utxos are listed. To list only the unconfirmed utxos, set the unconfirmed_only to true.
+//	@return string
 func ListUnspent() string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -247,11 +245,11 @@ func ListUnspent() string {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -261,31 +259,28 @@ func ListUnspent() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := walletrpc.NewWalletKitClient(conn)
 	request := &walletrpc.ListUnspentRequest{}
 	response, err := client.ListUnspent(context.Background(), request)
 	if err != nil {
-		log.Printf("watchtowerrpc ListUnspent err: %v", err)
+		fmt.Printf("%s watchtowerrpc ListUnspent err: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	//log.Printf("%v", response)
 	return response.String()
 }
 
 // NextAddr
 //
-//	@Description: 返回钱包中下一个未使用的地址
-//	@return *walletrpc.AddrResponse
-//
-// func NextAddr() *walletrpc.AddrResponse {
+//	@Description: NextAddr returns the next unused address within the wallet.
+//	@return string
 func NextAddr() string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -298,11 +293,11 @@ func NextAddr() string {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		log.Printf("Failed to read cert file: %s", err)
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		log.Printf("Failed to append cert")
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -312,21 +307,20 @@ func NextAddr() string {
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("conn Close err: %v", err)
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
 	client := walletrpc.NewWalletKitClient(conn)
 	request := &walletrpc.AddrRequest{}
 	response, err := client.NextAddr(context.Background(), request)
 	if err != nil {
-		log.Printf("watchtowerrpc NextAddr err: %v", err)
+		fmt.Printf("%s watchtowerrpc NextAddr err: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	//log.Printf("%v", response)
 	return response.String()
 }

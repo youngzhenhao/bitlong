@@ -355,8 +355,9 @@ func ListInvoices() string
 ## 付款 `pay`
 
 ### DecodePayReq
->func DecodePayReq(pay_req string) int64   
-
+```go
+func DecodePayReq(pay_req string) int64   
+```
 解码发票  
 解码支付请求字符串,返回发票金额
 
@@ -370,7 +371,9 @@ func ListInvoices() string
 
 
 ### EstimateRouteFee
->EstimateRouteFee(dest string, amtsat int64) string  
+```go
+EstimateRouteFee(dest string, amtsat int64) string  
+```
 
 计算费用  
 允许测试发送到目标节点指定金额是否成功
@@ -385,8 +388,9 @@ func ListInvoices() string
 | string | 返回测试信息 |
 
 ### SendPaymentSync
-
->func SendPaymentSync(invoice string) string  
+```go
+func SendPaymentSync(invoice string) string  
+```
 
 支付发票  
 支付闪电发票请求  
@@ -401,7 +405,9 @@ func ListInvoices() string
 | string | 返回支付hash,可用于跟踪付款进度 |
 
 ### TrackPaymentV2
->func TrackPaymentV2(payhash string) string
+```go
+func TrackPaymentV2(payhash string) string
+```
 
 交易信息  
 返回由付款哈希值标识的付款的更新流。
@@ -416,8 +422,9 @@ func ListInvoices() string
 | string | 返回支付状态 |
 
 ### SendCoins
->func SendCoins(addr string, amount int64) string
-
+```go
+func SendCoins(addr string, amount int64) string
+```
 发送至链上  
 向指定比特币地址发送金额。
 
@@ -429,5 +436,66 @@ func ListInvoices() string
 | 返回类型   | 用途     |
 |--------|--------|
 | string | 返回交易ID |
+
+
+## 铸造资产 `mint Asset`
+
+MintAsset  ->  FinalizeBatch
+
+### MintAsset   
+```go
+MintAsset(name string, assetMetaData string, amount int) bool
+```
+铸造资产  
+MintAsset 会尝试提取请求中指定的资产集（默认为异步，以确保正确批处理）。将返回待处理批次，显示属于下一批次的其他待处理资产。此调用将阻塞，直到操作成功（资产已在批次中分期）或失败。
+
+| 参数            | 类型     | 用途       |
+|---------------|--------|----------|
+| name          | string | 铸造的资产名称  |
+| assetMetaData | string | 铸造的资产元数据 |
+| int           | string | 铸造资产的数量  |
+
+| 返回类型 | 用途       |
+|------|----------|
+| bool | 铸造资产是否成功 |
+
+### FinalizeBatch
+```go
+ FinalizeBatch(feeRate int) string
+```
+确定资产  
+FinalizeBatch 将尝试最终确定当前待处理的批次。
+
+| 参数  | 类型     | 用途                      |
+|-----|--------|-------------------------|
+| int | string | 用于铸币交易的可选费率，单位为 sat/kw。 |
+
+| 返回类型   | 用途          |
+|--------|-------------|
+| string | 返回成功确定的资产数据 |
+
+### ListBatches
+```go
+func ListBatches() string
+```
+确定批次  
+ListBatches 列出提交给守护进程的批次集，包括待处理和已取消的批次。
+
+| 返回类型   | 用途         |
+|--------|------------|
+| string | 返回批次集内所有数据 |
+
+### CancelBatch
+```go
+func CancelBatch() bool
+```
+取消批次  
+CancelBatch 会尝试取消当前待处理的批次。
+
+| 返回类型 | 用途     |
+|------|--------|
+| bool | 是否成功取消 |
+
+
 
 

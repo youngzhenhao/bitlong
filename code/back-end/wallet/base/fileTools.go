@@ -48,16 +48,19 @@ func ReadConfigFile(path string) map[string]string {
 	return config
 
 }
+
 func Configure(appName string) string {
 	//fileConfig := ReadConfigFile("/data/user/0/io.bitlong/files/NewFolderBit/config.txt")
-	fileConfig := ReadConfigFile("C:\\mySpace\\bitlong\\code\\back-end\\wallet\\config.txt")
+	//fileConfig := ReadConfigFile("D:\\share\\bitlong\\code\\back-end\\wallet\\config.txt")
+	//fileConfig := ReadConfigFile("/home/en/test/config.txt")
 	dirPath := fileConfig["dirpath"]
 	folderPath := filepath.Join(dirPath, "."+appName)
 	return folderPath
 }
 
 func QueryConfigByKey(key string) (value string) {
-	fileConfig := ReadConfigFile("C:\\mySpace\\bitlong\\code\\back-end\\wallet\\config.txt")
+	//fileConfig := ReadConfigFile("D:\\share\\bitlong\\code\\back-end\\wallet\\config.txt")
+	//fileConfig := ReadConfigFile("/home/en/test/config.txt")
 	value = fileConfig[key]
 	return
 }

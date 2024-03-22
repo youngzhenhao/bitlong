@@ -1,10 +1,12 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"github.com/lightningnetwork/lnd/lnrpc/walletrpc"
 	"github.com/wallet/base"
@@ -78,6 +80,20 @@ func (c *macaroonCredential) RequireTransportSecurity() bool {
 
 func GetTimeNow() string {
 	return time.Now().Format("2006/01/02 15:04:05")
+}
+
+func s2json(value any) string {
+	jsonBytes, err := json.Marshal(value)
+	if err != nil {
+		fmt.Printf("%s %v", GetTimeNow(), err)
+	}
+	var str bytes.Buffer
+	err = json.Indent(&str, jsonBytes, "", "\t")
+	if err != nil {
+		fmt.Printf("%s %v", GetTimeNow(), err)
+	}
+	result := str.String()
+	return result
 }
 
 // ListAccounts

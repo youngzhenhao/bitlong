@@ -2,9 +2,17 @@
 
 ## 钱包解锁 `unlock`
 
-- `无钱包` -> `GenSeed` -> `InitWallet` -> `已解锁`
-- `未解锁` -> `UnlockWallet` -> `已解锁`
-- `未解锁` -> `ChangePassword` -> `已解锁`
+- `StarLnd` -> `无钱包` -> `GenSeed` -> `InitWallet` -> `已解锁` -> 进行各种交易或查询操作 -> `LndStopDaemon`
+- `StarLnd` -> `未解锁` -> `UnlockWallet` -> `已解锁` -> 进行各种交易或查询操作 -> `LndStopDaemon`
+- `StarLnd` -> `未解锁` -> `ChangePassword` -> `已解锁` -> 进行各种交易或查询操作 -> `LndStopDaemon`
+
+*未解锁指本地已经创建过钱包但当前未解锁*
+
+*进行各种交易或查询操作即后文的通道，发票，付款等操作*
+
+*打开钱包软件时应启动Lnd节点，关闭钱包软件时应停止Lnd节点*
+
+*获取新地址和当前余额每次解锁后刷新，可手动刷新*
 
 ### GenSeed
 
@@ -455,9 +463,18 @@ func LndStopDaemon() bool
 
 # Tap业务流程
 
-## 铸造资产 `mint Asset`
+铸造并发行资产
 
-- `MintAsset`  ->  `FinalizeBatch`
+- `Lnd已解锁` -> `StartTapRoot` -> `MintAsset`  ->  `FinalizeBatch` > `TapStopDaemon` -> `LndStopDaemon`
+
+*Lnd从启动到已解锁状态的流程与前文一致*
+
+*Tap节点是依赖于Lnd的一个资产服务节点，进行资产交易时是使用Lnd的钱包及其余额进行的，Tap节点自身并没有钱包， `MintAsset` 和  `FinalizeBatch` 等在该`Tap业务流程`中的api都是在Tap节点上进行的操作*
+
+
+- `lnd服务启动(包括从运行节点到解锁成功),再等待服务启动完` -> `tap服务启动，等待其成功连接到lnd节点` -> `进行tap节点资产的交易和查询操作` -> `关闭tap节点` -> `关闭lnd节点`
+
+## `Taproot Assets` 资产
 
 ### MintAsset   
 ```go
@@ -490,6 +507,8 @@ FinalizeBatch 将尝试最终确定当前待处理的批次。
 | 返回类型   | 用途          |
 |--------|-------------|
 | string | 返回成功确定的资产数据 |
+
+---
 
 ### ListBatches
 ```go

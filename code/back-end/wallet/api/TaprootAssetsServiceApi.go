@@ -380,6 +380,7 @@ func QueryAddrs() {
 
 }
 
+// skipped function SendAsset with unsupported parameter or return types
 func SendAsset(tapAddrs []string, feeRate int) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")

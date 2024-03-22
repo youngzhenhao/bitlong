@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 )
 
+// skipped function AnchorVirtualPsbts with unsupported parameter or return types
 func AnchorVirtualPsbts(virtualPsbts []string) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -67,6 +68,7 @@ func AnchorVirtualPsbts(virtualPsbts []string) bool {
 	return true
 }
 
+// skipped function FundVirtualPsbt with unsupported parameter or return types
 func FundVirtualPsbt(isPsbtNotRaw bool, psbt ...string) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")

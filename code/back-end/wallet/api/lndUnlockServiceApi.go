@@ -15,7 +15,7 @@ import (
 	"path/filepath"
 )
 
-func GenSeed() [24]string {
+func GenSeed() []string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	cert, err := os.ReadFile(tlsCertPath)
@@ -57,10 +57,10 @@ func GenSeed() [24]string {
 	if err != nil {
 		fmt.Printf("%s Error calling InitWallet: %v\n", GetTimeNow(), err)
 	}
-	return [24]string(response.CipherSeedMnemonic)
+	return response.CipherSeedMnemonic
 }
 
-func InitWallet(seed [24]string, password string) bool {
+func InitWallet(seed []string, password string) bool {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	cert, err := os.ReadFile(tlsCertPath)
@@ -90,7 +90,7 @@ func InitWallet(seed [24]string, password string) bool {
 	passphrase := ""
 	request := &lnrpc.InitWalletRequest{
 		WalletPassword:     []byte(password),
-		CipherSeedMnemonic: seed[:],
+		CipherSeedMnemonic: seed,
 		AezeedPassphrase:   []byte(passphrase),
 	}
 	response, err := client.InitWallet(context.Background(), request)

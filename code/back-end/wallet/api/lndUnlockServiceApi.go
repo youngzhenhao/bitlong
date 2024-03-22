@@ -13,9 +13,10 @@ import (
 	"google.golang.org/grpc/credentials"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
-func GenSeed() []string {
+func GenSeed() string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	cert, err := os.ReadFile(tlsCertPath)
@@ -57,10 +58,10 @@ func GenSeed() []string {
 	if err != nil {
 		fmt.Printf("%s Error calling InitWallet: %v\n", GetTimeNow(), err)
 	}
-	return response.CipherSeedMnemonic
+	return strings.Join(response.CipherSeedMnemonic, ",")
 }
 
-func InitWallet(seed []string, password string) bool {
+func InitWallet(seed, password string) bool {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	cert, err := os.ReadFile(tlsCertPath)
@@ -88,9 +89,10 @@ func InitWallet(seed []string, password string) bool {
 	}(conn)
 	client := lnrpc.NewWalletUnlockerClient(conn)
 	passphrase := ""
+	seedSlice := strings.Split(seed, ",")
 	request := &lnrpc.InitWalletRequest{
 		WalletPassword:     []byte(password),
-		CipherSeedMnemonic: seed,
+		CipherSeedMnemonic: seedSlice,
 		AezeedPassphrase:   []byte(passphrase),
 	}
 	response, err := client.InitWallet(context.Background(), request)

@@ -18,7 +18,7 @@ import (
 func AnchorVirtualPsbts(virtualPsbts []string) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
@@ -72,7 +72,7 @@ func AnchorVirtualPsbts(virtualPsbts []string) bool {
 func FundVirtualPsbt(isPsbtNotRaw bool, psbt ...string) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
@@ -128,7 +128,7 @@ func FundVirtualPsbt(isPsbtNotRaw bool, psbt ...string) bool {
 func NextInternalKey(keyFamily int) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
@@ -175,7 +175,7 @@ func NextInternalKey(keyFamily int) string {
 func NextScriptKey(keyFamily int) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
@@ -222,7 +222,7 @@ func NextScriptKey(keyFamily int) string {
 func ProveAssetOwnership(assetId, scriptKey string) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
@@ -274,7 +274,7 @@ func ProveAssetOwnership(assetId, scriptKey string) bool {
 func QueryInternalKey(internalKey string) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
@@ -323,7 +323,7 @@ func QueryInternalKey(internalKey string) string {
 func QueryScriptKey(tweakedScriptKey string) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
@@ -371,7 +371,7 @@ func QueryScriptKey(tweakedScriptKey string) string {
 func RemoveUTXOLease() bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
@@ -419,7 +419,7 @@ func RemoveUTXOLease() bool {
 func SignVirtualPsbt(fundedPsbt string) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
@@ -468,7 +468,7 @@ func SignVirtualPsbt(fundedPsbt string) bool {
 func VerifyAssetOwnership(proofWithWitness string) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {

@@ -17,7 +17,7 @@ import (
 func ImportProof(proofFile, genesisPoint string) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {

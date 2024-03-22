@@ -1,0 +1,9 @@
+go 1.22
+
+use (
+	.
+	btcutil@v1.1.5
+	lnd@v0.17.4-beta.rc1
+	lndclient@v0.17.0-4
+	api
+)

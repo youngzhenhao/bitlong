@@ -152,7 +152,7 @@ func ListBatches() string {
 	return response.String()
 }
 
-func MintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, assetMetaData string, AssetMetaTypeIsJsonNotOpaque bool, amount int, newGroupedAsset bool, groupedAsset bool, groupKey string, groupAnchor string, shortResponse bool) bool {
+func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, assetMetaData string, AssetMetaTypeIsJsonNotOpaque bool, amount int, newGroupedAsset bool, groupedAsset bool, groupKey string, groupAnchor string, shortResponse bool) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
@@ -231,4 +231,15 @@ func MintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, 
 	}
 	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return true
+}
+
+// MintAsset
+//
+//	@Description: Wraps the mintAsset, omitting most of the parameters and making them default values
+//	@param name
+//	@param assetMetaData
+//	@param amount
+//	@return bool
+func MintAsset(name string, assetMetaData string, amount int) bool {
+	return mintAsset(false, false, name, assetMetaData, false, amount, false, false, "", "", false)
 }

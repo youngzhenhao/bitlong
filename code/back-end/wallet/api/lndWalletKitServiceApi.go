@@ -56,7 +56,7 @@ func ListAddress() string {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	fmt.Printf("%s %v\n", GetTimeNow(), response)
+	//fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return response.String()
 }
 

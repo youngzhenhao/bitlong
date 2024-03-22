@@ -15,6 +15,10 @@ import (
 	"path/filepath"
 )
 
+// CancelBatch
+//
+//	@Description: CancelBatch will attempt to cancel the current pending batch.
+//	@return bool
 func CancelBatch() bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -60,7 +64,7 @@ func CancelBatch() bool {
 	return true
 }
 
-func FinalizeBatch(shortResponse bool, feeRate int) bool {
+func finalizeBatch(shortResponse bool, feeRate int) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
@@ -108,6 +112,20 @@ func FinalizeBatch(shortResponse bool, feeRate int) bool {
 	return true
 }
 
+// FinalizeBatch
+//
+//	@Description: Wraps the finalizeBatch. FinalizeBatch will attempt to finalize the current pending batch.
+//	@param shortResponse
+//	@param feeRate
+//	@return bool
+func FinalizeBatch(feeRate int) bool {
+	return finalizeBatch(false, feeRate)
+}
+
+// ListBatches
+//
+//	@Description: ListBatches lists the set of batches submitted to the daemon, including pending and cancelled batches.
+//	@return string
 func ListBatches() string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -235,7 +253,10 @@ func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, 
 
 // MintAsset
 //
-//	@Description: Wraps the mintAsset, omitting most of the parameters and making them default values
+//	@Description: Wraps the mintAsset, omitting most of the parameters and making them default values.
+//	MintAsset will attempt to mint the set of assets (async by default to ensure proper batching) specified in the request.
+//	The pending batch is returned that shows the other pending assets that are part of the next batch.
+//	This call will block until the operation succeeds (asset is staged in the batch) or fails.
 //	@param name
 //	@param assetMetaData
 //	@param amount

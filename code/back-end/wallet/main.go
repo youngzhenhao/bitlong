@@ -3,19 +3,28 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"github.com/wallet/api"
 )
 
 func main() {
 
-	var password string
-	flag.StringVar(&password, "password", "", "password must have at least 8 characters")
-	flag.Parse()
+	//var password string
+	//flag.StringVar(&password, "password", "", "password must have at least 8 characters")
+	//flag.Parse()
+	//
+	//fmt.Printf("%s password: %v\n", api.GetTimeNow(), password)
 
-	fmt.Printf("%s password: %v\n", api.GetTimeNow(), password)
+	//api.StarLnd()
+	//api.StopDaemon()
+	////
+	//api.StartTapRoot()
 
+	//api.LndWorkflowCreateWallet("12345678")
+
+	//fmt.Printf("%s %v\n", api.GetTimeNow(), api.GenSeed())
+	//fmt.Printf("%s %v\n", api.GetTimeNow(), api.GetNewAddress())
+	fmt.Printf("%s %v\n", api.GetTimeNow(), api.ListAddress())
 }
 
 func s2json(value any) string {

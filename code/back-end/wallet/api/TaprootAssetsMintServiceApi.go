@@ -15,6 +15,10 @@ import (
 	"path/filepath"
 )
 
+// CancelBatch
+//
+//	@Description: CancelBatch will attempt to cancel the current pending batch.
+//	@return bool
 func CancelBatch() bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -60,7 +64,7 @@ func CancelBatch() bool {
 	return true
 }
 
-func FinalizeBatch(shortResponse bool, feeRate int) bool {
+func finalizeBatch(shortResponse bool, feeRate int) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
@@ -108,6 +112,20 @@ func FinalizeBatch(shortResponse bool, feeRate int) bool {
 	return true
 }
 
+// FinalizeBatch
+//
+//	@Description: Wraps the finalizeBatch. FinalizeBatch will attempt to finalize the current pending batch.
+//	@param shortResponse
+//	@param feeRate
+//	@return bool
+func FinalizeBatch(feeRate int) bool {
+	return finalizeBatch(false, feeRate)
+}
+
+// ListBatches
+//
+//	@Description: ListBatches lists the set of batches submitted to the daemon, including pending and cancelled batches.
+//	@return string
 func ListBatches() string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -152,7 +170,7 @@ func ListBatches() string {
 	return response.String()
 }
 
-func MintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, assetMetaData string, AssetMetaTypeIsJsonNotOpaque bool, amount int, newGroupedAsset bool, groupedAsset bool, groupKey string, groupAnchor string, shortResponse bool) bool {
+func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, assetMetaData string, AssetMetaTypeIsJsonNotOpaque bool, amount int, newGroupedAsset bool, groupedAsset bool, groupKey string, groupAnchor string, shortResponse bool) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("tapd"), "."+"macaroonfile")
@@ -231,4 +249,18 @@ func MintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, 
 	}
 	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return true
+}
+
+// MintAsset
+//
+//	@Description: Wraps the mintAsset, omitting most of the parameters and making them default values.
+//	MintAsset will attempt to mint the set of assets (async by default to ensure proper batching) specified in the request.
+//	The pending batch is returned that shows the other pending assets that are part of the next batch.
+//	This call will block until the operation succeeds (asset is staged in the batch) or fails.
+//	@param name
+//	@param assetMetaData
+//	@param amount
+//	@return bool
+func MintAsset(name string, assetMetaData string, amount int) bool {
+	return mintAsset(false, false, name, assetMetaData, false, amount, false, false, "", "", false)
 }

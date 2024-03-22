@@ -1,6 +1,10 @@
-# 业务流程
+# Lnd业务流程
 
 ## 钱包解锁 `unlock`
+
+- `无钱包` -> `GenSeed` -> `InitWallet` -> `已解锁`
+- `未解锁` -> `UnlockWallet` -> `已解锁`
+- `未解锁` -> `ChangePassword` -> `已解锁`
 
 ### GenSeed
 
@@ -437,10 +441,23 @@ func SendCoins(addr string, amount int64) string
 |--------|--------|
 | string | 返回交易ID |
 
+## 停止lnd节点
+
+### LndStopDaemon
+
+```go
+func LndStopDaemon() bool
+```
+
+| 返回类型 | 用途     |
+|------|--------|
+| bool | 是否成功 |
+
+# Tap业务流程
 
 ## 铸造资产 `mint Asset`
 
-MintAsset  ->  FinalizeBatch
+- `MintAsset`  ->  `FinalizeBatch`
 
 ### MintAsset   
 ```go
@@ -496,6 +513,14 @@ CancelBatch 会尝试取消当前待处理的批次。
 |------|--------|
 | bool | 是否成功取消 |
 
+## 停止tap节点
 
+### TapStopDaemon
 
+```go
+func TapStopDaemon() bool
+```
 
+| 返回类型 | 用途     |
+|------|--------|
+| bool | 是否成功 |

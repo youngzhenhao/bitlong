@@ -440,6 +440,8 @@ func SendCoins(addr string, amount int64) string
 
 ## 铸造资产 `mint Asset`
 
+MintAsset  ->  FinalizeBatch
+
 ### MintAsset   
 ```go
 MintAsset(name string, assetMetaData string, amount int) bool

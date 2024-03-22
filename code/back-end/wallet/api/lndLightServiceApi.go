@@ -116,7 +116,7 @@ func GetWalletBalance() string {
 		fmt.Printf("%s lnrpc WalletBalance err: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	return response.String()
+	return s2json(response)
 }
 
 // GetIdentityPubkey

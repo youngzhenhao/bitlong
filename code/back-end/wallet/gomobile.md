@@ -55,6 +55,10 @@ go get golang.org/x/mobile/bind
 ```
 
 ## 5. 打包命令
+- 打包前，请更改
+```text
+fileConfig := ReadConfigFile("/data/user/0/io.bitlong/files/NewFolderBit/config.txt")
+```
 ```bash
 cd 到需要打包的文件目录
 gomobile bind -target android 

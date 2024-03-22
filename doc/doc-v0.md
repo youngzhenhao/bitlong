@@ -8,14 +8,14 @@
 
 1.  接口
 ```go
-func GenSeed() [24]string
+func GenSeed() string
 ```
 
 2.  参数列表
 
 |返回类型|用途|
 |----|----|
-|string[24]|助记词|
+|string|助记词，用逗号分割|
 
 3.  详细解释
 
@@ -30,14 +30,14 @@ func GenSeed() [24]string
 1. 接口
 
 ```go
-func InitWallet(seed [24]string, password string) bool
+func InitWallet(seed string, password string) bool
 ```
 
 2. 参数列表
 
 | 输入参数 | 类型 | 用途|
 |--------|----|----|
-| seed | string[24] | 助记词 |
+| seed | string | 助记词，用逗号连接 |
 | password | string | 钱包密码 |
 
 | 返回类型 | 用途 |

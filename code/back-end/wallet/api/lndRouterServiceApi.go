@@ -140,6 +140,7 @@ func TrackPaymentV2(payhash string) string {
 	}
 }
 
+// skipped function SendToRouteV2 with unsupported parameter or return types
 func SendToRouteV2(payhash []byte, route *lnrpc.Route) {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")

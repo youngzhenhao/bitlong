@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,10 +13,14 @@ func ReadConfigFile(path string) map[string]string {
 	config := make(map[string]string)
 
 	f, err := os.Open(path)
-	defer f.Close()
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			fmt.Printf("f.Close err: %v\n", err)
+		}
+	}(f)
 	if err != nil {
-		log.Fatalf("open file err: %v", err)
-		fmt.Println(err)
+		fmt.Printf("open file err: %v\n", err)
 	}
 
 	r := bufio.NewReader(f)
@@ -27,8 +30,7 @@ func ReadConfigFile(path string) map[string]string {
 			if err == io.EOF {
 				break
 			}
-			log.Fatalf("read file err: %v", err)
-			fmt.Println(err)
+			fmt.Printf("read file err: %v\n", err)
 		}
 		s := strings.TrimSpace(string(b))
 		index := strings.Index(s, "=")
@@ -50,6 +52,7 @@ func ReadConfigFile(path string) map[string]string {
 }
 
 func Configure(appName string) string {
+	fileConfig := ReadConfigFile("C:\\mySpace\\bitlong\\code\\back-end\\wallet\\config.txt")
 	//fileConfig := ReadConfigFile("/data/user/0/io.bitlong/files/NewFolderBit/config.txt")
 	//fileConfig := ReadConfigFile("D:\\share\\bitlong\\code\\back-end\\wallet\\config.txt")
 	//fileConfig := ReadConfigFile("/home/en/test/config.txt")
@@ -59,6 +62,7 @@ func Configure(appName string) string {
 }
 
 func QueryConfigByKey(key string) (value string) {
+	fileConfig := ReadConfigFile("C:\\mySpace\\bitlong\\code\\back-end\\wallet\\config.txt")
 	//fileConfig := ReadConfigFile("D:\\share\\bitlong\\code\\back-end\\wallet\\config.txt")
 	//fileConfig := ReadConfigFile("/home/en/test/config.txt")
 	value = fileConfig[key]

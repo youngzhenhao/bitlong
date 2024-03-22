@@ -42,6 +42,10 @@ func FetchAssetMeta() {
 
 }
 
+// GetInfoOfTap
+//
+//	@Description: GetInfo returns the information for the node.
+//	@return string
 func GetInfoOfTap() string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -87,6 +91,10 @@ func GetInfoOfTap() string {
 	return response.String()
 }
 
+// ListAssets
+//
+//	@Description: ListAssets lists the set of assets owned by the target daemon.
+//	@return string
 func ListAssets(withWitness, includeSpent, includeLeased bool) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -136,6 +144,10 @@ func ListAssets(withWitness, includeSpent, includeLeased bool) string {
 	return response.String()
 }
 
+// ListBalances
+//
+//	@Description: ListBalances lists asset balances
+//	@return string
 func ListBalances(isListAssetIdNotGroupKey bool) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -189,6 +201,10 @@ func ListBalances(isListAssetIdNotGroupKey bool) string {
 	return response.String()
 }
 
+// ListGroups
+//
+//	@Description: ListGroups lists the asset groups known to the target daemon, and the assets held in each group.
+//	@return string
 func ListGroups() string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -234,6 +250,10 @@ func ListGroups() string {
 	return response.String()
 }
 
+// ListTransfers
+//
+//	@Description: ListTransfers lists outbound asset transfers tracked by the target daemon.
+//	@return string
 func ListTransfers() string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -279,6 +299,10 @@ func ListTransfers() string {
 	return response.String()
 }
 
+// ListUtxos
+//
+//	@Description: ListUtxos lists the UTXOs managed by the target daemon, and the assets they hold.
+//	@return string
 func ListUtxos(includeLeased bool) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -326,6 +350,10 @@ func ListUtxos(includeLeased bool) string {
 	return response.String()
 }
 
+// NewAddr
+//
+//	@Description:NewAddr makes a new address from the set of request params.
+//	@return bool
 func NewAddr(assetId string, amt int) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -380,6 +408,12 @@ func QueryAddrs() {
 
 }
 
+// SendAsset
+//
+//	@Description:SendAsset uses one or multiple passed Taproot Asset address(es) to attempt to complete an asset send.
+//	The method returns information w.r.t the on chain send, as well as the proof file information the receiver needs to fully receive the asset.
+//	@return bool
+//
 // skipped function SendAsset with unsupported parameter or return types
 func SendAsset(tapAddrs []string, feeRate int) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
@@ -442,6 +476,10 @@ func VerifyProof() {
 
 }
 
+// TapStopDaemon
+//
+//	@Description: StopDaemon will send a shutdown request to the interrupt handler, triggering a graceful shutdown of the daemon.
+//	@return bool
 func TapStopDaemon() bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")

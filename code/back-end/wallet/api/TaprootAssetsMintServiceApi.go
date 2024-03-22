@@ -64,6 +64,12 @@ func CancelBatch() bool {
 	return true
 }
 
+// finalizeBatch
+//
+//	@Description: FinalizeBatch will attempt to finalize the current pending batch.
+//	@param shortResponse
+//	@param feeRate
+//	@return string
 func finalizeBatch(shortResponse bool, feeRate int) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -170,6 +176,22 @@ func ListBatches() string {
 	return response.String()
 }
 
+// mintAsset
+//
+//	@Description:MintAsset will attempt to mint the set of assets (async by default to ensure proper batching) specified in the request.
+//	The pending batch is returned that shows the other pending assets that are part of the next batch. This call will block until the operation succeeds (asset is staged in the batch) or fails.
+//	@param assetVersionIsV1
+//	@param assetTypeIsCollectible
+//	@param name
+//	@param assetMetaData
+//	@param AssetMetaTypeIsJsonNotOpaque
+//	@param amount
+//	@param newGroupedAsset
+//	@param groupedAsset
+//	@param groupKey
+//	@param groupAnchor
+//	@param shortResponse
+//	@return bool
 func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, assetMetaData string, AssetMetaTypeIsJsonNotOpaque bool, amount int, newGroupedAsset bool, groupedAsset bool, groupKey string, groupAnchor string, shortResponse bool) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")

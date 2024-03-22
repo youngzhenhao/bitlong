@@ -26,6 +26,10 @@ func DeleteAssetRoot() {}
 
 func DeleteFederationServer() {}
 
+// UniverseInfo
+//
+//	@Description: Info returns a set of information about the current state of the Universe.
+//	@return string
 func UniverseInfo() string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -73,6 +77,11 @@ func UniverseInfo() string {
 
 func InsertProof() {}
 
+// ListFederationServers
+//
+//	@Description: ListFederationServers lists the set of servers that make up the federation of the local Universe server.
+//	This servers are used to push out new proofs, and also periodically call sync new proofs from the remote server.
+//	@return string
 func ListFederationServers() string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")

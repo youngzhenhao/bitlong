@@ -14,6 +14,11 @@ import (
 	"path/filepath"
 )
 
+// ImportProof
+//
+//	@Description:ImportProof attempts to import a proof file into the daemon.
+//	If successful, a new asset will be inserted on disk, spendable using the specified target script key, and internal key.
+//	@return bool
 func ImportProof(proofFile, genesisPoint string) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")

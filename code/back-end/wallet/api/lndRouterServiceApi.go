@@ -17,6 +17,12 @@ import (
 	"path/filepath"
 )
 
+// SendPaymentV2
+//
+//	@Description: SendPaymentV2 attempts to route a payment described by the passed PaymentRequest to the final destination.
+//	The call returns a stream of payment updates. When using this RPC, make sure to set a fee limit, as the default routing fee limit is 0 sats.
+//	Without a non-zero fee limit only routes without fees will be attempted which often fails with FAILURE_REASON_NO_ROUTE.
+//	@return string
 func SendPaymentV2(invoice string, feelimit int64) string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -77,6 +83,10 @@ func SendPaymentV2(invoice string, feelimit int64) string {
 	}
 }
 
+// TrackPaymentV2
+//
+//	@Description: TrackPaymentV2 returns an update stream for the payment identified by the payment hash.
+//	@return string
 func TrackPaymentV2(payhash string) string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -140,7 +150,13 @@ func TrackPaymentV2(payhash string) string {
 	}
 }
 
-// skipped function SendToRouteV2 with unsupported parameter or return types
+// SendToRouteV2
+//
+//	@Description:SendToRouteV2 attempts to make a payment via the specified route.
+//	This method differs from SendPayment in that it allows users to specify a full route manually.
+//	This can be used for things like rebalancing, and atomic swaps.
+//	@param route
+//	skipped function SendToRouteV2 with unsupported parameter or return types
 func SendToRouteV2(payhash []byte, route *lnrpc.Route) {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
@@ -189,6 +205,10 @@ func SendToRouteV2(payhash []byte, route *lnrpc.Route) {
 	fmt.Printf("%s %v\n", GetTimeNow(), response)
 }
 
+// EstimateRouteFee
+//
+//	@Description: EstimateRouteFee allows callers to obtain a lower bound w.r.t how much it may cost to send an HTLC to the target end destination.
+//	@return string
 func EstimateRouteFee(dest string, amtsat int64) string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")

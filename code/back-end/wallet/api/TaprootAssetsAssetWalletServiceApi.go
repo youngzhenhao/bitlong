@@ -14,6 +14,14 @@ import (
 	"path/filepath"
 )
 
+// AnchorVirtualPsbts
+//
+//	@Description: AnchorVirtualPsbts merges and then commits multiple virtual transactions in a single BTC level anchor transaction.
+//
+// This RPC should be used if the BTC level anchor transaction of the assets to be spent are encumbered by a normal key and don't require any special spending conditions.
+// For any custom spending conditions on the BTC level, the two RPCs CommitVirtualPsbts and PublishAndLogTransfer should be used instead (which in combination do the same as this RPC but allow for more flexibility).
+// @return bool
+//
 // skipped function AnchorVirtualPsbts with unsupported parameter or return types
 func AnchorVirtualPsbts(virtualPsbts []string) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
@@ -68,6 +76,11 @@ func AnchorVirtualPsbts(virtualPsbts []string) bool {
 	return true
 }
 
+// FundVirtualPsbt
+//
+//	@Description:FundVirtualPsbt selects inputs from the available asset commitments to fund a virtual transaction matching the template.
+//	@return bool
+//
 // skipped function FundVirtualPsbt with unsupported parameter or return types
 func FundVirtualPsbt(isPsbtNotRaw bool, psbt ...string) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
@@ -125,6 +138,11 @@ func FundVirtualPsbt(isPsbtNotRaw bool, psbt ...string) bool {
 	return true
 }
 
+// NextInternalKey
+//
+//	@Description:NextInternalKey derives the next internal key for the given key family and stores it as an internal key in the database to make sure it is identified as a local key later on when importing proofs.
+//	While an internal key can also be used as the internal key of a script key, it is recommended to use the NextScriptKey RPC instead, to make sure the tweaked Taproot output key is also recognized as a local key.
+//	@return string
 func NextInternalKey(keyFamily int) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -172,6 +190,11 @@ func NextInternalKey(keyFamily int) string {
 	return response.String()
 }
 
+// NextScriptKey
+//
+//	@Description:NextInternalKey derives the next internal key for the given key family and stores it as an internal key in the database to make sure it is identified as a local key later on when importing proofs.
+//	While an internal key can also be used as the internal key of a script key, it is recommended to use the NextScriptKey RPC instead, to make sure the tweaked Taproot output key is also recognized as a local key.
+//	@return string
 func NextScriptKey(keyFamily int) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -219,6 +242,11 @@ func NextScriptKey(keyFamily int) string {
 	return response.String()
 }
 
+// ProveAssetOwnership
+//
+//	@Description:ProveAssetOwnership creates an ownership proof embedded in an asset transition proof.
+//	That ownership proof is a signed virtual transaction spending the asset with a valid witness to prove the prover owns the keys that can spend the asset.
+//	@return bool
 func ProveAssetOwnership(assetId, scriptKey string) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -271,6 +299,11 @@ func ProveAssetOwnership(assetId, scriptKey string) bool {
 	return true
 }
 
+// QueryInternalKey
+//
+//	@Description:QueryInternalKey returns the key descriptor for the given internal key.
+//	@param internalKey
+//	@return string
 func QueryInternalKey(internalKey string) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -320,6 +353,10 @@ func QueryInternalKey(internalKey string) string {
 	return response.String()
 }
 
+// QueryScriptKey
+//
+//	@Description:QueryScriptKey returns the full script key descriptor for the given tweaked script key.
+//	@return string
 func QueryScriptKey(tweakedScriptKey string) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -368,6 +405,10 @@ func QueryScriptKey(tweakedScriptKey string) string {
 	return response.String()
 }
 
+// RemoveUTXOLease
+//
+//	@Description:RemoveUTXOLease removes the lease/lock/reservation of the given managed UTXO.
+//	@return bool
 func RemoveUTXOLease() bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -416,6 +457,10 @@ func RemoveUTXOLease() bool {
 	return true
 }
 
+// SignVirtualPsbt
+//
+//	@Description:SignVirtualPsbt signs the inputs of a virtual transaction and prepares the commitments of the inputs and outputs.
+//	@return bool
 func SignVirtualPsbt(fundedPsbt string) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -465,6 +510,10 @@ func SignVirtualPsbt(fundedPsbt string) bool {
 	return true
 }
 
+// VerifyAssetOwnership
+//
+//	@Description:VerifyAssetOwnership verifies the asset ownership proof embedded in the given transition proof of an asset and returns true if the proof is valid.
+//	@return bool
 func VerifyAssetOwnership(proofWithWitness string) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")

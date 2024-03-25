@@ -12,6 +12,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func AddrReceives() {
@@ -415,7 +416,7 @@ func QueryAddrs() {
 //	@return bool
 //
 // skipped function SendAsset with unsupported parameter or return types
-func SendAsset(tapAddrs []string, feeRate int) bool {
+func SendAsset(tapAddrs string, feeRate int) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
@@ -451,8 +452,9 @@ func SendAsset(tapAddrs []string, feeRate int) bool {
 		}
 	}(conn)
 	client := taprpc.NewTaprootAssetsClient(conn)
+	addrs := strings.Split(tapAddrs, ",")
 	request := &taprpc.SendAssetRequest{
-		TapAddrs: tapAddrs,
+		TapAddrs: addrs,
 		FeeRate:  uint32(feeRate),
 	}
 	response, err := client.SendAsset(context.Background(), request)

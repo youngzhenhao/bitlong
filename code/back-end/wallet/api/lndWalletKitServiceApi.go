@@ -17,6 +17,11 @@ import (
 	"time"
 )
 
+// ListAddress
+//
+//	@Description: ListAddresses retrieves all the addresses along with their balance.
+//	An account name filter can be provided to filter through all of the wallet accounts and return the addresses of only those matching.
+//	@return string
 func ListAddress() string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")

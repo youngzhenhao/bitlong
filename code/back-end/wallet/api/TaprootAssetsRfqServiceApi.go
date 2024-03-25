@@ -15,6 +15,10 @@ import (
 	"path/filepath"
 )
 
+// AddAssetBuyOrder
+//
+//	@Description:AddAssetBuyOrder is used to add a buy order for a specific asset. If a buy order already exists for the asset, it will be updated.
+//	@return bool
 func AddAssetBuyOrder() bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -61,6 +65,10 @@ func AddAssetBuyOrder() bool {
 	return true
 }
 
+// AddAssetSellOffer
+//
+//	@Description:AddAssetSellOffer is used to add a sell offer for a specific asset. If a sell offer already exists for the asset, it will be updated.
+//	@return bool
 func AddAssetSellOffer() bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -107,6 +115,10 @@ func AddAssetSellOffer() bool {
 	return true
 }
 
+// QueryRfqAcceptedQuotes
+//
+//	@Description:
+//	@return string
 func QueryRfqAcceptedQuotes() string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
@@ -152,6 +164,10 @@ func QueryRfqAcceptedQuotes() string {
 	return response.String()
 }
 
+// SubscribeRfqEventNtfns
+//
+//	@Description:SubscribeRfqEventNtfns is used to subscribe to RFQ events.
+//	@return bool
 func SubscribeRfqEventNtfns() bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")

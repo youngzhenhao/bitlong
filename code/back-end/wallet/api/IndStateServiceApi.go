@@ -14,6 +14,11 @@ import (
 	"path/filepath"
 )
 
+// GetStateForSubscribe
+//
+//	@Description:SubscribeState subscribes to the state of the wallet.
+//	The current wallet state will always be delivered immediately.
+//	@return bool
 func GetStateForSubscribe() bool {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")

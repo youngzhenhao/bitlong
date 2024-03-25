@@ -15,6 +15,10 @@ import (
 	"path/filepath"
 )
 
+// WatchtowerGetInfo
+//
+//	@Description: GetInfo returns general information concerning the companion watchtower including its public key and URIs where the server is currently listening for clients.
+//	@return string
 func WatchtowerGetInfo() string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")

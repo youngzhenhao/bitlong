@@ -1,3 +1,20 @@
+# 业务流程说明
+
+## 1.钱包启动流程说明
+
+- **`StarLnd`** -> *`第一次进入【无钱包】`* -> `GenSeed` -> `InitWallet` -> *`【已解锁】`* -> **`StartTapRoot`** -> *进行各种交易或查询操作* -> **`TapStopDaemon`** -> **`LndStopDaemon`**
+- **`StarLnd`** -> *`非第一次进入【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`* -> **`StartTapRoot`** -> *进行各种交易或查询操作* -> **`TapStopDaemon`** -> **`LndStopDaemon`**
+
+## 2.发行主根资产流程说明
+
+- **`StarLnd`** -> *`【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`* -> **`StartTapRoot`** -> `MintAsset`  ->  `FinalizeBatch` -> **`TapStopDaemon`** -> **`LndStopDaemon`**
+
+## 3.修改密码流程说明
+
+- **`StarLnd`** -> *`【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`* -> **`StartTapRoot`** -> *进行各种交易或查询操作* -> *进入修改密码界面进行修改* -> **`TapStopDaemon`** -> **`LndStopDaemon`** -> **`StarLnd`** -> *`【未解锁】`* ->`ChangePassword` -> *`【已解锁】`* -> **`StartTapRoot`** -> *进行各种交易或查询操作* -> **`TapStopDaemon`** -> **`LndStopDaemon`**
+
+---
+
 # Lnd业务流程
 
 ## 钱包解锁 `unlock`
@@ -465,7 +482,7 @@ func LndStopDaemon() bool
 
 铸造并发行资产
 
-- `Lnd已解锁` -> `StartTapRoot` -> `MintAsset`  ->  `FinalizeBatch` > `TapStopDaemon` -> `LndStopDaemon`
+- `Lnd已解锁` -> `StartTapRoot` -> `MintAsset`  ->  `FinalizeBatch` -> `TapStopDaemon` -> `LndStopDaemon`
 
 *Lnd从启动到已解锁状态的流程与前文一致*
 

@@ -27,8 +27,51 @@ func DebugLevel() {
 
 }
 
-func DecodeAddr() {
+func DecodeAddr(addr string) string {
+	grpcHost := base.QueryConfigByKey("taproothost")
+	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
+	}
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
 
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
+		}
+	}(conn)
+	client := taprpc.NewTaprootAssetsClient(conn)
+	request := &taprpc.DecodeAddrRequest{
+		Addr: addr,
+	}
+	response, err := client.DecodeAddr(context.Background(), request)
+	if err != nil {
+		fmt.Printf("%s taprpc ListAssets Error: %v\n", GetTimeNow(), err)
+		return ""
+	}
+	return response.String()
 }
 
 func DecodeProof() {

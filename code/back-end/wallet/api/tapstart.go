@@ -3,14 +3,12 @@ package api
 import (
 	"errors"
 	"fmt"
-	"net/http"
-	"os"
-	"runtime/pprof"
-
 	"github.com/jessevdk/go-flags"
 	"github.com/lightninglabs/taproot-assets/fn"
 	"github.com/lightninglabs/taproot-assets/tapcfg"
 	"github.com/lightningnetwork/lnd/signal"
+	"net/http"
+	"os"
 )
 
 func StartTapRoot() {
@@ -50,21 +48,21 @@ func StartTapRoot() {
 	}
 
 	// Write cpu profile if requested.
-	if cfg.CPUProfile != "" {
-		f, err := os.Create(cfg.CPUProfile)
-		if err != nil {
-			_, _ = fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
-		_ = pprof.StartCPUProfile(f)
-		defer func(f *os.File) {
-			err := f.Close()
-			if err != nil {
-				fmt.Printf("%s f.Close Error: %v\n", GetTimeNow(), err)
-			}
-		}(f)
-		defer pprof.StopCPUProfile()
-	}
+	//if cfg.CPUProfile != "" {
+	//	f, err := os.Create(cfg.CPUProfile)
+	//	if err != nil {
+	//		_, _ = fmt.Fprintln(os.Stderr, err)
+	//		os.Exit(1)
+	//	}
+	//	_ = pprof.StartCPUProfile(f)
+	//	defer func(f *os.File) {
+	//		err := f.Close()
+	//		if err != nil {
+	//			fmt.Printf("%s f.Close Error: %v\n", GetTimeNow(), err)
+	//		}
+	//	}(f)
+	//	defer pprof.StopCPUProfile()
+	//}
 
 	// This concurrent error queue can be used by every component that can
 	// raise runtime errors. Using a queue will prevent us from blocking on

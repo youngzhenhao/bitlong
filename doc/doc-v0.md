@@ -13,6 +13,18 @@
 
 - **`StarLnd`** -> *`【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`* -> **`StartTapRoot`** -> *进行各种交易或查询操作* -> *进入修改密码界面进行修改* -> **`TapStopDaemon`** -> **`LndStopDaemon`** -> **`StarLnd`** -> *`【未解锁】`* ->`ChangePassword` -> *`【已解锁】`* -> **`StartTapRoot`** -> *进行各种交易或查询操作* -> **`TapStopDaemon`** -> **`LndStopDaemon`**
 
+## 4.开通流程说明
+
+- **`StarLnd`** -> *`【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`*  ->`ConnectPeer`-> `OpenChannelSync`-> `CloseChannel` -> **`LndStopDaemon`**
+
+## 5.收款流程说明
+
+-*`StarLnd`** -> *`【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`*  ->`AddInvoice`-> **`LndStopDaemon`**
+
+## 6.付款流程说明
+
+-*`StarLnd`** -> *`【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`*  ->`DecodePayReq`->`SendPaymentSync`->`SendCoins`-> **`LndStopDaemon`**
+
 ---
 
 # Lnd业务流程

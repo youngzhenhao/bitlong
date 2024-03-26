@@ -275,7 +275,7 @@ func AddInvoice(value int64, memo string) string {
 		fmt.Printf("%s client.AddInvoice :%v\n", GetTimeNow(), err)
 		return ""
 	}
-	return response.PaymentRequest
+	return response.GetPaymentRequest()
 }
 
 // ListInvoices

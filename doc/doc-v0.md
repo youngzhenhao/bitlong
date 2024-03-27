@@ -7,7 +7,7 @@
 
 ## 2.发行主根资产流程说明
 
-- **`StarLnd`** -> *`【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`* -> **`StartTapRoot`** -> `MintAsset`  ->  `FinalizeBatch` -> **`TapStopDaemon`** -> **`LndStopDaemon`**
+- **`StarLnd`** -> *`【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`* -> **`StartTapRoot`** -> `MintAsset`(资产创建页面，铸造资产)  ->  `FinalizeBatch`(资产创建页面，发行资产) ->  `ListAssets`(可在发行后查询所有资产) -> **`TapStopDaemon`** -> **`LndStopDaemon`**
 
 ## 3.修改密码流程说明
 
@@ -561,6 +561,24 @@ CancelBatch 会尝试取消当前待处理的批次。
 | 返回类型 | 用途     |
 |------|--------|
 | bool | 是否成功取消 |
+
+## 查询资产信息
+
+### ListAssets
+
+```go
+function  ListAssets(withWitness, includeSpent, includeLeased bool) string
+```
+
+| 参数  | 类型   | 用途              |
+|-----|------|-----------------|
+| withWitness | bool | 信息是否列出witness信息 |
+| includeSpent | bool | 是否包含spent资产     |
+| includeLeased | bool | 是否包括Leased资产    |
+
+| 返回类型   | 用途       |
+|--------|----------|
+| string | 返回所有资产信息 |
 
 ## 停止tap节点
 

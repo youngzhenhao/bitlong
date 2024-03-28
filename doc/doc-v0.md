@@ -1,40 +1,35 @@
-# Lnd业务流程说明
+# 业务流程说明
 
 ## 1.钱包启动流程说明
 
-1.  **`StarLnd`** -> *`第一次进入【无钱包】`* -> `GenSeed` -> `InitWallet` -> *`【已解锁】`* -> **`StartTapRoot`** -> *进行各种交易或查询操作* -> **`TapStopDaemon`** -> **`LndStopDaemon`**
-2. **`StarLnd`** -> *`非第一次进入【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`* -> **`StartTapRoot`** -> *进行各种交易或查询操作* -> **`TapStopDaemon`** -> **`LndStopDaemon`**
+- **`StarLnd`** -> *`第一次进入【无钱包】`* -> `GenSeed` -> `InitWallet` -> *`【已解锁】`* -> **`StartTapRoot`** -> *进行各种交易或查询操作* -> **`TapStopDaemon`** -> **`LndStopDaemon`**
+- **`StarLnd`** -> *`非第一次进入【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`* -> **`StartTapRoot`** -> *进行各种交易或查询操作* -> **`TapStopDaemon`** -> **`LndStopDaemon`**
 
-## 2.修改密码流程说明
+## 2.发行主根资产流程说明
+
+- **`StarLnd`** -> *`【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`* -> **`StartTapRoot`** -> `MintAsset`(资产创建页面，铸造资产)  ->  `FinalizeBatch`(资产创建页面，发行资产) ->  `ListAssets`(可在发行后查询所有资产) -> **`TapStopDaemon`** -> **`LndStopDaemon`**
+
+## 3.修改密码流程说明
 
 - **`StarLnd`** -> *`【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`* -> **`StartTapRoot`** -> *进行各种交易或查询操作* -> *进入修改密码界面进行修改* -> **`TapStopDaemon`** -> **`LndStopDaemon`** -> **`StarLnd`** -> *`【未解锁】`* ->`ChangePassword` -> *`【已解锁】`* -> **`StartTapRoot`** -> *进行各种交易或查询操作* -> **`TapStopDaemon`** -> **`LndStopDaemon`**
 
-## 4.收款流程说明
+## 4.开通通道流程说明
 
-- **`StarLnd`** -> *`【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`*  ->`AddInvoice`-> **`LndStopDaemon`**
+- **`StarLnd`** -> *`【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`*  ->`ConnectPeer`（创建通道页面调用链接节点）-> `OpenChannelSync`（创建通道页面调用开通通道）->`GetChanInfo`（创建通道后查询通道状态）-> `CloseChannel` -> **`LndStopDaemon`**
 
-## 5.开通道流程说明
+## 5.收款流程说明
 
-- **`StarLnd`** -> *`【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`*  ->`ConnectPeer`-> `OpenChannelSync`-> `CloseChannel` -> **`LndStopDaemon`**
+-*`StarLnd`** -> *`【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`*  ->`AddInvoice`(通道收款，创建时调用）-> **`LndStopDaemon`**
 
 ## 6.付款流程说明
 
-- **`StarLnd`** -> *`【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`* -> `ConnectPeer` -> `OpenChannelSync` -> `DecodePayReq` -> `SendPaymentSync` -> `SendCoins` -> `CloseChannel` -> **`LndStopDaemon`**
-
-# Tapd 流程说明
-
-## 1.发行主根资产流程说明
-
-- **`StarLnd`** -> *`【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`* -> **`StartTapRoot`** -> `MintAsset`  ->  `FinalizeBatch` -> **`TapStopDaemon`** -> **`LndStopDaemon`**
-
+-*`StarLnd`** -> *`【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`*  ->`DecodePayReq`（支付页面，填入闪电发票后解码发票获得发票金额）->`SendPaymentSync/SendPaymentSync0amt`（支付页面，支付发票）->`TrackPaymentV2`（查询支付发票的支付状态）-> **`LndStopDaemon`**
 
 ---
 
 # Lnd业务流程
 
 ## 钱包解锁 `unlock`
-
-*以下内容为旧版本*
 
 - `StarLnd` -> `无钱包` -> `GenSeed` -> `InitWallet` -> `已解锁` -> 进行各种交易或查询操作 -> `LndStopDaemon`
 - `StarLnd` -> `未解锁` -> `UnlockWallet` -> `已解锁` -> 进行各种交易或查询操作 -> `LndStopDaemon`
@@ -435,7 +430,8 @@ EstimateRouteFee(dest string, amtsat int64) string
 
 ### SendPaymentSync
 ```go
-func SendPaymentSync(invoice string) string  
+func SendPaymentSync(invoice string) string
+func SendPaymentSync0amt(invoice string, amt long) string
 ```
 
 支付发票  
@@ -444,7 +440,7 @@ func SendPaymentSync(invoice string) string
 | 参数      | 类型     | 用途              |
 |---------|--------|-----------------|
 | invoice | string | 要支付的闪电发票请求      |
-| amt     | string | 支付零闪电发票请求时填入的金额 |
+| amt     | long   | 支付零闪电发票请求时填入的金额 |
 
 | 返回类型   | 用途                 |
 |--------|--------------------|
@@ -565,6 +561,24 @@ CancelBatch 会尝试取消当前待处理的批次。
 | 返回类型 | 用途     |
 |------|--------|
 | bool | 是否成功取消 |
+
+## 查询资产信息
+
+### ListAssets
+
+```go
+function  ListAssets(withWitness, includeSpent, includeLeased bool) string
+```
+
+| 参数  | 类型   | 用途              |
+|-----|------|-----------------|
+| withWitness | bool | 信息是否列出witness信息 |
+| includeSpent | bool | 是否包含spent资产     |
+| includeLeased | bool | 是否包括Leased资产    |
+
+| 返回类型   | 用途       |
+|--------|----------|
+| string | 返回所有资产信息 |
 
 ## 停止tap节点
 

@@ -18,6 +18,7 @@ func main() {
 	//api.StarLnd()
 	//api.StopDaemon()
 	//api.StartTapRoot()
+	api.StartLitd()
 
 }
 

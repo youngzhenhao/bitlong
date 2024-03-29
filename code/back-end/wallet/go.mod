@@ -1,6 +1,6 @@
 module github.com/wallet
 
-go 1.22
+go 1.22.1
 
 replace github.com/wallet/api => ../wallet/api
 
@@ -30,6 +30,7 @@ require (
 )
 
 require (
+	github.com/lightninglabs/faraday v0.2.13-alpha // indirect
 	github.com/FactomProject/basen v0.0.0-20150613233007-fe3947df716e // indirect
 	github.com/FactomProject/btcutilecc v0.0.0-20130527213604-d3a63a5752ec // indirect
 	github.com/NebulousLabs/fastrand v0.0.0-20181203155948-6fb6489aac4e // indirect
@@ -256,8 +257,10 @@ replace google.golang.org/protobuf v1.32.0 => github.com/lightninglabs/protobuf-
 
 replace github.com/btcsuite/btcd/btcutil v1.1.5 => ../wallet/btcutil@v1.1.5
 
-replace github.com/lightningnetwork/lnd v0.17.4-beta.rc1 => ../wallet/lnd@v0.17.4-beta.rc1
+replace github.com/lightninglabs/lnd v0.17.4-beta => ../wallet/lnd@v0.17.4
 
-replace github.com/lightninglabs/lndclient v0.17.0-4 => ../wallet/lndclient@v0.17.0-4
+replace github.com/lightninglabs/lndclient v0.17.4-1 => ../wallet/lndclient@v0.17.4
+
+replace github.com/lightninglabs/lightning-terminal v0.12.2-alpha => ../wallet/lightning-terminal@v0.12.2
 
 retract v0.0.2

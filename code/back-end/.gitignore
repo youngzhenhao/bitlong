@@ -17,3 +17,5 @@ wallet/api.backup.zip
 wallet/file
 wallet/*_test.go
 wallet/api/*_test.go
+*.exe
+*.exe~

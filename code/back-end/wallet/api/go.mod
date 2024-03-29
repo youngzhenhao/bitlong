@@ -1,6 +1,6 @@
 module github.com/wallet/api
 
-go 1.22
+go 1.22.1
 
 replace github.com/wallet => ../../wallet
 

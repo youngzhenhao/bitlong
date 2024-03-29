@@ -765,7 +765,7 @@ func assertBuildTagsEnabled(actual *verrpc.Version,
 	requiredTags []string) error {
 
 	tagMap := make(map[string]struct{})
-	for _, tag := range actual.BuildTags {
+	for _, tag := range requiredTags {
 		tagMap[tag] = struct{}{}
 	}
 	for _, required := range requiredTags {

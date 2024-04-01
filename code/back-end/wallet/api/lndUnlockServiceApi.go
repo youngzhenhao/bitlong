@@ -63,7 +63,7 @@ func GenSeed() string {
 	}
 	response, err := client.GenSeed(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s Error calling InitWallet: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s Error calling GenSeed: %v\n", GetTimeNow(), err)
 	}
 	return strings.Join(response.CipherSeedMnemonic, ",")
 }
@@ -182,7 +182,7 @@ func UnlockWallet(password string) bool {
 	}
 	_, err = client.UnlockWallet(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s did not UnlockWallet: %v\n", GetTimeNow(), err)
 		return false
 	}
 	fmt.Printf("%s unlockSuccess\n", GetTimeNow())

@@ -49,7 +49,7 @@ func GetStateForSubscribe() bool {
 	request := &lnrpc.SubscribeStateRequest{}
 	response, err := client.SubscribeState(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s lnrpc NewAddress err: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s lnrpc SubscribeState err: %v\n", GetTimeNow(), err)
 		return false
 	}
 	fmt.Printf("%s %v\n", GetTimeNow(), response)

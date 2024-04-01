@@ -166,7 +166,7 @@ func GetIdentityPubkey() string {
 	request := &lnrpc.GetInfoRequest{}
 	response, err := client.GetInfo(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s lnrpc ListChannels err: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s lnrpc GetInfo.IdentityPubkey err: %v\n", GetTimeNow(), err)
 		return ""
 	}
 	return response.GetIdentityPubkey()
@@ -218,7 +218,7 @@ func GetInfoOfLnd() string {
 	request := &lnrpc.GetInfoRequest{}
 	response, err := client.GetInfo(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s lnrpc ListChannels err: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s lnrpc GetInfo err: %v\n", GetTimeNow(), err)
 		return ""
 	}
 	return response.String()
@@ -382,7 +382,7 @@ func LookupInvoice(rhash string) string {
 	}
 	response, err := client.LookupInvoice(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s client.ListInvoice :%v\n", GetTimeNow(), err)
+		fmt.Printf("%s client.LookupInvoice :%v\n", GetTimeNow(), err)
 		return ""
 	}
 	return response.String()
@@ -1591,6 +1591,8 @@ func ConnectPeer(pubkey, host string) bool {
 		fmt.Printf("%s lnrpc ConnectPeer err: %v\n", GetTimeNow(), err)
 		if strings.Contains(err.Error(), "already connected to peer") {
 			return true
+		} else {
+			return false
 		}
 	}
 	fmt.Printf("%s %v\n", GetTimeNow(), response)
@@ -1701,7 +1703,7 @@ func DecodePayReq(payReq string) int64 {
 	}
 	response, err := client.DecodePayReq(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s client.AddInvoice :%v\n", GetTimeNow(), err)
+		fmt.Printf("%s client.DecodePayReq :%v\n", GetTimeNow(), err)
 		return -1
 	}
 	return response.NumSatoshis
@@ -1857,7 +1859,7 @@ func SendCoins(addr string, amount int64) string {
 	}
 	response, err := client.SendCoins(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s lnrpc ConnectPeer err: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s lnrpc SendCoins err: %v\n", GetTimeNow(), err)
 		return "false"
 	}
 	fmt.Printf("%s %v\n", GetTimeNow(), response)
@@ -1909,7 +1911,7 @@ func LndStopDaemon() bool {
 	request := &lnrpc.StopRequest{}
 	response, err := client.StopDaemon(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s lnrpc AbandonChannel err: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s lnrpc StopDaemon err: %v\n", GetTimeNow(), err)
 		return false
 	}
 	fmt.Printf("%s %v\n", GetTimeNow(), response)
@@ -1956,8 +1958,8 @@ func ListPermissions() string {
 	request := &lnrpc.ListPermissionsRequest{}
 	response, err := client.ListPermissions(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s lnrpc AbandonChannel err: %v\n", GetTimeNow(), err)
-		return "false"
+		fmt.Printf("%s lnrpc ListPermissions err: %v\n", GetTimeNow(), err)
+		return err.Error()
 	}
 	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return response.String()

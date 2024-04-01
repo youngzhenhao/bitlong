@@ -60,7 +60,7 @@ func ListAddress() string {
 	request := &walletrpc.ListAddressesRequest{}
 	response, err := client.ListAddresses(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s walletrpc ListAddresses err: %v\n", GetTimeNow(), err)
 		return ""
 	}
 	//fmt.Printf("%s %v\n", GetTimeNow(), response)

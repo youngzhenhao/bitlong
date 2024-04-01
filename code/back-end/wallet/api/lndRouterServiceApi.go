@@ -65,7 +65,7 @@ func SendPaymentV2(invoice string, feelimit int64) string {
 	}
 	stream, err := client.SendPaymentV2(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s client.SendPaymentV2 :%v\n", GetTimeNow(), err)
+		fmt.Printf("%s routerrpc SendPaymentV2 :%v\n", GetTimeNow(), err)
 		return "false"
 	}
 	for {
@@ -200,7 +200,7 @@ func SendToRouteV2(payhash []byte, route *lnrpc.Route) {
 	}
 	response, err := client.SendToRouteV2(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s client.SendPaymentV2 :%v\n", GetTimeNow(), err)
+		fmt.Printf("%s routerrpc SendToRouteV2 :%v\n", GetTimeNow(), err)
 	}
 	fmt.Printf("%s %v\n", GetTimeNow(), response)
 }
@@ -255,7 +255,7 @@ func EstimateRouteFee(dest string, amtsat int64) string {
 	}
 	response, err := client.EstimateRouteFee(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s client.Sen下dPaymentV2 :%v\n", GetTimeNow(), err)
+		fmt.Printf("%s routerrpc EstimateRouteFee :%v\n", GetTimeNow(), err)
 	}
 	fmt.Printf("%s  %v\n", GetTimeNow(), response.RoutingFeeMsat)
 	return response.String()

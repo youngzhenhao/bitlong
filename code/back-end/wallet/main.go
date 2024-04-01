@@ -18,8 +18,8 @@ func main() {
 	//api.StarLnd()
 	//api.StopDaemon()
 	//api.StartTapRoot()
-	api.StartLitd()
-
+	//api.StartLitd()
+	api.LitdStopDaemon()
 }
 
 func s2json(value any) string {

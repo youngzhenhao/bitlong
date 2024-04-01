@@ -26,12 +26,12 @@ type UserResponse struct {
 	Lnurl  string `json:"lnurl"`
 }
 
-func PostServerToUploadUserInfo(name, socket string) string {
+func PostServerToUploadUserInfo(name, port string) string {
 
 	serverDomainOrSocket := base.QueryConfigByKey("LnurlServerHost")
 	targetUrl := "http://" + serverDomainOrSocket + "/upload/user"
 
-	payload := url.Values{"name": {name}, "socket": {socket}}
+	payload := url.Values{"name": {name}, "port": {port}}
 
 	response, err := http.PostForm(targetUrl, payload)
 	if err != nil {

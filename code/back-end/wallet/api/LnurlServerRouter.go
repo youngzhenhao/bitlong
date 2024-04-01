@@ -25,9 +25,11 @@ func setupRouterOnServer() *gin.Engine {
 	router.POST("/upload/user", func(c *gin.Context) {
 		id := uuid.New().String()
 		name := c.PostForm("name")
-		socket := c.PostForm("socket")
+		ip := c.ClientIP()
+		port := c.PostForm("port")
+		socket := ip + ":" + port
 		result := true
-		if name == "" || socket == "" {
+		if name == "" || port == "" {
 			result = false
 		}
 		user := &User{

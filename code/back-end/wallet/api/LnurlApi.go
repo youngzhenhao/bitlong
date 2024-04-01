@@ -5,11 +5,11 @@ package api
 // @Description: Alice's upload workflow, call after Alice and server's web services are launched
 // Alice's front-end uses this LNURL to generate a QR code that waits to be scanned
 // @param name
-// @param socket
+// @param port
 // @return string
 // @dev call to get lnurl to generate qr code
-func LnurlUploadUserInfo(name, socket string) string {
-	return PostServerToUploadUserInfo(name, socket)
+func LnurlUploadUserInfo(name, port string) string {
+	return PostServerToUploadUserInfo(name, port)
 }
 
 // LnurlPayToLnu

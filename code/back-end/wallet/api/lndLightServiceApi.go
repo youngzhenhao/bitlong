@@ -1752,13 +1752,12 @@ func SendPaymentSync(invoice string) string {
 	request := &lnrpc.SendRequest{
 		PaymentRequest: invoice,
 	}
-	stream, err := client.SendPaymentSync(context.Background(), request)
+	response, err := client.SendPaymentSync(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s client.SendPaymentSync :%v\n", GetTimeNow(), err)
+		fmt.Printf("%s lnrpc SendPaymentSync :%v\n", GetTimeNow(), err)
 		return "false"
 	}
-	fmt.Printf(GetTimeNow() + stream.String())
-	return hex.EncodeToString(stream.PaymentHash)
+	return hex.EncodeToString(response.PaymentHash)
 }
 
 func SendPaymentSync0amt(invoice string, amt int64) string {

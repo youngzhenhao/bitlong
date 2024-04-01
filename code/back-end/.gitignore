@@ -19,3 +19,5 @@ wallet/api/*_test.go
 *.exe
 *.exe~
 temp.go
+wellet/lnurl
+wallet/*.zip

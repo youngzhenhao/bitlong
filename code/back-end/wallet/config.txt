@@ -2,3 +2,4 @@ dirpath=C:\mySpace\walletDataDir\localnode
 lndhost=localhost:10009
 taproothost=localhost:10029
 litdhost=localhost:8443
+LnurlServerHost=202.79.173.41:9080

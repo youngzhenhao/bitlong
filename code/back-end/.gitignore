@@ -6,7 +6,6 @@ wallet/p2pfileT.zip
 # go.work.sum
 wallet/.idea
 .idea
-wallet/lnurl/temp.go
 wallet/api/api.aar
 wallet/api/api-sources.jar
 wallet/api/api1.aar
@@ -19,3 +18,4 @@ wallet/*_test.go
 wallet/api/*_test.go
 *.exe
 *.exe~
+temp.go

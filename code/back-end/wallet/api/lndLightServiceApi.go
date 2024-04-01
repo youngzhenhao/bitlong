@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 // GetNewAddress
@@ -1054,7 +1055,7 @@ func OpenChannelSync(nodePubkey string, localFundingAmount int64) string {
 	response, err := client.OpenChannelSync(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s lnrpc OpenChannelSync err: %v\n", GetTimeNow(), err)
-		return ""
+		return err.Error()
 	}
 	responseStr := hex.EncodeToString(response.GetFundingTxidBytes())
 	return responseStr + ":" + strconv.Itoa(int(response.GetOutputIndex()))
@@ -1588,7 +1589,9 @@ func ConnectPeer(pubkey, host string) bool {
 	response, err := client.ConnectPeer(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s lnrpc ConnectPeer err: %v\n", GetTimeNow(), err)
-		return false
+		if strings.Contains(err.Error(), "already connected to peer") {
+			return true
+		}
 	}
 	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return true

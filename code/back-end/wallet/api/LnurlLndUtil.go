@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/joho/godotenv"
 	"google.golang.org/grpc/credentials"
 	"log"
 	"os"
@@ -50,4 +51,13 @@ func S2json(value any) string {
 	}
 	result := str.String()
 	return result
+}
+
+func GetEnv(key string, filename ...string) string {
+	err := godotenv.Load(filename...)
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+	value := os.Getenv(key)
+	return value
 }

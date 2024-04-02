@@ -21,3 +21,6 @@ wallet/api/*_test.go
 temp.go
 wellet/lnurl
 wallet/*.zip
+.env
+frpc.ini
+cmd-test

@@ -99,7 +99,7 @@ func GetState() string {
 	response, err := client.GetState(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s watchtowerrpc GetState err: %v\n", GetTimeNow(), err)
-		return ""
+		return err.Error()
 	}
 	return response.String()
 }

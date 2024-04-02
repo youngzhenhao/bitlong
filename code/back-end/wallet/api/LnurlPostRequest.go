@@ -18,20 +18,21 @@ type InvoiceResponse struct {
 }
 
 type UserResponse struct {
-	Time   string `json:"time"`
-	Id     string `json:"id"`
-	Name   string `json:"name"`
-	Socket string `json:"socket"`
-	Result bool   `json:"result"`
-	Lnurl  string `json:"lnurl"`
+	Time       string `json:"time"`
+	Id         string `json:"id"`
+	Name       string `json:"name"`
+	Socket     string `json:"socket"`
+	RemotePort string `json:"remote_port"`
+	Result     bool   `json:"result"`
+	Lnurl      string `json:"lnurl"`
 }
 
-func PostServerToUploadUserInfo(name, port string) string {
+func PostServerToUploadUserInfo(id, name, localPort, remotePort string) string {
 
 	serverDomainOrSocket := base.QueryConfigByKey("LnurlServerHost")
 	targetUrl := "http://" + serverDomainOrSocket + "/upload/user"
 
-	payload := url.Values{"name": {name}, "port": {port}}
+	payload := url.Values{"id": {id}, "name": {name}, "local_port": {localPort}, "remote_port": {remotePort}}
 
 	response, err := http.PostForm(targetUrl, payload)
 	if err != nil {
@@ -48,8 +49,11 @@ func PostServerToUploadUserInfo(name, port string) string {
 }
 
 // PostPhoneToAddInvoice called by server
-func PostPhoneToAddInvoice(socket, amount string) string {
-	targetUrl := "http://" + socket + "/addInvoice"
+func PostPhoneToAddInvoice(remotePort, amount string) string {
+
+	frpsForwardSocket := fmt.Sprintf("%s:%s", base.QueryConfigByKey("serverAddr"), remotePort)
+
+	targetUrl := "http://" + frpsForwardSocket + "/addInvoice"
 
 	payload := url.Values{"amount": {amount}}
 

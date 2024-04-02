@@ -19,7 +19,8 @@ func main() {
 	//api.StopDaemon()
 	//api.StartTapRoot()
 	//api.StartLitd()
-	api.LitdStopDaemon()
+	//api.LitdStopDaemon()
+
 }
 
 func s2json(value any) string {

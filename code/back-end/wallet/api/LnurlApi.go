@@ -1,20 +1,61 @@
 package api
 
+import (
+	"github.com/google/uuid"
+	"github.com/wallet/base"
+	"strconv"
+)
+
+// LnurlPhoneWebService
+//
+// @Description: 1. Run Web Service
+func LnurlPhoneWebService() {
+	RouterRunOnPhone()
+}
+
+// LnurlGetPortAvailable
+//
+// @Description: 2. Get an available port
+// @return string
+func LnurlGetPortAvailable() string {
+	return strconv.Itoa(RequestServerGetPortAvailable(base.QueryConfigByKey("LnurlServerHost")))
+}
+
+// LnurlGetNewId
+//
+// @Description: 3. Get a new id
+// @return string
+func LnurlGetNewId() string {
+	return uuid.New().String()
+}
+
+// LnurlFrpcRun
+//
+// @Description: 4. Forwarding Service
+// @param id
+// @param remotePort
+func LnurlFrpcRun(id, remotePort string) {
+	FrpcRun(id, remotePort)
+}
+
 // LnurlUploadUserInfo
 //
-// @Description: Alice's upload workflow, call after Alice and server's web services are launched
-// Alice's front-end uses this LNURL to generate a QR code that waits to be scanned
+// @Description: If 4 success, 5. upload user info
+// @note: Alice's upload workflow, call after Alice and server's web services are launched
+// Alice's front-end uses this LNURL to generate a QR code that waits to be scannedparam id
 // @param name
-// @param port
+// @param localPort
+// @param remotePort
 // @return string
 // @dev call to get lnurl to generate qr code
-func LnurlUploadUserInfo(name, port string) string {
-	return PostServerToUploadUserInfo(name, port)
+func LnurlUploadUserInfo(id, name, localPort, remotePort string) string {
+	return PostServerToUploadUserInfo(id, name, localPort, remotePort)
 }
 
 // LnurlPayToLnu
 //
-// @Description: Bob's pay-to-lnurl workflow, call after Alice's LNURL QR code is generated
+// @description: 6. send a payment
+// @note: Bob's pay-to-lnurl workflow, call after Alice's LNURL QR code is generated
 // Bob's front-end scans the Alice's QR code to get the LNURL and then calls the PayToLnurl with amount which Bob wanna pay
 // @param ln
 // @param amount

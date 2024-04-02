@@ -12,9 +12,10 @@ type ServerStore struct {
 }
 
 type User struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	Socket string `json:"socket"`
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Socket     string `json:"socket"`
+	RemotePort string `json:"remote_port"`
 }
 
 func InitServerDB() error {

@@ -13,7 +13,7 @@ import (
 
 func RouterRunOnPhone() {
 	router := setupRouterOnPhone()
-	err := router.Run(":9090")
+	err := router.Run("0.0.0.0:9090")
 	if err != nil {
 		return
 	}

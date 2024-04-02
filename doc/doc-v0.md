@@ -97,13 +97,11 @@ func InitWallet(seed string, password string) bool
 
 解锁钱包
 
-1. 接口
-
 ```go
 func UnlockWallet(password string) bool
 ```
 
-2. 参数列表：
+在lnd启动时，UnlockWallet使用提供的解锁密码解锁钱包数据库。
 
 | 输入参数   | 类型     | 用途       |
 |--------|--------|----------|
@@ -112,10 +110,40 @@ func UnlockWallet(password string) bool
 | 返回类型  | 用途       |
 |--------|---------|
 |  bool  | 是否解锁钱包   |
- 
-3. 详细解释：
 
-在lnd启动时，UnlockWallet使用提供的解锁密码解锁钱包数据库。
+### GetState
+ 
+```go
+func GetState() string
+```
+
+返回lnd节点的启动状态
+
+| 返回类型   | 用途    |
+|--------|-------|
+| string | lnd状态 |
+
+获取钱包的当前状态。可能的状态有
+- WAITING_TO_START：节点正在等待成为集群的领导者，尚未启动。
+  尚未启动。
+- NON_EXISTING：钱包尚未初始化。
+- LOCKED（已锁定）：钱包已锁定。
+- UNLOCKED（已解锁）：钱包已成功解锁，但 RPC 服务器尚未就绪。
+- RPC_ACTIVE：RPC 服务器处于活动状态，但尚未完全准备好接受调用。
+- SERVER_ACTIVE：RPC 服务器可用并准备好接受调用。
+
+
+
+### 
+```go
+func GetStateForSubscribe(lndstate *)
+```
+订阅一个lnd状态事件流，每当lnd节点状态发生变化时更新lndstate
+| 输入参数   | 类型     | 用途       |
+|--------|--------|----------|
+|  lndstate  | *string | 用于接收服务器状态的字符串   |
+
+状态内容见GetState()
 
 
 ### ChangePassword

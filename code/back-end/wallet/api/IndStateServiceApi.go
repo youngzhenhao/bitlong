@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/hex"
 	"fmt"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/wallet/base"
@@ -63,13 +62,6 @@ func GetStateForSubscribe() bool {
 func GetState() string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
 		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
@@ -83,8 +75,7 @@ func GetState() string {
 		RootCAs:    certPool,
 	}
 	creds := credentials.NewTLS(config)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
@@ -99,7 +90,7 @@ func GetState() string {
 	response, err := client.GetState(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s watchtowerrpc GetState err: %v\n", GetTimeNow(), err)
-		return ""
+		return "NO_START_LND"
 	}
 	return response.String()
 }

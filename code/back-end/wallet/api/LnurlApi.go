@@ -35,7 +35,8 @@ func LnurlGetNewId() string {
 // @param id
 // @param remotePort
 func LnurlFrpcRun(id, remotePort string) {
-	FrpcRun(id, remotePort)
+	FrpcConfig(id, remotePort)
+	FrpcRun()
 }
 
 // LnurlUploadUserInfo

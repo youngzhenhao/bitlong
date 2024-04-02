@@ -1916,6 +1916,7 @@ func LndStopDaemon() bool {
 	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return true
 }
+
 func ListPermissions() string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")

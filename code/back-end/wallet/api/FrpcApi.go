@@ -7,9 +7,14 @@ import (
 	"strconv"
 )
 
-func FrpcRun(id, remotePortStr string) {
+// FrpcConfig
+// TODO: Need to test to find the "current path" of the Android
+func FrpcConfig(id, remotePortStr string) {
 	remotePort, _ := strconv.Atoi(remotePortStr)
-	_ = WriteConfig(base.QueryConfigByKey("serverAddr"), 7000, id, "tcp", "127.0.0.1", 9090, remotePort)
+	_ = WriteConfig(".\\frpc.ini", base.QueryConfigByKey("serverAddr"), 7000, id, "tcp", "127.0.0.1", 9090, remotePort)
+}
+
+func FrpcRun() {
 	system.EnableCompatibilityMode()
 	sub.Execute()
 }

@@ -8,7 +8,7 @@ import (
 
 // LnurlPhoneWebService
 //
-// @Description: 1. Run Web Service
+// @Description: 1. Run Web [Service]
 func LnurlPhoneWebService() {
 	RouterRunOnPhone()
 }
@@ -31,7 +31,7 @@ func LnurlGetNewId() string {
 
 // LnurlFrpcRun
 //
-// @Description: 4. Forwarding Service
+// @Description: 4. Forwarding [Service]
 // @param id
 // @param remotePort
 func LnurlFrpcRun(id, remotePort string) {

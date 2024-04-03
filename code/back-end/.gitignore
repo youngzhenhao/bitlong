@@ -6,12 +6,8 @@ wallet/p2pfileT.zip
 # go.work.sum
 wallet/.idea
 .idea
-wallet/api/api.aar
-wallet/api/api-sources.jar
-wallet/api/api1.aar
-wallet/api/api1-sources.jar
-wallet/api/api2.aar
-wallet/api/api2-sources.jar
+wallet/api/*.aar
+wallet/api/*.jar
 wallet/api.backup.zip
 wallet/file
 wallet/*_test.go

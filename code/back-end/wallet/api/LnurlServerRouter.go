@@ -143,5 +143,23 @@ func setupRouterOnServer() *gin.Engine {
 		})
 	})
 
+	router.POST("/isPortListening", func(c *gin.Context) {
+		remotePort := c.PostForm("remote_port")
+		result := true
+		if remotePort == "" {
+			result = false
+		}
+		listening := true
+		if result {
+			listening = QueryIsPortListening(remotePort)
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"time":        GetTimeNow(),
+			"remote_port": remotePort,
+			"result":      result,
+			"listening":   listening,
+		})
+	})
+
 	return router
 }

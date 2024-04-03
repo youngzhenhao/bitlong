@@ -234,6 +234,10 @@ func AddInvoice(value int64, memo string) string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	//@dev: Only for testing
+	//grpcHost := GetEnv("grpcHost")
+	//tlsCertPath := GetEnv("tlsCertPath")
+	//macaroonPath := GetEnv("macaroonPath")
 	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
 		panic(err)

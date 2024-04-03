@@ -1,6 +1,8 @@
 package api
 
 import (
+	"errors"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/wallet/base"
 	"strconv"
@@ -34,9 +36,15 @@ func LnurlGetNewId() string {
 // @Description: 4. Forwarding [Service]
 // @param id
 // @param remotePort
+// @return bool
 func LnurlFrpcRun(id, remotePort string) {
-	FrpcConfig(id, remotePort)
-	FrpcRun()
+	if !RequestPostServerIsPortListening(remotePort) {
+		FrpcConfig(id, remotePort)
+		FrpcRun()
+	} else {
+		err := errors.New("the server's port you requested is listening, try to get another available remote port")
+		fmt.Printf("%s LnurlFrpcRun err:%v\n", GetTimeNow(), err)
+	}
 }
 
 // LnurlUploadUserInfo

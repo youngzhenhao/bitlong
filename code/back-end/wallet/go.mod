@@ -271,4 +271,6 @@ replace github.com/lightninglabs/lndclient v0.17.4-1 => ../wallet/lndclient@v0.1
 
 replace github.com/lightninglabs/lightning-terminal v0.12.2-alpha => ../wallet/lightning-terminal@v0.12.2
 
+replace github.com/fatedier/frp => ../wallet/frp@v0.56.0
+
 retract v0.0.2

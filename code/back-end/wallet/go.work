@@ -6,5 +6,6 @@ use (
 	lnd@v0.17.4
 	lndclient@v0.17.4
 	lightning-terminal@v0.12.2
+	frp@v0.56.0
 	api
 )

@@ -17,6 +17,7 @@ type PhoneStore struct {
 	DB *bolt.DB
 }
 
+// @TODO: Path to be modified
 func InitPhoneDB() error {
 	_, err := createBucketInPhoneDB("./phone.db", "invoices")
 	return err

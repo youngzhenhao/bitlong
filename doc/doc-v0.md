@@ -25,6 +25,11 @@
 
 -*`StarLnd`** -> *`【未解锁】`* -> `UnlockWallet` -> *`【已解锁】`*  ->`DecodePayReq`（支付页面，填入闪电发票后解码发票获得发票金额）->`SendPaymentSync/SendPaymentSync0amt`（支付页面，支付发票）->`TrackPaymentV2`（查询支付发票的支付状态）-> **`LndStopDaemon`**
 
+## 7.lnurl流程说明
+
+-`ConnectPeer`（创建通道页面调用链接节点）-> `OpenChannelSync`（创建通道页面调用开通通道）-> `LnurlPhoneWebService` -> `LnurlGetPortAvailable` ->
+ `LnurlGetNewId` -> `LnurlFrpcRun` -> `LnurlUploadUserInfo` -> `LnurlPayToLnu`
+
 ---
 
 # Lnd业务流程
@@ -619,3 +624,81 @@ func TapStopDaemon() bool
 | 返回类型 | 用途     |
 |------|--------|
 | bool | 是否成功 |
+
+# Lnurl业务流程
+
+## 启动手机服务端
+
+```go
+func LnurlPhoneWebService()
+```
+启动一个web的服务
+
+## 获取端口
+
+```go
+func LnurlGetPortAvailable() string
+```
+
+| 返回类型 | 用途     |
+|------|--------|
+| string | 返回可用端口号 |
+
+获取一个可用的端口号
+
+## 获取id
+
+```go
+func LnurlGetNewId() string
+```
+
+| 返回类型 | 用途     |
+|------|--------|
+| string | id |
+
+获取一个随机的ID
+
+## 启动frpc
+
+```go
+func LnurlFrpcRun(id, remotePort string)
+```
+
+| 输入参数 |  类型  | 用途     |
+|---------|--------|--------|
+| id      | string |    用户ID   |
+| remotePort | string | 远程端口 |
+
+## 生成url
+
+这里需要启动frp成功才能进行
+
+```go
+func LnurlUploadUserInfo(id, name, localPort, remotePort string) string
+```
+
+| 输入参数 |  类型  | 用途     |
+|---------|--------|--------|
+| id      | string |    用户ID   |
+| name    | string |    用户昵称   |
+| localPort | string | 本地端口 |
+| remotePort | string | 远程端口 |
+
+|输出参数类型 |  用途  |
+|--------|--------|
+| string | 支付url |
+
+## 支付
+
+```go
+func LnurlPay(lnu, amount string) string
+```
+
+| 输入参数 |  类型  | 用途     |
+|---------|--------|--------|
+| lnu      | string |    支付url   |
+| amount  | string |    支付金额 |
+
+|输出参数类型 |  用途  |
+|--------|--------|
+| string | 支付信息 |

@@ -325,7 +325,12 @@ func DecodeMetaImage(image string, dir string) {
 		fmt.Println("create new image error:", err)
 		return
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(f)
 	decoder, err := base64.StdEncoding.DecodeString(image)
 	if err != nil {
 		fmt.Println("Decode image  fail:", err)

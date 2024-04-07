@@ -4,7 +4,9 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"github.com/lightninglabs/taproot-assets/taprpc"
 	"github.com/lightninglabs/taproot-assets/taprpc/mintrpc"
@@ -13,6 +15,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // CancelBatch
@@ -285,4 +288,53 @@ func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, 
 //	@return bool
 func MintAsset(name string, assetMetaData string, amount int) bool {
 	return mintAsset(false, false, name, assetMetaData, false, amount, false, false, "", "", false)
+}
+
+type NewMeta struct {
+	Acronym     string `json:"acronym"`
+	Description string `json:"description"`
+	Data        string `json:"data"`
+}
+
+func GetMetaImage(acronym string, description string, imagefile string) string {
+	image, err := os.ReadFile(imagefile)
+	if err != nil {
+		fmt.Println("open image file is error:", err)
+	}
+	imageStr := base64.StdEncoding.EncodeToString(image)
+	meta := NewMeta{
+		Acronym:     acronym,
+		Description: description,
+		Data:        imageStr,
+	}
+	metastr, err := json.Marshal(meta)
+	if err != nil {
+		fmt.Println("creat meta json str error:", err)
+	}
+	return string(metastr)
+}
+func DecodeMetaImage(image string, dir string) {
+	file := dir + "test"
+	if strings.Contains(image, "/9j/") {
+		file = file + ".jpeg"
+	} else {
+		file = file + ".jpg"
+	}
+	f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		fmt.Println("create new image error:", err)
+		return
+	}
+	defer f.Close()
+	decoder, err := base64.StdEncoding.DecodeString(image)
+	if err != nil {
+		fmt.Println("Decode image  fail:", err)
+		return
+	}
+	_, err = f.Write(decoder)
+	if err != nil {
+		fmt.Println("Write data fail:", err)
+
+		return
+	}
 }

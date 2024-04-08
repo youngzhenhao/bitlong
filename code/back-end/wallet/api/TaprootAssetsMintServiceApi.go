@@ -4,12 +4,12 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/lightninglabs/taproot-assets/taprpc"
 	"github.com/lightninglabs/taproot-assets/taprpc/mintrpc"
+	"github.com/vincent-petithory/dataurl"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -310,7 +310,8 @@ func GetMetaImage(acronym string, description string, imagefile string) string {
 	if err != nil {
 		fmt.Println("open image file is error:", err)
 	}
-	imageStr := base64.StdEncoding.EncodeToString(image)
+	imageStr := dataurl.EncodeBytes(image)
+
 	meta := NewMeta{
 		Acronym:     acronym,
 		Description: description,
@@ -323,13 +324,29 @@ func GetMetaImage(acronym string, description string, imagefile string) string {
 	return string(metastr)
 }
 
-func DecodeMetaImage(image string, dir string) {
-	file := dir + "test"
-	if strings.Contains(image, "/9j/") {
-		file = file + ".jpeg"
-	} else {
-		file = file + ".jpg"
+func GetDateforMeta(Meta string) string {
+	temp := &NewMeta{}
+	err := json.Unmarshal([]byte(Meta), temp)
+
+	if err != nil {
+		print(err)
 	}
+	return temp.Data
+}
+
+func DecodeMetaImage(image string, dir string, name string) {
+	dataUrl, err := dataurl.DecodeString(image)
+	if err != nil {
+		return
+	}
+	ContentType := dataUrl.MediaType.ContentType()
+	datatype := strings.Split(ContentType, "/")
+	if datatype[0] != "image" {
+		fmt.Println("is not image dataurl")
+		return
+	}
+	file := filepath.Join(dir, name+"."+datatype[1])
+
 	f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		fmt.Println("create new image error:", err)
@@ -341,12 +358,9 @@ func DecodeMetaImage(image string, dir string) {
 			fmt.Println(err)
 		}
 	}(f)
-	decoder, err := base64.StdEncoding.DecodeString(image)
-	if err != nil {
-		fmt.Println("Decode image  fail:", err)
-		return
-	}
-	_, err = f.Write(decoder)
+
+	_, err = f.Write(dataUrl.Data)
+
 	if err != nil {
 		fmt.Println("Write data fail:", err)
 

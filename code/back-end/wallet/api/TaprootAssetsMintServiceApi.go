@@ -290,6 +290,15 @@ func MintAsset(name string, assetMetaData string, amount int) bool {
 	return mintAsset(false, false, name, assetMetaData, false, amount, false, false, "", "", false)
 }
 
+func MintAssetnew(name string, assetTypeIsCollectible bool, assetMetaData string, amount int, newGroupedAsset bool) bool {
+	return mintAsset(false, assetTypeIsCollectible, name, assetMetaData, false, amount, newGroupedAsset, false, "", "", false)
+}
+
+func MintAssetadd(name string, assetTypeIsCollectible bool, assetMetaData string, amount int, groupedAsset bool, groupKey string) bool {
+	return mintAsset(false, assetTypeIsCollectible, name, assetMetaData, false, amount, false, groupedAsset, groupKey, "", false)
+
+}
+
 type NewMeta struct {
 	Acronym     string `json:"acronym"`
 	Description string `json:"description"`
@@ -313,6 +322,7 @@ func GetMetaImage(acronym string, description string, imagefile string) string {
 	}
 	return string(metastr)
 }
+
 func DecodeMetaImage(image string, dir string) {
 	file := dir + "test"
 	if strings.Contains(image, "/9j/") {
@@ -325,7 +335,12 @@ func DecodeMetaImage(image string, dir string) {
 		fmt.Println("create new image error:", err)
 		return
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(f)
 	decoder, err := base64.StdEncoding.DecodeString(image)
 	if err != nil {
 		fmt.Println("Decode image  fail:", err)

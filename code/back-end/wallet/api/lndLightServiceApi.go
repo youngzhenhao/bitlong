@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/wallet/base"
@@ -953,57 +954,6 @@ func GetChanInfo(chanId string) string {
 	return response.String()
 }
 
-// ListChannels
-//
-//	@Description: ListChannels returns a description of all the open channels that this node is a participant in.
-//	@return string
-func ListChannels() string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
-	if err != nil {
-		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
-	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
-	client := lnrpc.NewLightningClient(conn)
-	request := &lnrpc.ListChannelsRequest{}
-	response, err := client.ListChannels(context.Background(), request)
-	if err != nil {
-		fmt.Printf("%s lnrpc ListChannels err: %v\n", GetTimeNow(), err)
-		return ""
-	}
-	return response.String()
-}
-
 // OpenChannelSync
 //
 //	@Description:OpenChannelSync is a synchronous version of the OpenChannel RPC call. This call is meant to be consumed by clients to the REST proxy.
@@ -1138,6 +1088,62 @@ func OpenChannel(nodePubkey string, localFundingAmount int64) bool {
 	}
 }
 
+// ListChannels
+//
+//	@Description: ListChannels returns a description of all the open channels that this node is a participant in.
+//	@return string
+func ListChannels() string {
+	grpcHost := base.QueryConfigByKey("lndhost")
+	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
+	}
+
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
+	}
+
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
+		}
+	}(conn)
+	client := lnrpc.NewLightningClient(conn)
+	request := &lnrpc.ListChannelsRequest{}
+	response, err := client.ListChannels(context.Background(), request)
+	if err != nil {
+		fmt.Printf("%s lnrpc ListChannels err: %v\n", GetTimeNow(), err)
+		return ""
+	}
+	jsonBytes, err := json.Marshal(response)
+	if err != nil {
+		fmt.Printf("%s json.Marshal err: %v\n", GetTimeNow(), err)
+		return err.Error()
+	}
+	return string(jsonBytes)
+}
+
 // PendingChannels
 //
 //	@Description: PendingChannels returns a list of all the channels that are currently considered "pending".
@@ -1187,7 +1193,109 @@ func PendingChannels() string {
 		fmt.Printf("%s lnrpc PendingChannels err: %v\n", GetTimeNow(), err)
 		return ""
 	}
-	return response.String()
+	jsonBytes, err := json.Marshal(response)
+	if err != nil {
+		fmt.Printf("%s json.Marshal err: %v\n", GetTimeNow(), err)
+		return err.Error()
+	}
+	return string(jsonBytes)
+}
+
+// FindChanPoint
+//
+//	@Description:FindChanPoint is a helper function that takes a channel point string and returns the channel state
+//	@return string
+//	ACTIVE: channel is active
+//	INACTIVE: channel is inactive
+//	PENDING_OPEN: channel is pending open
+//	PENDING_CLOSE: channel is pending close
+//	CLOSED: channel is closed
+//	NO_FIND: channel not found
+//	ERR: grpc error
+func FindChanPoint(chanPoint string) string {
+	grpcHost := base.QueryConfigByKey("lndhost")
+	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
+	}
+
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
+	}
+
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
+		}
+	}(conn)
+
+	client := lnrpc.NewLightningClient(conn)
+	request := &lnrpc.ListChannelsRequest{}
+	response, err := client.ListChannels(context.Background(), request)
+	if err != nil {
+		fmt.Printf("%s lnrpc ListChannels err: %v\n", GetTimeNow(), err)
+		return "ERR"
+	}
+	for _, channel := range response.Channels {
+		if channel.ChannelPoint == chanPoint {
+			if channel.Active {
+				return "ACTIVE"
+			} else {
+				return "INACTIVE"
+			}
+		}
+	}
+	pendrequest := &lnrpc.PendingChannelsRequest{}
+	pendingresponse, err := client.PendingChannels(context.Background(), pendrequest)
+	if err != nil {
+		fmt.Printf("%s lnrpc PendingChannels err: %v\n", GetTimeNow(), err)
+		return "ERR"
+	}
+	for _, channel := range pendingresponse.PendingOpenChannels {
+		if channel.Channel.ChannelPoint == chanPoint {
+			return "PENDING_OPEN"
+		}
+	}
+	for _, channel := range pendingresponse.WaitingCloseChannels {
+		if channel.Channel.ChannelPoint == chanPoint {
+			return "PENDING_CLOSE"
+		}
+	}
+
+	closerequest := &lnrpc.ClosedChannelsRequest{}
+	closeresponse, err := client.ClosedChannels(context.Background(), closerequest)
+	if err != nil {
+		fmt.Printf("%s lnrpc ClosedChannels err: %v\n", GetTimeNow(), err)
+		return "ERR"
+	}
+	for _, channel := range closeresponse.Channels {
+		if channel.ChannelPoint == chanPoint {
+			return "CLOSED"
+		}
+	}
+
+	return "NO_FIND"
 }
 
 // RestoreChannelBackups

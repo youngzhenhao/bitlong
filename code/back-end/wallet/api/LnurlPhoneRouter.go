@@ -5,7 +5,9 @@ import (
 	"github.com/boltdb/bolt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/wallet/base"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -45,7 +47,7 @@ func setupRouterOnPhone() *gin.Engine {
 			fmt.Printf("%s InitPhoneDB err :%v\n", GetTimeNow(), err)
 		}
 
-		db, err := bolt.Open("phone.db", 0600, &bolt.Options{Timeout: 1 * time.Second})
+		db, err := bolt.Open(filepath.Join(base.QueryConfigByKey("dirpath"), "phone.db"), 0600, &bolt.Options{Timeout: 1 * time.Second})
 		if err != nil {
 			fmt.Printf("%s bolt.Open :%v\n", GetTimeNow(), err)
 		}

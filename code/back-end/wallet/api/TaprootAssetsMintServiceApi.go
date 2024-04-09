@@ -5,14 +5,17 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"github.com/lightninglabs/taproot-assets/taprpc"
 	"github.com/lightninglabs/taproot-assets/taprpc/mintrpc"
+	"github.com/vincent-petithory/dataurl"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // CancelBatch
@@ -285,4 +288,82 @@ func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, 
 //	@return bool
 func MintAsset(name string, assetMetaData string, amount int) bool {
 	return mintAsset(false, false, name, assetMetaData, false, amount, false, false, "", "", false)
+}
+
+func MintAssetnew(name string, assetTypeIsCollectible bool, assetMetaData string, amount int, newGroupedAsset bool) bool {
+	return mintAsset(false, assetTypeIsCollectible, name, assetMetaData, false, amount, newGroupedAsset, false, "", "", false)
+}
+
+func MintAssetadd(name string, assetTypeIsCollectible bool, assetMetaData string, amount int, groupedAsset bool, groupKey string) bool {
+	return mintAsset(false, assetTypeIsCollectible, name, assetMetaData, false, amount, false, groupedAsset, groupKey, "", false)
+
+}
+
+type NewMeta struct {
+	Acronym     string `json:"acronym"`
+	Description string `json:"description"`
+	Data        string `json:"data"`
+}
+
+func GetMetaImage(acronym string, description string, imagefile string) string {
+	image, err := os.ReadFile(imagefile)
+	if err != nil {
+		fmt.Println("open image file is error:", err)
+	}
+	imageStr := dataurl.EncodeBytes(image)
+
+	meta := NewMeta{
+		Acronym:     acronym,
+		Description: description,
+		Data:        imageStr,
+	}
+	metastr, err := json.Marshal(meta)
+	if err != nil {
+		fmt.Println("creat meta json str error:", err)
+	}
+	return string(metastr)
+}
+
+func GetDateforMeta(Meta string) string {
+	temp := &NewMeta{}
+	err := json.Unmarshal([]byte(Meta), temp)
+
+	if err != nil {
+		print(err)
+	}
+	return temp.Data
+}
+
+func DecodeMetaImage(image string, dir string, name string) {
+	dataUrl, err := dataurl.DecodeString(image)
+	if err != nil {
+		return
+	}
+	ContentType := dataUrl.MediaType.ContentType()
+	datatype := strings.Split(ContentType, "/")
+	if datatype[0] != "image" {
+		fmt.Println("is not image dataurl")
+		return
+	}
+	file := filepath.Join(dir, name+"."+datatype[1])
+
+	f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		fmt.Println("create new image error:", err)
+		return
+	}
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(f)
+
+	_, err = f.Write(dataUrl.Data)
+
+	if err != nil {
+		fmt.Println("Write data fail:", err)
+
+		return
+	}
 }

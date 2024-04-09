@@ -57,6 +57,7 @@ func LnurlFrpcRun(id, remotePort string) {
 // @param remotePort
 // @return string
 // @dev call to get lnurl to generate qr code
+// TODO: detection status of frpc
 func LnurlUploadUserInfo(id, name, localPort, remotePort string) string {
 	return PostServerToUploadUserInfo(id, name, localPort, remotePort)
 }

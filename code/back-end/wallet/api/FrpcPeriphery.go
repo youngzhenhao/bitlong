@@ -17,6 +17,13 @@ func WriteConfigFrpcRunTest() {
 	FrpcRun()
 }
 
+func InitPhoneDBTest() {
+	err := InitPhoneDB()
+	if err != nil {
+		fmt.Println("init phone db error,", err)
+	}
+}
+
 func WriteConfig(filePath string, serverAddr string, serverPort int, proxyName string, proxyType string, localIP string, localPort int, remotePort int) bool {
 	content := fmt.Sprintf("serverAddr = \"%s\"\nserverPort = %d\n\n[[proxies]]\nname = \"%s\"\ntype = \"%s\"\nlocalIP = \"%s\"\nlocalPort = %d\nremotePort = %d",
 		serverAddr, serverPort, proxyName, proxyType, localIP, localPort, remotePort)

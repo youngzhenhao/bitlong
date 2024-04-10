@@ -92,5 +92,5 @@ func GetState() string {
 		fmt.Printf("%s watchtowerrpc GetState err: %v\n", GetTimeNow(), err)
 		return "NO_START_LND"
 	}
-	return response.String()
+	return response.State.String()
 }

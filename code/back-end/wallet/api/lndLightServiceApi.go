@@ -1298,6 +1298,68 @@ func FindChanPoint(chanPoint string) string {
 	return "NO_FIND"
 }
 
+// GetChanBalance
+//
+//	@Description:GetChanBalance returns the balance of a channel specified by its channel point.
+//	@return string
+//	（localBalance:remoteBalance) :local balance and remotebalance of the channel
+//	ERR: grpc error
+//	NO_FIND: channel not found
+func GetChanBalance(chanPoint string) string {
+	grpcHost := base.QueryConfigByKey("lndhost")
+	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
+	}
+
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
+	}
+
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
+		}
+	}(conn)
+
+	client := lnrpc.NewLightningClient(conn)
+	request := &lnrpc.ListChannelsRequest{}
+	response, err := client.ListChannels(context.Background(), request)
+	if err != nil {
+		fmt.Printf("%s lnrpc ListChannels err: %v\n", GetTimeNow(), err)
+		return "ERR"
+	}
+	for _, channel := range response.Channels {
+		if channel.ChannelPoint == chanPoint {
+			localBalance := channel.LocalBalance
+			remoteBalance := channel.RemoteBalance
+			return strconv.FormatInt(localBalance, 10) + ":" + strconv.FormatInt(remoteBalance, 10)
+		}
+	}
+	return "NO_FIND"
+}
+
 // RestoreChannelBackups
 //
 //	@Description:RestoreChannelBackups accepts a set of singular channel backups, or a single encrypted multi-chan backup and attempts to recover any funds remaining within the channel.

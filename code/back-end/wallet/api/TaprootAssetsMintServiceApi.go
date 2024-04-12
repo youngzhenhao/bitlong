@@ -115,10 +115,15 @@ func finalizeBatch(shortResponse bool, feeRate int) string {
 	response, err := client.FinalizeBatch(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s mintrpc FinalizeBatch Error: %v\n", GetTimeNow(), err)
-		return ""
+		return "false," + err.Error()
 	}
-	//fmt.Printf("%s %v\n", GetTimeNow(), response)
-	return response.String()
+	fmt.Printf("%s %v\n", GetTimeNow(), response)
+	jstr, err := json.Marshal(response)
+	if err != nil {
+		fmt.Printf("%s json.Marshal Error: %v\n", GetTimeNow(), err)
+		return "false," + err.Error()
+	}
+	return "true," + string(jstr)
 }
 
 // FinalizeBatch
@@ -195,7 +200,7 @@ func ListBatches() string {
 //	@param groupAnchor
 //	@param shortResponse
 //	@return bool
-func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, assetMetaData string, AssetMetaTypeIsJsonNotOpaque bool, amount int, newGroupedAsset bool, groupedAsset bool, groupKey string, groupAnchor string, shortResponse bool) bool {
+func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, assetMetaData string, AssetMetaTypeIsJsonNotOpaque bool, amount int, newGroupedAsset bool, groupedAsset bool, groupKey string, groupAnchor string, shortResponse bool) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
@@ -270,10 +275,10 @@ func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, 
 	response, err := client.MintAsset(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s mintrpc MintAsset Error: %v\n", GetTimeNow(), err)
-		return false
+		return "false," + err.Error()
 	}
-	fmt.Printf("%s %v\n", GetTimeNow(), response)
-	return true
+	jstr, _ := json.Marshal(response)
+	return "true," + string(jstr)
 }
 
 // MintAsset
@@ -286,15 +291,15 @@ func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, 
 //	@param assetMetaData
 //	@param amount
 //	@return bool
-func MintAsset(name string, assetMetaData string, amount int) bool {
+func MintAsset(name string, assetMetaData string, amount int) string {
 	return mintAsset(false, false, name, assetMetaData, false, amount, false, false, "", "", false)
 }
 
-func MintAssetnew(name string, assetTypeIsCollectible bool, assetMetaData string, amount int, newGroupedAsset bool) bool {
+func MintAssetnew(name string, assetTypeIsCollectible bool, assetMetaData string, amount int, newGroupedAsset bool) string {
 	return mintAsset(false, assetTypeIsCollectible, name, assetMetaData, false, amount, newGroupedAsset, false, "", "", false)
 }
 
-func MintAssetadd(name string, assetTypeIsCollectible bool, assetMetaData string, amount int, groupedAsset bool, groupKey string) bool {
+func MintAssetadd(name string, assetTypeIsCollectible bool, assetMetaData string, amount int, groupedAsset bool, groupKey string) string {
 	return mintAsset(false, assetTypeIsCollectible, name, assetMetaData, false, amount, false, groupedAsset, groupKey, "", false)
 
 }

@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"github.com/lightninglabs/taproot-assets/taprpc"
 	"github.com/wallet/base"
@@ -183,9 +184,42 @@ func ListAssets(withWitness, includeSpent, includeLeased bool) string {
 	response, err := client.ListAssets(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s taprpc ListAssets Error: %v\n", GetTimeNow(), err)
-		return ""
+		return "false," + err.Error()
 	}
-	return response.String()
+	jstr, _ := json.Marshal(response)
+	return "true," + string(jstr)
+}
+
+func FindAssetByAssetName(assetName string) string {
+	list := ListAssets(false, false, false)
+	index := strings.Index(list, ",")
+	if index == -1 {
+		return "false,The separator does not exist"
+	}
+	if list[:index] == "false" {
+		return list
+	}
+
+	response := taprpc.ListAssetResponse{}
+	err := json.Unmarshal([]byte(list[index+1:]), &response)
+	if err != nil {
+		fmt.Printf("%s json.Unmarshal Error: %v\n", GetTimeNow(), err)
+		return "false," + err.Error()
+	}
+
+	var assets []*taprpc.Asset
+	for _, asset := range response.Assets {
+		//if hex.EncodeToString(asset.AssetGenesis.GetAssetId()) == assetName {
+		if asset.AssetGenesis.Name == assetName {
+			assets = append(assets, asset)
+		}
+	}
+	if len(assets) != 0 {
+		jstr, _ := json.Marshal(assets)
+		return "true," + string(jstr)
+	}
+
+	return "false,asset not found"
 }
 
 // ListBalances

@@ -32,7 +32,7 @@ func DeleteFederationServer() {}
 //	@return string
 func UniverseInfo() string {
 	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)
@@ -84,7 +84,7 @@ func InsertProof() {}
 //	@return string
 func ListFederationServers() string {
 	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)

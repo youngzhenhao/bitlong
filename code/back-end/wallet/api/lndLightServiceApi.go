@@ -788,7 +788,7 @@ func ClosedChannels() string {
 	response, err := client.ClosedChannels(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s lnrpc ClosedChannels err: %v\n", GetTimeNow(), err)
-		return ""
+		return err.Error()
 	}
 	return response.String()
 }

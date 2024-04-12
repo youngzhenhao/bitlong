@@ -24,7 +24,7 @@ import (
 //	@return bool
 func CancelBatch() bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)
@@ -75,7 +75,7 @@ func CancelBatch() bool {
 //	@return string
 func finalizeBatch(shortResponse bool, feeRate int) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)
@@ -137,7 +137,7 @@ func FinalizeBatch(feeRate int) string {
 //	@return string
 func ListBatches() string {
 	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)
@@ -197,7 +197,7 @@ func ListBatches() string {
 //	@return bool
 func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, assetMetaData string, AssetMetaTypeIsJsonNotOpaque bool, amount int, newGroupedAsset bool, groupedAsset bool, groupKey string, groupAnchor string, shortResponse bool) bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)

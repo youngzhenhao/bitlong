@@ -21,7 +21,7 @@ import (
 //	@return bool
 func AddAssetBuyOrder() bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)
@@ -71,7 +71,7 @@ func AddAssetBuyOrder() bool {
 //	@return bool
 func AddAssetSellOffer() bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)
@@ -121,7 +121,7 @@ func AddAssetSellOffer() bool {
 //	@return string
 func QueryRfqAcceptedQuotes() string {
 	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)
@@ -170,7 +170,7 @@ func QueryRfqAcceptedQuotes() string {
 //	@return bool
 func SubscribeRfqEventNtfns() bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("tapd"), "tls.cert")
+	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	macaroonBytes, err := os.ReadFile(macaroonPath)

@@ -115,15 +115,9 @@ func finalizeBatch(shortResponse bool, feeRate int) string {
 	response, err := client.FinalizeBatch(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s mintrpc FinalizeBatch Error: %v\n", GetTimeNow(), err)
-		return "false," + err.Error()
+		return MakeJsonResult(false, err.Error(), nil)
 	}
-	fmt.Printf("%s %v\n", GetTimeNow(), response)
-	jstr, err := json.Marshal(response)
-	if err != nil {
-		fmt.Printf("%s json.Marshal Error: %v\n", GetTimeNow(), err)
-		return "false," + err.Error()
-	}
-	return "true," + string(jstr)
+	return MakeJsonResult(true, "", response)
 }
 
 // FinalizeBatch
@@ -275,10 +269,9 @@ func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, 
 	response, err := client.MintAsset(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s mintrpc MintAsset Error: %v\n", GetTimeNow(), err)
-		return "false," + err.Error()
+		return MakeJsonResult(false, err.Error(), nil)
 	}
-	jstr, _ := json.Marshal(response)
-	return "true," + string(jstr)
+	return MakeJsonResult(true, "", response)
 }
 
 // MintAsset

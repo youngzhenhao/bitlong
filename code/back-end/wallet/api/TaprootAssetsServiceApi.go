@@ -182,45 +182,80 @@ func ListAssets(withWitness, includeSpent, includeLeased bool) string {
 		IncludeLeased: includeLeased,
 	}
 	response, err := client.ListAssets(context.Background(), request)
+	//if err != nil {
+	//	fmt.Printf("%s taprpc ListAssets Error: %v\n", GetTimeNow(), err)
+	//	return "false," + err.Error()
+	//}
+	//jstr, _ := json.Marshal(response)
+	//return "true," + string(jstr)
+
 	if err != nil {
 		fmt.Printf("%s taprpc ListAssets Error: %v\n", GetTimeNow(), err)
-		return "false," + err.Error()
+		return MakeJsonResult(false, err.Error(), nil)
 	}
-	jstr, _ := json.Marshal(response)
-	return "true," + string(jstr)
+	return MakeJsonResult(true, "", response)
 }
 
 func FindAssetByAssetName(assetName string) string {
+	//data := taprpc.ListAssetResponse{}
+
+	var response = struct {
+		Success bool                     `json:"success"`
+		Error   string                   `json:"error"`
+		Data    taprpc.ListAssetResponse `json:"data"`
+	}{}
 	list := ListAssets(false, false, false)
-	index := strings.Index(list, ",")
-	if index == -1 {
-		return "false,The separator does not exist"
-	}
-	if list[:index] == "false" {
-		return list
-	}
+	err := json.Unmarshal([]byte(list), &response)
 
-	response := taprpc.ListAssetResponse{}
-	err := json.Unmarshal([]byte(list[index+1:]), &response)
 	if err != nil {
-		fmt.Printf("%s json.Unmarshal Error: %v\n", GetTimeNow(), err)
-		return "false," + err.Error()
+		return MakeJsonResult(false, err.Error(), nil)
 	}
-
+	if response.Success == false {
+		return MakeJsonResult(false, response.Error, nil)
+	}
 	var assets []*taprpc.Asset
-	for _, asset := range response.Assets {
+	for _, asset := range response.Data.Assets {
 		//if hex.EncodeToString(asset.AssetGenesis.GetAssetId()) == assetName {
 		if asset.AssetGenesis.Name == assetName {
 			assets = append(assets, asset)
 		}
 	}
-	if len(assets) != 0 {
-		jstr, _ := json.Marshal(assets)
-		return "true," + string(jstr)
+	if len(assets) == 0 {
+		return MakeJsonResult(false, "NOT_FOUND", nil)
 	}
-
-	return "false,asset not found"
+	return MakeJsonResult(true, "", assets)
 }
+
+//list := ListAssets(false, false, false)
+//index := strings.Index(list, ",")
+//if index == -1 {
+//	return "false,The separator does not exist"
+//}
+//if list[:index] == "false" {
+//	return list
+//}
+//
+//response := taprpc.ListAssetResponse{}
+//err := json.Unmarshal([]byte(list[index+1:]), &response)
+//if err != nil {
+//	fmt.Printf("%s json.Unmarshal Error: %v\n", GetTimeNow(), err)
+//	return "false," + err.Error()
+//}
+//
+//var assets []*taprpc.Asset
+//for _, asset := range response.Assets {
+//	//if hex.EncodeToString(asset.AssetGenesis.GetAssetId()) == assetName {
+//	if asset.AssetGenesis.Name == assetName {
+//		assets = append(assets, asset)
+//	}
+//}
+//if len(assets) != 0 {
+//	jstr, _ := json.Marshal(assets)
+//	return "true," + string(jstr)
+//}
+//
+//return "false,asset not found"
+//}
 
 // ListBalances
 //

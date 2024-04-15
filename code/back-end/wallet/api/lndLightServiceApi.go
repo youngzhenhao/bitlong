@@ -18,6 +18,25 @@ import (
 	"strings"
 )
 
+type JsonResult struct {
+	Success bool   `json:"success"`
+	Error   string `json:"error"`
+	Data    any    `json:"data"`
+}
+
+func MakeJsonResult(success bool, error string, data any) string {
+	jsr := JsonResult{
+		Success: success,
+		Error:   error,
+		Data:    data,
+	}
+	jstr, err := json.Marshal(jsr)
+	if err != nil {
+		return MakeJsonResult(false, err.Error(), nil)
+	}
+	return string(jstr)
+}
+
 // GetNewAddress
 //
 //	@Description:NewAddress creates a new address under control of the local wallet.
@@ -333,9 +352,9 @@ func ListInvoices() string {
 	response, err := client.ListInvoices(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s client.ListInvoice :%v\n", GetTimeNow(), err)
-		return ""
+		return MakeJsonResult(false, err.Error(), nil)
 	}
-	return response.String()
+	return MakeJsonResult(true, "", response)
 }
 
 // LookupInvoice
@@ -2040,10 +2059,10 @@ func SendCoins(addr string, amount int64) string {
 	response, err := client.SendCoins(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s lnrpc SendCoins err: %v\n", GetTimeNow(), err)
-		return "false"
+		return MakeJsonResult(false, err.Error(), nil)
 	}
 	fmt.Printf("%s %v\n", GetTimeNow(), response)
-	return response.Txid
+	return MakeJsonResult(true, "", response)
 }
 
 // LndStopDaemon

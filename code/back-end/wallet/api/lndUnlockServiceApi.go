@@ -50,16 +50,16 @@ func GenSeed() string {
 		}
 	}(conn)
 	client := lnrpc.NewWalletUnlockerClient(conn)
-	passphrase := ""
-	var aezeedPassphrase = []byte(passphrase)
+	//passphrase := ""
+	//var aezeedPassphrase = []byte(passphrase)
 	seedEntropy := make([]byte, 16)
 	_, err = rand.Read(seedEntropy)
 	if err != nil {
 		fmt.Printf("%s could not generate seed entropy: %v\n", GetTimeNow(), err)
 	}
 	request := &lnrpc.GenSeedRequest{
-		AezeedPassphrase: aezeedPassphrase,
-		SeedEntropy:      seedEntropy,
+		//AezeedPassphrase: aezeedPassphrase,
+		//SeedEntropy:      seedEntropy,
 	}
 	response, err := client.GenSeed(context.Background(), request)
 	if err != nil {
@@ -103,13 +103,31 @@ func InitWallet(seed, password string) bool {
 			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
 		}
 	}(conn)
+
+	var (
+		cipherSeedMnemonic      []string
+		aezeedPass              []byte
+		extendedRootKey         string
+		extendedRootKeyBirthday uint64
+		recoveryWindow          int32
+	)
+
 	client := lnrpc.NewWalletUnlockerClient(conn)
-	passphrase := ""
-	seedSlice := strings.Split(seed, ",")
+	//seedrequest := &lnrpc.GenSeedRequest{}
+	//seedresponse, err := client.GenSeed(context.Background(), seedrequest)
+	//cipherSeedMnemonic = seedresponse.CipherSeedMnemonic
+	//
+	//recoveryWindow = 2500
+	cipherSeedMnemonic = strings.Split(seed, ",")
 	request := &lnrpc.InitWalletRequest{
-		WalletPassword:     []byte(password),
-		CipherSeedMnemonic: seedSlice,
-		AezeedPassphrase:   []byte(passphrase),
+		WalletPassword:                     []byte(password),
+		CipherSeedMnemonic:                 cipherSeedMnemonic,
+		AezeedPassphrase:                   aezeedPass,
+		RecoveryWindow:                     recoveryWindow,
+		ChannelBackups:                     nil,
+		StatelessInit:                      false,
+		ExtendedMasterKey:                  extendedRootKey,
+		ExtendedMasterKeyBirthdayTimestamp: extendedRootKeyBirthday,
 	}
 	response, err := client.InitWallet(context.Background(), request)
 	if err != nil {

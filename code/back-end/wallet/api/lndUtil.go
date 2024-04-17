@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/lightningnetwork/lnd/lnrpc"
@@ -57,5 +58,7 @@ func MakeJsonResult1(success bool, error string, data string) string {
 	data = strings.Replace(data, "\t", "", -1)
 	data = strings.Replace(data, " ", "", -1)
 	jstr := "{\"Success\":\"" + strconv.FormatBool(success) + "\",\"Error\":\"" + error + "\",\"Data\":" + data + "}"
-	return jstr
+	var restr bytes.Buffer
+	_ = json.Indent(&restr, []byte(jstr), "", "\t")
+	return restr.String()
 }

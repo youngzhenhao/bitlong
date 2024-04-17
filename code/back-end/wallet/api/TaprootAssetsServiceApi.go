@@ -226,37 +226,6 @@ func FindAssetByAssetName(assetName string) string {
 	return MakeJsonResult(true, "", assets)
 }
 
-//list := ListAssets(false, false, false)
-//index := strings.Index(list, ",")
-//if index == -1 {
-//	return "false,The separator does not exist"
-//}
-//if list[:index] == "false" {
-//	return list
-//}
-//
-//response := taprpc.ListAssetResponse{}
-//err := json.Unmarshal([]byte(list[index+1:]), &response)
-//if err != nil {
-//	fmt.Printf("%s json.Unmarshal Error: %v\n", GetTimeNow(), err)
-//	return "false," + err.Error()
-//}
-//
-//var assets []*taprpc.Asset
-//for _, asset := range response.Assets {
-//	//if hex.EncodeToString(asset.AssetGenesis.GetAssetId()) == assetName {
-//	if asset.AssetGenesis.Name == assetName {
-//		assets = append(assets, asset)
-//	}
-//}
-//if len(assets) != 0 {
-//	jstr, _ := json.Marshal(assets)
-//	return "true," + string(jstr)
-//}
-//
-//return "false,asset not found"
-//}
-
 // ListBalances
 //
 //	@Description: ListBalances lists asset balances

@@ -19,9 +19,9 @@ import (
 )
 
 type JsonResult struct {
-	Success bool   `json:"success"`
-	Error   string `json:"error"`
-	Data    any    `json:"data"`
+	Success bool   `json:"success,omitempty"`
+	Error   string `json:"error,omitempty"`
+	Data    any    `json:"data,omitempty"`
 }
 
 func MakeJsonResult(success bool, error string, data any) string {
@@ -132,12 +132,13 @@ func GetWalletBalance() string {
 	}(conn)
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.WalletBalanceRequest{}
+
 	response, err := client.WalletBalance(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s lnrpc WalletBalance err: %v\n", GetTimeNow(), err)
-		return ""
+		return MakeJsonResult(false, err.Error(), nil)
 	}
-	return s2json(response)
+	return MakeJsonResult(true, "", response.GetAccountBalance())
 }
 
 // GetIdentityPubkey

@@ -14,7 +14,7 @@ import (
 	"path/filepath"
 )
 
-func subServerStatus() *litrpc.SubServerStatusResp {
+func subServerStatus() (*litrpc.SubServerStatusResp, error) {
 	grpcHost := base.QueryConfigByKey("litdhost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lit"), "testnet")
@@ -55,23 +55,35 @@ func subServerStatus() *litrpc.SubServerStatusResp {
 	client := litrpc.NewStatusClient(conn)
 	request := &litrpc.SubServerStatusReq{}
 	response, err := client.SubServerStatus(context.Background(), request)
-	if err != nil {
-		fmt.Printf("%s subserver status err: %v\n", GetTimeNow(), err)
-	}
-	return response
+	return response, err
 }
+
+func SubServerStatus() string {
+	response, err := subServerStatus()
+	if err != nil {
+		return MakeJsonResult(false, err.Error(), nil)
+	}
+	return MakeJsonResult(true, "", response)
+}
+
 func GetTapdStatus() bool {
-	litstatus := subServerStatus().GetSubServers()
-	if len(litstatus) == 0 {
+	response, err := subServerStatus()
+	if err != nil {
 		return false
 	}
-	return litstatus["taproot-assets"].Running
+	if len(response.SubServers) == 0 {
+		return false
+	}
+	return response.SubServers["taproot-assets"].Running
 }
 
 func GetLitStatus() bool {
-	litstatus := subServerStatus().GetSubServers()
-	if len(litstatus) == 0 {
+	response, err := subServerStatus()
+	if err != nil {
 		return false
 	}
-	return litstatus["lit"].Running
+	if len(response.SubServers) == 0 {
+		return false
+	}
+	return response.SubServers["lit"].Running
 }

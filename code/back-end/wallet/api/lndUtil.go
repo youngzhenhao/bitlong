@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"google.golang.org/protobuf/proto"
+	"strconv"
+	"strings"
 )
 
 func GetRespJSON(resp proto.Message) string {
@@ -51,14 +53,9 @@ type JsonResult1 struct {
 }
 
 func MakeJsonResult1(success bool, error string, data string) string {
-	jsr := JsonResult{
-		Success: success,
-		Error:   error,
-		Data:    data,
-	}
-	jstr, err := json.Marshal(jsr)
-	if err != nil {
-		return MakeJsonResult(false, err.Error(), "nil")
-	}
-	return string(jstr)
+	data = strings.Replace(data, "\n", "", -1)
+	data = strings.Replace(data, "\t", "", -1)
+	data = strings.Replace(data, " ", "", -1)
+	jstr := "{\"Success\":\"" + strconv.FormatBool(success) + "\",\"Error\":\"" + error + "\",\"Data\":" + data + "}"
+	return jstr
 }

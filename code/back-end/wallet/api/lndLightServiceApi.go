@@ -1157,14 +1157,9 @@ func ListChannels() string {
 	response, err := client.ListChannels(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s lnrpc ListChannels err: %v\n", GetTimeNow(), err)
-		return ""
+		return MakeJsonResult(false, err.Error(), nil)
 	}
-	jsonBytes, err := json.Marshal(response)
-	if err != nil {
-		fmt.Printf("%s json.Marshal err: %v\n", GetTimeNow(), err)
-		return err.Error()
-	}
-	return string(jsonBytes)
+	return MakeJsonResult(true, "", response)
 }
 
 // PendingChannels
@@ -1214,14 +1209,9 @@ func PendingChannels() string {
 	response, err := client.PendingChannels(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s lnrpc PendingChannels err: %v\n", GetTimeNow(), err)
-		return ""
+		return MakeJsonResult(false, err.Error(), nil)
 	}
-	jsonBytes, err := json.Marshal(response)
-	if err != nil {
-		fmt.Printf("%s json.Marshal err: %v\n", GetTimeNow(), err)
-		return err.Error()
-	}
-	return string(jsonBytes)
+	return MakeJsonResult(true, "", response)
 }
 
 // FindChanPoint
@@ -1235,7 +1225,7 @@ func PendingChannels() string {
 //	CLOSED: channel is closed
 //	NO_FIND: channel not found
 //	ERR: grpc error
-func FindChanPoint(chanPoint string) string {
+func GetChannelState(chanPoint string) string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
@@ -1278,31 +1268,37 @@ func FindChanPoint(chanPoint string) string {
 	response, err := client.ListChannels(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s lnrpc ListChannels err: %v\n", GetTimeNow(), err)
-		return "ERR"
+		return MakeJsonResult(false, err.Error(), nil)
 	}
+
+	var ChannelState string
 	for _, channel := range response.Channels {
 		if channel.ChannelPoint == chanPoint {
 			if channel.Active {
-				return "ACTIVE"
+				ChannelState = "ACTIVE"
 			} else {
-				return "INACTIVE"
+				ChannelState = "INACTIVE"
 			}
+			return MakeJsonResult(true, "", ChannelState)
 		}
 	}
 	pendrequest := &lnrpc.PendingChannelsRequest{}
 	pendingresponse, err := client.PendingChannels(context.Background(), pendrequest)
 	if err != nil {
 		fmt.Printf("%s lnrpc PendingChannels err: %v\n", GetTimeNow(), err)
-		return "ERR"
+		return MakeJsonResult(false, err.Error(), nil)
 	}
 	for _, channel := range pendingresponse.PendingOpenChannels {
 		if channel.Channel.ChannelPoint == chanPoint {
-			return "PENDING_OPEN"
+
+			ChannelState = "PENDING_OPEN"
+			return MakeJsonResult(true, "", ChannelState)
 		}
 	}
 	for _, channel := range pendingresponse.WaitingCloseChannels {
 		if channel.Channel.ChannelPoint == chanPoint {
-			return "PENDING_CLOSE"
+			ChannelState = "PENDING_CLOSE"
+			return MakeJsonResult(true, "", ChannelState)
 		}
 	}
 
@@ -1310,15 +1306,16 @@ func FindChanPoint(chanPoint string) string {
 	closeresponse, err := client.ClosedChannels(context.Background(), closerequest)
 	if err != nil {
 		fmt.Printf("%s lnrpc ClosedChannels err: %v\n", GetTimeNow(), err)
-		return "ERR"
+		return MakeJsonResult(false, err.Error(), nil)
 	}
 	for _, channel := range closeresponse.Channels {
 		if channel.ChannelPoint == chanPoint {
-			return "CLOSED"
+			ChannelState = "CLOSED"
+			return MakeJsonResult(true, "", ChannelState)
 		}
 	}
 
-	return "NO_FIND"
+	return MakeJsonResult(false, "NO_FIND_CHANNEL", nil)
 }
 
 // GetChanBalance
@@ -1328,7 +1325,7 @@ func FindChanPoint(chanPoint string) string {
 //	（localBalance:remoteBalance) :local balance and remotebalance of the channel
 //	ERR: grpc error
 //	NO_FIND: channel not found
-func GetChanBalance(chanPoint string) string {
+func GetChannelInfo(chanPoint string) string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
@@ -1371,16 +1368,15 @@ func GetChanBalance(chanPoint string) string {
 	response, err := client.ListChannels(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s lnrpc ListChannels err: %v\n", GetTimeNow(), err)
-		return "ERR"
+		return MakeJsonResult(false, err.Error(), nil)
 	}
 	for _, channel := range response.Channels {
 		if channel.ChannelPoint == chanPoint {
-			localBalance := channel.LocalBalance
-			remoteBalance := channel.RemoteBalance
-			return strconv.FormatInt(localBalance, 10) + ":" + strconv.FormatInt(remoteBalance, 10)
+
+			return MakeJsonResult(true, "", channel)
 		}
 	}
-	return "NO_FIND"
+	return MakeJsonResult(false, "NO_FIND_CHANNEL", nil)
 }
 
 // RestoreChannelBackups

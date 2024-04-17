@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/wallet/base"
@@ -17,25 +16,6 @@ import (
 	"strconv"
 	"strings"
 )
-
-type JsonResult struct {
-	Success bool   `json:"success,omitempty"`
-	Error   string `json:"error,omitempty"`
-	Data    any    `json:"data,omitempty"`
-}
-
-func MakeJsonResult(success bool, error string, data any) string {
-	jsr := JsonResult{
-		Success: success,
-		Error:   error,
-		Data:    data,
-	}
-	jstr, err := json.Marshal(jsr)
-	if err != nil {
-		return MakeJsonResult(false, err.Error(), nil)
-	}
-	return string(jstr)
-}
 
 // GetNewAddress
 //
@@ -138,7 +118,8 @@ func GetWalletBalance() string {
 		fmt.Printf("%s lnrpc WalletBalance err: %v\n", GetTimeNow(), err)
 		return MakeJsonResult(false, err.Error(), nil)
 	}
-	return MakeJsonResult(true, "", response.GetAccountBalance())
+	jstr := printRespJSON(response)
+	return MakeJsonResult1(true, "", jstr)
 }
 
 // GetIdentityPubkey

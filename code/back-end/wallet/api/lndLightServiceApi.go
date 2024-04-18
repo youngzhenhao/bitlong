@@ -17,6 +17,38 @@ import (
 	"strings"
 )
 
+func GetWalletBalance() string {
+	response, err := getWalletBalance()
+	if err != nil {
+		fmt.Printf("%s lnrpc WalletBalance err: %v\n", GetTimeNow(), err)
+		return MakeJsonResult(false, err.Error(), nil)
+	}
+	return MakeJsonResult(true, "", response)
+}
+
+func GetInfoOfLnd() string {
+	response, err := getInfoOfLnd()
+	if err != nil {
+		fmt.Printf("%s lnrpc GetInfo err: %v\n", GetTimeNow(), err)
+		return MakeJsonResult(false, err.Error(), nil)
+	}
+	return MakeJsonResult(true, "", response)
+}
+
+// GetIdentityPubkey
+//
+//	@Description: GetInfo returns general information concerning the lightning node including it's identity pubkey, alias,
+//	the chains it is connected to, and information concerning the number of open+pending channels.
+//	@return string
+func GetIdentityPubkey() string {
+	response, err := getInfoOfLnd()
+	if err != nil {
+		fmt.Printf("%s lnrpc GetInfo.IdentityPubkey err: %v\n", GetTimeNow(), err)
+		return ""
+	}
+	return response.GetIdentityPubkey()
+}
+
 // GetNewAddress
 //
 //	@Description:NewAddress creates a new address under control of the local wallet.
@@ -73,7 +105,7 @@ func GetNewAddress() string {
 //	@Description: WalletBalance returns total unspent outputs(confirmed and unconfirmed),
 //	all confirmed unspent outputs and all unconfirmed unspent outputs under control of the wallet.
 //	@return string
-func GetWalletBalance() string {
+func getWalletBalance() (*lnrpc.WalletBalanceResponse, error) {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
@@ -104,6 +136,7 @@ func GetWalletBalance() string {
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
+
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
@@ -114,64 +147,9 @@ func GetWalletBalance() string {
 	request := &lnrpc.WalletBalanceRequest{}
 
 	response, err := client.WalletBalance(context.Background(), request)
-	if err != nil {
-		fmt.Printf("%s lnrpc WalletBalance err: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, err.Error(), nil)
-	}
-	jstr := printRespJSON(response)
-	return MakeJsonResult1(true, "", jstr)
-}
 
-// GetIdentityPubkey
-//
-//	@Description: GetInfo returns general information concerning the lightning node including it's identity pubkey, alias,
-//	the chains it is connected to, and information concerning the number of open+pending channels.
-//	@return string
-func GetIdentityPubkey() string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
+	return response, err
 
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
-	if err != nil {
-		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
-	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
-	client := lnrpc.NewLightningClient(conn)
-	request := &lnrpc.GetInfoRequest{}
-	response, err := client.GetInfo(context.Background(), request)
-	if err != nil {
-		fmt.Printf("%s lnrpc GetInfo.IdentityPubkey err: %v\n", GetTimeNow(), err)
-		return ""
-	}
-	return response.GetIdentityPubkey()
 }
 
 // GetInfoOfLnd
@@ -179,7 +157,7 @@ func GetIdentityPubkey() string {
 //	@Description: GetInfo returns general information concerning the lightning node including it's identity pubkey, alias,
 //	the chains it is connected to, and information concerning the number of open+pending channels.
 //	@return string
-func GetInfoOfLnd() string {
+func getInfoOfLnd() (*lnrpc.GetInfoResponse, error) {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
@@ -219,11 +197,7 @@ func GetInfoOfLnd() string {
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.GetInfoRequest{}
 	response, err := client.GetInfo(context.Background(), request)
-	if err != nil {
-		fmt.Printf("%s lnrpc GetInfo err: %v\n", GetTimeNow(), err)
-		return ""
-	}
-	return response.String()
+	return response, err
 }
 
 // AddInvoice

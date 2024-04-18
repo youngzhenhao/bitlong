@@ -1,12 +1,10 @@
 package api
 
 import (
-	"bytes"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"github.com/lightningnetwork/lnd/lnrpc/walletrpc"
 	"github.com/wallet/base"
@@ -17,12 +15,32 @@ import (
 	"time"
 )
 
+type macaroonCredential struct {
+	macaroon string
+}
+
+func newMacaroonCredential(macaroon string) *macaroonCredential {
+	return &macaroonCredential{macaroon: macaroon}
+}
+
+func (c *macaroonCredential) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
+	return map[string]string{"macaroon": c.macaroon}, nil
+}
+
+func (c *macaroonCredential) RequireTransportSecurity() bool {
+	return true
+}
+
+func GetTimeNow() string {
+	return time.Now().Format("2006/01/02 15:04:05")
+}
+
 // ListAddress
 //
 //	@Description: ListAddresses retrieves all the addresses along with their balance.
 //	An account name filter can be provided to filter through all of the wallet accounts and return the addresses of only those matching.
 //	@return string
-func ListAddress() string {
+func listAddress() (*walletrpc.ListAddressesResponse, error) {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
@@ -59,46 +77,7 @@ func ListAddress() string {
 	client := walletrpc.NewWalletKitClient(conn)
 	request := &walletrpc.ListAddressesRequest{}
 	response, err := client.ListAddresses(context.Background(), request)
-	if err != nil {
-		fmt.Printf("%s walletrpc ListAddresses err: %v\n", GetTimeNow(), err)
-		return ""
-	}
-	//fmt.Printf("%s %v\n", GetTimeNow(), response)
-	return response.String()
-}
-
-type macaroonCredential struct {
-	macaroon string
-}
-
-func newMacaroonCredential(macaroon string) *macaroonCredential {
-	return &macaroonCredential{macaroon: macaroon}
-}
-
-func (c *macaroonCredential) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
-	return map[string]string{"macaroon": c.macaroon}, nil
-}
-
-func (c *macaroonCredential) RequireTransportSecurity() bool {
-	return true
-}
-
-func GetTimeNow() string {
-	return time.Now().Format("2006/01/02 15:04:05")
-}
-
-func s2json(value any) string {
-	jsonBytes, err := json.Marshal(value)
-	if err != nil {
-		fmt.Printf("%s %v", GetTimeNow(), err)
-	}
-	var str bytes.Buffer
-	err = json.Indent(&str, jsonBytes, "", "\t")
-	if err != nil {
-		fmt.Printf("%s %v", GetTimeNow(), err)
-	}
-	result := str.String()
-	return result
+	return response, err
 }
 
 // ListAccounts
@@ -107,7 +86,7 @@ func s2json(value any) string {
 //	An account name filter can be provided to filter through all the wallet accounts
 //	and return the addresses of only those matching.
 //	@return string
-func ListAccounts() string {
+func listAccounts() (*walletrpc.ListAccountsResponse, error) {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
@@ -144,11 +123,43 @@ func ListAccounts() string {
 	client := walletrpc.NewWalletKitClient(conn)
 	request := &walletrpc.ListAccountsRequest{}
 	response, err := client.ListAccounts(context.Background(), request)
+	return response, err
+}
+
+func ListAddress() string {
+	response, err := listAddress()
+	if err != nil {
+		fmt.Printf("%s walletrpc ListAddresses err: %v\n", GetTimeNow(), err)
+		return ""
+	}
+	return response.String()
+}
+
+func ListAccounts() string {
+	response, err := listAccounts()
 	if err != nil {
 		fmt.Printf("%s watchtowerrpc ListAccounts err: %v\n", GetTimeNow(), err)
 		return ""
 	}
 	return response.String()
+
+}
+
+func FindAccount(name string) string {
+	response, err := listAccounts()
+	if err != nil {
+		return MakeJsonResult(false, err.Error(), nil)
+	}
+	var accounts []*walletrpc.Account
+	for _, account := range response.Accounts {
+		if account.Name == name {
+			accounts = append(accounts, account)
+		}
+	}
+	if len(accounts) > 0 {
+		return MakeJsonResult(true, "", accounts)
+	}
+	return MakeJsonResult(false, "account not found", nil)
 }
 
 // ListLeases

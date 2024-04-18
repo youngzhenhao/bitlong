@@ -64,7 +64,7 @@ func getWalletBalance() (*lnrpc.WalletBalanceResponse, error) {
 	request := &lnrpc.WalletBalanceRequest{}
 
 	response, err := client.WalletBalance(context.Background(), request)
-
+	fmt.Printf("%s lnrpc WalletBalance response: %v\n", GetTimeNow(), response.String())
 	return response, err
 
 }

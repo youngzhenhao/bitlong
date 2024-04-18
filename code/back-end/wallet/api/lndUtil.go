@@ -10,6 +10,13 @@ import (
 	"strings"
 )
 
+const API_VERSION = "v0.0.1"
+const API_Date = "2024-04-18"
+
+func GetApiVersion() string {
+	return API_VERSION + "---" + API_Date
+}
+
 func GetRespJSON(resp proto.Message) string {
 	jsonBytes, err := lnrpc.ProtoJSONMarshalOpts.Marshal(resp)
 	if err != nil {
@@ -20,9 +27,9 @@ func GetRespJSON(resp proto.Message) string {
 }
 
 type JsonResult struct {
-	Success bool   `json:"success,omitempty"`
-	Error   string `json:"error,omitempty"`
-	Data    any    `json:"data,omitempty"`
+	Success bool   `json:"success"`
+	Error   string `json:"error"`
+	Data    any    `json:"data"`
 }
 
 func MakeJsonResult(success bool, error string, data any) string {

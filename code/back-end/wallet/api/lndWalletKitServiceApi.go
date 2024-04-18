@@ -130,18 +130,18 @@ func ListAddress() string {
 	response, err := listAddress()
 	if err != nil {
 		fmt.Printf("%s walletrpc ListAddresses err: %v\n", GetTimeNow(), err)
-		return ""
+		return MakeJsonResult(false, err.Error(), nil)
 	}
-	return response.String()
+	return MakeJsonResult(true, "", response)
 }
 
 func ListAccounts() string {
 	response, err := listAccounts()
 	if err != nil {
 		fmt.Printf("%s watchtowerrpc ListAccounts err: %v\n", GetTimeNow(), err)
-		return ""
+		return MakeJsonResult(false, err.Error(), nil)
 	}
-	return response.String()
+	return MakeJsonResult(true, "", response)
 
 }
 

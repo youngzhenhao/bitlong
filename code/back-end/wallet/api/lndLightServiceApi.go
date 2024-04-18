@@ -17,89 +17,6 @@ import (
 	"strings"
 )
 
-func GetWalletBalance() string {
-	response, err := getWalletBalance()
-	if err != nil {
-		fmt.Printf("%s lnrpc WalletBalance err: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, err.Error(), nil)
-	}
-	return MakeJsonResult(true, "", response)
-}
-
-func GetInfoOfLnd() string {
-	response, err := getInfoOfLnd()
-	if err != nil {
-		fmt.Printf("%s lnrpc GetInfo err: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, err.Error(), nil)
-	}
-	return MakeJsonResult(true, "", response)
-}
-
-// GetIdentityPubkey
-//
-//	@Description: GetInfo returns general information concerning the lightning node including it's identity pubkey, alias,
-//	the chains it is connected to, and information concerning the number of open+pending channels.
-//	@return string
-func GetIdentityPubkey() string {
-	response, err := getInfoOfLnd()
-	if err != nil {
-		fmt.Printf("%s lnrpc GetInfo.IdentityPubkey err: %v\n", GetTimeNow(), err)
-		return ""
-	}
-	return response.GetIdentityPubkey()
-}
-
-// GetNewAddress
-//
-//	@Description:NewAddress creates a new address under control of the local wallet.
-//	@return string
-func GetNewAddress() string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
-	if err != nil {
-		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
-	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
-	client := lnrpc.NewLightningClient(conn)
-	request := &lnrpc.NewAddressRequest{}
-	response, err := client.NewAddress(context.Background(), request)
-	if err != nil {
-		fmt.Printf("%s lnrpc NewAddress err: %v\n", GetTimeNow(), err)
-		return ""
-	}
-	return response.Address
-}
-
 // GetWalletBalance
 //
 //	@Description: WalletBalance returns total unspent outputs(confirmed and unconfirmed),
@@ -198,6 +115,137 @@ func getInfoOfLnd() (*lnrpc.GetInfoResponse, error) {
 	request := &lnrpc.GetInfoRequest{}
 	response, err := client.GetInfo(context.Background(), request)
 	return response, err
+}
+
+func sendCoins(addr string, amount int64, all bool) (*lnrpc.SendCoinsResponse, error) {
+	grpcHost := base.QueryConfigByKey("lndhost")
+	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
+	}
+
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
+	}
+
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
+		}
+	}(conn)
+
+	client := lnrpc.NewLightningClient(conn)
+	request := &lnrpc.SendCoinsRequest{
+		Addr:    addr,
+		Amount:  amount,
+		SendAll: all,
+	}
+	response, err := client.SendCoins(context.Background(), request)
+	return response, err
+}
+
+func GetWalletBalance() string {
+	response, err := getWalletBalance()
+	if err != nil {
+		fmt.Printf("%s lnrpc WalletBalance err: %v\n", GetTimeNow(), err)
+		return MakeJsonResult(false, err.Error(), nil)
+	}
+	return MakeJsonResult(true, "", response)
+}
+
+func GetInfoOfLnd() string {
+	response, err := getInfoOfLnd()
+	if err != nil {
+		fmt.Printf("%s lnrpc GetInfo err: %v\n", GetTimeNow(), err)
+		return MakeJsonResult(false, err.Error(), nil)
+	}
+	return MakeJsonResult(true, "", response)
+}
+
+// GetIdentityPubkey
+//
+//	@Description: GetInfo returns general information concerning the lightning node including it's identity pubkey, alias,
+//	the chains it is connected to, and information concerning the number of open+pending channels.
+//	@return string
+func GetIdentityPubkey() string {
+	response, err := getInfoOfLnd()
+	if err != nil {
+		fmt.Printf("%s lnrpc GetInfo.IdentityPubkey err: %v\n", GetTimeNow(), err)
+		return ""
+	}
+	return response.GetIdentityPubkey()
+}
+
+// GetNewAddress
+//
+//	@Description:NewAddress creates a new address under control of the local wallet.
+//	@return string
+func GetNewAddress() string {
+	grpcHost := base.QueryConfigByKey("lndhost")
+	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
+	}
+
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		fmt.Printf(GetTimeNow() + "Failed to append cert")
+	}
+
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
+		}
+	}(conn)
+	client := lnrpc.NewLightningClient(conn)
+	request := &lnrpc.NewAddressRequest{}
+	response, err := client.NewAddress(context.Background(), request)
+	if err != nil {
+		fmt.Printf("%s lnrpc NewAddress err: %v\n", GetTimeNow(), err)
+		return ""
+	}
+	return response.Address
 }
 
 // AddInvoice
@@ -1966,54 +2014,18 @@ func SendPaymentSync0amt(invoice string, amt int64) string {
 //	If neither target_conf, or sat_per_vbyte are set, then the internal wallet will consult its fee model to determine a fee for the default confirmation target.
 //	@return string
 func SendCoins(addr string, amount int64) string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
+	response, err := sendCoins(addr, amount, false)
 	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
-	if err != nil {
-		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
-	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
-
-	client := lnrpc.NewLightningClient(conn)
-	request := &lnrpc.SendCoinsRequest{
-		Addr:   addr,
-		Amount: amount,
-	}
-	response, err := client.SendCoins(context.Background(), request)
-	if err != nil {
-		fmt.Printf("%s lnrpc SendCoins err: %v\n", GetTimeNow(), err)
 		return MakeJsonResult(false, err.Error(), nil)
 	}
-	fmt.Printf("%s %v\n", GetTimeNow(), response)
+	return MakeJsonResult(true, "", response)
+}
+
+func SendAllCoins(addr string) string {
+	response, err := sendCoins(addr, 0, true)
+	if err != nil {
+		return MakeJsonResult(false, err.Error(), nil)
+	}
 	return MakeJsonResult(true, "", response)
 }
 

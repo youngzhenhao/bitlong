@@ -52,27 +52,22 @@ func ReadConfigFile(path string) map[string]string {
 
 }
 
+const (
+	PATH  = "D:/share/bitlong/code/back-end/wallet/config.txt"
+	PATH2 = "D:/share/bitlong/code/back-end/wallet/regconf.txt"
+	PATH3 = "/data/data/io.bitlong/files/NewFolderBit/config.txt"
+)
+const DIR = PATH
+
 func Configure(appName string) string {
-	fileConfig := ReadConfigFile("C:\\mySpace\\bitlong\\code\\back-end\\wallet\\config.txt")
-	//fileConfig := ReadConfigFile("/data/user/0/io.bitlong/files/NewFolderBit/config.txt")
-	//fileConfig := ReadConfigFile("/data/user/0/io.bitlong2/files/NewFolderBit/config.txt")
-	//fileConfig := ReadConfigFile("/data/user/0/io.bitlong/files/config.txt")
-	//fileConfig := ReadConfigFile("/data/user/0/io.bitlong2/files/bitlong/config.txt")
-	//fileConfig := ReadConfigFile("D:\\share\\bitlong\\code\\back-end\\wallet\\config.txt")
-	//fileConfig := ReadConfigFile("/home/en/test/config.txt")
+	fileConfig := ReadConfigFile(DIR)
 	dirPath := fileConfig["dirpath"]
 	folderPath := filepath.Join(dirPath, "."+appName)
 	return folderPath
 }
 
 func QueryConfigByKey(key string) (value string) {
-	fileConfig := ReadConfigFile("C:\\mySpace\\bitlong\\code\\back-end\\wallet\\config.txt")
-	//fileConfig := ReadConfigFile("/data/user/0/io.bitlong/files/NewFolderBit/config.txt")
-	//fileConfig := ReadConfigFile("/data/user/0/io.bitlong2/files/NewFolderBit/config.txt")
-	//fileConfig := ReadConfigFile("/data/user/0/io.bitlong/files/config.txt")
-	//fileConfig := ReadConfigFile("/data/user/0/io.bitlong2/files/bitlong/config.txt")
-	//fileConfig := ReadConfigFile("D:\\share\\bitlong\\code\\back-end\\wallet\\config.txt")
-	//fileConfig := ReadConfigFile("/home/en/test/config.txt")
+	fileConfig := ReadConfigFile(DIR)
 	value = fileConfig[key]
 	return
 }

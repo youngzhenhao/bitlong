@@ -1,22 +1,22 @@
-wallet/tls.cert
-wallet/p2pfileT.zip
-# go.sum
-# wallet/go.sum
-# go.work
-# go.work.sum
-wallet/.idea
 .idea
+# wallet
 wallet/api/*.aar
 wallet/api/*.jar
 wallet/api.backup.zip
 wallet/file
 wallet/*_test.go
 wallet/api/*_test.go
+wallet/*.zip
+wallet/cmd-test
+
+tls.cert
+tls.key
+*.macaroon
 *.exe
 *.exe~
+
 temp.go
-wellet/lnurl
-wallet/*.zip
+
 .env
 frpc.ini
-cmd-test
+frpc.yaml

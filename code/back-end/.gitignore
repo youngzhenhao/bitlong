@@ -5,15 +5,14 @@ wallet/api/*.jar
 wallet/*_test.go
 wallet/*.zip
 wallet/cmd-test
-
+temp.go
 tls.cert
 tls.key
 *.macaroon
 *.exe
 *.exe~
-
-temp.go
-
+# environment
 .env
+.env.local
 frpc.ini
 frpc.yaml

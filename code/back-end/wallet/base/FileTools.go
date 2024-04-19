@@ -56,7 +56,7 @@ const (
 	PATH                    = "/data/data/io.bitlong/files/NewFolderBit/config.txt"
 	PATH1                   = "D:\\share\\bitlong\\code\\back-end\\wallet\\config.txt"
 	PATH2                   = "D:\\share\\bitlong\\code\\back-end\\wallet\\regconf.txt"
-	ONLY_FOR_TEST_LOCALPATH = "C:\\mySpace\\bitlong\\code\\back-end\\wallet\\config.txt"
+	ONLY_FOR_TEST_LOCALPATH = "C:\\mySpace\\bitlong\\code\\back-end\\wallet\\config\\config.txt"
 )
 const CONFIG_FILE = PATH
 

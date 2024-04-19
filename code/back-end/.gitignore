@@ -2,10 +2,7 @@
 # wallet
 wallet/api/*.aar
 wallet/api/*.jar
-wallet/api.backup.zip
-wallet/file
 wallet/*_test.go
-wallet/api/*_test.go
 wallet/*.zip
 wallet/cmd-test
 

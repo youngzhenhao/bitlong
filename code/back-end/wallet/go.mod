@@ -1,11 +1,14 @@
 module github.com/wallet
 
-go 1.22.1
+go 1.22.2
 
 require (
-	github.com/lightningnetwork/lnd v0.17.4-beta
+	github.com/lightningnetwork/lnd v0.17.4-beta.rc1
 	github.com/wallet/api v0.0.0-00010101000000-000000000000
 	google.golang.org/grpc v1.63.2
+)
+
+require (
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/Azure/go-ntlmssp v0.0.0-20200615164410-66371956d46c // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
@@ -139,7 +142,7 @@ require (
 	github.com/lightninglabs/neutrino/cache v1.1.1 // indirect
 	github.com/lightninglabs/pool v0.6.4-beta.0.20231003174306-80d8854a0c4b // indirect
 	github.com/lightninglabs/pool/auctioneerrpc v1.1.1 // indirect
-	github.com/lightninglabs/taproot-assets v0.3.3-0.20240418183430-d8f3190f2a58 // indirect
+	github.com/lightninglabs/taproot-assets v0.3.3-0.20240315091907-f5ef93e9998a // indirect
 	github.com/lightningnetwork/lightning-onion v1.2.1-0.20230823005744-06182b1d7d2f // indirect
 	github.com/lightningnetwork/lnd/cert v1.2.2 // indirect
 	github.com/lightningnetwork/lnd/clock v1.1.1 // indirect

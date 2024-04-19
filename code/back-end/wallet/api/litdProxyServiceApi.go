@@ -15,6 +15,15 @@ import (
 )
 
 func LitdStopDaemon() bool {
+	_, err := litdStopDaemon()
+	if err != nil {
+		fmt.Printf("%s litrpc StopRequest err: %v\n", GetTimeNow(), err)
+		return false
+	}
+	return true
+}
+
+func litdStopDaemon() (*litrpc.StopDaemonResponse, error) {
 	grpcHost := base.QueryConfigByKey("litdhost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lit"), "testnet")
@@ -54,10 +63,5 @@ func LitdStopDaemon() bool {
 	client := litrpc.NewProxyClient(conn)
 	request := &litrpc.StopDaemonRequest{}
 	response, err := client.StopDaemon(context.Background(), request)
-	if err != nil {
-		fmt.Printf("%s litrpc StopRequest err: %v\n", GetTimeNow(), err)
-		return false
-	}
-	fmt.Printf("%s %v\n", GetTimeNow(), response)
-	return true
+	return response, err
 }

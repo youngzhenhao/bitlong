@@ -303,13 +303,12 @@ type NewMeta struct {
 	Data        string `json:"data"`
 }
 
-func GetMetaImage(acronym string, description string, imagefile string) string {
+func GetImageMeta(acronym string, description string, imagefile string) string {
 	image, err := os.ReadFile(imagefile)
 	if err != nil {
 		fmt.Println("open image file is error:", err)
 	}
 	imageStr := dataurl.EncodeBytes(image)
-
 	meta := NewMeta{
 		Acronym:     acronym,
 		Description: description,

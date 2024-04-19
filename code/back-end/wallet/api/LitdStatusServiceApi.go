@@ -14,6 +14,36 @@ import (
 	"path/filepath"
 )
 
+func SubServerStatus() string {
+	response, err := subServerStatus()
+	if err != nil {
+		return MakeJsonResult(false, err.Error(), nil)
+	}
+	return MakeJsonResult(true, "", response)
+}
+
+func GetTapdStatus() bool {
+	response, err := subServerStatus()
+	if err != nil {
+		return false
+	}
+	if len(response.SubServers) == 0 {
+		return false
+	}
+	return response.SubServers["taproot-assets"].Running
+}
+
+func GetLitStatus() bool {
+	response, err := subServerStatus()
+	if err != nil {
+		return false
+	}
+	if len(response.SubServers) == 0 {
+		return false
+	}
+	return response.SubServers["lit"].Running
+}
+
 func subServerStatus() (*litrpc.SubServerStatusResp, error) {
 	grpcHost := base.QueryConfigByKey("litdhost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
@@ -56,34 +86,4 @@ func subServerStatus() (*litrpc.SubServerStatusResp, error) {
 	request := &litrpc.SubServerStatusReq{}
 	response, err := client.SubServerStatus(context.Background(), request)
 	return response, err
-}
-
-func SubServerStatus() string {
-	response, err := subServerStatus()
-	if err != nil {
-		return MakeJsonResult(false, err.Error(), nil)
-	}
-	return MakeJsonResult(true, "", response)
-}
-
-func GetTapdStatus() bool {
-	response, err := subServerStatus()
-	if err != nil {
-		return false
-	}
-	if len(response.SubServers) == 0 {
-		return false
-	}
-	return response.SubServers["taproot-assets"].Running
-}
-
-func GetLitStatus() bool {
-	response, err := subServerStatus()
-	if err != nil {
-		return false
-	}
-	if len(response.SubServers) == 0 {
-		return false
-	}
-	return response.SubServers["lit"].Running
 }

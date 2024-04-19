@@ -55,11 +55,20 @@ func GetStateForSubscribe() bool {
 	return true
 }
 
-// GetState
+func GetState() string {
+	response, err := getState()
+	if err != nil {
+		fmt.Printf("%s watchtowerrpc GetState err: %v\n", GetTimeNow(), err)
+		return "NO_START_LND"
+	}
+	return response.State.String()
+}
+
+// getState
 //
 //	@Description: GetState returns the current wallet state without streaming further changes.
 //	@return string
-func GetState() string {
+func getState() (*lnrpc.GetStateResponse, error) {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	cert, err := os.ReadFile(tlsCertPath)
@@ -88,9 +97,5 @@ func GetState() string {
 	client := lnrpc.NewStateClient(conn)
 	request := &lnrpc.GetStateRequest{}
 	response, err := client.GetState(context.Background(), request)
-	if err != nil {
-		fmt.Printf("%s watchtowerrpc GetState err: %v\n", GetTimeNow(), err)
-		return "NO_START_LND"
-	}
-	return response.State.String()
+	return response, err
 }

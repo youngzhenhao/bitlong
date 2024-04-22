@@ -1,3 +1,5 @@
+//go:build no_grpc
+
 package api
 
 import (
@@ -155,8 +157,8 @@ func QueryRfqAcceptedQuotes() string {
 		}
 	}(conn)
 	client := rfqrpc.NewRfqClient(conn)
-	request := &rfqrpc.QueryRfqAcceptedQuotesRequest{}
-	response, err := client.QueryRfqAcceptedQuotes(context.Background(), request)
+	request := &rfqrpc.QueryPeerAcceptedQuotesRequest{}
+	response, err := client.QueryPeerAcceptedQuotes(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s rfqrpc QueryRfqAcceptedQuotes Error: %v\n", GetTimeNow(), err)
 		return ""

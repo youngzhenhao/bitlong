@@ -54,11 +54,12 @@ func ReadConfigFile(path string) map[string]string {
 
 const (
 	PATH                    = "/data/data/io.bitlong/files/NewFolderBit/config.txt"
-	PATH1                   = "D:\\share\\bitlong\\code\\back-end\\wallet\\config.txt"
-	PATH2                   = "D:\\share\\bitlong\\code\\back-end\\wallet\\regconf.txt"
+	PATH1                   = "D:\\share\\bitlong\\code\\back-end\\wallet\\config\\config.txt"
+	PATH2                   = "D:\\share\\bitlong\\code\\back-end\\wallet\\config\\regconf.txt"
+	PATH3                   = "/home/en"
 	ONLY_FOR_TEST_LOCALPATH = "C:\\mySpace\\bitlong\\code\\back-end\\wallet\\config\\config.txt"
 )
-const CONFIG_FILE = PATH
+const CONFIG_FILE = PATH2
 
 func Configure(appName string) string {
 	fileConfig := ReadConfigFile(CONFIG_FILE)

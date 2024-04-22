@@ -141,59 +141,54 @@ func GetInfoOfTap() string {
 //	@Description: ListAssets lists the set of assets owned by the target daemon.
 //	@return string
 func ListAssets(withWitness, includeSpent, includeLeased bool) string {
-	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
-	}
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
-
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
-	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
-	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
-	client := taprpc.NewTaprootAssetsClient(conn)
-	request := &taprpc.ListAssetRequest{
-		WithWitness:   withWitness,
-		IncludeSpent:  includeSpent,
-		IncludeLeased: includeLeased,
-	}
-	response, err := client.ListAssets(context.Background(), request)
-	//if err != nil {
-	//	fmt.Printf("%s taprpc ListAssets Error: %v\n", GetTimeNow(), err)
-	//	return "false," + err.Error()
-	//}
-	//jstr, _ := json.Marshal(response)
-	//return "true," + string(jstr)
-
+	response, err := listAssets(withWitness, includeSpent, includeLeased)
 	if err != nil {
 		fmt.Printf("%s taprpc ListAssets Error: %v\n", GetTimeNow(), err)
 		return MakeJsonResult(false, err.Error(), nil)
 	}
 	return MakeJsonResult(true, "", response)
+}
+
+func ListSimpleAssets(withWitness, includeSpent, includeLeased bool) string {
+	response, err := listAssets(withWitness, includeSpent, includeLeased)
+	if err != nil {
+		fmt.Printf("%s taprpc ListAssets Error: %v\n", GetTimeNow(), err)
+		return MakeJsonResult(false, err.Error(), nil)
+	}
+	var (
+		simpleAssets []struct {
+			AssetId string `json:"asset_id"`
+			Name    string `json:"name"`
+			Amount  uint64 `json:"amount"`
+			Type    string `json:"type"`
+		}
+	)
+	for _, asset := range response.Assets {
+		set := true
+		for index, s := range simpleAssets {
+			if s.AssetId == hex.EncodeToString(asset.AssetGenesis.GetAssetId()) {
+				simpleAssets[index].Amount = asset.Amount + s.Amount
+				set = false
+				break
+			}
+		}
+		if !set {
+			continue
+		}
+		simpleAssets = append(simpleAssets, struct {
+			AssetId string `json:"asset_id"`
+			Name    string `json:"name"`
+			Amount  uint64 `json:"amount"`
+			Type    string `json:"type"`
+		}{
+			AssetId: hex.EncodeToString(asset.AssetGenesis.GetAssetId()),
+			Name:    asset.AssetGenesis.Name,
+			Amount:  asset.Amount,
+			Type:    asset.AssetGenesis.AssetType.String(),
+		})
+	}
+
+	return MakeJsonResult(true, "", simpleAssets)
 }
 
 func FindAssetByAssetName(assetName string) string {
@@ -606,4 +601,49 @@ func TapStopDaemon() bool {
 	}
 	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return true
+}
+
+func listAssets(withWitness, includeSpent, includeLeased bool) (*taprpc.ListAssetResponse, error) {
+	grpcHost := base.QueryConfigByKey("taproothost")
+	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
+	}
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+	if err != nil {
+		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
+		}
+	}(conn)
+	client := taprpc.NewTaprootAssetsClient(conn)
+	request := &taprpc.ListAssetRequest{
+		WithWitness:   withWitness,
+		IncludeSpent:  includeSpent,
+		IncludeLeased: includeLeased,
+	}
+	response, err := client.ListAssets(context.Background(), request)
+	return response, err
 }

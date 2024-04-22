@@ -10,9 +10,6 @@ import (
 	"strings"
 )
 
-const API_VERSION = "v0.0.1"
-const API_Date = "2024-04-18"
-
 func GetApiVersion() string {
 	return API_VERSION + "---" + API_Date
 }

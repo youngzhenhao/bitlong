@@ -11,7 +11,7 @@ import (
 )
 
 func GetApiVersion() string {
-	return API_VERSION + "---" + API_Date
+	return API_VERSION_PREFFIX + API_MARKER + API_DATE_TIME
 }
 
 func GetRespJSON(resp proto.Message) string {
@@ -42,7 +42,7 @@ func MakeJsonResult(success bool, error string, data any) string {
 	return string(jstr)
 }
 
-func printRespJSON(resp proto.Message) string {
+func MultipleRespJsonString(resp proto.Message) string {
 	jsonBytes, err := lnrpc.ProtoJSONMarshalOpts.Marshal(resp)
 	if err != nil {
 		fmt.Println("unable to decode response: ", err)
@@ -51,13 +51,13 @@ func printRespJSON(resp proto.Message) string {
 	return string(jsonBytes)
 }
 
-type JsonResult1 struct {
+type JsonResult_ONLY_FOR_TEST struct {
 	Success bool   `json:"success,omitempty"`
 	Error   string `json:"error,omitempty"`
 	Data    string `json:"data,omitempty"`
 }
 
-func MakeJsonResult1(success bool, error string, data string) string {
+func MakeJsonResult_ONLY_FOR_TEST(success bool, error string, data string) string {
 	data = strings.Replace(data, "\n", "", -1)
 	data = strings.Replace(data, "\t", "", -1)
 	data = strings.Replace(data, " ", "", -1)

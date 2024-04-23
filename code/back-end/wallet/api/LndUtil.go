@@ -10,10 +10,6 @@ import (
 	"strings"
 )
 
-func GetApiVersion() string {
-	return API_VERSION_PREFFIX + API_MARKER + API_DATE_TIME
-}
-
 func GetRespJSON(resp proto.Message) string {
 	jsonBytes, err := lnrpc.ProtoJSONMarshalOpts.Marshal(resp)
 	if err != nil {

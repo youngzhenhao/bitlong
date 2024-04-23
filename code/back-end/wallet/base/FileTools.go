@@ -59,7 +59,7 @@ const (
 	PATH3                   = "/home/en"
 	ONLY_FOR_TEST_LOCALPATH = "C:\\mySpace\\bitlong\\code\\back-end\\wallet\\config\\config.txt"
 )
-const CONFIG_FILE = PATH2
+const CONFIG_FILE = PATH
 
 func Configure(appName string) string {
 	fileConfig := ReadConfigFile(CONFIG_FILE)

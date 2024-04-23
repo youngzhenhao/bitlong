@@ -1,9 +1,9 @@
 .idea
 # wallet
-wallet/api/*.aar
-wallet/api/*.jar
-wallet/*_test.go
-wallet/*.zip
+*.aar
+*.jar
+*_test.go
+*.zip
 wallet/cmd-test
 temp.go
 tls.cert
@@ -11,6 +11,7 @@ tls.key
 *.macaroon
 *.exe
 *.exe~
+*.db
 # environment
 .env
 .env.local

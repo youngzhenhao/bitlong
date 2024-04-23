@@ -1,7 +1,6 @@
 go 1.22.2
 
 use (
-	.
 	./lib/btcutil@v1.1.5
 	./lib/lnd@v0.17.4
 	./lib/lndclient@v0.17.4

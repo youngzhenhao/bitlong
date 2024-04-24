@@ -68,7 +68,11 @@ func GetNewAddress_P2TR() string {
 		fmt.Printf("%s lnrpc NewAddress err: %v\n", GetTimeNow(), err)
 		return MakeJsonResult(false, "AddressType_TAPROOT_PUBKEY error", "")
 	}
-	return MakeJsonResult(true, "", response.Address)
+	return MakeJsonResult(true, "", Addr{
+		Address: response.Address,
+		Balance: 0,
+		Type:    lnrpc.AddressType_TAPROOT_PUBKEY.String(),
+	})
 }
 
 // GetNewAddress_P2WKH
@@ -122,7 +126,11 @@ func GetNewAddress_P2WKH() string {
 		fmt.Printf("%s lnrpc NewAddress err: %v\n", GetTimeNow(), err)
 		return MakeJsonResult(false, "AddressType_WITNESS_PUBKEY_HASH error", "")
 	}
-	return MakeJsonResult(true, "", response.Address)
+	return MakeJsonResult(true, "", Addr{
+		Address: response.Address,
+		Balance: 0,
+		Type:    lnrpc.AddressType_WITNESS_PUBKEY_HASH.String(),
+	})
 }
 
 // GetNewAddress_NP2WKH
@@ -176,7 +184,11 @@ func GetNewAddress_NP2WKH() string {
 		fmt.Printf("%s lnrpc NewAddress err: %v\n", GetTimeNow(), err)
 		return MakeJsonResult(false, "AddressType_NESTED_PUBKEY_HASH error", "")
 	}
-	return MakeJsonResult(true, "", response.Address)
+	return MakeJsonResult(true, "", Addr{
+		Address: response.Address,
+		Balance: 0,
+		Type:    lnrpc.AddressType_NESTED_PUBKEY_HASH.String(),
+	})
 }
 
 // StoreAddr

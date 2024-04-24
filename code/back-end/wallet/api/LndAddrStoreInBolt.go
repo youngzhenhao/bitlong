@@ -13,7 +13,6 @@ type Addr struct {
 	Address string `json:"address"`
 	Balance int    `json:"balance"`
 	Type    string `json:"type"`
-	Path    string `json:"path"`
 }
 
 type AddrStore struct {

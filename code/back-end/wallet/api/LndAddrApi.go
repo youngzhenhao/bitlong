@@ -72,7 +72,6 @@ func GetNewAddress_P2TR() string {
 		Address: response.Address,
 		Balance: 0,
 		Type:    lnrpc.AddressType_TAPROOT_PUBKEY.String(),
-		Path:    "",
 	})
 }
 

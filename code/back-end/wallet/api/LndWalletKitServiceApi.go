@@ -35,6 +35,10 @@ func GetTimeNow() string {
 	return time.Now().Format("2006/01/02 15:04:05")
 }
 
+func GetTimeSuffixString() string {
+	return time.Now().Format("20060102150405")
+}
+
 // ListAddress
 //
 //	@Description: ListAddresses retrieves all the addresses along with their balance.

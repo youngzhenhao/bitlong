@@ -19,7 +19,7 @@ apt install sdkmanager
 sdkmanager --install "ndk;21.4.7075529"
 sdkmanager --install "build-tools;35.0.0-rc3"
 sdkmanager --install "platforms;android-34"
-cp /opt/android-sdk/build-tools/35.0.0-rc3/ /root/Android/Sdk/
+cp -r /opt/android-sdk/build-tools/35.0.0-rc3/ /root/Android/Sdk/
 cp -r /opt/android-sdk/ndk/21.4.7075529/ /root/Android/Sdk/ndk/
 cp -r /opt/android-sdk/platforms/android-34/ /root/Android/Sdk/platforms/
 ```
@@ -50,6 +50,10 @@ go get golang.org/x/mobile/bind
 ```
 
 ## Use gomobile
+
+- https://pkg.go.dev/golang.org/x/mobile/cmd/gomobile#hdr-Build_a_library_for_Android_and_iOS
+
+*To package a specific sub-module, you need to go to that directory first.*
 
 ```bash
 cd api

@@ -2,22 +2,11 @@ package api
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
-	"fmt"
-	"github.com/lightningnetwork/lnd/lnrpc"
-	"google.golang.org/protobuf/proto"
 	"strconv"
 	"strings"
 )
-
-func GetRespJSON(resp proto.Message) string {
-	jsonBytes, err := lnrpc.ProtoJSONMarshalOpts.Marshal(resp)
-	if err != nil {
-		fmt.Printf("%s unable to decode response: %v\n", GetTimeNow(), err)
-		return ""
-	}
-	return string(jsonBytes)
-}
 
 type JsonResult struct {
 	Success bool   `json:"success"`
@@ -38,22 +27,7 @@ func MakeJsonResult(success bool, error string, data any) string {
 	return string(jstr)
 }
 
-func MultipleRespJsonString(resp proto.Message) string {
-	jsonBytes, err := lnrpc.ProtoJSONMarshalOpts.Marshal(resp)
-	if err != nil {
-		fmt.Println("unable to decode response: ", err)
-		return "false"
-	}
-	return string(jsonBytes)
-}
-
-type JsonResult_ONLY_FOR_TEST struct {
-	Success bool   `json:"success,omitempty"`
-	Error   string `json:"error,omitempty"`
-	Data    string `json:"data,omitempty"`
-}
-
-func MakeJsonResult_ONLY_FOR_TEST(success bool, error string, data string) string {
+func MakeJsonResult1(success bool, error string, data string) string {
 	data = strings.Replace(data, "\n", "", -1)
 	data = strings.Replace(data, "\t", "", -1)
 	data = strings.Replace(data, " ", "", -1)
@@ -61,4 +35,11 @@ func MakeJsonResult_ONLY_FOR_TEST(success bool, error string, data string) strin
 	var restr bytes.Buffer
 	_ = json.Indent(&restr, []byte(jstr), "", "\t")
 	return restr.String()
+}
+func Base64Decode(s string) string {
+	byte1, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		return "DECODE_ERROR"
+	}
+	return string(byte1)
 }

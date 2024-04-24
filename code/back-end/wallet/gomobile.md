@@ -4,13 +4,36 @@
 
 - https://go.dev/dl/
 
+```bash
+go version
+```
+
 ## Install Android Studio
 
 - Install the **latest version** of the `SDK` and **version** 21 of the `NDK` in Android Studio
 
+### Ubuntu
+
+```bash
+apt install sdkmanager
+sdkmanager --install "ndk;21.4.7075529"
+sdkmanager --install "build-tools;35.0.0-rc3"
+sdkmanager --install "platforms;android-34"
+cp /opt/android-sdk/build-tools/35.0.0-rc3/ /root/Android/Sdk/
+cp -r /opt/android-sdk/ndk/21.4.7075529/ /root/Android/Sdk/ndk/
+cp -r /opt/android-sdk/platforms/android-34/ /root/Android/Sdk/platforms/
+```
+
 ## Install JDK 11
 
 - https://www.oracle.com/java/technologies/javase-downloads.html
+
+### Ubuntu
+
+```bash
+apt install openjdk-11-jdk
+java --version
+```
 
 ## Install gomobile and gobind
 

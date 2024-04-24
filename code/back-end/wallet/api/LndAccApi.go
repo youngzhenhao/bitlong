@@ -1,5 +1,7 @@
 package api
 
+import "fmt"
+
 type Account struct {
 	Name              string `json:"name"`
 	Type              string `json:"address_type"`
@@ -7,10 +9,19 @@ type Account struct {
 	DerivationPath    string `json:"derivation_path"`
 }
 
+func GetAllAccountsString() string {
+	accs := GetAllAccounts()
+	if accs == nil {
+		return MakeJsonResult(false, "get all accounts fail.", "")
+	}
+	return MakeJsonResult(true, "", accs)
+}
+
 func GetAllAccounts() []Account {
 	var accs []Account
 	response, err := listAccounts()
 	if err != nil {
+		fmt.Printf("%s listAccounts fail. %v\n", GetTimeNow(), err)
 		return nil
 	}
 	for _, v := range response.Accounts {
@@ -31,8 +42,9 @@ func GetPathByAddressType(addressType string) string {
 	}
 	for _, acc := range accs {
 		if acc.Type == addressType {
-			return acc.DerivationPath
+			return MakeJsonResult(true, "", acc.DerivationPath)
 		}
 	}
-	return ""
+	fmt.Printf("%s %v is not a valid address type.\n", GetTimeNow(), addressType)
+	return MakeJsonResult(false, "can't find path by given address type.", "")
 }

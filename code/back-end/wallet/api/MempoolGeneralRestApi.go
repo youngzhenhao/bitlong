@@ -27,13 +27,13 @@ func GetDifficultyAdjustmentByMempool() string {
 	targetUrl := "https://mempool.space/testnet/api/v1/difficulty-adjustment"
 	response, err := http.Get(targetUrl)
 	if err != nil {
-		fmt.Printf("%s http.PostForm :%v\n", GetTimeNow(), err)
+		fmt.Printf("%s http.Get :%v\n", GetTimeNow(), err)
 		return MakeJsonResult(false, "http get fail.", "")
 	}
 	bodyBytes, _ := io.ReadAll(response.Body)
 	var difficultyResponse DifficultyResponse
 	if err := json.Unmarshal(bodyBytes, &difficultyResponse); err != nil {
-		fmt.Printf("%s PSTUUI json.Unmarshal :%v\n", GetTimeNow(), err)
+		fmt.Printf("%s GDABM json.Unmarshal :%v\n", GetTimeNow(), err)
 		return MakeJsonResult(false, "Unmarshal response body fail.", "")
 	}
 	return MakeJsonResult(true, "", difficultyResponse)

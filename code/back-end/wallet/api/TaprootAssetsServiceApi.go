@@ -88,8 +88,7 @@ func FetchAssetMeta(isHash bool, data string) string {
 	if err != nil {
 		return MakeJsonResult(false, err.Error(), nil)
 	}
-
-	return MakeJsonResult(true, "", hex.EncodeToString(response.Data))
+	return MakeJsonResult(true, "", string(response.Data))
 }
 
 func fetchAssetMeta(isHash bool, data string) (*taprpc.AssetMeta, error) {

@@ -241,14 +241,15 @@ func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, 
 	} else {
 		_assetType = taprpc.AssetType_NORMAL
 	}
-	_assetMetaDataByteSlice, _ := hex.DecodeString(assetMetaData)
+	_assetMetaDataByteSlice := []byte(assetMetaData)
 	var _assetMetaType taprpc.AssetMetaType
 	if AssetMetaTypeIsJsonNotOpaque {
 		_assetMetaType = taprpc.AssetMetaType_META_TYPE_JSON
 	} else {
 		_assetMetaType = taprpc.AssetMetaType_META_TYPE_OPAQUE
 	}
-	_groupKeyByteSlice, _ := hex.DecodeString(groupKey)
+	_groupKeyByteSlices := []byte(groupKey)
+
 	request := &mintrpc.MintAssetRequest{
 		Asset: &mintrpc.MintAsset{
 			AssetVersion: _assetVersion,
@@ -261,7 +262,7 @@ func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, 
 			Amount:          uint64(amount),
 			NewGroupedAsset: newGroupedAsset,
 			GroupedAsset:    groupedAsset,
-			GroupKey:        _groupKeyByteSlice,
+			GroupKey:        _groupKeyByteSlices,
 			GroupAnchor:     groupAnchor,
 		},
 		ShortResponse: shortResponse,
@@ -284,70 +285,76 @@ func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, 
 //	@param assetMetaData
 //	@param amount
 //	@return bool
-func MintAsset(name string, assetMetaData string, amount int) string {
-	return mintAsset(false, false, name, assetMetaData, false, amount, false, false, "", "", false)
-}
+//func MintAsset(name string, assetMetaData string, amount int) string {
+//	return mintAsset(false, false, name, assetMetaData, false, amount, false, false, "", "", false)
+//}
 
-func MintAssetnew(name string, assetTypeIsCollectible bool, assetMetaData string, amount int, newGroupedAsset bool) string {
+func MintAsset(name string, assetTypeIsCollectible bool, assetMetaData string, amount int, newGroupedAsset bool) string {
 	return mintAsset(false, assetTypeIsCollectible, name, assetMetaData, false, amount, newGroupedAsset, false, "", "", false)
 }
 
-func MintAssetadd(name string, assetTypeIsCollectible bool, assetMetaData string, amount int, groupedAsset bool, groupKey string) string {
-	return mintAsset(false, assetTypeIsCollectible, name, assetMetaData, false, amount, false, groupedAsset, groupKey, "", false)
+func AddGroupAsset(name string, assetTypeIsCollectible bool, assetMetaData string, amount int, groupKey string) string {
+	return mintAsset(false, assetTypeIsCollectible, name, assetMetaData, false, amount, false, true, groupKey, "", false)
 
 }
 
 type NewMeta struct {
-	Acronym     string `json:"acronym"`
-	Description string `json:"description"`
-	Data        string `json:"data"`
+	Acronym     string `json:"acronym,omitempty"`
+	Description string `json:"description,omitempty"`
+	Image_Data  string `json:"image_data,omitempty"`
 }
 
-func GetImageMeta(acronym string, description string, imagefile string) string {
-	image, err := os.ReadFile(imagefile)
-	if err != nil {
-		fmt.Println("open image file is error:", err)
-	}
-	imageStr := dataurl.EncodeBytes(image)
+const (
+	OPEN_IMAGE_FILE_ERROR  = "OPEN_IMAGE_FILE_ERROR"
+	WRITE_IMAGE_FILE_ERROR = "WRITE_IMAGE_FILE_ERROR"
+	Data_not_urldata       = "Data_not_urldata"
+	DATA_NOT_IMAGE         = "DATA_NOT_IMAGE"
+)
+
+func CreateNewMeta(acronym string, description string, imagefile string) string {
 	meta := NewMeta{
 		Acronym:     acronym,
 		Description: description,
-		Data:        imageStr,
 	}
-	metastr, err := json.Marshal(meta)
-	if err != nil {
-		fmt.Println("creat meta json str error:", err)
+	if imagefile != "" {
+		image, err := os.ReadFile(imagefile)
+		if err != nil {
+			fmt.Println("open image file is error:", err)
+			return OPEN_IMAGE_FILE_ERROR
+		}
+		imageStr := dataurl.EncodeBytes(image)
+		meta.Image_Data = imageStr
 	}
+	metastr, _ := json.Marshal(meta)
 	return string(metastr)
 }
 
-func GetDateforMeta(Meta string) string {
+func CheckMetaStandard(Meta string) bool {
 	temp := &NewMeta{}
 	err := json.Unmarshal([]byte(Meta), temp)
-
 	if err != nil {
-		print(err)
+		return false
 	}
-	return temp.Data
+	return true
 }
 
-func DecodeMetaImage(image string, dir string, name string) {
+func DecodeBase64ForImage(image string, dir string, name string) string {
 	dataUrl, err := dataurl.DecodeString(image)
 	if err != nil {
-		return
+		return Data_not_urldata
 	}
 	ContentType := dataUrl.MediaType.ContentType()
 	datatype := strings.Split(ContentType, "/")
 	if datatype[0] != "image" {
 		fmt.Println("is not image dataurl")
-		return
+		return DATA_NOT_IMAGE
 	}
-	file := filepath.Join(dir, name+"."+datatype[1])
-
+	formatName := strings.Split(name, ".")
+	file := filepath.Join(dir, formatName[0]+"."+datatype[1])
 	f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		fmt.Println("create new image error:", err)
-		return
+		return OPEN_IMAGE_FILE_ERROR
 	}
 	defer func(f *os.File) {
 		err := f.Close()
@@ -355,12 +362,10 @@ func DecodeMetaImage(image string, dir string, name string) {
 			fmt.Println(err)
 		}
 	}(f)
-
 	_, err = f.Write(dataUrl.Data)
-
 	if err != nil {
 		fmt.Println("Write data fail:", err)
-
-		return
+		return WRITE_IMAGE_FILE_ERROR
 	}
+	return file
 }

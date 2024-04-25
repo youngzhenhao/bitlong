@@ -91,57 +91,6 @@ func FetchAssetMeta(isHash bool, data string) string {
 	return MakeJsonResult(true, "", string(response.Data))
 }
 
-func fetchAssetMeta(isHash bool, data string) (*taprpc.AssetMeta, error) {
-	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
-	}
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
-
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
-	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
-	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
-
-	client := taprpc.NewTaprootAssetsClient(conn)
-	request := &taprpc.FetchAssetMetaRequest{}
-	if isHash {
-		request.Asset = &taprpc.FetchAssetMetaRequest_MetaHashStr{
-			MetaHashStr: data,
-		}
-	} else {
-		request.Asset = &taprpc.FetchAssetMetaRequest_AssetIdStr{
-			AssetIdStr: data,
-		}
-	}
-	response, err := client.FetchAssetMeta(context.Background(), request)
-	return response, err
-}
-
 // GetInfoOfTap
 //
 //	@Description: GetInfo returns the information for the node.
@@ -282,59 +231,6 @@ func ListBalances() string {
 		MakeJsonResult(false, err.Error(), nil)
 	}
 	return MakeJsonResult(true, "", response)
-}
-
-// ListBalances
-//
-//	@Description: ListBalances lists asset balances
-//	@return string
-func listBalances(useGroupKey bool, assetFilter, groupKeyFilter []byte) (*taprpc.ListBalancesResponse, error) {
-	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
-	}
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
-
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
-	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
-	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
-	client := taprpc.NewTaprootAssetsClient(conn)
-	request := &taprpc.ListBalancesRequest{
-		AssetFilter:    assetFilter,
-		GroupKeyFilter: groupKeyFilter,
-	}
-	if useGroupKey {
-		request.GroupBy = &taprpc.ListBalancesRequest_GroupKey{GroupKey: true}
-	} else {
-		request.GroupBy = &taprpc.ListBalancesRequest_AssetId{AssetId: true}
-	}
-	response, err := client.ListBalances(context.Background(), request)
-	return response, err
 }
 
 // ListGroups
@@ -661,6 +557,7 @@ func TapStopDaemon() bool {
 	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return true
 }
+
 func decodeProof(proof []byte, depth uint32, withMetaReveal bool, withPrevWitnesses bool) (*taprpc.DecodeProofResponse, error) {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
@@ -704,6 +601,110 @@ func decodeProof(proof []byte, depth uint32, withMetaReveal bool, withPrevWitnes
 		WithPrevWitnesses: withPrevWitnesses,
 	}
 	response, err := client.DecodeProof(context.Background(), request)
+	return response, err
+}
+
+func fetchAssetMeta(isHash bool, data string) (*taprpc.AssetMeta, error) {
+	grpcHost := base.QueryConfigByKey("taproothost")
+	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
+	}
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+	if err != nil {
+		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
+		}
+	}(conn)
+
+	client := taprpc.NewTaprootAssetsClient(conn)
+	request := &taprpc.FetchAssetMetaRequest{}
+	if isHash {
+		request.Asset = &taprpc.FetchAssetMetaRequest_MetaHashStr{
+			MetaHashStr: data,
+		}
+	} else {
+		request.Asset = &taprpc.FetchAssetMetaRequest_AssetIdStr{
+			AssetIdStr: data,
+		}
+	}
+	response, err := client.FetchAssetMeta(context.Background(), request)
+	return response, err
+}
+
+// ListBalances
+//
+//	@Description: ListBalances lists asset balances
+//	@return string
+func listBalances(useGroupKey bool, assetFilter, groupKeyFilter []byte) (*taprpc.ListBalancesResponse, error) {
+	grpcHost := base.QueryConfigByKey("taproothost")
+	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
+	}
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+	if err != nil {
+		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
+		}
+	}(conn)
+	client := taprpc.NewTaprootAssetsClient(conn)
+	request := &taprpc.ListBalancesRequest{
+		AssetFilter:    assetFilter,
+		GroupKeyFilter: groupKeyFilter,
+	}
+	if useGroupKey {
+		request.GroupBy = &taprpc.ListBalancesRequest_GroupKey{GroupKey: true}
+	} else {
+		request.GroupBy = &taprpc.ListBalancesRequest_AssetId{AssetId: true}
+	}
+	response, err := client.ListBalances(context.Background(), request)
 	return response, err
 }
 

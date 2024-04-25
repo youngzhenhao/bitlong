@@ -222,52 +222,6 @@ func SyncUniverse(universeHost string, asset_id string) string {
 
 }
 
-func syncUniverse(universeHost string, syncTargets []*universerpc.SyncTarget, syncMode universerpc.UniverseSyncMode) (*universerpc.SyncResponse, error) {
-
-	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
-	}
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
-
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
-	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
-	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
-	request := &universerpc.SyncRequest{
-		UniverseHost: universeHost,
-		SyncMode:     syncMode,
-		SyncTargets:  syncTargets,
-	}
-	client := universerpc.NewUniverseClient(conn)
-	response, err := client.SyncUniverse(context.Background(), request)
-	return response, err
-}
-
 func UniverseStats() {}
 
 func assetLeaves(isGroup bool, id string, prooftype universerpc.ProofType) (*universerpc.AssetLeafResponse, error) {
@@ -368,5 +322,51 @@ func queryAssetStats(assetId string) (*universerpc.UniverseAssetStats, error) {
 		AssetIdFilter: id,
 	}
 	response, err := client.QueryAssetStats(context.Background(), request)
+	return response, err
+}
+
+func syncUniverse(universeHost string, syncTargets []*universerpc.SyncTarget, syncMode universerpc.UniverseSyncMode) (*universerpc.SyncResponse, error) {
+
+	grpcHost := base.QueryConfigByKey("taproothost")
+	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
+	}
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+	if err != nil {
+		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
+		}
+	}(conn)
+	request := &universerpc.SyncRequest{
+		UniverseHost: universeHost,
+		SyncMode:     syncMode,
+		SyncTargets:  syncTargets,
+	}
+	client := universerpc.NewUniverseClient(conn)
+	response, err := client.SyncUniverse(context.Background(), request)
 	return response, err
 }

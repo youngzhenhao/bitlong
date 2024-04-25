@@ -218,9 +218,6 @@ func SyncUniverse(universeHost string, asset_id string) string {
 	if err != nil {
 		return MakeJsonResult(false, err.Error(), "")
 	}
-	if response.SyncedUniverses == nil {
-		return MakeJsonResult(false, "NOT_NEW_DATA", "")
-	}
 	return MakeJsonResult(true, "", response)
 
 }

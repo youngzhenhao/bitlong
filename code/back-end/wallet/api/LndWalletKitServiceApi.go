@@ -12,32 +12,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"os"
 	"path/filepath"
-	"time"
 )
-
-type macaroonCredential struct {
-	macaroon string
-}
-
-func newMacaroonCredential(macaroon string) *macaroonCredential {
-	return &macaroonCredential{macaroon: macaroon}
-}
-
-func (c *macaroonCredential) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
-	return map[string]string{"macaroon": c.macaroon}, nil
-}
-
-func (c *macaroonCredential) RequireTransportSecurity() bool {
-	return true
-}
-
-func GetTimeNow() string {
-	return time.Now().Format("2006/01/02 15:04:05")
-}
-
-func GetTimeSuffixString() string {
-	return time.Now().Format("20060102150405")
-}
 
 // ListAddress
 //
@@ -68,7 +43,7 @@ func listAddress() (*walletrpc.ListAddressesResponse, error) {
 	}
 	creds := credentials.NewTLS(config)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
@@ -114,7 +89,7 @@ func listAccounts() (*walletrpc.ListAccountsResponse, error) {
 	}
 	creds := credentials.NewTLS(config)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
@@ -194,7 +169,7 @@ func ListLeases() string {
 	}
 	creds := credentials.NewTLS(config)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
@@ -243,7 +218,7 @@ func ListSweeps() string {
 	}
 	creds := credentials.NewTLS(config)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
@@ -293,7 +268,7 @@ func ListUnspent() string {
 	}
 	creds := credentials.NewTLS(config)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
@@ -341,7 +316,7 @@ func NextAddr() string {
 	}
 	creds := credentials.NewTLS(config)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}

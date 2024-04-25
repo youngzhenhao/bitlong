@@ -48,7 +48,7 @@ func AnchorVirtualPsbts(virtualPsbts []string) bool {
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -107,7 +107,7 @@ func FundVirtualPsbt(isPsbtNotRaw bool, psbt ...string) bool {
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -168,7 +168,7 @@ func NextInternalKey(keyFamily int) string {
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -220,7 +220,7 @@ func NextScriptKey(keyFamily int) string {
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -272,7 +272,7 @@ func ProveAssetOwnership(assetId, scriptKey string) bool {
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -329,7 +329,7 @@ func QueryInternalKey(internalKey string) string {
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -382,7 +382,7 @@ func QueryScriptKey(tweakedScriptKey string) string {
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -434,7 +434,7 @@ func RemoveUTXOLease() bool {
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -486,7 +486,7 @@ func SignVirtualPsbt(fundedPsbt string) bool {
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -539,7 +539,7 @@ func VerifyAssetOwnership(proofWithWitness string) bool {
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}

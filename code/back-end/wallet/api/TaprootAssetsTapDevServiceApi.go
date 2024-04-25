@@ -44,7 +44,7 @@ func ImportProof(proofFile, genesisPoint string) bool {
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}

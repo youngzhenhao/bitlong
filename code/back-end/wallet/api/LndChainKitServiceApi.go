@@ -17,8 +17,8 @@ import (
 	"path/filepath"
 )
 
-func Getblock(blockHash string) string {
-	response, err := getblock(blockHash)
+func GetBlockWrap(blockHash string) string {
+	response, err := GetBlock(blockHash)
 	if err != nil {
 		return MakeJsonResult(false, err.Error(), nil)
 	}
@@ -28,7 +28,7 @@ func Getblock(blockHash string) string {
 	return MakeJsonResult(true, "", msgBlock)
 }
 
-func getblock(blockHashStr string) (response *chainrpc.GetBlockResponse, err error) {
+func GetBlock(blockHashStr string) (response *chainrpc.GetBlockResponse, err error) {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
@@ -52,7 +52,7 @@ func getblock(blockHashStr string) (response *chainrpc.GetBlockResponse, err err
 	}
 	creds := credentials.NewTLS(config)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}

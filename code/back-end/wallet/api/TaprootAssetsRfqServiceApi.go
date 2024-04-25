@@ -33,11 +33,11 @@ func AddAssetBuyOrder() bool {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
+		fmt.Printf("%s Failed to read cert file: %s", api.GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", api.GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -46,24 +46,24 @@ func AddAssetBuyOrder() bool {
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(api.NewMacaroonCredential(macaroon)))
 	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s did not connect: grpc.Dial: %v\n", api.GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
+			fmt.Printf("%s conn Close Error: %v\n", api.GetTimeNow(), err)
 		}
 	}(conn)
 	client := rfqrpc.NewRfqClient(conn)
 	request := &rfqrpc.AddAssetBuyOrderRequest{}
 	response, err := client.AddAssetBuyOrder(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s rfqrpc AddAssetBuyOrder Error: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s rfqrpc AddAssetBuyOrder Error: %v\n", api.GetTimeNow(), err)
 		return false
 	}
-	fmt.Printf("%s %v\n", GetTimeNow(), response)
+	fmt.Printf("%s %v\n", api.GetTimeNow(), response)
 	return true
 }
 
@@ -83,11 +83,11 @@ func AddAssetSellOffer() bool {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
+		fmt.Printf("%s Failed to read cert file: %s", api.GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", api.GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -96,24 +96,24 @@ func AddAssetSellOffer() bool {
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(api.NewMacaroonCredential(macaroon)))
 	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s did not connect: grpc.Dial: %v\n", api.GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
+			fmt.Printf("%s conn Close Error: %v\n", api.GetTimeNow(), err)
 		}
 	}(conn)
 	client := rfqrpc.NewRfqClient(conn)
 	request := &rfqrpc.AddAssetSellOfferRequest{}
 	response, err := client.AddAssetSellOffer(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s rfqrpc  Error: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s rfqrpc  Error: %v\n", api.GetTimeNow(), err)
 		return false
 	}
-	fmt.Printf("%s %v\n", GetTimeNow(), response)
+	fmt.Printf("%s %v\n", api.GetTimeNow(), response)
 	return true
 }
 
@@ -133,11 +133,11 @@ func QueryRfqAcceptedQuotes() string {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
+		fmt.Printf("%s Failed to read cert file: %s", api.GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", api.GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -146,21 +146,21 @@ func QueryRfqAcceptedQuotes() string {
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(api.NewMacaroonCredential(macaroon)))
 	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s did not connect: grpc.Dial: %v\n", api.GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
+			fmt.Printf("%s conn Close Error: %v\n", api.GetTimeNow(), err)
 		}
 	}(conn)
 	client := rfqrpc.NewRfqClient(conn)
 	request := &rfqrpc.QueryPeerAcceptedQuotesRequest{}
 	response, err := client.QueryPeerAcceptedQuotes(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s rfqrpc QueryRfqAcceptedQuotes Error: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s rfqrpc QueryRfqAcceptedQuotes Error: %v\n", api.GetTimeNow(), err)
 		return ""
 	}
 	return response.String()
@@ -182,11 +182,11 @@ func SubscribeRfqEventNtfns() bool {
 	macaroon := hex.EncodeToString(macaroonBytes)
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
+		fmt.Printf("%s Failed to read cert file: %s", api.GetTimeNow(), err)
 	}
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf("%s Failed to append cert\n", GetTimeNow())
+		fmt.Printf("%s Failed to append cert\n", api.GetTimeNow())
 	}
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -195,34 +195,34 @@ func SubscribeRfqEventNtfns() bool {
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(api.NewMacaroonCredential(macaroon)))
 	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s did not connect: grpc.Dial: %v\n", api.GetTimeNow(), err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
+			fmt.Printf("%s conn Close Error: %v\n", api.GetTimeNow(), err)
 		}
 	}(conn)
 	client := rfqrpc.NewRfqClient(conn)
 	request := &rfqrpc.SubscribeRfqEventNtfnsRequest{}
 	stream, err := client.SubscribeRfqEventNtfns(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s rfqrpc  Error: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s rfqrpc  Error: %v\n", api.GetTimeNow(), err)
 		return false
 	}
 	for {
 		response, err := stream.Recv()
 		if err != nil {
 			if err == io.EOF {
-				fmt.Printf("%s err == io.EOF, err: %v\n", GetTimeNow(), err)
+				fmt.Printf("%s err == io.EOF, err: %v\n", api.GetTimeNow(), err)
 				return false
 			}
-			fmt.Printf("%s stream Recv err: %v\n", GetTimeNow(), err)
+			fmt.Printf("%s stream Recv err: %v\n", api.GetTimeNow(), err)
 			return false
 		}
-		fmt.Printf("%s %v\n", GetTimeNow(), response)
+		fmt.Printf("%s %v\n", api.GetTimeNow(), response)
 		return true
 	}
 

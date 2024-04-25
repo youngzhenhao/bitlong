@@ -6,7 +6,6 @@ import (
 	"crypto/x509"
 	"encoding/hex"
 	"fmt"
-
 	"github.com/lightningnetwork/lnd/lnrpc/watchtowerrpc"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
@@ -43,7 +42,7 @@ func WatchtowerGetInfo() string {
 	}
 	creds := credentials.NewTLS(config)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}

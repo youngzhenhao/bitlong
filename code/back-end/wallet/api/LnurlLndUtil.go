@@ -13,7 +13,7 @@ import (
 	"os"
 )
 
-func newTlsCert(tlsCertPath string) credentials.TransportCredentials {
+func NewTlsCert(tlsCertPath string) credentials.TransportCredentials {
 	cert, err := os.ReadFile(tlsCertPath)
 	if err != nil {
 		log.Fatalf("Failed to read cert file: %s", err)
@@ -30,7 +30,7 @@ func newTlsCert(tlsCertPath string) credentials.TransportCredentials {
 	return creds
 }
 
-func getMacaroon(macaroonPath string) string {
+func GetMacaroon(macaroonPath string) string {
 	macaroonBytes, err := os.ReadFile(macaroonPath)
 	if err != nil {
 		panic(err)

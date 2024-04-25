@@ -36,7 +36,6 @@ func AssetLeaves(id string) string {
 }
 
 func GetAssetInfo(id string) string {
-	//从宇宙中读取发行记录
 	response, err := assetLeaves(false, id, universerpc.ProofType_PROOF_TYPE_ISSUANCE)
 	if err != nil {
 		fmt.Printf("%s universerpc AssetLeaves Error: %v\n", GetTimeNow(), err)
@@ -45,13 +44,11 @@ func GetAssetInfo(id string) string {
 	if response.Leaves == nil {
 		return MakeJsonResult(false, "NOT_FOUND", nil)
 	}
-	//解析证明文件
 	proof, err := decodeProof(response.Leaves[0].Proof, 0, true, false)
 	if err != nil {
 		return MakeJsonResult(false, err.Error(), nil)
 	}
-	// 获取时间戳
-	block, err := getblock(proof.DecodedProof.Asset.ChainAnchor.AnchorBlockHash)
+	block, err := GetBlock(proof.DecodedProof.Asset.ChainAnchor.AnchorBlockHash)
 	if err != nil {
 		return MakeJsonResult(false, err.Error(), nil)
 	}
@@ -59,8 +56,6 @@ func GetAssetInfo(id string) string {
 	blockReader := bytes.NewReader(block.RawBlock)
 	err = msgBlock.Deserialize(blockReader)
 	timeStamp := msgBlock.Header.Timestamp
-
-	// 转换为Unix时间戳
 	createTime := timeStamp.Unix()
 
 	var assetInfo = struct {
@@ -110,7 +105,7 @@ func UniverseInfo() string {
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -162,7 +157,7 @@ func ListFederationServers() string {
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -256,7 +251,7 @@ func syncUniverse(universeHost string, syncTargets []*universerpc.SyncTarget, sy
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -303,7 +298,7 @@ func assetLeaves(isGroup bool, id string, prooftype universerpc.ProofType) (*uni
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -360,7 +355,7 @@ func queryAssetStats(assetId string) (*universerpc.UniverseAssetStats, error) {
 	creds := credentials.NewTLS(config)
 
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(newMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}

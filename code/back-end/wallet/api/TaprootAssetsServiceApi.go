@@ -209,7 +209,7 @@ func FindAssetByAssetName(assetName string) string {
 	if err != nil {
 		return MakeJsonResult(false, err.Error(), nil)
 	}
-	if response.Success == false {
+	if !response.Success {
 		return MakeJsonResult(false, response.Error, nil)
 	}
 	var assets []*taprpc.Asset

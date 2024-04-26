@@ -180,36 +180,12 @@ func CreateNewMeta(acronym string, description string, imagefile string) string 
 }
 
 func CheckMetaStandard(Meta string) bool {
-	temp := NewMeta{}
-	err := json.Unmarshal([]byte(Meta), &temp)
+	temp := &NewMeta{}
+	err := json.Unmarshal([]byte(Meta), temp)
 	if err != nil {
 		return false
 	}
 	return true
-}
-func GetMetaAcronym(Meta string) string {
-	if !CheckMetaStandard(Meta) {
-		return ""
-	}
-	s := NewMeta{}
-	json.Unmarshal([]byte(Meta), &s)
-	return s.Acronym
-}
-func GetMetaDescription(Meta string) string {
-	if !CheckMetaStandard(Meta) {
-		return ""
-	}
-	s := NewMeta{}
-	json.Unmarshal([]byte(Meta), &s)
-	return s.Description
-}
-func GetMetaImage(Meta, dir, name string) string {
-	if !CheckMetaStandard(Meta) {
-		return ""
-	}
-	s := NewMeta{}
-	json.Unmarshal([]byte(Meta), &s)
-	return DecodeBase64ForImage(s.Image_Data, dir, name)
 }
 
 func DecodeBase64ForImage(image string, dir string, name string) string {

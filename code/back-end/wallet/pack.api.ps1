@@ -1,3 +1,4 @@
+cd
 $start_time = Get-Date
 $currentPath = Get-Location
 $currentFolderName = Split-Path -Path $currentPath -Leaf

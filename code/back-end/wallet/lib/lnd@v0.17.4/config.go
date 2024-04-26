@@ -531,6 +531,9 @@ type GRPCConfig struct {
 // DefaultConfig returns all default values for the Config struct.
 //
 //nolint:lll
+func SetdefaultLndDir(defaultLndDir string) {
+	DefaultLndDir = defaultLndDir
+}
 func DefaultConfig() Config {
 	return Config{
 		LndDir:            DefaultLndDir,

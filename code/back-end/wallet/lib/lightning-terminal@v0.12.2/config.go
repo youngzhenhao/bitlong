@@ -4,14 +4,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"net"
-	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
-	"time"
-
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/jessevdk/go-flags"
 	"github.com/lightninglabs/faraday"
@@ -33,7 +25,16 @@ import (
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/lightningnetwork/lnd/signal"
 	"github.com/mwitkow/go-conntrack/connhelpers"
+	"github.com/wallet/base"
 	"golang.org/x/crypto/acme/autocert"
+	"io/ioutil"
+	"net"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync"
+	"time"
 )
 
 const (
@@ -90,7 +91,9 @@ const (
 	defaultFirstLNCConnTimeout = 10 * time.Minute
 )
 
+/*
 var (
+
 	lndDefaultConfig     = lnd.DefaultConfig()
 	faradayDefaultConfig = faraday.DefaultConfig()
 	loopDefaultConfig    = loopd.DefaultConfig()
@@ -141,7 +144,110 @@ var (
 	DefaultMacaroonPath = filepath.Join(
 		DefaultLitDir, DefaultNetwork, DefaultMacaroonFilename,
 	)
+
 )
+*/
+
+var (
+	lndDefaultConfig         lnd.Config
+	faradayDefaultConfig     faraday.Config
+	loopDefaultConfig        loopd.Config
+	poolDefaultConfig        pool.Config
+	tapDefaultConfig         tapcfg.Config
+	defaultLitDir            string
+	defaultLitDirOnce        sync.Once
+	lndDefaultConfigOnce     sync.Once
+	faradayDefaultConfigOnce sync.Once
+	loopDefaultConfigOnce    sync.Once
+	poolDefaultConfigOnce    sync.Once
+	tapDefaultConfigOnce     sync.Once
+
+	// DefaultLitDir is the default directory where LiT tries to find its
+	// configuration file and store its data (in remote lnd node). This is a
+	// directory in the user's application data, for example:
+	//   C:\Users\<username>\AppData\Local\Lit on Windows
+	//   ~/.lit on Linux
+	//   ~/Library/Application Support/Lit on MacOS
+
+)
+
+func loadDefaultLitDir() {
+	defaultLitDirOnce.Do(func() {
+		defaultLitDir = btcutil.AppDataDir("lit", false)
+	})
+}
+func loadLndDefaultConfig() {
+	lndDefaultConfigOnce.Do(func() {
+		lnd.SetdefaultLndDir(base.GetFilePath())
+		lndDefaultConfig = lnd.DefaultConfig()
+	})
+}
+
+func loadFaradayDefaultConfig() {
+	faradayDefaultConfigOnce.Do(func() {
+		faraday.SetFaradayDirBase(base.GetFilePath())
+		faradayDefaultConfig = faraday.DefaultConfig()
+	})
+}
+
+func loadLoopDefaultConfig() {
+	loopDefaultConfigOnce.Do(func() {
+		loopd.SetLoopDirBase(base.GetFilePath())
+		loopDefaultConfig = loopd.DefaultConfig()
+	})
+}
+
+func loadPoolDefaultConfig() {
+	poolDefaultConfigOnce.Do(func() {
+		pool.SetDefaultBaseDir(base.GetFilePath())
+		poolDefaultConfig = pool.DefaultConfig()
+	})
+}
+
+func loadTapDefaultConfig() {
+	tapDefaultConfigOnce.Do(func() {
+		tapcfg.SetDefaultTapdDir(base.GetFilePath())
+		tapDefaultConfig = tapcfg.DefaultConfig()
+	})
+}
+
+func getDefaultTLSCertPath() string {
+	loadDefaultLitDir()
+	return filepath.Join(defaultLitDir, DefaultTLSCertFilename)
+}
+
+func getDefaultTLSKeyPath() string {
+	loadDefaultLitDir()
+	return filepath.Join(defaultLitDir, DefaultTLSKeyFilename)
+}
+
+func getDefaultConfigFile() string {
+	loadDefaultLitDir()
+	return filepath.Join(defaultLitDir, defaultConfigFilename)
+}
+
+func getDefaultLogDir() string {
+	loadDefaultLitDir()
+	return filepath.Join(defaultLitDir, defaultLogDirname)
+}
+
+func getDefaultLetsEncryptDir() string {
+	loadDefaultLitDir()
+	return filepath.Join(defaultLitDir, defaultLetsEncryptSubDir)
+}
+
+func getDefaultRemoteLndMacaroonPath() string {
+	loadLndDefaultConfig()
+	return filepath.Join(
+		lndDefaultConfig.DataDir, defaultLndChainSubDir,
+		defaultLndChain, DefaultNetwork, defaultLndMacaroon,
+	)
+}
+
+func getDefaultMacaroonPath() string {
+	loadDefaultLitDir()
+	return filepath.Join(defaultLitDir, DefaultNetwork, DefaultMacaroonFilename)
+}
 
 // Config is the main configuration struct of lightning-terminal. It contains
 // all config items of its enveloping subservers, each prefixed with their
@@ -265,18 +371,24 @@ func (c *Config) lndConnectParams() (string, lndclient.Network, string,
 
 // defaultConfig returns a configuration struct with all default values set.
 func defaultConfig() *Config {
+	loadLndDefaultConfig()
+	loadFaradayDefaultConfig()
+	loadLoopDefaultConfig()
+	loadPoolDefaultConfig()
+	loadTapDefaultConfig()
+	loadDefaultLitDir()
 	return &Config{
 		HTTPSListen: defaultHTTPSListen,
-		TLSCertPath: DefaultTLSCertPath,
-		TLSKeyPath:  defaultTLSKeyPath,
+		TLSCertPath: getDefaultTLSCertPath(),
+		TLSKeyPath:  getDefaultTLSKeyPath(),
 		Remote: &subservers.RemoteConfig{
 			LitDebugLevel:     defaultLogLevel,
-			LitLogDir:         defaultLogDir,
+			LitLogDir:         getDefaultLogDir(),
 			LitMaxLogFiles:    defaultMaxLogFiles,
 			LitMaxLogFileSize: defaultMaxLogFileSize,
 			Lnd: &subservers.RemoteDaemonConfig{
 				RPCServer:    defaultRemoteLndRpcServer,
-				MacaroonPath: DefaultRemoteLndMacaroonPath,
+				MacaroonPath: getDefaultRemoteLndMacaroonPath(),
 				TLSCertPath:  lndDefaultConfig.TLSCertPath,
 			},
 			Faraday: &subservers.RemoteDaemonConfig{
@@ -303,11 +415,11 @@ func defaultConfig() *Config {
 		Network:              DefaultNetwork,
 		LndMode:              DefaultLndMode,
 		Lnd:                  &lndDefaultConfig,
-		LitDir:               DefaultLitDir,
+		LitDir:               defaultLitDir,
 		LetsEncryptListen:    defaultLetsEncryptListen,
-		LetsEncryptDir:       defaultLetsEncryptDir,
-		MacaroonPath:         DefaultMacaroonPath,
-		ConfigFile:           defaultConfigFile,
+		LetsEncryptDir:       getDefaultLetsEncryptDir(),
+		MacaroonPath:         getDefaultMacaroonPath(),
+		ConfigFile:           getDefaultConfigFile(),
 		FaradayMode:          defaultFaradayMode,
 		Faraday:              &faradayDefaultConfig,
 		faradayRpcConfig:     &frdrpcserver.Config{},
@@ -398,8 +510,8 @@ func loadAndValidateConfig(interceptor signal.Interceptor) (*Config, error) {
 	// Validate the lightning-terminal config options.
 	litDir := lnd.CleanAndExpandPath(preCfg.LitDir)
 	cfg.LetsEncryptDir = lncfg.CleanAndExpandPath(cfg.LetsEncryptDir)
-	if litDir != DefaultLitDir {
-		if cfg.LetsEncryptDir == defaultLetsEncryptDir {
+	if litDir != defaultLitDir {
+		if cfg.LetsEncryptDir == getDefaultLetsEncryptDir() {
 			cfg.LetsEncryptDir = filepath.Join(
 				litDir, defaultLetsEncryptSubDir,
 			)
@@ -431,7 +543,7 @@ func loadAndValidateConfig(interceptor signal.Interceptor) (*Config, error) {
 		}
 	}
 
-	if cfg.MacaroonPath == DefaultMacaroonPath {
+	if cfg.MacaroonPath == getDefaultMacaroonPath() {
 		cfg.MacaroonPath = filepath.Join(
 			litDir, cfg.Network, DefaultMacaroonFilename,
 		)
@@ -555,8 +667,8 @@ func loadConfigFile(preCfg *Config, interceptor signal.Interceptor) (*Config,
 	// file within it.
 	litDir := lnd.CleanAndExpandPath(preCfg.LitDir)
 	configFilePath := lnd.CleanAndExpandPath(preCfg.ConfigFile)
-	if litDir != DefaultLitDir {
-		if configFilePath == defaultConfigFile {
+	if litDir != defaultLitDir {
+		if configFilePath == getDefaultConfigFile() {
 			configFilePath = filepath.Join(
 				litDir, defaultConfigFilename,
 			)
@@ -624,14 +736,14 @@ func loadConfigFile(preCfg *Config, interceptor signal.Interceptor) (*Config,
 
 	// If the provided lit directory is not the default, we'll modify the
 	// path to all of the files and directories that will live within it.
-	if litDir != DefaultLitDir {
-		if cfg.TLSKeyPath == defaultTLSKeyPath {
+	if litDir != defaultLitDir {
+		if cfg.TLSKeyPath == getDefaultTLSKeyPath() {
 			cfg.TLSKeyPath = filepath.Join(
 				litDir, DefaultTLSKeyFilename,
 			)
 		}
 
-		if cfg.TLSCertPath == DefaultTLSCertPath {
+		if cfg.TLSCertPath == getDefaultTLSCertPath() {
 			cfg.TLSCertPath = filepath.Join(
 				litDir, DefaultTLSCertFilename,
 			)
@@ -675,7 +787,7 @@ func validateRemoteModeConfig(cfg *Config) error {
 	// specify --network=testnet for example if everything else is using
 	// the defaults.
 	if cfg.Network != DefaultNetwork &&
-		r.Lnd.MacaroonPath == DefaultRemoteLndMacaroonPath {
+		r.Lnd.MacaroonPath == getDefaultRemoteLndMacaroonPath() {
 
 		r.Lnd.MacaroonPath = filepath.Join(
 			defaultLndCfg.DataDir, defaultLndChainSubDir,
@@ -687,8 +799,8 @@ func validateRemoteModeConfig(cfg *Config) error {
 	// If the provided lit directory is not the default, we'll modify the
 	// path to all of the files and directories that will live within it.
 	litDir := lnd.CleanAndExpandPath(cfg.LitDir)
-	if litDir != DefaultLitDir {
-		if r.LitLogDir == defaultLogDir {
+	if litDir != defaultLitDir {
+		if r.LitLogDir == getDefaultLogDir() {
 			r.LitLogDir = filepath.Join(
 				litDir, defaultLogDirname,
 			)
@@ -872,25 +984,51 @@ func buildTLSConfigForHttp2(config *Config) (*tls.Config, error) {
 	return tlsConfig, nil
 }
 
+func directoryExists(path string) (bool, error) {
+	fmt.Printf("path is %v\n", path)
+	info, err := os.Stat(path)
+	if err == nil {
+		// No error: something is at the path
+		return info.IsDir(), nil // Check if it is a directory
+	}
+	if os.IsNotExist(err) {
+		// Path does not exist
+		return false, nil
+	}
+	// Other error (e.g., permission denied)
+	return false, err
+}
+
 // makeDirectories creates the directory given and if necessary any parent
 // directories as well.
 func makeDirectories(fullDir string) error {
-	err := os.MkdirAll(fullDir, 0700)
+	exists, err := directoryExists(fullDir)
 	if err != nil {
+		fmt.Println("Error checking if directory exists:", err)
+		return nil
+	}
+	if exists {
+		fmt.Println("Directory exists:", fullDir)
+	} else {
+		fmt.Println("Directory does not exist:", fullDir)
+	}
+
+	err1 := os.MkdirAll(fullDir, 0755)
+	if err1 != nil {
 		// Show a nicer error message if it's because a symlink is
 		// linked to a directory that does not exist (probably because
 		// it's not mounted).
-		if e, ok := err.(*os.PathError); ok && os.IsExist(err) {
+		if e, ok := err1.(*os.PathError); ok && os.IsExist(err1) {
 			if link, lerr := os.Readlink(e.Path); lerr == nil {
 				str := "is symlink %s -> %s mounted?"
-				err = fmt.Errorf(str, e.Path, link)
+				err1 = fmt.Errorf(str, e.Path, link)
 			}
 		}
 
-		err := fmt.Errorf("failed to create directory %v: %v", fullDir,
-			err)
-		_, _ = fmt.Fprintln(os.Stderr, err)
-		return err
+		err1 := fmt.Errorf("failed to create directory %v: %v", fullDir,
+			err1)
+		_, _ = fmt.Fprintln(os.Stderr, err1)
+		return err1
 	}
 
 	return nil

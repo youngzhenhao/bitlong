@@ -315,10 +315,10 @@ func accountInfo(ctx *cli.Context) error {
 }
 
 var removeAccountCommand = cli.Command{
-	Name:      "remove",
-	ShortName: "r",
-	Usage:     "Remove an off-chain account from the database.",
-	ArgsUsage: "[id | label]",
+	Name:        "remove",
+	ShortName:   "r",
+	Usage:       "Remove an off-chain account from the database.",
+	ArgsUsage:   "[id | label]",
 	Description: "Removes an account entry from the account database.",
 	Flags: []cli.Flag{
 		cli.StringFlag{

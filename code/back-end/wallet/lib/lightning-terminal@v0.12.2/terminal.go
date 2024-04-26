@@ -91,7 +91,7 @@ var (
 	// root package, all assets will have a path prefix of /app/build/ which
 	// we'll strip by giving a sub directory to the HTTP server.
 	//
-	//go:embed app/build/*
+
 	appBuildFS embed.FS
 
 	// appFilesDir is the sub directory of the above build directory which

@@ -24,7 +24,7 @@ func CreateFile(dir, filename, content string) bool {
 	return true
 }
 
-// testCreateFile ONLY_FOR_TEST IN WINDOWS
+// testCreateFile TEST IN WINDOWS
 func testCreateFile() bool {
 	//folderPath := base.Configure("tapd")
 	return CreateFile("C:\\mySpace\\bitlong\\code\\back-end\\wallet\\base", "TESTWriteFile.txt", "TEST MESSAGE.")
@@ -39,7 +39,7 @@ func ReadFile(filePath string) string {
 	return string(content)
 }
 
-// testReadFile ONLY_FOR_TEST IN WINDOWS
+// testReadFile TEST IN WINDOWS
 func testReadFile() bool {
 	content := ReadFile("C:\\mySpace\\bitlong\\code\\back-end\\wallet\\config.txt")
 	if content == "" {
@@ -82,7 +82,7 @@ func CopyFile(srcPath, destPath string) bool {
 	return true
 }
 
-// testCopyFile ONLY_FOR_TEST IN WINDOWS
+// testCopyFile TEST IN WINDOWS
 func testCopyFile() bool {
 	return CopyFile("C:\\mySpace\\bitlong\\code\\back-end\\wallet\\config.txt", "C:\\mySpace\\bitlong\\code\\back-end\\wallet\\base\\config.txt")
 }
@@ -97,7 +97,7 @@ func DeleteFile(filePath string) bool {
 	return true
 }
 
-// testDeleteFile ONLY_FOR_TEST IN WINDOWS
+// testDeleteFile TEST IN WINDOWS
 func testDeleteFile() bool {
 	return DeleteFile("C:\\mySpace\\bitlong\\code\\back-end\\wallet\\base\\config.txt")
 }

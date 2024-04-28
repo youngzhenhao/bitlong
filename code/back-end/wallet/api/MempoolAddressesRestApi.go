@@ -74,9 +74,8 @@ type TransactionsSimplified struct {
 		ScriptpubkeyAddress string `json:"scriptpubkey_address"`
 		Value               int    `json:"value"`
 	} `json:"vout"`
-	Fee           int `json:"fee"`
 	BlockTime     int `json:"block_time"`
-	BalanceResult int `json:"result"`
+	BalanceResult int `json:"balance_result"`
 }
 
 func SimplifyTransactions(address string, responses *GetAddressTransactionsResponse) *[]TransactionsSimplified {
@@ -84,7 +83,6 @@ func SimplifyTransactions(address string, responses *GetAddressTransactionsRespo
 	for _, transaction := range *responses {
 		var simplifiedTx TransactionsSimplified
 		simplifiedTx.Txid = transaction.Txid
-		simplifiedTx.Fee = transaction.Fee
 		simplifiedTx.BlockTime = transaction.Status.BlockTime
 		for _, vin := range transaction.Vin {
 			simplifiedTx.Vin = append(simplifiedTx.Vin, struct {

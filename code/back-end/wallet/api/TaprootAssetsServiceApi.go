@@ -83,14 +83,6 @@ func ExportProof() {
 
 }
 
-func FetchAssetMeta(isHash bool, data string) string {
-	response, err := fetchAssetMeta(isHash, data)
-	if err != nil {
-		return MakeJsonResult(false, err.Error(), nil)
-	}
-	return MakeJsonResult(true, "", string(response.Data))
-}
-
 // GetInfoOfTap
 //
 //	@Description: GetInfo returns the information for the node.

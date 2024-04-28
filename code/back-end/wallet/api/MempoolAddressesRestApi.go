@@ -64,6 +64,58 @@ type GetAddressTransactionsResponse []struct {
 	} `json:"status"`
 }
 
+type TransactionsSimplified struct {
+	Txid string `json:"txid"`
+	Vin  []struct {
+		ScriptpubkeyAddress string `json:"scriptpubkey_address"`
+		Value               int    `json:"value"`
+	} `json:"vin"`
+	Vout []struct {
+		ScriptpubkeyAddress string `json:"scriptpubkey_address"`
+		Value               int    `json:"value"`
+	} `json:"vout"`
+	Fee           int `json:"fee"`
+	BlockTime     int `json:"block_time"`
+	BalanceResult int `json:"result"`
+}
+
+func SimplifyTransactions(address string, responses *GetAddressTransactionsResponse) *[]TransactionsSimplified {
+	var simplified []TransactionsSimplified
+	for _, transaction := range *responses {
+		var simplifiedTx TransactionsSimplified
+		simplifiedTx.Txid = transaction.Txid
+		simplifiedTx.Fee = transaction.Fee
+		simplifiedTx.BlockTime = transaction.Status.BlockTime
+		for _, vin := range transaction.Vin {
+			simplifiedTx.Vin = append(simplifiedTx.Vin, struct {
+				ScriptpubkeyAddress string `json:"scriptpubkey_address"`
+				Value               int    `json:"value"`
+			}{
+				ScriptpubkeyAddress: vin.Prevout.ScriptpubkeyAddress,
+				Value:               vin.Prevout.Value,
+			})
+			if vin.Prevout.ScriptpubkeyAddress == address {
+				simplifiedTx.BalanceResult -= vin.Prevout.Value
+			}
+		}
+		for _, vout := range transaction.Vout {
+			simplifiedTx.Vout = append(simplifiedTx.Vout, struct {
+				ScriptpubkeyAddress string `json:"scriptpubkey_address"`
+				Value               int    `json:"value"`
+			}{
+				ScriptpubkeyAddress: vout.ScriptpubkeyAddress,
+				Value:               vout.Value,
+			})
+			if vout.ScriptpubkeyAddress == address {
+				simplifiedTx.BalanceResult += vout.Value
+			}
+
+		}
+		simplified = append(simplified, simplifiedTx)
+	}
+	return &simplified
+}
+
 // GetAddressInfoByMempool
 // @Description: Get address info by mempool api
 // @param address
@@ -101,7 +153,8 @@ func GetAddressTransactionsByMempool(address string) string {
 		fmt.Printf("%s GATBM json.Unmarshal :%v\n", GetTimeNow(), err)
 		return MakeJsonResult(false, "Unmarshal response body fail.", "")
 	}
-	return MakeJsonResult(true, "", getAddressTransactionsResponse)
+	transactions := SimplifyTransactions(address, &getAddressTransactionsResponse)
+	return MakeJsonResult(true, "", transactions)
 }
 
 func GetAddressTransactionsChainByMempool() {}

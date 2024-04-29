@@ -237,6 +237,23 @@ func (m *Meta) SaveImage(dir string, name string) bool {
 	return true
 }
 
+func (m *Meta) GetImage() []byte {
+	if m.Image_Data == "" {
+		return nil
+	}
+	dataUrl, err := dataurl.DecodeString(m.Image_Data)
+	if err != nil {
+		return nil
+	}
+	ContentType := dataUrl.MediaType.ContentType()
+	datatype := strings.Split(ContentType, "/")
+	if datatype[0] != "image" {
+		fmt.Println("is not image dataurl")
+		return nil
+	}
+	return dataUrl.Data
+}
+
 func (m *Meta) FetchAssetMeta(isHash bool, data string) string {
 	response, err := fetchAssetMeta(isHash, data)
 	if err != nil {

@@ -38,6 +38,7 @@ func MakeJsonResult_ONLY_FOR_TEST(success bool, error string, data string) strin
 	_ = json.Indent(&restr, []byte(jstr), "", "\t")
 	return restr.String()
 }
+
 func Base64Decode(s string) string {
 	byte1, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {

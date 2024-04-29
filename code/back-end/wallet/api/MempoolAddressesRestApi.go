@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 )
 
 type GetAddressResponse struct {
@@ -74,8 +75,11 @@ type TransactionsSimplified struct {
 		ScriptpubkeyAddress string `json:"scriptpubkey_address"`
 		Value               int    `json:"value"`
 	} `json:"vout"`
-	BlockTime     int `json:"block_time"`
-	BalanceResult int `json:"balance_result"`
+	BlockTime       int     `json:"block_time"`
+	BalanceResult   int     `json:"balance_result"`
+	FeeRate         float64 `json:"fee_rate"`
+	Fee             int     `json:"fee"`
+	ConfirmedBlocks int     `json:"confirmed_blocks"`
 }
 
 func SimplifyTransactions(address string, responses *GetAddressTransactionsResponse) *[]TransactionsSimplified {
@@ -84,6 +88,16 @@ func SimplifyTransactions(address string, responses *GetAddressTransactionsRespo
 		var simplifiedTx TransactionsSimplified
 		simplifiedTx.Txid = transaction.Txid
 		simplifiedTx.BlockTime = transaction.Status.BlockTime
+		feeRate, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(transaction.Fee)/(float64(transaction.Weight)/4)), 64)
+		simplifiedTx.FeeRate = feeRate
+		simplifiedTx.Fee = transaction.Fee
+		blockHeight := BlockTipHeight()
+		if blockHeight == 0 {
+			fmt.Println("block height is zero")
+			simplifiedTx.ConfirmedBlocks = 0
+		} else {
+			simplifiedTx.ConfirmedBlocks = BlockTipHeight() - transaction.Status.BlockHeight
+		}
 		for _, vin := range transaction.Vin {
 			simplifiedTx.Vin = append(simplifiedTx.Vin, struct {
 				ScriptpubkeyAddress string `json:"scriptpubkey_address"`

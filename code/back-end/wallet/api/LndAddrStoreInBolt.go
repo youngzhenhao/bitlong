@@ -10,9 +10,12 @@ import (
 )
 
 type Addr struct {
-	Address string `json:"address"`
-	Balance int    `json:"balance"`
-	Type    string `json:"type"`
+	Name           string `json:"name"`
+	Address        string `json:"address"`
+	Balance        int    `json:"balance"`
+	AddressType    string `json:"address_type"`
+	DerivationPath string `json:"derivation_path"`
+	IsInternal     bool   `json:"is_internal"`
 }
 
 type AddrStore struct {
@@ -20,7 +23,7 @@ type AddrStore struct {
 }
 
 func InitAddrDB() error {
-	_, err := createBucketInAddrDB(filepath.Join(base.QueryConfigByKey("dirpath"), "addr.db"), "addresses")
+	_, err := createBucketInAddrDB(filepath.Join(base.QueryConfigByKey("dirpath"), "phone.db"), "addresses")
 	return err
 }
 

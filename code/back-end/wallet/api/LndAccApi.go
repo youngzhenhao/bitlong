@@ -38,6 +38,8 @@ func GetAllAccounts() []Account {
 	return accs
 }
 
+// AddressTypeToDerivationPath
+// @dev: NOT STANDARD RESULT RETURN
 func AddressTypeToDerivationPath(addressType string) string {
 	accs := GetAllAccounts()
 	addressType = strings.ToUpper(addressType)

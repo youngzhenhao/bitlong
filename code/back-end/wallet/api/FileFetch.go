@@ -1,16 +1,25 @@
 package api
 
-import "github.com/wallet/base"
+import (
+	"fmt"
+	"github.com/wallet/base"
+)
 
 func SetPath(path string) {
-	base.SetFilePath(path)
+	err := base.SetFilePath(path)
+	if err != nil {
+		fmt.Println("set file path error. ", err)
+		return
+	}
 }
 func GetPath() string {
 	return base.GetFilePath()
 }
+
 func FileTestConfig() bool {
 	return base.FileConfig(GetPath())
 }
+
 func ReadConfigFile() {
 	base.ReadConfig(GetPath())
 }

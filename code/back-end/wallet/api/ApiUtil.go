@@ -3,9 +3,16 @@ package api
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
+	"github.com/joho/godotenv"
+	"google.golang.org/grpc/credentials"
+	"log"
 	"math"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -75,4 +82,39 @@ func GetTimeSuffixString() string {
 func RoundToDecimalPlace(number float64, places int) float64 {
 	shift := math.Pow(10, float64(places))
 	return math.Round(number*shift) / shift
+}
+
+func NewTlsCert(tlsCertPath string) credentials.TransportCredentials {
+	cert, err := os.ReadFile(tlsCertPath)
+	if err != nil {
+		log.Fatalf("Failed to read cert file: %s", err)
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(cert) {
+		log.Fatalf("Failed to append cert")
+	}
+	config := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    certPool,
+	}
+	creds := credentials.NewTLS(config)
+	return creds
+}
+
+func GetMacaroon(macaroonPath string) string {
+	macaroonBytes, err := os.ReadFile(macaroonPath)
+	if err != nil {
+		panic(err)
+	}
+	macaroon := hex.EncodeToString(macaroonBytes)
+	return macaroon
+}
+
+func GetEnv(key string, filename ...string) string {
+	err := godotenv.Load(filename...)
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+	value := os.Getenv(key)
+	return value
 }

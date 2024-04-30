@@ -119,7 +119,6 @@ func SimplifyTransactions(address string, responses *GetAddressTransactionsRespo
 			if vout.ScriptpubkeyAddress == address {
 				simplifiedTx.BalanceResult += vout.Value
 			}
-
 		}
 		simplified = append(simplified, simplifiedTx)
 	}

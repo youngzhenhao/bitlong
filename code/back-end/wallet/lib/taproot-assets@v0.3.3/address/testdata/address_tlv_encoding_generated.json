@@ -1,0 +1,133 @@
+{
+  "valid_test_cases": [
+    {
+      "address": {
+        "version": 0,
+        "chain_params_hrp": "taprt",
+        "asset_version": 0,
+        "asset_id": "7a3811630bb33503c6536c3a223d3caecb93fe55f4b3439528edf27b10d38e93",
+        "group_key": "",
+        "script_key": "02a0afeb165f0ec36880b68e0baabd9ad9c62fd1a69aa998bc30e9a346202e078f",
+        "internal_key": "02a0afeb165f0ec36880b68e0baabd9ad9c62fd1a69aa998bc30e9a346202e078f",
+        "tapscript_sibling": "",
+        "amount": 5577006791947779410,
+        "proof_courier_addr": "hashmail://rand.hashmail.proof.courier:443"
+      },
+      "expected": "taprt1qqqsqqspqqzzq73cz93shve4q0r9xmp6yg7netktj0l9ta9ngw2j3m0j0vgd8r5nqcss9g90avt97rkrdzqtdrst427e4kwx9lg6dx4fnz7rp6drgcszupu0pqss9g90avt97rkrdzqtdrst427e4kwx9lg6dx4fnz7rp6drgcszupu0pgyl7nt9sgss0l8a2gxz56rpwd5x6ctfdsaz7tmjv9hxgtngv9eksmtpd9kzuurjdahkvtnrda6hy6t9wgargdpn5zn5dz",
+      "comment": "valid regtest address"
+    },
+    {
+      "address": {
+        "version": 0,
+        "chain_params_hrp": "tapsb",
+        "asset_version": 0,
+        "asset_id": "8acb5154261425dd613fda19dee00a51e95c6921df8af4085bc468706b946fec",
+        "group_key": "",
+        "script_key": "02a0afeb165f0ec36880b68e0baabd9ad9c62fd1a69aa998bc30e9a346202e078f",
+        "internal_key": "02a0afeb165f0ec36880b68e0baabd9ad9c62fd1a69aa998bc30e9a346202e078f",
+        "tapscript_sibling": "",
+        "amount": 3510942875414458836,
+        "proof_courier_addr": "hashmail://rand.hashmail.proof.courier:443"
+      },
+      "expected": "tapsb1qqqsqqspqqzzpzkt292zv9p9m4snlksemmsq550ft35jrhu27sy9h3rgwp4egmlvqcss9g90avt97rkrdzqtdrst427e4kwx9lg6dx4fnz7rp6drgcszupu0pqss9g90avt97rkrdzqtdrst427e4kwx9lg6dx4fnz7rp6drgcszupu0pgyl7v9etlcc83r36sxz56rpwd5x6ctfdsaz7tmjv9hxgtngv9eksmtpd9kzuurjdahkvtnrda6hy6t9wgargdpnrzxc4w",
+      "comment": "valid simnet address"
+    },
+    {
+      "address": {
+        "version": 0,
+        "chain_params_hrp": "taptb",
+        "asset_version": 0,
+        "asset_id": "60459cbb4d4e6a78b8c58545f2fe026ad217bf0fafeed5ff5e3b3379c658ddf3",
+        "group_key": "",
+        "script_key": "02a0afeb165f0ec36880b68e0baabd9ad9c62fd1a69aa998bc30e9a346202e078f",
+        "internal_key": "02a0afeb165f0ec36880b68e0baabd9ad9c62fd1a69aa998bc30e9a346202e078f",
+        "tapscript_sibling": "",
+        "amount": 2740103009342231109,
+        "proof_courier_addr": "hashmail://rand.hashmail.proof.courier:443"
+      },
+      "expected": "taptb1qqqsqqspqqzzqcz9nja56nn20zuvtp297tlqy6kjz7lsltlw6hl4uwen08r93h0nqcss9g90avt97rkrdzqtdrst427e4kwx9lg6dx4fnz7rp6drgcszupu0pqss9g90avt97rkrdzqtdrst427e4kwx9lg6dx4fnz7rp6drgcszupu0pgyl7fsxe544055jg5xz56rpwd5x6ctfdsaz7tmjv9hxgtngv9eksmtpd9kzuurjdahkvtnrda6hy6t9wgargdpny8e5zg",
+      "comment": "valid testnet address"
+    },
+    {
+      "address": {
+        "version": 0,
+        "chain_params_hrp": "tapbc",
+        "asset_version": 0,
+        "asset_id": "f2c70e1261b761f098499918acf6ccf18d7d9cf7cd6be0c940630f0643ab832c",
+        "group_key": "",
+        "script_key": "02a0afeb165f0ec36880b68e0baabd9ad9c62fd1a69aa998bc30e9a346202e078f",
+        "internal_key": "02a0afeb165f0ec36880b68e0baabd9ad9c62fd1a69aa998bc30e9a346202e078f",
+        "tapscript_sibling": "",
+        "amount": 545291762129038907,
+        "proof_courier_addr": "hashmail://rand.hashmail.proof.courier:443"
+      },
+      "expected": "tapbc1qqqsqqspqqzzpuk8pcfxrdmp7zvynxgc4nmveuvd0kw00nttury5qcc0qep6hqevqcss9g90avt97rkrdzqtdrst427e4kwx9lg6dx4fnz7rp6drgcszupu0pqss9g90avt97rkrdzqtdrst427e4kwx9lg6dx4fnz7rp6drgcszupu0pgyl7pu3g0mlff0w8vxz56rpwd5x6ctfdsaz7tmjv9hxgtngv9eksmtpd9kzuurjdahkvtnrda6hy6t9wgargdpnlhg0u8",
+      "comment": "valid mainnet address"
+    },
+    {
+      "address": {
+        "version": 0,
+        "chain_params_hrp": "tapbc",
+        "asset_version": 1,
+        "asset_id": "6cc0ce0688a60e2872f5db536fa1ef3a784a2e4f1e06f223c23cbbd9dbdb6e38",
+        "group_key": "",
+        "script_key": "02a0afeb165f0ec36880b68e0baabd9ad9c62fd1a69aa998bc30e9a346202e078f",
+        "internal_key": "02a0afeb165f0ec36880b68e0baabd9ad9c62fd1a69aa998bc30e9a346202e078f",
+        "tapscript_sibling": "",
+        "amount": 3337066551442961397,
+        "proof_courier_addr": "hashmail://rand.hashmail.proof.courier:443"
+      },
+      "expected": "tapbc1qqqsqqspqyzzqmxqecrg3fsw9pe0tk6nd7s77wncfghy78sx7g3uy09mm8dakm3cqcss9g90avt97rkrdzqtdrst427e4kwx9lg6dx4fnz7rp6drgcszupu0pqss9g90avt97rkrdzqtdrst427e4kwx9lg6dx4fnz7rp6drgcszupu0pgyl7tj053v3dxrn75xz56rpwd5x6ctfdsaz7tmjv9hxgtngv9eksmtpd9kzuurjdahkvtnrda6hy6t9wgargdpn0mcj0c",
+      "comment": "valid addr, v1 asset version"
+    },
+    {
+      "address": {
+        "version": 0,
+        "chain_params_hrp": "taptb",
+        "asset_version": 0,
+        "asset_id": "e2a4eef388dbb22a8e5af46451ef3e719de83cc25f8a66220e2fc1ed8851e6a8",
+        "group_key": "028c7d6b5a5b992e2a4bc0dca03095dafa69ad197914acb8feea0bc39e4aedd980",
+        "script_key": "02a0afeb165f0ec36880b68e0baabd9ad9c62fd1a69aa998bc30e9a346202e078f",
+        "internal_key": "02a0afeb165f0ec36880b68e0baabd9ad9c62fd1a69aa998bc30e9a346202e078f",
+        "tapscript_sibling": "",
+        "amount": 1,
+        "proof_courier_addr": "hashmail://rand.hashmail.proof.courier:443"
+      },
+      "expected": "taptb1qqqsqqspqqzzpc4yamec3kaj92894ary28hnuuvaaq7vyhu2vc3qut7paky9re4gq5ss9rraddd9hxfw9f9uph9qxz2a47nf45vhj99vhrlw5z7rne9wmkvqqcss9g90avt97rkrdzqtdrst427e4kwx9lg6dx4fnz7rp6drgcszupu0pqss9g90avt97rkrdzqtdrst427e4kwx9lg6dx4fnz7rp6drgcszupu0pgqszrp2dpshx6rdv95kcw309aexzmny9e5xzumgd4skjmpwwpex7mmx9e3k7atjd9jhyw35xsesxfm2ej",
+      "comment": "signet group collectible"
+    },
+    {
+      "address": {
+        "version": 0,
+        "chain_params_hrp": "tapsb",
+        "asset_version": 0,
+        "asset_id": "9386c85c765757c7727d6f0a3a6e2266017465f175ed9820006e11837b1acbd6",
+        "group_key": "",
+        "script_key": "02a0afeb165f0ec36880b68e0baabd9ad9c62fd1a69aa998bc30e9a346202e078f",
+        "internal_key": "02a0afeb165f0ec36880b68e0baabd9ad9c62fd1a69aa998bc30e9a346202e078f",
+        "tapscript_sibling": "",
+        "amount": 1,
+        "proof_courier_addr": "hashmail://rand.hashmail.proof.courier:443"
+      },
+      "expected": "tapsb1qqqsqqspqqzzpyuxepw8v46hcae86mc28fhzyespw3jlza0dnqsqqms3sda34j7kqcss9g90avt97rkrdzqtdrst427e4kwx9lg6dx4fnz7rp6drgcszupu0pqss9g90avt97rkrdzqtdrst427e4kwx9lg6dx4fnz7rp6drgcszupu0pgqszrp2dpshx6rdv95kcw309aexzmny9e5xzumgd4skjmpwwpex7mmx9e3k7atjd9jhyw35xses4nwf8t",
+      "comment": "simnet collectible"
+    },
+    {
+      "address": {
+        "version": 0,
+        "chain_params_hrp": "tapsb",
+        "asset_version": 0,
+        "asset_id": "71238f81a7a515a52976c7ec1911a1ccc9eaabfb6349591ca6f1b9c64256d27d",
+        "group_key": "",
+        "script_key": "02a0afeb165f0ec36880b68e0baabd9ad9c62fd1a69aa998bc30e9a346202e078f",
+        "internal_key": "02a0afeb165f0ec36880b68e0baabd9ad9c62fd1a69aa998bc30e9a346202e078f",
+        "tapscript_sibling": "00c0126e6f7420612076616c696420736372697074",
+        "amount": 1,
+        "proof_courier_addr": "hashmail://rand.hashmail.proof.courier:443"
+      },
+      "expected": "tapsb1qqqsqqspqqzzqufr37q60fg4555hd3lvryg6rnxfa24lkc6ftyw2dudecep9d5naqcss9g90avt97rkrdzqtdrst427e4kwx9lg6dx4fnz7rp6drgcszupu0pqss9g90avt97rkrdzqtdrst427e4kwx9lg6dx4fnz7rp6drgcszupu0py2spsqjdehhggrpypmxzmrfvss8xcmjd9c8gzspqyxz56rpwd5x6ctfdsaz7tmjv9hxgtngv9eksmtpd9kzuurjdahkvtnrda6hy6t9wgargdpn4cr6tj",
+      "comment": "simnet collectible with sibling"
+    }
+  ],
+  "error_test_cases": null
+}

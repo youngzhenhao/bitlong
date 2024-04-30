@@ -139,22 +139,16 @@ func ListBatches() string {
 //	return mintAsset(false, false, name, assetMetaData, false, amount, false, false, "", "", false)
 //}
 
-func MintAsset(name string, assetTypeIsCollectible bool, assetMetaData *Meta, amount int, newGroupedAsset bool) string {
-	Metastr := assetMetaData.ToJsonStr()
-	return mintAsset(false, assetTypeIsCollectible, name, Metastr, false, amount, newGroupedAsset, false, "", "", false)
+func MintAsset(name string, assetTypeIsCollectible bool, assetMetaData string, amount int, newGroupedAsset bool) string {
+	return mintAsset(false, assetTypeIsCollectible, name, assetMetaData, false, amount, newGroupedAsset, false, "", "", false)
 }
 
-func AddGroupAsset(name string, assetTypeIsCollectible bool, assetMetaData *Meta, amount int, groupKey string) string {
-	Metastr := assetMetaData.ToJsonStr()
-	return mintAsset(false, assetTypeIsCollectible, name, Metastr, false, amount, false, true, groupKey, "", false)
+func AddGroupAsset(name string, assetTypeIsCollectible bool, assetMetaData string, amount int, groupKey string) string {
+	return mintAsset(false, assetTypeIsCollectible, name, assetMetaData, false, amount, false, true, groupKey, "", false)
 
 }
 
-type Asset struct {
-	Meta *Meta `json:"meta"`
-}
-
-type Meta struct {
+type NewMeta struct {
 	Acronym     string `json:"acronym,omitempty"`
 	Description string `json:"description,omitempty"`
 	Image_Data  string `json:"image_data,omitempty"`
@@ -163,65 +157,54 @@ type Meta struct {
 const (
 	OPEN_IMAGE_FILE_ERROR  = "OPEN_IMAGE_FILE_ERROR"
 	WRITE_IMAGE_FILE_ERROR = "WRITE_IMAGE_FILE_ERROR"
-	DATA_ILLEGAL           = "DATA_ILLEGAL "
+	Data_not_urldata       = "Data_not_urldata"
 	DATA_NOT_IMAGE         = "DATA_NOT_IMAGE"
 )
 
-func NewMeta(description string) *Meta {
-	meta := Meta{
+func CreateNewMeta(acronym string, description string, imagefile string) string {
+	meta := NewMeta{
+		Acronym:     acronym,
 		Description: description,
 	}
-	return &meta
-}
-
-func (m *Meta) LoadImage(file string) (bool, error) {
-	if file != "" {
-		image, err := os.ReadFile(file)
+	if imagefile != "" {
+		image, err := os.ReadFile(imagefile)
 		if err != nil {
 			fmt.Println("open image file is error:", err)
-			return false, err
+			return OPEN_IMAGE_FILE_ERROR
 		}
 		imageStr := dataurl.EncodeBytes(image)
-		m.Image_Data = imageStr
+		meta.Image_Data = imageStr
 	}
-	return true, nil
-}
-
-func (m *Meta) ToJsonStr() string {
-	metastr, _ := json.Marshal(m)
+	metastr, _ := json.Marshal(meta)
 	return string(metastr)
 }
 
-func (m *Meta) GetMetaFromStr(metaStr string) {
-	if metaStr == "" {
-		m.Description = "This asset has no meta."
-	}
-	err := json.Unmarshal([]byte(metaStr), m)
+func CheckMetaStandard(Meta string) bool {
+	temp := &NewMeta{}
+	err := json.Unmarshal([]byte(Meta), temp)
 	if err != nil {
-		m.Description = metaStr
+		return false
 	}
+	return true
 }
 
-func (m *Meta) SaveImage(dir string, name string) bool {
-	if m.Image_Data == "" {
-		return false
-	}
-	dataUrl, err := dataurl.DecodeString(m.Image_Data)
+func DecodeBase64ForImage(image string, dir string, name string) string {
+	dataUrl, err := dataurl.DecodeString(image)
 	if err != nil {
-		return false
+		return Data_not_urldata
 	}
 	ContentType := dataUrl.MediaType.ContentType()
 	datatype := strings.Split(ContentType, "/")
 	if datatype[0] != "image" {
 		fmt.Println("is not image dataurl")
-		return false
+		return DATA_NOT_IMAGE
 	}
 	formatName := strings.Split(name, ".")
 	file := filepath.Join(dir, formatName[0]+"."+datatype[1])
 	f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		fmt.Println("create new image error:", err)
-		return false
+		return OPEN_IMAGE_FILE_ERROR
 	}
 	defer func(f *os.File) {
 		err := f.Close()
@@ -232,19 +215,9 @@ func (m *Meta) SaveImage(dir string, name string) bool {
 	_, err = f.Write(dataUrl.Data)
 	if err != nil {
 		fmt.Println("Write data fail:", err)
-		return false
+		return WRITE_IMAGE_FILE_ERROR
 	}
-	return true
-}
-
-func (m *Meta) FetchAssetMeta(isHash bool, data string) string {
-	response, err := fetchAssetMeta(isHash, data)
-	if err != nil {
-		return MakeJsonResult(false, err.Error(), nil)
-	}
-	fmt.Println(response.Data)
-	m.GetMetaFromStr(string(response.Data))
-	return MakeJsonResult(true, "", nil)
+	return file
 }
 
 // finalizeBatch

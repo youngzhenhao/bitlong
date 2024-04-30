@@ -1,9 +1,6 @@
 package api
 
-import (
-	"fmt"
-	"strings"
-)
+import "fmt"
 
 type Account struct {
 	Name              string `json:"name"`
@@ -40,7 +37,6 @@ func GetAllAccounts() []Account {
 
 func GetPathByAddressType(addressType string) string {
 	accs := GetAllAccounts()
-	addressType = strings.ToUpper(addressType)
 	if addressType == "NESTED_PUBKEY_HASH" {
 		addressType = "HYBRID_NESTED_WITNESS_PUBKEY_HASH"
 	}

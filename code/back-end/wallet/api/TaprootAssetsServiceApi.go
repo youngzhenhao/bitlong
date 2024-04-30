@@ -83,6 +83,14 @@ func ExportProof() {
 
 }
 
+func FetchAssetMeta(isHash bool, data string) string {
+	response, err := fetchAssetMeta(isHash, data)
+	if err != nil {
+		return MakeJsonResult(false, err.Error(), nil)
+	}
+	return MakeJsonResult(true, "", string(response.Data))
+}
+
 // GetInfoOfTap
 //
 //	@Description: GetInfo returns the information for the node.
@@ -201,7 +209,7 @@ func FindAssetByAssetName(assetName string) string {
 	if err != nil {
 		return MakeJsonResult(false, err.Error(), nil)
 	}
-	if !response.Success {
+	if response.Success == false {
 		return MakeJsonResult(false, response.Error, nil)
 	}
 	var assets []*taprpc.Asset

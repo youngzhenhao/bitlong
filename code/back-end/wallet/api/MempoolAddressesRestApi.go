@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
 )
 
 type GetAddressResponse struct {
@@ -88,8 +87,7 @@ func SimplifyTransactions(address string, responses *GetAddressTransactionsRespo
 		var simplifiedTx TransactionsSimplified
 		simplifiedTx.Txid = transaction.Txid
 		simplifiedTx.BlockTime = transaction.Status.BlockTime
-		feeRate, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(transaction.Fee)/(float64(transaction.Weight)/4)), 64)
-		simplifiedTx.FeeRate = feeRate
+		simplifiedTx.FeeRate = RoundToDecimalPlace(float64(transaction.Fee)/(float64(transaction.Weight)/4), 2)
 		simplifiedTx.Fee = transaction.Fee
 		blockHeight := BlockTipHeight()
 		if blockHeight == 0 {

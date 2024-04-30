@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -69,4 +70,9 @@ func GetTimeNow() string {
 
 func GetTimeSuffixString() string {
 	return time.Now().Format("20060102150405")
+}
+
+func RoundToDecimalPlace(number float64, places int) float64 {
+	shift := math.Pow(10, float64(places))
+	return math.Round(number*shift) / shift
 }

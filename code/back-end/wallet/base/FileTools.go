@@ -76,6 +76,9 @@ func Configure(appName string) string {
 }
 func QueryConfigByKey(key string) (value string) {
 	pathStr := GetFilePath()
+	if pathStr == "" {
+		return ""
+	}
 	filePath := "config.txt"
 	complexFolderPath := pathStr + string(os.PathSeparator) + filePath
 	fmt.Printf("read file path is :%v and key is %s\n", complexFolderPath, key)

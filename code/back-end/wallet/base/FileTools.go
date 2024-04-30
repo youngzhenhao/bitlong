@@ -55,21 +55,34 @@ func ReadConfigFile(path string) map[string]string {
 const (
 	PATH                    = "/data/data/io.bitlong/files/NewFolderBit/config.txt"
 	PATH1                   = "D:\\share\\bitlong\\code\\back-end\\wallet\\config\\config.txt"
-	PATH2                   = "D:\\share\\bitlong\\code\\back-end\\wallet\\config\\regconf.txt"
+	PATH2                   = "D:\\share\\bitlong\\code\\back-end\\wallet\\config"
 	PATH3                   = "/home/en"
 	ONLY_FOR_TEST_LOCALPATH = "C:\\mySpace\\bitlong\\code\\back-end\\wallet\\config\\config.txt"
 )
-const CONFIG_FILE = PATH
 
 func Configure(appName string) string {
-	fileConfig := ReadConfigFile(CONFIG_FILE)
+	pathStr := GetFilePath()
+	if pathStr == "" {
+		return ""
+	}
+	filePath := "config.txt"
+	complexFolderPath := pathStr + string(os.PathSeparator) + filePath
+	fmt.Printf("read file path is :%v and appName is %s\n", complexFolderPath, appName)
+	fileConfig := ReadConfigFile(complexFolderPath)
 	dirPath := fileConfig["dirpath"]
+	fmt.Printf("read dirpath is :%v\n", dirPath)
 	folderPath := filepath.Join(dirPath, "."+appName)
 	return folderPath
 }
-
 func QueryConfigByKey(key string) (value string) {
-	fileConfig := ReadConfigFile(CONFIG_FILE)
+	pathStr := GetFilePath()
+	if pathStr == "" {
+		return ""
+	}
+	filePath := "config.txt"
+	complexFolderPath := pathStr + string(os.PathSeparator) + filePath
+	fmt.Printf("read file path is :%v and key is %s\n", complexFolderPath, key)
+	fileConfig := ReadConfigFile(complexFolderPath)
 	value = fileConfig[key]
 	return
 }

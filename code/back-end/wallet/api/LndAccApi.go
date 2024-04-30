@@ -57,7 +57,6 @@ func AddressTypeToDerivationPath(addressType string) string {
 
 func GetPathByAddressType(addressType string) string {
 	accs := GetAllAccounts()
-	addressType = strings.ToUpper(addressType)
 	if addressType == "NESTED_PUBKEY_HASH" {
 		addressType = "HYBRID_NESTED_WITNESS_PUBKEY_HASH"
 	}

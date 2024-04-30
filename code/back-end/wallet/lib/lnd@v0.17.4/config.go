@@ -531,6 +531,29 @@ type GRPCConfig struct {
 // DefaultConfig returns all default values for the Config struct.
 //
 //nolint:lll
+func SetdefaultLndDir(defaultLndDir string) {
+	fmt.Println("defaultLndDir is %v", defaultLndDir)
+
+	DefaultLndDir = btcutil.AppDataDir("lnd", false)
+	fmt.Printf("defaultLndDir is: %v\n", defaultLndDir)
+	DefaultConfigFile = filepath.Join(DefaultLndDir, lncfg.DefaultConfigFilename)
+	defaultDataDir = filepath.Join(DefaultLndDir, defaultDataDirname)
+	fmt.Printf("defaultDataDir is: %v\n", defaultDataDir)
+	defaultLogDir = filepath.Join(DefaultLndDir, defaultLogDirname)
+	defaultTowerDir = filepath.Join(defaultDataDir, defaultTowerSubDirname)
+	defaultTLSCertPath = filepath.Join(DefaultLndDir, defaultTLSCertFilename)
+	fmt.Printf("defaultTLSCertPath is: %v\n", defaultTLSCertPath)
+	defaultTLSKeyPath = filepath.Join(DefaultLndDir, defaultTLSKeyFilename)
+	fmt.Printf("defaultTLSKeyPath is: %v\n", defaultTLSKeyPath)
+	defaultLetsEncryptDir = filepath.Join(DefaultLndDir, defaultLetsEncryptDirname)
+	fmt.Printf("defaultLetsEncryptDir is: %v\n", defaultLetsEncryptDir)
+	defaultBtcdDir = btcutil.AppDataDir("btcd", false)
+	defaultBtcdRPCCertFile = filepath.Join(defaultBtcdDir, "rpc.cert")
+	defaultLtcdDir = btcutil.AppDataDir("ltcd", false)
+	defaultLtcdRPCCertFile = filepath.Join(defaultLtcdDir, "rpc.cert")
+	defaultBitcoindDir = btcutil.AppDataDir("bitcoin", false)
+	defaultLitecoindDir = btcutil.AppDataDir("litecoin", false)
+}
 func DefaultConfig() Config {
 	return Config{
 		LndDir:            DefaultLndDir,

@@ -52,14 +52,6 @@ func ReadConfigFile(path string) map[string]string {
 
 }
 
-const (
-	PATH                    = "/data/data/io.bitlong/files/NewFolderBit/config.txt"
-	PATH1                   = "D:\\share\\bitlong\\code\\back-end\\wallet\\config\\config.txt"
-	PATH2                   = "D:\\share\\bitlong\\code\\back-end\\wallet\\config"
-	PATH3                   = "/home/en"
-	ONLY_FOR_TEST_LOCALPATH = "C:\\mySpace\\bitlong\\code\\back-end\\wallet\\config\\config.txt"
-)
-
 func Configure(appName string) string {
 	pathStr := GetFilePath()
 	if pathStr == "" {
@@ -74,6 +66,7 @@ func Configure(appName string) string {
 	folderPath := filepath.Join(dirPath, "."+appName)
 	return folderPath
 }
+
 func QueryConfigByKey(key string) (value string) {
 	pathStr := GetFilePath()
 	if pathStr == "" {

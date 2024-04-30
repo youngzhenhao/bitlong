@@ -1,5 +1,5 @@
 package api
 
-func GetMempoolBlocksFees() {}
+func GetMempoolBlocksFeesByMempool() {}
 
-func GetRecommendedFees() {}
+func GetRecommendedFeesByMempool() {}

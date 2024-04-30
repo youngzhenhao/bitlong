@@ -1,11 +1,11 @@
 package api
 
-func GetMempool() {}
+func GetMempoolByMempool() {}
 
-func GetMempoolTransactionIDs() {}
+func GetMempoolTransactionIDsByMempool() {}
 
-func GetMempoolRecent() {}
+func GetMempoolRecentByMempool() {}
 
-func GetMempoolRBFTransactions() {}
+func GetMempoolRBFTransactionsByMempool() {}
 
-func GetMempoolFullRBFTransactions() {}
+func GetMempoolFullRBFTransactionsByMempool() {}

@@ -1,25 +1,25 @@
 package api
 
-func GetChildrenPayforParent() {}
+func GetChildrenPayforParentByMempool() {}
 
-func GetTransaction() {}
+func GetTransactionByMempool() {}
 
-func GetTransactionHex() {}
+func GetTransactionHexByMempool() {}
 
-func GetTransactionMerkleblockProof() {}
+func GetTransactionMerkleblockProofByMempool() {}
 
-func GetTransactionMerkleProof() {}
+func GetTransactionMerkleProofByMempool() {}
 
-func GetTransactionOutspend() {}
+func GetTransactionOutspendByMempool() {}
 
-func GetTransactionOutspends() {}
+func GetTransactionOutspendsByMempool() {}
 
-func GetTransactionRaw() {}
+func GetTransactionRawByMempool() {}
 
-func GetTransactionRBFHistory() {}
+func GetTransactionRBFHistoryByMempool() {}
 
-func GetTransactionStatus() {}
+func GetTransactionStatusByMempool() {}
 
-func GetTransactionTimes() {}
+func GetTransactionTimesByMempool() {}
 
-func PostTransaction() {}
+func PostTransactionByMempool() {}

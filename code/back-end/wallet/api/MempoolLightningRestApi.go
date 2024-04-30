@@ -1,35 +1,35 @@
 package api
 
-func GetNetworkStats() {}
+func GetNetworkStatsByMempool() {}
 
-func GetNodesSlashChannels() {}
+func GetNodesSlashChannelsByMempool() {}
 
-func GetNodesInCountry() {}
+func GetNodesInCountryByMempool() {}
 
-func GetNodeStatsPerCountry() {}
+func GetNodeStatsPerCountryByMempool() {}
 
-func GetISPNodes() {}
+func GetISPNodesByMempool() {}
 
-func GetNodeStatsPerISP() {}
+func GetNodeStatsPerISPByMempool() {}
 
-func GetTop100Nodes() {}
+func GetTop100NodesByMempool() {}
 
-func GetTop100NodesbyLiquidity() {}
+func GetTop100NodesbyLiquidityByMempool() {}
 
-func GetTop100NodesbyConnectivity() {}
+func GetTop100NodesbyConnectivityByMempool() {}
 
-func GetTop100OldestNodes() {}
+func GetTop100OldestNodesByMempool() {}
 
-func GetNodeStats() {}
+func GetNodeStatsByMempool() {}
 
-func GetHistoricalNodeStats() {}
+func GetHistoricalNodeStatsByMempool() {}
 
-func GetChannel() {}
+func GetChannelByMempool() {}
 
-func GetChannelsfromTXID() {}
+func GetChannelsfromTXIDByMempool() {}
 
-func GetChannelsfromNodePubkey() {}
+func GetChannelsfromNodePubkeyByMempool() {}
 
-func GetChannelGeodata() {}
+func GetChannelGeodataByMempool() {}
 
-func GetChannelGeodataforNode() {}
+func GetChannelGeodataforNodeByMempool() {}

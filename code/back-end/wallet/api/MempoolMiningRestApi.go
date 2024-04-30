@@ -1,33 +1,33 @@
 package api
 
-func GetMiningPools() {}
+func GetMiningPoolsByMempool() {}
 
-func GetMiningPool() {}
+func GetMiningPoolByMempool() {}
 
-func GetMiningPoolHashrates() {}
+func GetMiningPoolHashratesByMempool() {}
 
-func GetMiningPoolHashrate() {}
+func GetMiningPoolHashrateByMempool() {}
 
-func GetMiningPoolBlocks() {}
+func GetMiningPoolBlocksByMempool() {}
 
-func GetHashrate() {}
+func GetHashrateByMempool() {}
 
-func GetDifficultyAdjustments() {}
+func GetDifficultyAdjustmentsByMempool() {}
 
-func GetRewardStats() {}
+func GetRewardStatsByMempool() {}
 
-func GetBlockFees() {}
+func GetBlockFeesByMempool() {}
 
-func GetBlockRewards() {}
+func GetBlockRewardsByMempool() {}
 
-func GetBlockFeerates() {}
+func GetBlockFeeratesByMempool() {}
 
-func GetBlockSizesandWeights() {}
+func GetBlockSizesandWeightsByMempool() {}
 
-func GetBlockPredictions() {}
+func GetBlockPredictionsByMempool() {}
 
-func GetBlockAuditScore() {}
+func GetBlockAuditScoreByMempool() {}
 
-func GetBlocksAuditScores() {}
+func GetBlocksAuditScoresByMempool() {}
 
-func GetBlockAuditSummary() {}
+func GetBlockAuditSummaryByMempool() {}

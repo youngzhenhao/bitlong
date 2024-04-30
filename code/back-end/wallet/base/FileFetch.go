@@ -67,6 +67,7 @@ func CreateDir(path string) {
 		fmt.Println("Nested directories created successfully")
 	}
 }
+
 func CreateDir2(path string) {
 	folderPath := filepath.Join(path, "/.lit")
 	folderPath1 := filepath.Join(folderPath, "/logs")

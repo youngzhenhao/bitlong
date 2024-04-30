@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -38,6 +39,7 @@ func MakeJsonResult_ONLY_FOR_TEST(success bool, error string, data string) strin
 	_ = json.Indent(&restr, []byte(jstr), "", "\t")
 	return restr.String()
 }
+
 func Base64Decode(s string) string {
 	byte1, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
@@ -68,4 +70,9 @@ func GetTimeNow() string {
 
 func GetTimeSuffixString() string {
 	return time.Now().Format("20060102150405")
+}
+
+func RoundToDecimalPlace(number float64, places int) float64 {
+	shift := math.Pow(10, float64(places))
+	return math.Round(number*shift) / shift
 }

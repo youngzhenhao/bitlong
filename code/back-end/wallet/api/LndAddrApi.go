@@ -69,9 +69,12 @@ func GetNewAddress_P2TR() string {
 		return MakeJsonResult(false, "AddressType_TAPROOT_PUBKEY error", "")
 	}
 	return MakeJsonResult(true, "", Addr{
-		Address: response.Address,
-		Balance: 0,
-		Type:    lnrpc.AddressType_TAPROOT_PUBKEY.String(),
+		Name:           "default",
+		Address:        response.Address,
+		Balance:        0,
+		AddressType:    lnrpc.AddressType_TAPROOT_PUBKEY.String(),
+		DerivationPath: AddressTypeToDerivationPath(lnrpc.AddressType_TAPROOT_PUBKEY.String()),
+		IsInternal:     false,
 	})
 }
 
@@ -127,9 +130,12 @@ func GetNewAddress_P2WKH() string {
 		return MakeJsonResult(false, "AddressType_WITNESS_PUBKEY_HASH error", "")
 	}
 	return MakeJsonResult(true, "", Addr{
-		Address: response.Address,
-		Balance: 0,
-		Type:    lnrpc.AddressType_WITNESS_PUBKEY_HASH.String(),
+		Name:           "default",
+		Address:        response.Address,
+		Balance:        0,
+		AddressType:    lnrpc.AddressType_WITNESS_PUBKEY_HASH.String(),
+		DerivationPath: AddressTypeToDerivationPath(lnrpc.AddressType_WITNESS_PUBKEY_HASH.String()),
+		IsInternal:     false,
 	})
 }
 
@@ -185,9 +191,12 @@ func GetNewAddress_NP2WKH() string {
 		return MakeJsonResult(false, "AddressType_NESTED_PUBKEY_HASH error", "")
 	}
 	return MakeJsonResult(true, "", Addr{
-		Address: response.Address,
-		Balance: 0,
-		Type:    lnrpc.AddressType_NESTED_PUBKEY_HASH.String(),
+		Name:           "default",
+		Address:        response.Address,
+		Balance:        0,
+		AddressType:    lnrpc.AddressType_NESTED_PUBKEY_HASH.String(),
+		DerivationPath: AddressTypeToDerivationPath(lnrpc.AddressType_NESTED_PUBKEY_HASH.String()),
+		IsInternal:     false,
 	})
 }
 
@@ -197,9 +206,9 @@ func GetNewAddress_NP2WKH() string {
 // @param balance
 // @param _type
 // @return string
-func StoreAddr(address string, balance int, _type string) string {
+func StoreAddr(name string, address string, balance int, addressType string, derivationPath string, isInternal bool) string {
 	_ = InitAddrDB()
-	path := filepath.Join(base.QueryConfigByKey("dirpath"), "addr.db")
+	path := filepath.Join(base.QueryConfigByKey("dirpath"), "phone.db")
 	db, err := bolt.Open(path, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		fmt.Printf("%s bolt.Open :%v\n", GetTimeNow(), err)
@@ -212,9 +221,12 @@ func StoreAddr(address string, balance int, _type string) string {
 	}(db)
 	s := &AddrStore{DB: db}
 	err = s.CreateOrUpdateAddr("addresses", &Addr{
-		Address: address,
-		Balance: balance,
-		Type:    _type,
+		Name:           name,
+		Address:        address,
+		Balance:        balance,
+		AddressType:    addressType,
+		DerivationPath: derivationPath,
+		IsInternal:     isInternal,
 	})
 	if err != nil {
 		return MakeJsonResult(false, "Store address fail", "")
@@ -228,7 +240,7 @@ func StoreAddr(address string, balance int, _type string) string {
 // @return string
 func RemoveAddr(address string) string {
 	_ = InitAddrDB()
-	path := filepath.Join(base.QueryConfigByKey("dirpath"), "addr.db")
+	path := filepath.Join(base.QueryConfigByKey("dirpath"), "phone.db")
 	db, err := bolt.Open(path, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		fmt.Printf("%s bolt.Open :%v\n", GetTimeNow(), err)
@@ -257,7 +269,7 @@ func RemoveAddr(address string) string {
 // @return string
 func QueryAddr(address string) string {
 	_ = InitAddrDB()
-	path := filepath.Join(base.QueryConfigByKey("dirpath"), "addr.db")
+	path := filepath.Join(base.QueryConfigByKey("dirpath"), "phone.db")
 	db, err := bolt.Open(path, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		fmt.Printf("%s bolt.Open :%v\n", GetTimeNow(), err)
@@ -281,7 +293,7 @@ func QueryAddr(address string) string {
 // @return string
 func QueryAllAddr() string {
 	_ = InitAddrDB()
-	path := filepath.Join(base.QueryConfigByKey("dirpath"), "addr.db")
+	path := filepath.Join(base.QueryConfigByKey("dirpath"), "phone.db")
 	db, err := bolt.Open(path, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		fmt.Printf("%s bolt.Open :%v\n", GetTimeNow(), err)
@@ -315,14 +327,16 @@ func GetNonZeroBalanceAddresses() string {
 		return MakeJsonResult(false, "Queried non-zero balance addresses NULL.", "")
 	}
 	for _, accWithAddr := range listAddrs {
-		_addresses := accWithAddr.Addresses
-		_addressType := accWithAddr.AddressType
-		for _, _addr := range _addresses {
-			if _addr.Balance != 0 {
+		addresses := accWithAddr.Addresses
+		for _, address := range addresses {
+			if address.Balance != 0 {
 				addrs = append(addrs, Addr{
-					Address: _addr.Address,
-					Balance: int(_addr.Balance),
-					Type:    _addressType.String(),
+					Name:           accWithAddr.Name,
+					Address:        address.Address,
+					Balance:        int(address.Balance),
+					AddressType:    accWithAddr.AddressType.String(),
+					DerivationPath: accWithAddr.DerivationPath,
+					IsInternal:     address.IsInternal,
 				})
 			}
 		}
@@ -344,15 +358,14 @@ func UpdateAllAddressesByGNZBA() string {
 		return MakeJsonResult(false, "Queried non-zero balance addresses NULL.", "")
 	}
 	for _, accWithAddr := range listAddrs {
+		if accWithAddr.Name != "default" {
+			continue
+		}
 		_addresses := accWithAddr.Addresses
-		_addressType := accWithAddr.AddressType
-		for _, _addr := range _addresses {
-			if _addr.Balance != 0 {
-				_ad := _addr.Address
-				_ba := int(_addr.Balance)
-				_ty := _addressType.String()
+		for _, _address := range _addresses {
+			if _address.Balance != 0 && !_address.IsInternal {
 				var result JsonResult
-				_re := StoreAddr(_ad, _ba, _ty)
+				_re := StoreAddr(accWithAddr.Name, _address.Address, int(_address.Balance), accWithAddr.AddressType.String(), accWithAddr.DerivationPath, _address.IsInternal)
 				err := json.Unmarshal([]byte(_re), &result)
 				if err != nil {
 					return MakeJsonResult(false, "Store address Unmarshal fail. "+err.Error(), "")
@@ -360,7 +373,7 @@ func UpdateAllAddressesByGNZBA() string {
 				if !result.Success {
 					return MakeJsonResult(false, "Store address result false", "")
 				}
-				addresses = append(addresses, _ad)
+				addresses = append(addresses, _address.Address)
 			}
 		}
 	}

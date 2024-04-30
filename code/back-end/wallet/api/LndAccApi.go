@@ -4,7 +4,7 @@ import "fmt"
 
 type Account struct {
 	Name              string `json:"name"`
-	Type              string `json:"address_type"`
+	AddressType       string `json:"address_type"`
 	ExtendedPublicKey string `json:"extended_public_key"`
 	DerivationPath    string `json:"derivation_path"`
 }
@@ -35,13 +35,30 @@ func GetAllAccounts() []Account {
 	return accs
 }
 
+// AddressTypeToDerivationPath
+// @dev: NOT STANDARD RESULT RETURN
+func AddressTypeToDerivationPath(addressType string) string {
+	accs := GetAllAccounts()
+	addressType = strings.ToUpper(addressType)
+	if addressType == "NESTED_PUBKEY_HASH" {
+		addressType = "HYBRID_NESTED_WITNESS_PUBKEY_HASH"
+	}
+	for _, acc := range accs {
+		if acc.AddressType == addressType {
+			return acc.DerivationPath
+		}
+	}
+	fmt.Printf("%s %v is not a valid address type.\n", GetTimeNow(), addressType)
+	return ""
+}
+
 func GetPathByAddressType(addressType string) string {
 	accs := GetAllAccounts()
 	if addressType == "NESTED_PUBKEY_HASH" {
 		addressType = "HYBRID_NESTED_WITNESS_PUBKEY_HASH"
 	}
 	for _, acc := range accs {
-		if acc.Type == addressType {
+		if acc.AddressType == addressType {
 			return MakeJsonResult(true, "", acc.DerivationPath)
 		}
 	}

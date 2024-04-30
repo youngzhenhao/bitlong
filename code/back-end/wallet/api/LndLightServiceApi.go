@@ -358,7 +358,79 @@ func ListInvoices() string {
 		fmt.Printf("%s client.ListInvoice :%v\n", GetTimeNow(), err)
 		return MakeJsonResult(false, err.Error(), nil)
 	}
-	return MakeJsonResult(true, "", response)
+	invoices := SimplifyInvoice(response)
+	return MakeJsonResult(true, "", invoices)
+}
+
+type InvoiceSimplified struct {
+	PaymentRequest string `json:"payment_request"`
+	Value          int    `json:"value"`
+	State          string `json:"state"`
+	CreationDate   int    `json:"creation_date"`
+}
+
+func SimplifyInvoice(invoice *lnrpc.ListInvoiceResponse) *[]InvoiceSimplified {
+	var invoices []InvoiceSimplified
+	for _, invoice := range invoice.Invoices {
+		invoices = append(invoices, InvoiceSimplified{
+			PaymentRequest: invoice.PaymentRequest,
+			Value:          int(invoice.Value),
+			State:          invoice.State.String(),
+			CreationDate:   int(invoice.CreationDate),
+		})
+	}
+	return &invoices
+}
+
+type InvoiceAll struct {
+	Invoices []struct {
+		Memo            string        `json:"memo"`
+		RPreimage       string        `json:"r_preimage"`
+		RHash           string        `json:"r_hash"`
+		Value           string        `json:"value"`
+		ValueMsat       string        `json:"value_msat"`
+		Settled         bool          `json:"settled"`
+		CreationDate    string        `json:"creation_date"`
+		SettleDate      string        `json:"settle_date"`
+		PaymentRequest  string        `json:"payment_request"`
+		DescriptionHash string        `json:"description_hash"`
+		Expiry          string        `json:"expiry"`
+		FallbackAddr    string        `json:"fallback_addr"`
+		CltvExpiry      string        `json:"cltv_expiry"`
+		RouteHints      []interface{} `json:"route_hints"`
+		Private         bool          `json:"private"`
+		AddIndex        string        `json:"add_index"`
+		SettleIndex     string        `json:"settle_index"`
+		AmtPaid         string        `json:"amt_paid"`
+		AmtPaidSat      string        `json:"amt_paid_sat"`
+		AmtPaidMsat     string        `json:"amt_paid_msat"`
+		State           string        `json:"state"`
+		Htlcs           []interface{} `json:"htlcs"`
+		Features        struct {
+			Num9 struct {
+				Name       string `json:"name"`
+				IsRequired bool   `json:"is_required"`
+				IsKnown    bool   `json:"is_known"`
+			} `json:"9"`
+			Num14 struct {
+				Name       string `json:"name"`
+				IsRequired bool   `json:"is_required"`
+				IsKnown    bool   `json:"is_known"`
+			} `json:"14"`
+			Num17 struct {
+				Name       string `json:"name"`
+				IsRequired bool   `json:"is_required"`
+				IsKnown    bool   `json:"is_known"`
+			} `json:"17"`
+		} `json:"features"`
+		IsKeysend       bool   `json:"is_keysend"`
+		PaymentAddr     string `json:"payment_addr"`
+		IsAmp           bool   `json:"is_amp"`
+		AmpInvoiceState struct {
+		} `json:"amp_invoice_state"`
+	} `json:"invoices"`
+	LastIndexOffset  string `json:"last_index_offset"`
+	FirstIndexOffset string `json:"first_index_offset"`
 }
 
 // LookupInvoice

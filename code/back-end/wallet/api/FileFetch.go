@@ -12,6 +12,7 @@ func SetPath(path string) {
 		return
 	}
 }
+
 func GetPath() string {
 	return base.GetFilePath()
 }
@@ -23,9 +24,11 @@ func FileTestConfig() bool {
 func ReadConfigFile() {
 	base.ReadConfig(GetPath())
 }
+
 func ReadConfigFile1() {
 	base.ReadConfig1(GetPath())
 }
+
 func ReadConfigFile2() {
 	base.ReadConfig2(GetPath())
 }
@@ -33,6 +36,7 @@ func ReadConfigFile2() {
 func CreateDir() {
 	base.CreateDir(GetPath())
 }
+
 func CreateDir2() {
 	base.CreateDir2(GetPath())
 }

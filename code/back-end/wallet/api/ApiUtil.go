@@ -69,24 +69,6 @@ func TapMarshalRespString(resp proto.Message) string {
 	return string(jsonBytes)
 }
 
-func LnMarshalRespBytes(resp proto.Message) []byte {
-	jsonBytes, err := lnrpc.ProtoJSONMarshalOpts.Marshal(resp)
-	if err != nil {
-		fmt.Printf("%s unable to decode response: %v\n", GetTimeNow(), err)
-		return nil
-	}
-	return jsonBytes
-}
-
-func TapMarshalRespBytes(resp proto.Message) []byte {
-	jsonBytes, err := taprpc.ProtoJSONMarshalOpts.Marshal(resp)
-	if err != nil {
-		fmt.Printf("%s unable to decode response: %v\n", GetTimeNow(), err)
-		return nil
-	}
-	return jsonBytes
-}
-
 func B64DecodeToHex(s string) string {
 	byte1, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {

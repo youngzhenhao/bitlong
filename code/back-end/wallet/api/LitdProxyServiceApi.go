@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	terminal "github.com/lightninglabs/lightning-terminal"
 	"github.com/lightninglabs/lightning-terminal/litrpc"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
@@ -40,4 +41,9 @@ func litdStopDaemon() (*litrpc.StopDaemonResponse, error) {
 	request := &litrpc.StopDaemonRequest{}
 	response, err := client.StopDaemon(context.Background(), request)
 	return response, err
+}
+
+func LitdLocalStop() {
+	fmt.Printf("%s User stop Litd at local...\n", GetTimeNow())
+	terminal.StopLitd()
 }

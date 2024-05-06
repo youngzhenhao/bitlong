@@ -2,15 +2,10 @@ package api
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
-	"encoding/hex"
 	"fmt"
 	"github.com/lightninglabs/lightning-terminal/litrpc"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
-	"os"
 	"path/filepath"
 )
 
@@ -49,27 +44,8 @@ func subServerStatus() (*litrpc.SubServerStatusResp, error) {
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lit"), "testnet")
 	macaroonPath := filepath.Join(newFilePath, "lit.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {

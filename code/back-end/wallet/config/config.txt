@@ -1,6 +1,6 @@
-dirpath=C:\mySpace\walletDataDir\Charlie-node
-lndhost=localhost:13009
-taproothost=localhost:10029
-litdhost=localhost:8443
-LnurlServerHost=202.79.173.41:9080
-serverAddr=202.79.173.41
+dirpath=
+lndhost=
+taproothost=
+litdhost=
+LnurlServerHost=
+serverAddr=

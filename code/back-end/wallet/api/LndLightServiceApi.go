@@ -2,16 +2,12 @@ package api
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/hex"
 	"fmt"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 	"io"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -27,27 +23,8 @@ func getWalletBalance() (*lnrpc.WalletBalanceResponse, error) {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -79,27 +56,8 @@ func getInfoOfLnd() (*lnrpc.GetInfoResponse, error) {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -122,27 +80,8 @@ func sendCoins(addr string, amount int64, all bool) (*lnrpc.SendCoinsResponse, e
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -206,27 +145,8 @@ func GetNewAddress() string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -262,27 +182,8 @@ func AddInvoice(value int64, memo string) string {
 	//grpcHost := GetEnv("grpcHost")
 	//tlsCertPath := GetEnv("tlsCertPath")
 	//macaroonPath := GetEnv("macaroonPath")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -319,27 +220,8 @@ func ListInvoices() string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -358,7 +240,79 @@ func ListInvoices() string {
 		fmt.Printf("%s client.ListInvoice :%v\n", GetTimeNow(), err)
 		return MakeJsonResult(false, err.Error(), nil)
 	}
-	return MakeJsonResult(true, "", response)
+	invoices := SimplifyInvoice(response)
+	return MakeJsonResult(true, "", invoices)
+}
+
+type InvoiceSimplified struct {
+	PaymentRequest string `json:"payment_request"`
+	Value          int    `json:"value"`
+	State          string `json:"state"`
+	CreationDate   int    `json:"creation_date"`
+}
+
+func SimplifyInvoice(invoice *lnrpc.ListInvoiceResponse) *[]InvoiceSimplified {
+	var invoices []InvoiceSimplified
+	for _, invoice := range invoice.Invoices {
+		invoices = append(invoices, InvoiceSimplified{
+			PaymentRequest: invoice.PaymentRequest,
+			Value:          int(invoice.Value),
+			State:          invoice.State.String(),
+			CreationDate:   int(invoice.CreationDate),
+		})
+	}
+	return &invoices
+}
+
+type InvoiceAll struct {
+	Invoices []struct {
+		Memo            string        `json:"memo"`
+		RPreimage       string        `json:"r_preimage"`
+		RHash           string        `json:"r_hash"`
+		Value           string        `json:"value"`
+		ValueMsat       string        `json:"value_msat"`
+		Settled         bool          `json:"settled"`
+		CreationDate    string        `json:"creation_date"`
+		SettleDate      string        `json:"settle_date"`
+		PaymentRequest  string        `json:"payment_request"`
+		DescriptionHash string        `json:"description_hash"`
+		Expiry          string        `json:"expiry"`
+		FallbackAddr    string        `json:"fallback_addr"`
+		CltvExpiry      string        `json:"cltv_expiry"`
+		RouteHints      []interface{} `json:"route_hints"`
+		Private         bool          `json:"private"`
+		AddIndex        string        `json:"add_index"`
+		SettleIndex     string        `json:"settle_index"`
+		AmtPaid         string        `json:"amt_paid"`
+		AmtPaidSat      string        `json:"amt_paid_sat"`
+		AmtPaidMsat     string        `json:"amt_paid_msat"`
+		State           string        `json:"state"`
+		Htlcs           []interface{} `json:"htlcs"`
+		Features        struct {
+			Num9 struct {
+				Name       string `json:"name"`
+				IsRequired bool   `json:"is_required"`
+				IsKnown    bool   `json:"is_known"`
+			} `json:"9"`
+			Num14 struct {
+				Name       string `json:"name"`
+				IsRequired bool   `json:"is_required"`
+				IsKnown    bool   `json:"is_known"`
+			} `json:"14"`
+			Num17 struct {
+				Name       string `json:"name"`
+				IsRequired bool   `json:"is_required"`
+				IsKnown    bool   `json:"is_known"`
+			} `json:"17"`
+		} `json:"features"`
+		IsKeysend       bool   `json:"is_keysend"`
+		PaymentAddr     string `json:"payment_addr"`
+		IsAmp           bool   `json:"is_amp"`
+		AmpInvoiceState struct {
+		} `json:"amp_invoice_state"`
+	} `json:"invoices"`
+	LastIndexOffset  string `json:"last_index_offset"`
+	FirstIndexOffset string `json:"first_index_offset"`
 }
 
 // LookupInvoice
@@ -371,27 +325,8 @@ func LookupInvoice(rhash string) string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -428,27 +363,8 @@ func AbandonChannel() bool {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -482,27 +398,8 @@ func BatchOpenChannel() bool {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -535,27 +432,8 @@ func ChannelAcceptor() bool {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -597,27 +475,8 @@ func ChannelBalance() string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -649,27 +508,8 @@ func CheckMacaroonPermissions() bool {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -704,27 +544,8 @@ func CloseChannel(fundingTxidStr string, outputIndex int) bool {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -774,27 +595,8 @@ func ClosedChannels() string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -827,27 +629,8 @@ func ExportAllChannelBackups() bool {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -881,27 +664,8 @@ func ExportChannelBackup() bool {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -933,27 +697,8 @@ func GetChanInfo(chanId string) string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -991,27 +736,8 @@ func OpenChannelSync(nodePubkey string, localFundingAmount int64) string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -1057,27 +783,8 @@ func OpenChannel(nodePubkey string, localFundingAmount int64) bool {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -1124,27 +831,8 @@ func ListChannels() string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -1176,27 +864,8 @@ func PendingChannels() string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -1234,27 +903,8 @@ func GetChannelState(chanPoint string) string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -1334,27 +984,8 @@ func GetChannelInfo(chanPoint string) string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -1393,27 +1024,8 @@ func RestoreChannelBackups() bool {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -1447,27 +1059,8 @@ func SubscribeChannelBackups() bool {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -1512,27 +1105,8 @@ func SubscribeChannelEvents() bool {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -1577,27 +1151,8 @@ func SubscribeChannelGraph() bool {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -1641,27 +1196,8 @@ func UpdateChannelPolicy() bool {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -1694,27 +1230,8 @@ func VerifyChanBackup() bool {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -1747,27 +1264,8 @@ func ConnectPeer(pubkey, host string) bool {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -1810,27 +1308,8 @@ func EstimateFee(addr string, amount int64) string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -1865,27 +1344,8 @@ func DecodePayReq(payReq string) int64 {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -1919,24 +1379,8 @@ func SendPaymentSync(invoice string) string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -1965,24 +1409,8 @@ func SendPaymentSync0amt(invoice string, amt int64) string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -2038,27 +1466,8 @@ func LndStopDaemon() bool {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -2086,27 +1495,8 @@ func ListPermissions() string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {

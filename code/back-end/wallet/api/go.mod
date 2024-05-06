@@ -4,6 +4,8 @@ go 1.22.2
 
 require (
 	github.com/boltdb/bolt v1.3.1
+	github.com/btcsuite/btcd v0.24.1-0.20240123000108-62e6af035ec5
+	github.com/btcsuite/btcd/chaincfg/chainhash v1.1.0
 	github.com/fatedier/frp v0.56.0
 	github.com/fiatjaf/go-lnurl v1.13.1
 	github.com/gin-gonic/gin v1.9.1
@@ -17,7 +19,6 @@ require (
 	github.com/wallet v0.0.0-00010101000000-000000000000
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
 	google.golang.org/grpc v1.63.2
-	google.golang.org/protobuf v1.33.0
 )
 
 require (
@@ -33,11 +34,9 @@ require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/btcsuite/btcd v0.24.1-0.20240123000108-62e6af035ec5 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
 	github.com/btcsuite/btcd/btcutil v1.1.5 // indirect
 	github.com/btcsuite/btcd/btcutil/psbt v1.1.8 // indirect
-	github.com/btcsuite/btcd/chaincfg/chainhash v1.1.0 // indirect
 	github.com/btcsuite/btclog v0.0.0-20170628155309-84c8d2346e9f // indirect
 	github.com/btcsuite/btcwallet v0.16.10-0.20240127010340-16b422a2e8bf // indirect
 	github.com/btcsuite/btcwallet/wallet/txauthor v1.3.2 // indirect
@@ -261,6 +260,7 @@ require (
 	google.golang.org/genproto v0.0.0-20240227224415-6ceb2ff114de // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240227224415-6ceb2ff114de // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240401170217-c3f982113cda // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/errgo.v1 v1.0.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/macaroon-bakery.v2 v2.3.0 // indirect

@@ -2,18 +2,14 @@ package api
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/boltdb/bolt"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
-	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -27,27 +23,8 @@ func GetNewAddress_P2TR() string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -88,27 +65,8 @@ func GetNewAddress_P2WKH() string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -149,27 +107,8 @@ func GetNewAddress_NP2WKH() string {
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-
-	cert, err := os.ReadFile(tlsCertPath)
-	if err != nil {
-		fmt.Printf("%s Failed to read cert file: %s", GetTimeNow(), err)
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(cert) {
-		fmt.Printf(GetTimeNow() + "Failed to append cert")
-	}
-
-	config := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		RootCAs:    certPool,
-	}
-	creds := credentials.NewTLS(config)
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -378,4 +317,70 @@ func UpdateAllAddressesByGNZBA() string {
 		}
 	}
 	return MakeJsonResult(true, "", addresses)
+}
+
+// @dev: Acc
+
+type Account struct {
+	Name              string `json:"name"`
+	AddressType       string `json:"address_type"`
+	ExtendedPublicKey string `json:"extended_public_key"`
+	DerivationPath    string `json:"derivation_path"`
+}
+
+func GetAllAccountsString() string {
+	accs := GetAllAccounts()
+	if accs == nil {
+		return MakeJsonResult(false, "get all accounts fail.", "")
+	}
+	return MakeJsonResult(true, "", accs)
+}
+
+func GetAllAccounts() []Account {
+	var accs []Account
+	response, err := listAccounts()
+	if err != nil {
+		fmt.Printf("%s listAccounts fail. %v\n", GetTimeNow(), err)
+		return nil
+	}
+	for _, v := range response.Accounts {
+		accs = append(accs, Account{
+			v.Name,
+			v.AddressType.String(),
+			v.ExtendedPublicKey,
+			v.DerivationPath,
+		})
+	}
+	return accs
+}
+
+// AddressTypeToDerivationPath
+// @dev: NOT STANDARD RESULT RETURN
+func AddressTypeToDerivationPath(addressType string) string {
+	accs := GetAllAccounts()
+	addressType = strings.ToUpper(addressType)
+	if addressType == "NESTED_PUBKEY_HASH" {
+		addressType = "HYBRID_NESTED_WITNESS_PUBKEY_HASH"
+	}
+	for _, acc := range accs {
+		if acc.AddressType == addressType {
+			return acc.DerivationPath
+		}
+	}
+	fmt.Printf("%s %v is not a valid address type.\n", GetTimeNow(), addressType)
+	return ""
+}
+
+func GetPathByAddressType(addressType string) string {
+	accs := GetAllAccounts()
+	if addressType == "NESTED_PUBKEY_HASH" {
+		addressType = "HYBRID_NESTED_WITNESS_PUBKEY_HASH"
+	}
+	for _, acc := range accs {
+		if acc.AddressType == addressType {
+			return MakeJsonResult(true, "", acc.DerivationPath)
+		}
+	}
+	fmt.Printf("%s %v is not a valid address type.\n", GetTimeNow(), addressType)
+	return MakeJsonResult(false, "can't find path by given address type.", "")
 }

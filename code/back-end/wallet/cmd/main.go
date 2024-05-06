@@ -1,5 +1,9 @@
 package main
 
-func main() {
+import (
+	"github.com/wallet/api"
+)
 
+func main() {
+	api.SetPath("")
 }

@@ -10,32 +10,39 @@ import (
 )
 
 var (
-	// 使用互斥锁来确保对路径的线程安全访问
+	// Use mutexes to ensure thread-safe access to paths
 	mu sync.Mutex
-	// 存储文件路径
+	// The path to the storage file
 	filePath string
 )
 
-// SetFilePath 设置文件路径，并可在设置时执行某些验证
+// SetFilePath
+// Set the file path and perform some validation at setup time
 func SetFilePath(path string) error {
 	mu.Lock()
 	defer mu.Unlock()
 	fmt.Printf("path:%v\n", path)
-	// 这里可以添加路径验证逻辑
+	// Here you can add the path validation logic
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return fmt.Errorf("file does not exist at path: %s", path)
 	}
-	// 假设只是读取文件
+	// Let's say it's just reading the file
 	file, err := os.Open(path)
 	if err != nil {
 		return fmt.Errorf("error opening file: %s", err)
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			fmt.Println("error closing file")
+		}
+	}(file)
 	filePath = path
 	return nil
 }
 
-// GetFilePath 获取存储的文件路径
+// GetFilePath
+// Get the path to the stored file
 func GetFilePath() string {
 	mu.Lock()
 	defer mu.Unlock()
@@ -51,7 +58,7 @@ func CreateDir(path string) {
 		fmt.Println("Directory created successfully")
 	}
 
-	// 创建目录及其所有父目录
+	// Create a directory and all of its parent directories
 	folderPath1 := filepath.Join(path, "/example/dir1/dir2")
 	err = os.MkdirAll(folderPath1, 0755)
 	if err != nil {
@@ -60,6 +67,7 @@ func CreateDir(path string) {
 		fmt.Println("Nested directories created successfully")
 	}
 }
+
 func CreateDir2(path string) {
 	folderPath := filepath.Join(path, "/.lit")
 	folderPath1 := filepath.Join(folderPath, "/logs")
@@ -70,7 +78,7 @@ func CreateDir2(path string) {
 		fmt.Println("Directory created successfully")
 	}
 
-	// 创建目录及其所有父目录
+	// Create a directory and all of its parent directories
 	folderPath2 := filepath.Join(path, "/.lit")
 	folderPath21 := filepath.Join(folderPath2, "/data/logs")
 	err = os.MkdirAll(folderPath21, 0755)
@@ -90,9 +98,13 @@ func FileConfig(path string) bool {
 		fmt.Println("Error creating file:", err)
 		return false
 	}
-	defer file.Close() // 确保在函数结束时关闭文件
-
-	// 写入字符串到文件中
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			fmt.Println("error closing file")
+		}
+	}(file)
+	// Write the string to a file
 	_, err = file.WriteString("Hello, world!\n")
 	if err != nil {
 		fmt.Println("Error writing to file:", err)
@@ -160,13 +172,14 @@ func visit(path string, f os.FileInfo, err error) error {
 	if err != nil {
 		return err // 处理潜在的错误
 	}
-	// 检查是目录还是文件
+	// Check if it's a directory or a file
 	fileType := "File"
 	if f.IsDir() {
 		fileType = "Directory"
 	}
-	// 获取并打印文件或目录的权限
-	perms := f.Mode().Perm() // 返回文件权限的部分
+	// Obtain permission to print a file or directory
+	// Go back to the section on file permissions
+	perms := f.Mode().Perm()
 
 	fmt.Printf("%s: %s, Permissions: %04o\n", fileType, path, perms)
 	return nil
@@ -174,7 +187,7 @@ func visit(path string, f os.FileInfo, err error) error {
 
 func VisitAll() {
 	root := GetFilePath()
-	// 使用 filepath.Walk 遍历目录
+	// Use filepath.Walk to traverse the directory
 	err := filepath.Walk(root, visit)
 	if err != nil {
 		fmt.Printf("Error walking the path %q: %v\n", root, err)

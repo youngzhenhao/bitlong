@@ -7,23 +7,23 @@ import (
 	"strconv"
 )
 
-func GetBlockByMempool() {}
+func GetBlockByMempoolByMempool() {}
 
-func GetBlockHeader() {}
+func GetBlockHeaderByMempool() {}
 
-func GetBlockHeight() {}
+func GetBlockHeightByMempool() {}
 
-func GetBlockTimestamp() {}
+func GetBlockTimestampByMempool() {}
 
-func GetBlockRaw() {}
+func GetBlockRawByMempool() {}
 
-func GetBlockStatus() {}
+func GetBlockStatusByMempool() {}
 
 func GetBlockTipHeightByMempool() string {
 	targetUrl := "https://mempool.space/testnet/api/blocks/tip/height"
 	response, err := http.Get(targetUrl)
 	if err != nil {
-		fmt.Printf("%s http.Get :%v\n", GetTimeNow(), err)
+		fmt.Printf("%s http.Get :%v\n", GetTimeNow, err)
 		return MakeJsonResult(false, "http get fail.", "")
 	}
 	bodyBytes, _ := io.ReadAll(response.Body)
@@ -38,7 +38,7 @@ func BlockTipHeight() int {
 	targetUrl := "https://mempool.space/testnet/api/blocks/tip/height"
 	response, err := http.Get(targetUrl)
 	if err != nil {
-		fmt.Printf("%s http.Get :%v\n", GetTimeNow(), err)
+		fmt.Printf("%s http.Get :%v\n", GetTimeNow, err)
 		return 0
 	}
 	bodyBytes, _ := io.ReadAll(response.Body)
@@ -46,14 +46,14 @@ func BlockTipHeight() int {
 	return height
 }
 
-func GetBlockTipHash() {}
+func GetBlockTipHashByMempool() {}
 
-func GetBlockTransactionID() {}
+func GetBlockTransactionIDByMempool() {}
 
-func GetBlockTransactionIDs() {}
+func GetBlockTransactionIDsByMempool() {}
 
-func GetBlockTransactions() {}
+func GetBlockTransactionsByMempool() {}
 
-func GetBlocks() {}
+func GetBlocksByMempool() {}
 
-func GetBlocksBulk() {}
+func GetBlocksBulkByMempool() {}

@@ -1817,3 +1817,7 @@ func toLocalAddress(listenerAddress string) string {
 func isRESTRequest(req *http.Request) bool {
 	return patternRESTRequest.MatchString(req.URL.Path)
 }
+
+func StopLitd() {
+	interceptor.RequestShutdown()
+}

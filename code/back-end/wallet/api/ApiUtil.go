@@ -87,12 +87,12 @@ func TapMarshalRespBytes(resp proto.Message) []byte {
 	return jsonBytes
 }
 
-func Base64Decode(s string) string {
+func B64DecodeToHex(s string) string {
 	byte1, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
 		return "DECODE_ERROR"
 	}
-	return string(byte1)
+	return hex.EncodeToString(byte1)
 }
 
 type MacaroonCredential struct {

@@ -8,8 +8,12 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/joho/godotenv"
+	"github.com/lightninglabs/taproot-assets/taprpc"
+	"github.com/lightningnetwork/lnd/lnrpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/protobuf/proto"
 	"log"
 	"math"
 	"os"
@@ -45,6 +49,42 @@ func MakeJsonResult_ONLY_FOR_TEST(success bool, error string, data string) strin
 	var restr bytes.Buffer
 	_ = json.Indent(&restr, []byte(jstr), "", "\t")
 	return restr.String()
+}
+
+func LnMarshalRespString(resp proto.Message) string {
+	jsonBytes, err := lnrpc.ProtoJSONMarshalOpts.Marshal(resp)
+	if err != nil {
+		fmt.Printf("%s unable to decode response: %v\n", GetTimeNow(), err)
+		return ""
+	}
+	return string(jsonBytes)
+}
+
+func TapMarshalRespString(resp proto.Message) string {
+	jsonBytes, err := taprpc.ProtoJSONMarshalOpts.Marshal(resp)
+	if err != nil {
+		fmt.Printf("%s unable to decode response: %v\n", GetTimeNow(), err)
+		return ""
+	}
+	return string(jsonBytes)
+}
+
+func LnMarshalRespBytes(resp proto.Message) []byte {
+	jsonBytes, err := lnrpc.ProtoJSONMarshalOpts.Marshal(resp)
+	if err != nil {
+		fmt.Printf("%s unable to decode response: %v\n", GetTimeNow(), err)
+		return nil
+	}
+	return jsonBytes
+}
+
+func TapMarshalRespBytes(resp proto.Message) []byte {
+	jsonBytes, err := taprpc.ProtoJSONMarshalOpts.Marshal(resp)
+	if err != nil {
+		fmt.Printf("%s unable to decode response: %v\n", GetTimeNow(), err)
+		return nil
+	}
+	return jsonBytes
 }
 
 func Base64Decode(s string) string {
@@ -117,4 +157,12 @@ func GetEnv(key string, filename ...string) string {
 	}
 	value := os.Getenv(key)
 	return value
+}
+
+func ToBTC(sat int) float64 {
+	return float64(sat / 1e8)
+}
+
+func ToSat(btc float64) int {
+	return int(btc * 1e8)
 }

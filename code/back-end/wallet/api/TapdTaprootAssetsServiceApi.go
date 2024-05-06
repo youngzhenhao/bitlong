@@ -229,6 +229,15 @@ func ListGroups() string {
 //	@Description: ListTransfers lists outbound asset transfers tracked by the target daemon.
 //	@return string
 func ListTransfers() string {
+	response, err := listTransfers()
+	if err != nil {
+		fmt.Printf("%s taprpc ListTransfers Error: %v\n", GetTimeNow(), err)
+		return MakeJsonResult(false, err.Error(), nil)
+	}
+	return MakeJsonResult(true, "", response)
+}
+
+func listTransfers() (*taprpc.ListTransfersResponse, error) {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
@@ -251,9 +260,9 @@ func ListTransfers() string {
 	response, err := client.ListTransfers(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s taprpc ListTransfers Error: %v\n", GetTimeNow(), err)
-		return ""
+		return nil, err
 	}
-	return response.String()
+	return response, err
 }
 
 // ListUtxos

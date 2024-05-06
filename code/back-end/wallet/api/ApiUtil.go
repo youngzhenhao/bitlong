@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"math"
 	"strconv"
@@ -40,12 +41,12 @@ func MakeJsonResult_ONLY_FOR_TEST(success bool, error string, data string) strin
 	return restr.String()
 }
 
-func Base64Decode(s string) string {
+func B64DecodeToHex(s string) string {
 	byte1, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
 		return "DECODE_ERROR"
 	}
-	return string(byte1)
+	return hex.EncodeToString(byte1)
 }
 
 type MacaroonCredential struct {

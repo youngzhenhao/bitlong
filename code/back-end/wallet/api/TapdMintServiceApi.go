@@ -223,7 +223,6 @@ func (m *Meta) FetchAssetMeta(isHash bool, data string) string {
 	if err != nil {
 		return MakeJsonResult(false, err.Error(), nil)
 	}
-	fmt.Println(response.Data)
 	m.GetMetaFromStr(string(response.Data))
 	return MakeJsonResult(true, "", nil)
 }

@@ -74,7 +74,7 @@ func QueryConfigByKey(key string) (value string) {
 	}
 	filePath := "config.txt"
 	complexFolderPath := pathStr + string(os.PathSeparator) + filePath
-	fmt.Printf("read file path is :%v and key is %s\n", complexFolderPath, key)
+	//fmt.Printf("read file path is :%v and key is %s\n", complexFolderPath, key)
 	fileConfig := ReadConfigFile(complexFolderPath)
 	value = fileConfig[key]
 	return

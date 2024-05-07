@@ -21,7 +21,7 @@ var (
 func SetFilePath(path string) error {
 	mu.Lock()
 	defer mu.Unlock()
-	fmt.Printf("path:%v\n", path)
+	//fmt.Printf("path:%v\n", path)
 	// Here you can add the path validation logic
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return fmt.Errorf("file does not exist at path: %s", path)

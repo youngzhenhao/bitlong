@@ -15,7 +15,79 @@ import (
 
 func AddFederationServer() {}
 
-func AssetLeafKeys() {}
+func assetLeafKeys(id string, proofType universerpc.ProofType) (*universerpc.AssetLeafKeyResponse, error) {
+	grpcHost := base.QueryConfigByKey("taproothost")
+	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+	if err != nil {
+		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
+		}
+	}(conn)
+	client := universerpc.NewUniverseClient(conn)
+	request := &universerpc.AssetLeafKeysRequest{
+		Id: &universerpc.ID{
+			Id: &universerpc.ID_AssetIdStr{
+				AssetIdStr: id,
+			},
+			ProofType: proofType,
+		},
+		//Offset:    0,
+		//Limit:     0,
+		//Direction: 0,
+	}
+	response, err := client.AssetLeafKeys(context.Background(), request)
+	if err != nil {
+		fmt.Printf("%s universerpc Info Error: %v\n", GetTimeNow(), err)
+		return nil, err
+	}
+	return response, nil
+}
+
+func AssetLeafKeys(id string, proofType string) string {
+	var _proofType universerpc.ProofType
+	if proofType == "issuance" || proofType == "ISSUANCE" || proofType == "PROOF_TYPE_ISSUANCE" {
+		_proofType = universerpc.ProofType_PROOF_TYPE_ISSUANCE
+	} else if proofType == "transfer" || proofType == "TRANSFER" || proofType == "PROOF_TYPE_TRANSFER" {
+		_proofType = universerpc.ProofType_PROOF_TYPE_TRANSFER
+	} else {
+		_proofType = universerpc.ProofType_PROOF_TYPE_UNSPECIFIED
+	}
+	response, err := assetLeafKeys(id, _proofType)
+	if err != nil {
+		fmt.Printf("%s universerpc AssetLeafKeys Error: %v\n", GetTimeNow(), err)
+		return MakeJsonResult(false, err.Error(), nil)
+	}
+	if len(response.AssetKeys) == 0 {
+		return MakeJsonResult(false, "Result length is zero.", nil)
+	}
+	return MakeJsonResult(true, "", processAssetKey(response))
+}
+
+type AssetKey struct {
+	OpStr          string `json:"op_str"`
+	ScriptKeyBytes string `json:"script_key_bytes"`
+}
+
+func processAssetKey(response *universerpc.AssetLeafKeyResponse) *[]AssetKey {
+	var assetKey []AssetKey
+	for _, keys := range response.AssetKeys {
+		assetKey = append(assetKey, AssetKey{
+			OpStr:          keys.GetOpStr(),
+			ScriptKeyBytes: hex.EncodeToString(keys.GetScriptKeyBytes()),
+		})
+	}
+	return &assetKey
+}
 
 func AssetLeaves(id string) string {
 	response, err := assetLeaves(false, id, universerpc.ProofType_PROOF_TYPE_ISSUANCE)
@@ -99,9 +171,9 @@ func UniverseInfo() string {
 	response, err := client.Info(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s universerpc Info Error: %v\n", GetTimeNow(), err)
-		return ""
+		return MakeJsonResult(false, err.Error(), nil)
 	}
-	return response.String()
+	return MakeJsonResult(true, "", response)
 }
 
 func InsertProof() {}
@@ -186,7 +258,7 @@ func SyncUniverse(universeHost string, asset_id string) string {
 
 func UniverseStats() {}
 
-func assetLeaves(isGroup bool, id string, prooftype universerpc.ProofType) (*universerpc.AssetLeafResponse, error) {
+func assetLeaves(isGroup bool, id string, proofType universerpc.ProofType) (*universerpc.AssetLeafResponse, error) {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
@@ -206,7 +278,7 @@ func assetLeaves(isGroup bool, id string, prooftype universerpc.ProofType) (*uni
 	}(conn)
 
 	request := &universerpc.ID{
-		ProofType: prooftype,
+		ProofType: proofType,
 	}
 
 	if isGroup {

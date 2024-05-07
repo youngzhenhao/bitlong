@@ -48,13 +48,13 @@ func DecodeAddr(addr string) string {
 	}
 	response, err := client.DecodeAddr(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s taprpc ListAssets Error: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s taprpc DecodeAddr Error: %v\n", GetTimeNow(), err)
 		return ""
 	}
 	return response.String()
 }
 
-func DecodeProof() {
+func DecodeProof(rawProof string) {
 
 }
 
@@ -416,12 +416,11 @@ func TapStopDaemon() bool {
 	}(conn)
 	client := taprpc.NewTaprootAssetsClient(conn)
 	request := &taprpc.StopRequest{}
-	response, err := client.StopDaemon(context.Background(), request)
+	_, err = client.StopDaemon(context.Background(), request)
 	if err != nil {
-		fmt.Printf("%s taprpc ListGroups Error: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s taprpc TapStopDaemon Error: %v\n", GetTimeNow(), err)
 		return false
 	}
-	fmt.Printf("%s %v\n", GetTimeNow(), response)
 	return true
 }
 

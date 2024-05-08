@@ -187,7 +187,7 @@ func FindAssetByAssetName(assetName string) string {
 func ListBalances() string {
 	response, err := listBalances(false, nil, nil)
 	if err != nil {
-		MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonResult(false, err.Error(), nil)
 	}
 	return MakeJsonResult(true, "", response)
 }

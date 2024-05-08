@@ -66,7 +66,14 @@ func GetAssetInfo(id string) string {
 	return MakeJsonResult(true, "", assetInfo)
 }
 
-func AssetRoots() {}
+func QueryAssetRoots(id string) string {
+	response, err := queryAssetRoot(id)
+	if err != nil {
+		fmt.Printf("%s universerpc AssetRoots Error: %v\n", GetTimeNow(), err)
+		return MakeJsonResult(false, err.Error(), nil)
+	}
+	return MakeJsonResult(true, "", response)
+}
 
 func DeleteAssetRoot() {}
 
@@ -141,8 +148,6 @@ func ListFederationServers() string {
 
 func MultiverseRoot() {}
 
-func QueryAssetRoots() {}
-
 func QueryAssetStats(assetId string) string {
 	response, err := queryAssetStats(assetId)
 	if err != nil {
@@ -185,6 +190,37 @@ func SyncUniverse(universeHost string, asset_id string) string {
 }
 
 func UniverseStats() {}
+
+func queryAssetRoot(id string) (*universerpc.QueryRootResponse, error) {
+	grpcHost := base.QueryConfigByKey("taproothost")
+	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+	if err != nil {
+		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
+		}
+	}(conn)
+
+	requst := &universerpc.AssetRootQuery{
+		Id: &universerpc.ID{
+			Id: &universerpc.ID_AssetIdStr{
+				AssetIdStr: id,
+			},
+		},
+	}
+	client := universerpc.NewUniverseClient(conn)
+	response, err := client.QueryAssetRoots(context.Background(), requst)
+	return response, err
+}
 
 func assetLeaves(isGroup bool, id string, prooftype universerpc.ProofType) (*universerpc.AssetLeafResponse, error) {
 	grpcHost := base.QueryConfigByKey("taproothost")

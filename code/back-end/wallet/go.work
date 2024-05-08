@@ -8,4 +8,7 @@ use (
 	./lib/lightning-terminal@v0.12.2
 	./lib/frp@v0.56.0
 	api
+	lib/taproot-assets@v0.3.3
+	lib/anet
+	lib/cert@v1.2.2
 )

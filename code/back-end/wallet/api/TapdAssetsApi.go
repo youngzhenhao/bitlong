@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"github.com/lightninglabs/taproot-assets/taprpc"
 	"github.com/lightninglabs/taproot-assets/taprpc/universerpc"
@@ -232,8 +233,8 @@ func SyncAssetAllSlice(ids []string) {
 		return
 	}
 	for _, _id := range ids {
-		fmt.Println(SyncAssetIssuance(_id))
-		fmt.Println(SyncAssetTransfer(_id))
+		fmt.Println("Sync issuance:", _id, ".", SyncAssetIssuance(_id))
+		fmt.Println("Sync transfer:", _id, ".", SyncAssetTransfer(_id))
 	}
 }
 
@@ -345,116 +346,6 @@ func GetAllAssetsIdSlice() string {
 	return MakeJsonResult(true, "", ids)
 }
 
-// TransferLeave @dev
-type TransferLeave struct {
-	Version      string `json:"version"`
-	AssetGenesis struct {
-		GenesisPoint string `json:"genesis_point"`
-		Name         string `json:"name"`
-		MetaHash     string `json:"meta_hash"`
-		AssetID      string `json:"asset_id"`
-		AssetType    string `json:"asset_type"`
-		OutputIndex  int    `json:"output_index"`
-		Version      int    `json:"version"`
-	} `json:"asset_genesis"`
-	Amount           string `json:"amount"`
-	LockTime         int    `json:"lock_time"`
-	RelativeLockTime int    `json:"relative_lock_time"`
-	ScriptVersion    int    `json:"script_version"`
-	ScriptKey        string `json:"script_key"`
-	ScriptKeyIsLocal bool   `json:"script_key_is_local"`
-	//AssetGroup       interface{} `json:"asset_group"`
-	//ChainAnchor      interface{} `json:"chain_anchor"`
-	//PrevWitnesses    []struct {
-	//	PrevID struct {
-	//		AnchorPoint string `json:"anchor_point"`
-	//		AssetID     string `json:"asset_id"`
-	//		ScriptKey   string `json:"script_key"`
-	//		Amount      string `json:"amount"`
-	//	} `json:"prev_id"`
-	//	TxWitness       []interface{} `json:"tx_witness"`
-	//	SplitCommitment struct {
-	//		RootAsset struct {
-	//			Version      string `json:"version"`
-	//			AssetGenesis struct {
-	//				GenesisPoint string `json:"genesis_point"`
-	//				Name         string `json:"name"`
-	//				MetaHash     string `json:"meta_hash"`
-	//				AssetID      string `json:"asset_id"`
-	//				AssetType    string `json:"asset_type"`
-	//				OutputIndex  int    `json:"output_index"`
-	//				Version      int    `json:"version"`
-	//			} `json:"asset_genesis"`
-	//			Amount           string      `json:"amount"`
-	//			LockTime         int         `json:"lock_time"`
-	//			RelativeLockTime int         `json:"relative_lock_time"`
-	//			ScriptVersion    int         `json:"script_version"`
-	//			ScriptKey        string      `json:"script_key"`
-	//			ScriptKeyIsLocal bool        `json:"script_key_is_local"`
-	//			AssetGroup       interface{} `json:"asset_group"`
-	//			ChainAnchor      interface{} `json:"chain_anchor"`
-	//			PrevWitnesses    []struct {
-	//				PrevID struct {
-	//					AnchorPoint string `json:"anchor_point"`
-	//					AssetID     string `json:"asset_id"`
-	//					ScriptKey   string `json:"script_key"`
-	//					Amount      string `json:"amount"`
-	//				} `json:"prev_id"`
-	//				TxWitness       []string    `json:"tx_witness"`
-	//				SplitCommitment interface{} `json:"split_commitment"`
-	//			} `json:"prev_witnesses"`
-	//			IsSpent     bool   `json:"is_spent"`
-	//			LeaseOwner  string `json:"lease_owner"`
-	//			LeaseExpiry string `json:"lease_expiry"`
-	//			IsBurn      bool   `json:"is_burn"`
-	//		} `json:"root_asset"`
-	//	} `json:"split_commitment"`
-	//} `json:"prev_witnesses"`
-	IsSpent     bool   `json:"is_spent"`
-	LeaseOwner  string `json:"lease_owner"`
-	LeaseExpiry string `json:"lease_expiry"`
-	IsBurn      bool   `json:"is_burn"`
-}
-
-// IssuanceLeave @dev
-type IssuanceLeave struct {
-	Asset struct {
-		Version      string `json:"version"`
-		AssetGenesis struct {
-			GenesisPoint string `json:"genesis_point"`
-			Name         string `json:"name"`
-			MetaHash     string `json:"meta_hash"`
-			AssetID      string `json:"asset_id"`
-			AssetType    string `json:"asset_type"`
-			OutputIndex  int    `json:"output_index"`
-			Version      int    `json:"version"`
-		} `json:"asset_genesis"`
-		Amount           string      `json:"amount"`
-		LockTime         int         `json:"lock_time"`
-		RelativeLockTime int         `json:"relative_lock_time"`
-		ScriptVersion    int         `json:"script_version"`
-		ScriptKey        string      `json:"script_key"`
-		ScriptKeyIsLocal bool        `json:"script_key_is_local"`
-		AssetGroup       interface{} `json:"asset_group"`
-		ChainAnchor      interface{} `json:"chain_anchor"`
-		PrevWitnesses    []struct {
-			PrevID struct {
-				AnchorPoint string `json:"anchor_point"`
-				AssetID     string `json:"asset_id"`
-				ScriptKey   string `json:"script_key"`
-				Amount      string `json:"amount"`
-			} `json:"prev_id"`
-			TxWitness       []interface{} `json:"tx_witness"`
-			SplitCommitment interface{}   `json:"split_commitment"`
-		} `json:"prev_witnesses"`
-		IsSpent     bool   `json:"is_spent"`
-		LeaseOwner  string `json:"lease_owner"`
-		LeaseExpiry string `json:"lease_expiry"`
-		IsBurn      bool   `json:"is_burn"`
-	} `json:"asset"`
-	Proof string `json:"proof"`
-}
-
 // assetKeysTransfer
 // @dev
 func assetKeysTransfer(id string) *[]AssetKey {
@@ -479,27 +370,9 @@ func AssetKeysTransfer(id string) string {
 	return MakeJsonResult(true, "", result)
 }
 
-func DecodeRawProofByte(rawProof []byte) *taprpc.DecodeProofResponse {
-	result, err := decodeProof(rawProof, 0, false, false)
-	if err != nil {
-		return nil
-	}
-	return result
-}
-
-// DecodeRawProof
-// @dev:
-func DecodeRawProof(proof string) {
-	decodeString, err := hex.DecodeString(proof)
-	if err != nil {
-		return
-	}
-	DecodeRawProofByte(decodeString)
-}
-
 // AssetLeavesSpecified
 // @dev: Need To Complete
-func AssetLeavesSpecified(id string, proofType string) string {
+func AssetLeavesSpecified(id string, proofType string) *universerpc.AssetLeafResponse {
 	var _proofType universerpc.ProofType
 	if proofType == "issuance" || proofType == "ISSUANCE" || proofType == "PROOF_TYPE_ISSUANCE" {
 		_proofType = universerpc.ProofType_PROOF_TYPE_ISSUANCE
@@ -511,10 +384,370 @@ func AssetLeavesSpecified(id string, proofType string) string {
 	response, err := assetLeaves(false, id, _proofType)
 	if err != nil {
 		fmt.Printf("%s universerpc AssetLeaves Error: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, err.Error(), nil)
+		return nil
 	}
-	if response.Leaves == nil {
-		return MakeJsonResult(false, "NOT_FOUND", nil)
+	return response
+}
+
+type AssetTransferLeave struct {
+	Name string `json:"name"`
+	//MetaHash     string `json:"meta_hash"`
+	AssetID   string `json:"asset_id"`
+	Amount    int    `json:"amount"`
+	ScriptKey string `json:"script_key"`
+	//PrevWitnesses []struct {
+	//	PrevID struct {
+	//		AnchorPoint string `json:"anchor_point"`
+	//		AssetID     string `json:"asset_id"`
+	//		ScriptKey   string `json:"script_key"`
+	//	} `json:"prev_id"`
+	//	SplitCommitment struct {
+	//		RootAsset struct {
+	//			AssetGenesis struct {
+	//				GenesisPoint string `json:"genesis_point"`
+	//				Name         string `json:"name"`
+	//				MetaHash     string `json:"meta_hash"`
+	//				AssetID      string `json:"asset_id"`
+	//			} `json:"asset_genesis"`
+	//			Amount        int    `json:"amount"`
+	//			ScriptKey     string `json:"script_key"`
+	//			PrevWitnesses []struct {
+	//				PrevID struct {
+	//					AnchorPoint string `json:"anchor_point"`
+	//					AssetID     string `json:"asset_id"`
+	//					ScriptKey   string `json:"script_key"`
+	//				} `json:"prev_id"`
+	//				TxWitness []string `json:"tx_witness"`
+	//			} `json:"prev_witnesses"`
+	//		} `json:"root_asset"`
+	//	} `json:"split_commitment"`
+	//} `json:"prev_witnesses"`
+	Proof string `json:"proof"`
+}
+
+func ProcessAssetTransferLeave(response *universerpc.AssetLeafResponse) *[]AssetTransferLeave {
+	var assetTransferLeaves []AssetTransferLeave
+	for _, leave := range response.Leaves {
+		assetTransferLeaves = append(assetTransferLeaves, AssetTransferLeave{
+			Name:      leave.Asset.AssetGenesis.Name,
+			AssetID:   hex.EncodeToString(leave.Asset.AssetGenesis.AssetId),
+			Amount:    int(leave.Asset.Amount),
+			ScriptKey: hex.EncodeToString(leave.Asset.ScriptKey),
+			Proof:     hex.EncodeToString(leave.Proof),
+		})
+	}
+	return &assetTransferLeaves
+}
+
+func AssetLeavesTransfer(id string) string {
+	response := AssetLeavesSpecified(id, universerpc.ProofType_PROOF_TYPE_TRANSFER.String())
+	if response == nil {
+		fmt.Printf("%s universerpc AssetLeaves Error.\n", GetTimeNow())
+		return MakeJsonResult(false, errors.New("null asset leaves").Error(), nil)
+	}
+	assetTransferLeaves := ProcessAssetTransferLeave(response)
+	return MakeJsonResult(true, "", assetTransferLeaves)
+}
+
+func AssetLeavesTransfer_ONLY_FOR_TEST(id string) *[]AssetTransferLeave {
+	response := AssetLeavesSpecified(id, universerpc.ProofType_PROOF_TYPE_TRANSFER.String())
+	if response == nil {
+		fmt.Printf("%s universerpc AssetLeaves Error.\n", GetTimeNow())
+		return nil
+	}
+	return ProcessAssetTransferLeave(response)
+}
+
+func DecodeRawProofByte(rawProof []byte) *taprpc.DecodeProofResponse {
+	result, err := decodeProof(rawProof, 0, false, false)
+	if err != nil {
+		return nil
+	}
+	return result
+}
+
+// DecodeRawProof
+// @dev:
+func DecodeRawProofString(proof string) *taprpc.DecodeProofResponse {
+	decodeString, err := hex.DecodeString(proof)
+	if err != nil {
+		return nil
+	}
+	return DecodeRawProofByte(decodeString)
+}
+
+type DecodedProof struct {
+	NumberOfProofs  int    `json:"number_of_proofs"`
+	Name            string `json:"name"`
+	AssetID         string `json:"asset_id"`
+	Amount          int    `json:"amount"`
+	ScriptKey       string `json:"script_key"`
+	AnchorTx        string `json:"anchor_tx"`
+	AnchorBlockHash string `json:"anchor_block_hash"`
+	AnchorOutpoint  string `json:"anchor_outpoint"`
+	InternalKey     string `json:"internal_key"`
+	MerkleRoot      string `json:"merkle_root"`
+	BlockHeight     int    `json:"block_height"`
+}
+
+func ProcessProof(response *taprpc.DecodeProofResponse) *DecodedProof {
+	if response == nil {
+		return nil
+	}
+	return &DecodedProof{
+		NumberOfProofs:  int(response.DecodedProof.NumberOfProofs),
+		Name:            response.DecodedProof.Asset.AssetGenesis.Name,
+		AssetID:         hex.EncodeToString(response.DecodedProof.Asset.AssetGenesis.AssetId),
+		Amount:          int(response.DecodedProof.Asset.Amount),
+		ScriptKey:       hex.EncodeToString(response.DecodedProof.Asset.ScriptKey),
+		AnchorTx:        hex.EncodeToString(response.DecodedProof.Asset.ChainAnchor.AnchorTx),
+		AnchorBlockHash: response.DecodedProof.Asset.ChainAnchor.AnchorBlockHash,
+		AnchorOutpoint:  response.DecodedProof.Asset.ChainAnchor.AnchorOutpoint,
+		InternalKey:     hex.EncodeToString(response.DecodedProof.Asset.ChainAnchor.InternalKey),
+		MerkleRoot:      hex.EncodeToString(response.DecodedProof.Asset.ChainAnchor.MerkleRoot),
+		BlockHeight:     int(response.DecodedProof.Asset.ChainAnchor.BlockHeight),
+	}
+}
+
+func DecodeRawProof(proof string) string {
+	response := DecodeRawProofString(proof)
+	if response == nil {
+		return MakeJsonResult(false, "null raw proof", nil)
+	}
+	return MakeJsonResult(true, "", ProcessProof(response))
+}
+
+func allAssetList() *taprpc.ListAssetResponse {
+	response, err := listAssets(false, true, false)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	return response
+}
+
+type ListAllAsset struct {
+	Version            string `json:"version"`
+	GenesisPoint       string `json:"genesis_point"`
+	GenesisName        string `json:"genesis_name"`
+	GenesisMetaHash    string `json:"genesis_meta_hash"`
+	GenesisAssetID     string `json:"genesis_asset_id"`
+	GenesisAssetType   string `json:"genesis_asset_type"`
+	GenesisOutputIndex int    `json:"genesis_output_index"`
+	Amount             string `json:"amount"`
+	LockTime           int    `json:"lock_time"`
+	RelativeLockTime   int    `json:"relative_lock_time"`
+	ScriptVersion      int    `json:"script_version"`
+	ScriptKey          string `json:"script_key"`
+	ScriptKeyIsLocal   bool   `json:"script_key_is_local"`
+	AnchorTx           string `json:"anchor_tx"`
+	AnchorBlockHash    string `json:"anchor_block_hash"`
+	AnchorOutpoint     string `json:"anchor_outpoint"`
+	AnchorInternalKey  string `json:"anchor_internal_key"`
+	AnchorBlockHeight  int    `json:"anchor_block_height"`
+	IsSpent            bool   `json:"is_spent"`
+	LeaseOwner         string `json:"lease_owner"`
+	LeaseExpiry        string `json:"lease_expiry"`
+	IsBurn             bool   `json:"is_burn"`
+}
+
+func ProcessListAllAssets(response *taprpc.ListAssetResponse) *[]ListAllAsset {
+	if response == nil || response.Assets == nil || len(response.Assets) == 0 {
+		return nil
+	}
+	var listAllAssets []ListAllAsset
+	for _, asset := range response.Assets {
+		listAllAssets = append(listAllAssets, ListAllAsset{
+			Version:            asset.Version.String(),
+			GenesisPoint:       asset.AssetGenesis.GenesisPoint,
+			GenesisName:        asset.AssetGenesis.Name,
+			GenesisMetaHash:    hex.EncodeToString(asset.AssetGenesis.MetaHash),
+			GenesisAssetID:     hex.EncodeToString(asset.AssetGenesis.AssetId),
+			GenesisAssetType:   asset.AssetGenesis.AssetType.String(),
+			GenesisOutputIndex: int(asset.AssetGenesis.OutputIndex),
+			Amount:             strconv.FormatUint(asset.Amount, 10),
+			LockTime:           int(asset.LockTime),
+			RelativeLockTime:   int(asset.RelativeLockTime),
+			ScriptVersion:      int(asset.ScriptVersion),
+			ScriptKey:          hex.EncodeToString(asset.ScriptKey),
+			ScriptKeyIsLocal:   asset.ScriptKeyIsLocal,
+			AnchorTx:           hex.EncodeToString(asset.ChainAnchor.AnchorTx),
+			AnchorBlockHash:    asset.ChainAnchor.AnchorBlockHash,
+			AnchorOutpoint:     asset.ChainAnchor.AnchorOutpoint,
+			AnchorInternalKey:  hex.EncodeToString(asset.ChainAnchor.InternalKey),
+			AnchorBlockHeight:  int(asset.ChainAnchor.BlockHeight),
+			IsSpent:            asset.IsSpent,
+			LeaseOwner:         hex.EncodeToString(asset.LeaseOwner),
+			LeaseExpiry:        strconv.FormatInt(asset.LeaseExpiry, 10),
+			IsBurn:             asset.IsBurn,
+		})
+	}
+	if len(listAllAssets) == 0 {
+		return nil
+	}
+	return &listAllAssets
+}
+
+func GetAllAssetList() string {
+	response := allAssetList()
+	if response == nil {
+		return MakeJsonResult(false, "null asset list", nil)
+	}
+	return MakeJsonResult(true, "", ProcessListAllAssets(response))
+}
+
+type ListAllAssetSimplified struct {
+	GenesisName      string `json:"genesis_name"`
+	GenesisAssetID   string `json:"genesis_asset_id"`
+	GenesisAssetType string `json:"genesis_asset_type"`
+	Amount           string `json:"amount"`
+	AnchorOutpoint   string `json:"anchor_outpoint"`
+	IsSpent          bool   `json:"is_spent"`
+}
+
+func ProcessListAllAssetsSimplified(result *[]ListAllAsset) *[]ListAllAssetSimplified {
+	if result == nil || len(*result) == 0 {
+		return nil
+	}
+	var listAllAssetsSimplified []ListAllAssetSimplified
+	for _, asset := range *result {
+		listAllAssetsSimplified = append(listAllAssetsSimplified, ListAllAssetSimplified{
+			GenesisName:      asset.GenesisName,
+			GenesisAssetID:   asset.GenesisAssetID,
+			GenesisAssetType: asset.GenesisAssetType,
+			Amount:           asset.Amount,
+			AnchorOutpoint:   asset.AnchorOutpoint,
+			IsSpent:          asset.IsSpent,
+		})
+	}
+	if len(listAllAssetsSimplified) == 0 {
+		return nil
+	}
+	return &listAllAssetsSimplified
+}
+
+// GetAllAssetListSimplified
+// @dev:
+func GetAllAssetListSimplified() string {
+	result := ProcessListAllAssetsSimplified(ProcessListAllAssets(allAssetList()))
+	if result == nil {
+		return MakeJsonResult(false, "null asset list", nil)
+	}
+	return MakeJsonResult(true, "", result)
+}
+
+func GetAllAssetIdByListAll() []string {
+	id := make(map[string]bool)
+	var ids []string
+	result := ProcessListAllAssetsSimplified(ProcessListAllAssets(allAssetList()))
+	//var index int
+	if result == nil || len(*result) == 0 {
+		return nil
+	}
+	for _, asset := range *result {
+		//index++
+		//fmt.Println(index, asset.GenesisAssetID)
+		id[asset.GenesisAssetID] = true
+	}
+	for k, _ := range id {
+		ids = append(ids, k)
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	//fmt.Println(len(ids))
+	return ids
+}
+
+// SyncUniverseFullIssuanceByIdSlice
+// @dev
+func SyncUniverseFullIssuanceByIdSlice(ids []string) string {
+	universeHost := "testnet.universe.lightning.finance:10029"
+	var targets []*universerpc.SyncTarget
+	for _, id := range ids {
+		targets = append(targets, &universerpc.SyncTarget{
+			Id: &universerpc.ID{
+				Id: &universerpc.ID_AssetIdStr{
+					AssetIdStr: id,
+				},
+				ProofType: universerpc.ProofType_PROOF_TYPE_ISSUANCE,
+			},
+		})
+	}
+	response, err := syncUniverse(universeHost, targets, universerpc.UniverseSyncMode_SYNC_FULL)
+	if err != nil {
+		return MakeJsonResult(false, err.Error(), "")
 	}
 	return MakeJsonResult(true, "", response)
+}
+
+// SyncUniverseFullTransferByIdSlice
+// @dev
+func SyncUniverseFullTransferByIdSlice(ids []string) string {
+	universeHost := "testnet.universe.lightning.finance:10029"
+	var targets []*universerpc.SyncTarget
+	for _, id := range ids {
+		targets = append(targets, &universerpc.SyncTarget{
+			Id: &universerpc.ID{
+				Id: &universerpc.ID_AssetIdStr{
+					AssetIdStr: id,
+				},
+				ProofType: universerpc.ProofType_PROOF_TYPE_TRANSFER,
+			},
+		})
+	}
+	response, err := syncUniverse(universeHost, targets, universerpc.UniverseSyncMode_SYNC_FULL)
+	if err != nil {
+		return MakeJsonResult(false, err.Error(), "")
+	}
+	return MakeJsonResult(true, "", response)
+}
+
+// SyncUniverseFullNoSlice
+// @dev
+// @note: Sync all assets
+func SyncUniverseFullNoSlice() string {
+	universeHost := "testnet.universe.lightning.finance:10029"
+	var targets []*universerpc.SyncTarget
+
+	response, err := syncUniverse(universeHost, targets, universerpc.UniverseSyncMode_SYNC_FULL)
+	if err != nil {
+		return MakeJsonResult(false, err.Error(), "")
+	}
+	return MakeJsonResult(true, "", response)
+}
+
+type AssetHoldInfo struct {
+	Name      string `json:"name"`
+	AssetId   string `json:"assetId"`
+	Amount    int    `json:"amount"`
+	Outpoint  string `json:"outpoint"`
+	Address   string `json:"address"`
+	ScriptKey string `json:"scriptKey"`
+	Proof     string `json:"proof"`
+}
+
+// TODO
+func OutpointToAddress(outpoint string) string {
+	return ""
+}
+
+func CompareScriptKey(scriptKey1 string, scriptKey2 string) string {
+	if scriptKey1 == scriptKey2 {
+		return scriptKey1
+	} else if len(scriptKey1) == len(scriptKey2) {
+		return ""
+	} else if len(scriptKey1) > len(scriptKey2) {
+		if scriptKey1 == "02"+scriptKey2 || scriptKey1 == "2"+scriptKey2 {
+			return "02" + scriptKey2
+		} else if true{
+		// TODO , 2 of three compare
+		}
+
+	} else if len(scriptKey1) < len(scriptKey2) {
+		if "02"+scriptKey1 == scriptKey2 || "2"+scriptKey1 == scriptKey2 {
+			return "02" + scriptKey1
+		}
+	}
+	return ""
 }

@@ -326,7 +326,6 @@ func queryAssetStats(assetId string) (*universerpc.UniverseAssetStats, error) {
 }
 
 func syncUniverse(universeHost string, syncTargets []*universerpc.SyncTarget, syncMode universerpc.UniverseSyncMode) (*universerpc.SyncResponse, error) {
-
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")

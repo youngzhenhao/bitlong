@@ -145,6 +145,22 @@ func GetAddressInfoByMempool(address string) string {
 	return MakeJsonResult(true, "", getAddressResponse)
 }
 
+func getAddressInfoByMempool(address string) *GetAddressResponse {
+	targetUrl := "https://mempool.space/testnet/api/address/" + address
+	response, err := http.Get(targetUrl)
+	if err != nil {
+		fmt.Printf("%s http.PostForm :%v\n", GetTimeNow(), err)
+		return nil
+	}
+	bodyBytes, _ := io.ReadAll(response.Body)
+	var getAddressResponse GetAddressResponse
+	if err := json.Unmarshal(bodyBytes, &getAddressResponse); err != nil {
+		fmt.Printf("%s GAIBM json.Unmarshal :%v\n", GetTimeNow(), err)
+		return nil
+	}
+	return &getAddressResponse
+}
+
 // GetAddressTransactionsByMempool
 // @Description: Get address transactions by mempool api
 // @param address

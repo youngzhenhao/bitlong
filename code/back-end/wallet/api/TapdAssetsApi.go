@@ -11,10 +11,10 @@ import (
 )
 
 type SimplifiedAssetsTransfer struct {
-	TransferTimestamp  string                  `json:"transfer_timestamp"`
+	TransferTimestamp  int                     `json:"transfer_timestamp"`
 	AnchorTxHash       string                  `json:"anchor_tx_hash"`
 	AnchorTxHeightHint int                     `json:"anchor_tx_height_hint"`
-	AnchorTxChainFees  string                  `json:"anchor_tx_chain_fees"`
+	AnchorTxChainFees  int                     `json:"anchor_tx_chain_fees"`
 	Inputs             []AssetsTransfersInput  `json:"inputs"`
 	Outputs            []AssetsTransfersOutput `json:"outputs"`
 }
@@ -28,7 +28,7 @@ type AssetsTransfersInput struct {
 
 type AssetsTransfersOutputAnchor struct {
 	Outpoint string `json:"outpoint"`
-	Value    string `json:"value"`
+	Value    int    `json:"value"`
 	//TaprootAssetRoot string `json:"taproot_asset_root"`
 	//MerkleRoot       string `json:"merkle_root"`
 	//TapscriptSibling string `json:"tapscript_sibling"`
@@ -37,13 +37,14 @@ type AssetsTransfersOutputAnchor struct {
 
 type AssetsTransfersOutput struct {
 	Anchor           AssetsTransfersOutputAnchor
-	ScriptKeyIsLocal bool   `json:"script_key_is_local"`
-	Amount           string `json:"amount"`
+	ScriptKeyIsLocal bool `json:"script_key_is_local"`
+	Amount           int  `json:"amount"`
 	//SplitCommitRootHash string `json:"split_commit_root_hash"`
 	OutputType   string `json:"output_type"`
 	AssetVersion string `json:"asset_version"`
 }
 
+// @dev: May be deprecated
 func SimplifyAssetsTransfer() *[]SimplifiedAssetsTransfer {
 	var simpleTransfers []SimplifiedAssetsTransfer
 	response, _ := listTransfers()
@@ -62,24 +63,24 @@ func SimplifyAssetsTransfer() *[]SimplifiedAssetsTransfer {
 			outputs = append(outputs, AssetsTransfersOutput{
 				Anchor: AssetsTransfersOutputAnchor{
 					Outpoint: _output.Anchor.Outpoint,
-					Value:    strconv.FormatInt(_output.Anchor.Value, 10),
+					Value:    int(_output.Anchor.Value),
 					//TaprootAssetRoot: hex.EncodeToString(_output.Anchor.TaprootAssetRoot),
 					//MerkleRoot:       hex.EncodeToString(_output.Anchor.MerkleRoot),
 					//TapscriptSibling: hex.EncodeToString(_output.Anchor.TapscriptSibling),
 					//NumPassiveAssets: int(_output.Anchor.NumPassiveAssets),
 				},
 				ScriptKeyIsLocal: _output.ScriptKeyIsLocal,
-				Amount:           strconv.FormatUint(_output.Amount, 10),
+				Amount:           int(_output.Amount),
 				//SplitCommitRootHash: hex.EncodeToString(_output.SplitCommitRootHash),
 				OutputType:   _output.OutputType.String(),
 				AssetVersion: _output.AssetVersion.String(),
 			})
 		}
 		simpleTransfers = append(simpleTransfers, SimplifiedAssetsTransfer{
-			TransferTimestamp:  strconv.FormatInt(transfers.TransferTimestamp, 10),
+			TransferTimestamp:  int(transfers.TransferTimestamp),
 			AnchorTxHash:       hex.EncodeToString(transfers.AnchorTxHash),
 			AnchorTxHeightHint: int(transfers.AnchorTxHeightHint),
-			AnchorTxChainFees:  strconv.FormatInt(transfers.AnchorTxChainFees, 10),
+			AnchorTxChainFees:  int(transfers.AnchorTxChainFees),
 			Inputs:             inputs,
 			Outputs:            outputs,
 		})
@@ -90,7 +91,7 @@ func SimplifyAssetsTransfer() *[]SimplifiedAssetsTransfer {
 type SimplifiedAssetsList struct {
 	Version      string                 `json:"version"`
 	AssetGenesis AssetsListAssetGenesis `json:"asset_genesis"`
-	Amount       string                 `json:"amount"`
+	Amount       int                    `json:"amount"`
 	LockTime     int                    `json:"lock_time"`
 	//RelativeLockTime int    `json:"relative_lock_time"`
 	//ScriptVersion    int    `json:"script_version"`
@@ -106,7 +107,7 @@ type SimplifiedAssetsList struct {
 	//PrevWitnesses []interface{} `json:"prev_witnesses"`
 	IsSpent     bool   `json:"is_spent"`
 	LeaseOwner  string `json:"lease_owner"`
-	LeaseExpiry string `json:"lease_expiry"`
+	LeaseExpiry int    `json:"lease_expiry"`
 	IsBurn      bool   `json:"is_burn"`
 }
 
@@ -130,6 +131,7 @@ type AssetsListChainAnchor struct {
 	BlockHeight      int    `json:"block_height"`
 }
 
+// @dev: May be deprecated
 func SimplifyAssetsList(assets []*taprpc.Asset) *[]SimplifiedAssetsList {
 	var simpleAssetsList []SimplifiedAssetsList
 	for _, _asset := range assets {
@@ -144,7 +146,7 @@ func SimplifyAssetsList(assets []*taprpc.Asset) *[]SimplifiedAssetsList {
 				OutputIndex:  int(_asset.AssetGenesis.OutputIndex),
 				Version:      int(_asset.AssetGenesis.Version),
 			},
-			Amount:           strconv.FormatUint(_asset.Amount, 10),
+			Amount:           int(_asset.Amount),
 			LockTime:         int(_asset.LockTime),
 			ScriptKeyIsLocal: _asset.ScriptKeyIsLocal,
 			//RawGroupKey:      hex.EncodeToString(_asset.AssetGroup.RawGroupKey),
@@ -159,7 +161,7 @@ func SimplifyAssetsList(assets []*taprpc.Asset) *[]SimplifiedAssetsList {
 			},
 			IsSpent:     _asset.IsSpent,
 			LeaseOwner:  hex.EncodeToString(_asset.LeaseOwner),
-			LeaseExpiry: strconv.FormatInt(_asset.LeaseExpiry, 10),
+			LeaseExpiry: int(_asset.LeaseExpiry),
 			IsBurn:      _asset.IsBurn,
 		})
 	}
@@ -461,6 +463,16 @@ func AssetLeavesTransfer_ONLY_FOR_TEST(id string) *[]AssetTransferLeave {
 	return ProcessAssetTransferLeave(response)
 }
 
+// @dev: Not-exported same copy of AssetLeavesTransfer_ONLY_FOR_TEST
+func assetLeavesTransfer(id string) *[]AssetTransferLeave {
+	response := AssetLeavesSpecified(id, universerpc.ProofType_PROOF_TYPE_TRANSFER.String())
+	if response == nil {
+		fmt.Printf("%s universerpc AssetLeaves Error.\n", GetTimeNow())
+		return nil
+	}
+	return ProcessAssetTransferLeave(response)
+}
+
 func DecodeRawProofByte(rawProof []byte) *taprpc.DecodeProofResponse {
 	result, err := decodeProof(rawProof, 0, false, false)
 	if err != nil {
@@ -537,7 +549,7 @@ type ListAllAsset struct {
 	GenesisAssetID     string `json:"genesis_asset_id"`
 	GenesisAssetType   string `json:"genesis_asset_type"`
 	GenesisOutputIndex int    `json:"genesis_output_index"`
-	Amount             string `json:"amount"`
+	Amount             int    `json:"amount"`
 	LockTime           int    `json:"lock_time"`
 	RelativeLockTime   int    `json:"relative_lock_time"`
 	ScriptVersion      int    `json:"script_version"`
@@ -550,7 +562,7 @@ type ListAllAsset struct {
 	AnchorBlockHeight  int    `json:"anchor_block_height"`
 	IsSpent            bool   `json:"is_spent"`
 	LeaseOwner         string `json:"lease_owner"`
-	LeaseExpiry        string `json:"lease_expiry"`
+	LeaseExpiry        int    `json:"lease_expiry"`
 	IsBurn             bool   `json:"is_burn"`
 }
 
@@ -568,7 +580,7 @@ func ProcessListAllAssets(response *taprpc.ListAssetResponse) *[]ListAllAsset {
 			GenesisAssetID:     hex.EncodeToString(asset.AssetGenesis.AssetId),
 			GenesisAssetType:   asset.AssetGenesis.AssetType.String(),
 			GenesisOutputIndex: int(asset.AssetGenesis.OutputIndex),
-			Amount:             strconv.FormatUint(asset.Amount, 10),
+			Amount:             int(asset.Amount),
 			LockTime:           int(asset.LockTime),
 			RelativeLockTime:   int(asset.RelativeLockTime),
 			ScriptVersion:      int(asset.ScriptVersion),
@@ -581,7 +593,7 @@ func ProcessListAllAssets(response *taprpc.ListAssetResponse) *[]ListAllAsset {
 			AnchorBlockHeight:  int(asset.ChainAnchor.BlockHeight),
 			IsSpent:            asset.IsSpent,
 			LeaseOwner:         hex.EncodeToString(asset.LeaseOwner),
-			LeaseExpiry:        strconv.FormatInt(asset.LeaseExpiry, 10),
+			LeaseExpiry:        int(asset.LeaseExpiry),
 			IsBurn:             asset.IsBurn,
 		})
 	}
@@ -603,7 +615,7 @@ type ListAllAssetSimplified struct {
 	GenesisName      string `json:"genesis_name"`
 	GenesisAssetID   string `json:"genesis_asset_id"`
 	GenesisAssetType string `json:"genesis_asset_type"`
-	Amount           string `json:"amount"`
+	Amount           int    `json:"amount"`
 	AnchorOutpoint   string `json:"anchor_outpoint"`
 	IsSpent          bool   `json:"is_spent"`
 }
@@ -729,7 +741,8 @@ type AssetHoldInfo struct {
 	Outpoint  string `json:"outpoint"`
 	Address   string `json:"address"`
 	ScriptKey string `json:"scriptKey"`
-	Proof     string `json:"proof"`
+	//Proof     string `json:"proof"`
+	IsSpent bool `json:"isSpent"`
 }
 
 // OutpointToAddress
@@ -742,6 +755,24 @@ func OutpointToAddress(outpoint string) string {
 		return ""
 	}
 	return response.Vout[index].ScriptpubkeyAddress
+}
+
+func TransactionAndIndexToAddress(transaction string, indexStr string) string {
+	index, _ := strconv.Atoi(indexStr)
+	response, err := getTransactionByMempool(transaction)
+	if err != nil {
+		return ""
+	}
+	return response.Vout[index].ScriptpubkeyAddress
+}
+
+func TransactionAndIndexToValue(transaction string, indexStr string) int {
+	index, _ := strconv.Atoi(indexStr)
+	response, err := getTransactionByMempool(transaction)
+	if err != nil {
+		return 0
+	}
+	return response.Vout[index].Value
 }
 
 // getTransactionAndIndexByOutpoint
@@ -778,8 +809,166 @@ func CompareScriptKey(scriptKey1 string, scriptKey2 string) string {
 	return ""
 }
 
-// GetAssetHoldInfos
+// GetAssetHoldInfosIncludeSpent
 // @dev
-func GetAssetHoldInfos() {
-	// TODO: Get Leaves and keys to generate hold-infos
+func GetAssetHoldInfosIncludeSpent(id string) *[]AssetHoldInfo {
+	assetLeavesTransfers := assetLeavesTransfer(id)
+	var idToAssetHoldInfo []AssetHoldInfo
+	for _, leaf := range *assetLeavesTransfers {
+		outpoint := ProcessProof(DecodeRawProofString(leaf.Proof)).AnchorOutpoint
+		address := OutpointToAddress(outpoint)
+		idToAssetHoldInfo = append(idToAssetHoldInfo, AssetHoldInfo{
+			Name:      leaf.Name,
+			AssetId:   leaf.AssetID,
+			Amount:    leaf.Amount,
+			Outpoint:  outpoint,
+			Address:   address,
+			ScriptKey: leaf.ScriptKey,
+			//Proof:     leaf.Proof,
+			IsSpent: AddressIsSpentAll(address),
+		})
+	}
+	return &idToAssetHoldInfo
+}
+
+// GetAssetHoldInfosExcludeSpent
+// @Description: This function uses multiple http requests to call mempool's api during processing,
+// and it is recommended to store the data in a database and update it manually
+// @param id
+// @return *[]AssetHoldInfo
+// @dev: Get hold info of asset
+func GetAssetHoldInfosExcludeSpent(id string) *[]AssetHoldInfo {
+	assetLeavesTransfers := assetLeavesTransfer(id)
+	var idToAssetHoldInfo []AssetHoldInfo
+	for _, leaf := range *assetLeavesTransfers {
+		outpoint := ProcessProof(DecodeRawProofString(leaf.Proof)).AnchorOutpoint
+		address := OutpointToAddress(outpoint)
+		isSpent := AddressIsSpentAll(address)
+		if !isSpent {
+			idToAssetHoldInfo = append(idToAssetHoldInfo, AssetHoldInfo{
+				Name:      leaf.Name,
+				AssetId:   leaf.AssetID,
+				Amount:    leaf.Amount,
+				Outpoint:  outpoint,
+				Address:   address,
+				ScriptKey: leaf.ScriptKey,
+				IsSpent:   isSpent,
+			})
+		}
+	}
+	return &idToAssetHoldInfo
+}
+
+func GetAssetHoldInfosIncludeSpentSlow(id string) string {
+	response := GetAssetHoldInfosIncludeSpent(id)
+	if response == nil {
+		return MakeJsonResult(false, "Get asset hold infos include spent fail, null response.", nil)
+	}
+	return MakeJsonResult(true, "", response)
+}
+
+// @dev
+func GetAssetHoldInfosExcludeSpentSlow(id string) string {
+	response := GetAssetHoldInfosExcludeSpent(id)
+	if response == nil {
+		return MakeJsonResult(false, "Get asset hold infos exclude spent fail, null response.", nil)
+	}
+	return MakeJsonResult(true, "", response)
+}
+
+// SyncAllAssetByList
+// @dev: Use this api to sync all
+// @dev
+func SyncAllAssetByList() {
+	SyncAssetAllSlice(GetAllAssetIdByListAll())
+}
+
+func AddressIsSpent(address string) bool {
+	addressInfo := getAddressInfoByMempool(address)
+	if addressInfo.ChainStats.SpentTxoSum == 0 {
+		return false
+	}
+	return true
+
+}
+
+func AddressIsSpentAll(address string) bool {
+	if !AddressIsSpent(address) {
+		return false
+	}
+	addressInfo := getAddressInfoByMempool(address)
+	if int(addressInfo.ChainStats.FundedTxoSum) == addressInfo.ChainStats.SpentTxoSum {
+		return true
+	}
+	return false
+}
+
+func OutpointToTransactionInfo(outpoint string) *AssetTransactionInfo {
+	transaction, indexStr := getTransactionAndIndexByOutpoint(outpoint)
+	index, _ := strconv.Atoi(indexStr)
+	response, err := getTransactionByMempool(transaction)
+	if err != nil {
+		return nil
+	}
+	var inputs []string
+	for _, input := range response.Vin {
+		if input.Prevout.Value == 1000 {
+			inputs = append(inputs, input.Prevout.ScriptpubkeyAddress)
+		}
+	}
+	result := AssetTransactionInfo{
+		AnchorTransaction: response.Txid,
+		From:              inputs,
+		To:                response.Vout[index].ScriptpubkeyAddress,
+		//Name:              "",
+		//AssetId:           "",
+		//Amount:            0,
+		BlockTime:       response.Status.BlockTime,
+		FeeRate:         RoundToDecimalPlace(float64(response.Fee)/(float64(response.Weight)/4), 2),
+		ConfirmedBlocks: BlockTipHeight() - response.Status.BlockHeight,
+		//IsSpent:           false,
+	}
+	return &result
+}
+
+type AssetTransactionInfo struct {
+	AnchorTransaction string   `json:"anchor_transaction"`
+	From              []string `json:"from"`
+	To                string   `json:"to"`
+	Name              string   `json:"name"`
+	AssetId           string   `json:"assetId"`
+	Amount            int      `json:"amount"`
+	BlockTime         int      `json:"block_time"`
+	FeeRate           float64  `json:"fee_rate"`
+	ConfirmedBlocks   int      `json:"confirmed_blocks"`
+	IsSpent           bool     `json:"isSpent"`
+}
+
+func GetAssetTransactionInfos(id string) *[]AssetTransactionInfo {
+	assetLeavesTransfers := assetLeavesTransfer(id)
+	var idToAssetTransactionInfos []AssetTransactionInfo
+	for _, leaf := range *assetLeavesTransfers {
+		outpoint := ProcessProof(DecodeRawProofString(leaf.Proof)).AnchorOutpoint
+		transactionInfo := OutpointToTransactionInfo(outpoint)
+		transactionInfo.Name = leaf.Name
+		transactionInfo.AssetId = leaf.AssetID
+		transactionInfo.Amount = leaf.Amount
+		transactionInfo.IsSpent = AddressIsSpentAll(transactionInfo.To)
+		idToAssetTransactionInfos = append(idToAssetTransactionInfos, *transactionInfo)
+	}
+	return &idToAssetTransactionInfos
+}
+
+// @dev
+func GetAssetTransactionInfosSlow(id string) string {
+	response := GetAssetTransactionInfos(id)
+	if response == nil {
+		return MakeJsonResult(false, "Get asset transaction infos fail, null response.", nil)
+	}
+	return MakeJsonResult(true, "", response)
+}
+
+func GetAssetInfoById(id string) {
+	//	TODO: Get info by universe leaves issuance
+
 }

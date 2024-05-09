@@ -223,8 +223,7 @@ func SyncAssetTransfer(id string) string {
 	return SyncUniverseFullSpecified("", id, universerpc.ProofType_PROOF_TYPE_TRANSFER.String())
 }
 
-// SyncAssetAll
-// @dev: 1
+// SyncAssetAll @dev
 func SyncAssetAll(id string) {
 	fmt.Println(SyncAssetIssuance(id))
 	fmt.Println(SyncAssetTransfer(id))
@@ -232,7 +231,6 @@ func SyncAssetAll(id string) {
 
 // SyncAssetAllSlice
 // @dev
-// @note: api.SyncAssetAllSlice(api.GetAllAssetIdByListAll())
 func SyncAssetAllSlice(ids []string) {
 	if len(ids) == 0 {
 		return
@@ -287,7 +285,6 @@ func allAssetBalances() *[]AssetBalance {
 }
 
 // GetAllAssetBalances
-// @dev: 0
 // @note: Get all balance of assets info
 func GetAllAssetBalances() string {
 	result := allAssetBalances()
@@ -321,7 +318,8 @@ func GetAllAssetGroupBalances() string {
 	return MakeJsonResult(true, "", result)
 }
 
-func GetAllAssetId(assetBalance *[]AssetBalance) *[]string {
+// @dev: May be deprecated
+func GetAllAssetIdByAssetBalance(assetBalance *[]AssetBalance) *[]string {
 	if assetBalance == nil {
 		return nil
 	}
@@ -333,10 +331,10 @@ func GetAllAssetId(assetBalance *[]AssetBalance) *[]string {
 }
 
 // SyncAllAssetsByAssetBalance
-// @dev: 2
 // @note: Sync all assets of non-zero-balance to public universe
+// @dev: May be deprecated
 func SyncAllAssetsByAssetBalance() string {
-	ids := GetAllAssetId(allAssetBalances())
+	ids := GetAllAssetIdByAssetBalance(allAssetBalances())
 	if ids != nil {
 		SyncAssetAllSlice(*ids)
 	}
@@ -346,8 +344,9 @@ func SyncAllAssetsByAssetBalance() string {
 // GetAllAssetsIdSlice
 // @dev: 3
 // @note: Get an array including all assets ids
+// @dev: May be deprecated
 func GetAllAssetsIdSlice() string {
-	ids := GetAllAssetId(allAssetBalances())
+	ids := GetAllAssetIdByAssetBalance(allAssetBalances())
 	return MakeJsonResult(true, "", ids)
 }
 
@@ -473,6 +472,72 @@ func assetLeavesTransfer(id string) *[]AssetTransferLeave {
 	return ProcessAssetTransferLeave(response)
 }
 
+type AssetIssuanceLeave struct {
+	Version            string `json:"version"`
+	GenesisPoint       string `json:"genesis_point"`
+	Name               string `json:"name"`
+	MetaHash           string `json:"meta_hash"`
+	AssetID            string `json:"asset_id"`
+	AssetType          string `json:"asset_type"`
+	GenesisOutputIndex int    `json:"genesis_output_index"`
+	Amount             int    `json:"amount"`
+	LockTime           int    `json:"lock_time"`
+	RelativeLockTime   int    `json:"relative_lock_time"`
+	ScriptVersion      int    `json:"script_version"`
+	ScriptKey          string `json:"script_key"`
+	ScriptKeyIsLocal   bool   `json:"script_key_is_local"`
+	IsSpent            bool   `json:"is_spent"`
+	LeaseOwner         string `json:"lease_owner"`
+	LeaseExpiry        int    `json:"lease_expiry"`
+	IsBurn             bool   `json:"is_burn"`
+	Proof              string `json:"proof"`
+}
+
+func ProcessAssetIssuanceLeave(response *universerpc.AssetLeafResponse) *AssetIssuanceLeave {
+	if response == nil {
+		return nil
+	}
+	return &AssetIssuanceLeave{
+		Version:            response.Leaves[0].Asset.Version.String(),
+		GenesisPoint:       response.Leaves[0].Asset.AssetGenesis.GenesisPoint,
+		Name:               response.Leaves[0].Asset.AssetGenesis.Name,
+		MetaHash:           hex.EncodeToString(response.Leaves[0].Asset.AssetGenesis.MetaHash),
+		AssetID:            hex.EncodeToString(response.Leaves[0].Asset.AssetGenesis.AssetId),
+		AssetType:          response.Leaves[0].Asset.AssetGenesis.AssetType.String(),
+		GenesisOutputIndex: int(response.Leaves[0].Asset.AssetGenesis.OutputIndex),
+		Amount:             int(response.Leaves[0].Asset.Amount),
+		LockTime:           int(response.Leaves[0].Asset.LockTime),
+		RelativeLockTime:   int(response.Leaves[0].Asset.RelativeLockTime),
+		ScriptVersion:      int(response.Leaves[0].Asset.ScriptVersion),
+		ScriptKey:          hex.EncodeToString(response.Leaves[0].Asset.ScriptKey),
+		ScriptKeyIsLocal:   response.Leaves[0].Asset.ScriptKeyIsLocal,
+		IsSpent:            response.Leaves[0].Asset.IsSpent,
+		LeaseOwner:         hex.EncodeToString(response.Leaves[0].Asset.LeaseOwner),
+		LeaseExpiry:        int(response.Leaves[0].Asset.LeaseExpiry),
+		IsBurn:             response.Leaves[0].Asset.IsBurn,
+		Proof:              hex.EncodeToString(response.Leaves[0].Proof),
+	}
+}
+
+func assetLeavesIssuance(id string) *AssetIssuanceLeave {
+	response := AssetLeavesSpecified(id, universerpc.ProofType_PROOF_TYPE_ISSUANCE.String())
+	if response == nil {
+		fmt.Printf("%s Universerpc asset leaves issuance error.\n", GetTimeNow())
+		return nil
+	}
+	return ProcessAssetIssuanceLeave(response)
+}
+
+// @dev
+func GetAssetInfoByIssuanceLeaf(id string) string {
+	response := assetLeavesIssuance(id)
+	if response == nil {
+		fmt.Printf("%s Universerpc asset leaves issuance error.\n", GetTimeNow())
+		return MakeJsonResult(false, errors.New("Null asset leaves").Error(), nil)
+	}
+	return MakeJsonResult(true, "", response)
+}
+
 func DecodeRawProofByte(rawProof []byte) *taprpc.DecodeProofResponse {
 	result, err := decodeProof(rawProof, 0, false, false)
 	if err != nil {
@@ -482,7 +547,7 @@ func DecodeRawProofByte(rawProof []byte) *taprpc.DecodeProofResponse {
 }
 
 // DecodeRawProofString
-// @dev:
+// @dev
 func DecodeRawProofString(proof string) *taprpc.DecodeProofResponse {
 	decodeString, err := hex.DecodeString(proof)
 	if err != nil {
@@ -642,7 +707,7 @@ func ProcessListAllAssetsSimplified(result *[]ListAllAsset) *[]ListAllAssetSimpl
 }
 
 // GetAllAssetListSimplified
-// @dev:
+// @dev
 func GetAllAssetListSimplified() string {
 	result := ProcessListAllAssetsSimplified(ProcessListAllAssets(allAssetList()))
 	if result == nil {
@@ -677,6 +742,7 @@ func GetAllAssetIdByListAll() []string {
 // SyncUniverseFullIssuanceByIdSlice
 // @dev
 // @note: Deprecated
+// @dev: May be deprecated
 func SyncUniverseFullIssuanceByIdSlice(ids []string) string {
 	universeHost := "testnet.universe.lightning.finance:10029"
 	var targets []*universerpc.SyncTarget
@@ -700,6 +766,7 @@ func SyncUniverseFullIssuanceByIdSlice(ids []string) string {
 // SyncUniverseFullTransferByIdSlice
 // @dev
 // @note: Deprecated
+// @dev: May be deprecated
 func SyncUniverseFullTransferByIdSlice(ids []string) string {
 	universeHost := "testnet.universe.lightning.finance:10029"
 	var targets []*universerpc.SyncTarget
@@ -746,7 +813,7 @@ type AssetHoldInfo struct {
 }
 
 // OutpointToAddress
-// @dev:
+// @dev
 func OutpointToAddress(outpoint string) string {
 	transaction, indexStr := getTransactionAndIndexByOutpoint(outpoint)
 	index, _ := strconv.Atoi(indexStr)
@@ -867,22 +934,6 @@ func GetAssetHoldInfosIncludeSpentSlow(id string) string {
 	return MakeJsonResult(true, "", response)
 }
 
-// @dev
-func GetAssetHoldInfosExcludeSpentSlow(id string) string {
-	response := GetAssetHoldInfosExcludeSpent(id)
-	if response == nil {
-		return MakeJsonResult(false, "Get asset hold infos exclude spent fail, null response.", nil)
-	}
-	return MakeJsonResult(true, "", response)
-}
-
-// SyncAllAssetByList
-// @dev: Use this api to sync all
-// @dev
-func SyncAllAssetByList() {
-	SyncAssetAllSlice(GetAllAssetIdByListAll())
-}
-
 func AddressIsSpent(address string) bool {
 	addressInfo := getAddressInfoByMempool(address)
 	if addressInfo.ChainStats.SpentTxoSum == 0 {
@@ -959,16 +1010,38 @@ func GetAssetTransactionInfos(id string) *[]AssetTransactionInfo {
 	return &idToAssetTransactionInfos
 }
 
-// @dev
-func GetAssetTransactionInfosSlow(id string) string {
+// SyncAllAssetByList
+// @note: Call this api to sync all
+func SyncAllAssetByList() string {
+	SyncAssetAllSlice(GetAllAssetIdByListAll())
+	return MakeJsonResult(true, "", "Sync Completed.")
+}
+
+// GetAssetInfoById
+// @note: Call this api to get asset info
+func GetAssetInfoById(id string) string {
+	return GetAssetInfoByIssuanceLeaf(id)
+}
+
+// GetAssetHoldInfosExcludeSpentSlow
+// @note: Call this api to get asset hold info which is not be spent
+// @dev: Wrap to call GetAssetHoldInfosExcludeSpent
+// @notice: THIS COST A LOT OF TIME
+func GetAssetHoldInfosExcludeSpentSlow(id string) string {
+	response := GetAssetHoldInfosExcludeSpent(id)
+	if response == nil {
+		return MakeJsonResult(false, "Get asset hold infos exclude spent fail, null response.", nil)
+	}
+	return MakeJsonResult(true, "", response)
+}
+
+// GetAssetTransactionInfoSlow
+// @note: Call this api to get asset transaction info
+// @notice: THIS COST A LOT OF TIME
+func GetAssetTransactionInfoSlow(id string) string {
 	response := GetAssetTransactionInfos(id)
 	if response == nil {
 		return MakeJsonResult(false, "Get asset transaction infos fail, null response.", nil)
 	}
 	return MakeJsonResult(true, "", response)
-}
-
-func GetAssetInfoById(id string) {
-	//	TODO: Get info by universe leaves issuance
-
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/lightninglabs/taproot-assets/taprpc"
 	"github.com/lightninglabs/taproot-assets/taprpc/universerpc"
 	"strconv"
+	"strings"
 )
 
 type SimplifiedAssetsTransfer struct {
@@ -227,7 +228,9 @@ func SyncAssetAll(id string) {
 	fmt.Println(SyncAssetTransfer(id))
 }
 
-// SyncAssetAllSlice @dev
+// SyncAssetAllSlice
+// @dev
+// @note: api.SyncAssetAllSlice(api.GetAllAssetIdByListAll())
 func SyncAssetAllSlice(ids []string) {
 	if len(ids) == 0 {
 		return
@@ -466,7 +469,7 @@ func DecodeRawProofByte(rawProof []byte) *taprpc.DecodeProofResponse {
 	return result
 }
 
-// DecodeRawProof
+// DecodeRawProofString
 // @dev:
 func DecodeRawProofString(proof string) *taprpc.DecodeProofResponse {
 	decodeString, err := hex.DecodeString(proof)
@@ -661,6 +664,7 @@ func GetAllAssetIdByListAll() []string {
 
 // SyncUniverseFullIssuanceByIdSlice
 // @dev
+// @note: Deprecated
 func SyncUniverseFullIssuanceByIdSlice(ids []string) string {
 	universeHost := "testnet.universe.lightning.finance:10029"
 	var targets []*universerpc.SyncTarget
@@ -683,6 +687,7 @@ func SyncUniverseFullIssuanceByIdSlice(ids []string) string {
 
 // SyncUniverseFullTransferByIdSlice
 // @dev
+// @note: Deprecated
 func SyncUniverseFullTransferByIdSlice(ids []string) string {
 	universeHost := "testnet.universe.lightning.finance:10029"
 	var targets []*universerpc.SyncTarget
@@ -727,11 +732,25 @@ type AssetHoldInfo struct {
 	Proof     string `json:"proof"`
 }
 
+// OutpointToAddress
 // TODO
+// @dev:
 func OutpointToAddress(outpoint string) string {
+	transaction, index := GetTransactionAndIndexByOutpoint(outpoint)
+	_ = transaction + index
+
 	return ""
 }
 
+// GetTransactionAndIndexByOutpoint
+// @dev: Split outpoint
+func GetTransactionAndIndexByOutpoint(outpoint string) (transaction string, index string) {
+	result := strings.Split(outpoint, ":")
+	return result[0], result[1]
+}
+
+// CompareScriptKey
+// @dev:
 func CompareScriptKey(scriptKey1 string, scriptKey2 string) string {
 	if scriptKey1 == scriptKey2 {
 		return scriptKey1

@@ -9,6 +9,7 @@ import (
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -182,14 +183,6 @@ func FindAssetByAssetName(assetName string) string {
 		return MakeJsonResult(false, "NOT_FOUND", nil)
 	}
 	return MakeJsonResult(true, "", assets)
-}
-
-func ListBalances() string {
-	response, err := listBalances(false, nil, nil)
-	if err != nil {
-		return MakeJsonResult(false, err.Error(), nil)
-	}
-	return MakeJsonResult(true, "", response)
 }
 
 // ListGroups
@@ -521,6 +514,42 @@ func listBalances(useGroupKey bool, assetFilter, groupKeyFilter []byte) (*taprpc
 	}
 	response, err := client.ListBalances(context.Background(), request)
 	return response, err
+}
+
+type ListAssetBalanceInfo struct {
+	GenesisPoint string `json:"genesis_point"`
+	Name         string `json:"name"`
+	MetaHash     string `json:"meta_hash"`
+	AssetID      string `json:"asset_id"`
+	AssetType    string `json:"asset_type"`
+	OutputIndex  int    `json:"output_index"`
+	Version      int    `json:"version"`
+	Balance      string `json:"balance"`
+}
+
+func ProcessListBalancesResponse(response *taprpc.ListBalancesResponse) *[]ListAssetBalanceInfo {
+	var listAssetBalanceInfos []ListAssetBalanceInfo
+	for _, balance := range response.AssetBalances {
+		listAssetBalanceInfos = append(listAssetBalanceInfos, ListAssetBalanceInfo{
+			GenesisPoint: balance.AssetGenesis.GenesisPoint,
+			Name:         balance.AssetGenesis.Name,
+			MetaHash:     hex.EncodeToString(balance.AssetGenesis.MetaHash),
+			AssetID:      hex.EncodeToString(balance.AssetGenesis.AssetId),
+			AssetType:    balance.AssetGenesis.AssetType.String(),
+			OutputIndex:  int(balance.AssetGenesis.OutputIndex),
+			Version:      int(balance.AssetGenesis.Version),
+			Balance:      strconv.FormatUint(balance.Balance, 10),
+		})
+	}
+	return &listAssetBalanceInfos
+}
+
+func ListBalances() string {
+	response, err := listBalances(false, nil, nil)
+	if err != nil {
+		return MakeJsonResult(false, err.Error(), nil)
+	}
+	return MakeJsonResult(true, "", ProcessListBalancesResponse(response))
 }
 
 func listAssets(withWitness, includeSpent, includeLeased bool) (*taprpc.ListAssetResponse, error) {

@@ -733,13 +733,15 @@ type AssetHoldInfo struct {
 }
 
 // OutpointToAddress
-// TODO
 // @dev:
 func OutpointToAddress(outpoint string) string {
-	transaction, index := getTransactionAndIndexByOutpoint(outpoint)
-	_ = transaction + index
-
-	return ""
+	transaction, indexStr := getTransactionAndIndexByOutpoint(outpoint)
+	index, _ := strconv.Atoi(indexStr)
+	response, err := getTransactionByMempool(transaction)
+	if err != nil {
+		return ""
+	}
+	return response.Vout[index].ScriptpubkeyAddress
 }
 
 // getTransactionAndIndexByOutpoint
@@ -750,7 +752,7 @@ func getTransactionAndIndexByOutpoint(outpoint string) (transaction string, inde
 }
 
 // CompareScriptKey
-// @dev:
+// @dev
 func CompareScriptKey(scriptKey1 string, scriptKey2 string) string {
 	if scriptKey1 == scriptKey2 {
 		return scriptKey1
@@ -774,4 +776,10 @@ func CompareScriptKey(scriptKey1 string, scriptKey2 string) string {
 		}
 	}
 	return ""
+}
+
+// GetAssetHoldInfos
+// @dev
+func GetAssetHoldInfos() {
+	// TODO: Get Leaves and keys to generate hold-infos
 }

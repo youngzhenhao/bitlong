@@ -736,15 +736,15 @@ type AssetHoldInfo struct {
 // TODO
 // @dev:
 func OutpointToAddress(outpoint string) string {
-	transaction, index := GetTransactionAndIndexByOutpoint(outpoint)
+	transaction, index := getTransactionAndIndexByOutpoint(outpoint)
 	_ = transaction + index
 
 	return ""
 }
 
-// GetTransactionAndIndexByOutpoint
+// getTransactionAndIndexByOutpoint
 // @dev: Split outpoint
-func GetTransactionAndIndexByOutpoint(outpoint string) (transaction string, index string) {
+func getTransactionAndIndexByOutpoint(outpoint string) (transaction string, index string) {
 	result := strings.Split(outpoint, ":")
 	return result[0], result[1]
 }

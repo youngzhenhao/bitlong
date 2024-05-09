@@ -738,15 +738,20 @@ func CompareScriptKey(scriptKey1 string, scriptKey2 string) string {
 	} else if len(scriptKey1) == len(scriptKey2) {
 		return ""
 	} else if len(scriptKey1) > len(scriptKey2) {
-		if scriptKey1 == "02"+scriptKey2 || scriptKey1 == "2"+scriptKey2 {
+		if scriptKey1 == "0"+scriptKey2 || scriptKey1 == "02"+scriptKey2 {
+			return scriptKey1
+		} else if scriptKey1 == "2"+scriptKey2 {
 			return "02" + scriptKey2
-		} else if true{
-		// TODO , 2 of three compare
+		} else {
+			return ""
 		}
-
 	} else if len(scriptKey1) < len(scriptKey2) {
-		if "02"+scriptKey1 == scriptKey2 || "2"+scriptKey1 == scriptKey2 {
+		if "0"+scriptKey1 == scriptKey2 || "02"+scriptKey1 == scriptKey2 {
+			return scriptKey2
+		} else if "2"+scriptKey1 == scriptKey2 {
 			return "02" + scriptKey1
+		} else {
+			return ""
 		}
 	}
 	return ""

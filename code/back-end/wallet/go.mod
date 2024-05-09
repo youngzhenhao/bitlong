@@ -15,15 +15,21 @@ replace (
 	github.com/lightninglabs/loop v0.26.6-beta => ../wallet/lib/loop@v0.26.6
 	github.com/lightninglabs/pool v0.6.4-beta.0.20231003174306-80d8854a0c4b => ../wallet/lib/pool@v0.6.4
 	github.com/lightninglabs/taproot-assets v0.3.3-0.20240315091907-f5ef93e9998a => ../wallet/lib/taproot-assets@v0.3.3
+	github.com/lightningnetwork/lnd/cert => ../wallet/lib/cert@v1.2.2
 	github.com/ulikunitz/xz => github.com/ulikunitz/xz v0.5.11
 	github.com/wallet/api => ../wallet/api
 	// We want to format raw bytes as hex instead of base64. The forked version
 	// allows us to specify that as an option.
 	google.golang.org/protobuf => github.com/lightninglabs/protobuf-go-hex-display v1.30.0-hex-display
-	github.com/lightningnetwork/lnd/cert => ../wallet/lib/cert@v1.2.2
 )
 
-require github.com/wallet/api v0.0.0-00010101000000-000000000000
+require (
+	github.com/boltdb/bolt v1.3.1
+	github.com/lightninglabs/taproot-assets v0.3.3-0.20240315091907-f5ef93e9998a
+	github.com/lightningnetwork/lnd v0.17.4-beta.rc1
+	github.com/wallet/api v0.0.0-00010101000000-000000000000
+	google.golang.org/grpc v1.63.2
+)
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
@@ -38,7 +44,6 @@ require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/btcsuite/btcd v0.24.1-0.20240123000108-62e6af035ec5 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
 	github.com/btcsuite/btcd/btcutil v1.1.5 // indirect
@@ -161,9 +166,7 @@ require (
 	github.com/lightninglabs/neutrino/cache v1.1.1 // indirect
 	github.com/lightninglabs/pool v0.6.4-beta.0.20231003174306-80d8854a0c4b // indirect
 	github.com/lightninglabs/pool/auctioneerrpc v1.1.1 // indirect
-	github.com/lightninglabs/taproot-assets v0.3.3-0.20240315091907-f5ef93e9998a // indirect
 	github.com/lightningnetwork/lightning-onion v1.2.1-0.20230823005744-06182b1d7d2f // indirect
-	github.com/lightningnetwork/lnd v0.17.4-beta.rc1 // indirect
 	github.com/lightningnetwork/lnd/cert v1.2.2 // indirect
 	github.com/lightningnetwork/lnd/clock v1.1.1 // indirect
 	github.com/lightningnetwork/lnd/healthcheck v1.2.3 // indirect
@@ -235,6 +238,7 @@ require (
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/urfave/cli v1.22.9 // indirect
 	github.com/vincent-petithory/dataurl v1.0.0 // indirect
+	github.com/wlynxg/anet v0.0.1 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
@@ -279,7 +283,6 @@ require (
 	google.golang.org/genproto v0.0.0-20240227224415-6ceb2ff114de // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240227224415-6ceb2ff114de // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240401170217-c3f982113cda // indirect
-	google.golang.org/grpc v1.63.2 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/errgo.v1 v1.0.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect

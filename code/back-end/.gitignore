@@ -4,7 +4,7 @@
 *.jar
 *_test.go
 *.zip
-wallet/cmd-test
+cmd-test
 temp.go
 tls.cert
 tls.key
@@ -17,3 +17,4 @@ tls.key
 .env.local
 frpc.ini
 frpc.yaml
+config.yaml

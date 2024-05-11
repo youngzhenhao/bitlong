@@ -1045,3 +1045,14 @@ func GetAssetTransactionInfoSlow(id string) string {
 	}
 	return MakeJsonResult(true, "", response)
 }
+
+func AssetIDAndTransferScriptKeyToOutpoint(id string, scriptKey string) string {
+	keys := assetKeysTransfer(id)
+	for _, key := range *keys {
+		cs := CompareScriptKey(scriptKey, key.ScriptKeyBytes)
+		if scriptKey == cs {
+			return key.OpStr
+		}
+	}
+	return ""
+}

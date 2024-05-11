@@ -25,13 +25,14 @@ type Config struct {
 	} `yaml:"redis"`
 }
 
+var config Config
+
 func LoadConfig(path string) (*Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	var config Config
 	err = yaml.Unmarshal(data, &config)
 	if err != nil {
 		return nil, err

@@ -8,5 +8,6 @@ func SetupRouter() *gin.Engine {
 	r := gin.Default()
 	SetupLoginRouter(r)
 	setupFileServerRouter(r)
+	setupFairLaunchRouter(r)
 	return r
 }

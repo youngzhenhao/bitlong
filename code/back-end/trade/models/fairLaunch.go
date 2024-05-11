@@ -1,6 +1,6 @@
 package models
 
-type FairLaunch struct {
+type FairLaunchInfo struct {
 	ID           string
 	AssetID      string
 	Name         string

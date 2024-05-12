@@ -1,6 +1,7 @@
-package api
+package utils
 
 import (
+	"AssetsTrade/models"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
@@ -19,14 +20,8 @@ import (
 	"time"
 )
 
-type JsonResult struct {
-	Success bool   `json:"success"`
-	Error   string `json:"error"`
-	Data    any    `json:"data"`
-}
-
 func MakeJsonResult(success bool, error string, data any) string {
-	jsr := JsonResult{
+	jsr := models.JsonResult{
 		Success: success,
 		Error:   error,
 		Data:    data,

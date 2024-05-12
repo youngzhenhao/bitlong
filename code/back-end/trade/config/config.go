@@ -1,6 +1,8 @@
 package config
 
 import (
+	"AssetsTrade/utils"
+	"fmt"
 	"gopkg.in/yaml.v3"
 	"os"
 )
@@ -23,6 +25,29 @@ type Config struct {
 		Password string `yaml:"password"`
 		DB       int    `yaml:"db"`
 	} `yaml:"redis"`
+	Routers struct {
+		Login      bool `yaml:"login"`
+		FileServer bool `yaml:"file_server"`
+		FairLaunch bool `yaml:"fair_launch"`
+	} `yaml:"routers"`
+	Lnd struct {
+		Host         string `yaml:"host"`
+		Port         int    `yaml:"port"`
+		TlsCertPath  string `yaml:"tls_cert_path"`
+		MacaroonPath string `yaml:"macaroon_path"`
+	} `yaml:"lnd"`
+	Tapd struct {
+		Host         string `yaml:"host"`
+		Port         int    `yaml:"port"`
+		TlsCertPath  string `yaml:"tls_cert_path"`
+		MacaroonPath string `yaml:"macaroon_path"`
+	} `yaml:"tapd"`
+	Litd struct {
+		Host         string `yaml:"host"`
+		Port         int    `yaml:"port"`
+		TlsCertPath  string `yaml:"tls_cert_path"`
+		MacaroonPath string `yaml:"macaroon_path"`
+	} `yaml:"litd"`
 }
 
 var config Config
@@ -39,4 +64,13 @@ func LoadConfig(path string) (*Config, error) {
 	}
 
 	return &config, nil
+}
+
+func GetConfig() *Config {
+	loadConfig, err := LoadConfig("config.yaml")
+	if err != nil {
+		fmt.Println(utils.GetTimeNow(), "[ERROR] Failed to load config: "+err.Error())
+		return &Config{}
+	}
+	return loadConfig
 }

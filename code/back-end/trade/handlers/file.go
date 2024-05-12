@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"AssetsTrade/api"
+	"AssetsTrade/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -22,9 +22,9 @@ func FileUpload(c *gin.Context) {
 	result := true
 	if err != nil {
 		result = false
-		fmt.Printf("%s %v\n", api.GetTimeNow(), err)
+		fmt.Printf("%s %v\n", utils.GetTimeNow(), err)
 		c.JSON(http.StatusOK, gin.H{
-			"time":   api.GetTimeNow(),
+			"time":   utils.GetTimeNow(),
 			"result": result,
 			"info":   err,
 		})
@@ -40,10 +40,10 @@ func FileUpload(c *gin.Context) {
 	if err != nil || !localFileInfo.IsDir() {
 		err := os.MkdirAll(saveDir, 0755)
 		if err != nil {
-			fmt.Printf("%s mkdir %s error %v\n", api.GetTimeNow(), saveDir, err)
+			fmt.Printf("%s mkdir %s error %v\n", utils.GetTimeNow(), saveDir, err)
 			result = false
 			c.JSON(http.StatusOK, gin.H{
-				"time":   api.GetTimeNow(),
+				"time":   utils.GetTimeNow(),
 				"result": result,
 				"info":   err,
 			})
@@ -52,26 +52,26 @@ func FileUpload(c *gin.Context) {
 	}
 	out, err := os.Create(savePath)
 	if err != nil {
-		fmt.Printf("%s create file %s error %v\n", api.GetTimeNow(), savePath, err)
+		fmt.Printf("%s create file %s error %v\n", utils.GetTimeNow(), savePath, err)
 	}
 	defer func(out *os.File) {
 		err := out.Close()
 		if err != nil {
-			fmt.Printf("%s close file %s error %v\n", api.GetTimeNow(), savePath, err)
+			fmt.Printf("%s close file %s error %v\n", utils.GetTimeNow(), savePath, err)
 		}
 	}(out)
 	_, err = io.Copy(out, file)
 	if err != nil {
 		result = false
 		c.JSON(http.StatusOK, gin.H{
-			"time":   api.GetTimeNow(),
+			"time":   utils.GetTimeNow(),
 			"result": result,
 			"info":   err,
 		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"time":   api.GetTimeNow(),
+		"time":   utils.GetTimeNow(),
 		"result": result,
 		"info":   "uploaded successfully",
 	})
@@ -84,12 +84,12 @@ func FileDownload(c *gin.Context) {
 	defer func(fileTmp *os.File) {
 		err := fileTmp.Close()
 		if err != nil {
-			fmt.Printf("%s close file error %v\n", api.GetTimeNow(), err)
+			fmt.Printf("%s close file error %v\n", utils.GetTimeNow(), err)
 		}
 	}(fileTmp)
 	fileName := path.Base(filePath)
 	if filePath == "" || fileName == "" || err != nil {
-		fmt.Printf("%s file not found %v\n", api.GetTimeNow(), err)
+		fmt.Printf("%s file not found %v\n", utils.GetTimeNow(), err)
 		c.Redirect(http.StatusFound, "/404")
 		return
 	}

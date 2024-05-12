@@ -1,8 +1,8 @@
 package dao
 
 import (
-	"AssetsTrade/api"
 	"AssetsTrade/models"
+	"AssetsTrade/utils"
 	"encoding/json"
 	"fmt"
 	"github.com/boltdb/bolt"
@@ -10,7 +10,7 @@ import (
 )
 
 type ServerStore struct {
-	DB *bolt.DB
+	DB *bolt.DB `json:"db"`
 }
 
 func InitServerDB() error {
@@ -21,13 +21,13 @@ func InitServerDB() error {
 func createBucketInServerDB(DBName, bucket string) (*bolt.Bucket, error) {
 	db, err := bolt.Open(DBName, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
-		fmt.Printf("%s bolt.Open :%v\n", api.GetTimeNow(), err)
+		fmt.Printf("%s bolt.Open :%v\n", utils.GetTimeNow(), err)
 	}
 
 	defer func(db *bolt.DB) {
 		err := db.Close()
 		if err != nil {
-			fmt.Printf("%s db.Close :%v\n", api.GetTimeNow(), err)
+			fmt.Printf("%s db.Close :%v\n", utils.GetTimeNow(), err)
 		}
 	}(db)
 	var b *bolt.Bucket

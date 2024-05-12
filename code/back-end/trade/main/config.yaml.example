@@ -12,3 +12,22 @@ redis:
   addr: localhost:6379
   password: ""
   db: 0
+routers:
+  login: false
+  file_server: false
+  fair_launch: true
+lnd:
+  host: "127.0.0.1"
+  port: 10009
+  tls_cert_path: ""
+  macaroon_path: ""
+tapd:
+  host: "127.0.0.1"
+  port: 8443
+  tls_cert_path: ""
+  macaroon_path: ""
+litd:
+  host: "127.0.0.1"
+  port: 8443
+  tls_cert_path: ""
+  macaroon_path: ""

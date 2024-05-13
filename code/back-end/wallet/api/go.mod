@@ -1,6 +1,6 @@
 module github.com/wallet/api
 
-go 1.22.2
+go 1.22.3
 
 require (
 	github.com/boltdb/bolt v1.3.1

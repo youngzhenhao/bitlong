@@ -1,6 +1,6 @@
 module github.com/wallet
 
-go 1.22.2
+go 1.22.3
 
 replace (
 	github.com/btcsuite/btcd/btcutil v1.1.5 => ../wallet/lib/btcutil@v1.1.5

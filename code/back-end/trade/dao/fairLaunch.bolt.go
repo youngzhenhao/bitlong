@@ -11,6 +11,9 @@ import (
 	"trade/utils"
 )
 
+// WARNING: This file should be deprecated.
+// TODO: Use Mysql
+
 var (
 	serverDbPath          = config.GetLoadConfig().Bolt.DbPath
 	serverDbMode          = config.GetLoadConfig().Bolt.DbMode

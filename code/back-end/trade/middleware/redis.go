@@ -15,13 +15,11 @@ func RedisConnect() {
 	if err != nil {
 		panic("failed to load config: " + err.Error())
 	}
-
 	Client = redis.NewClient(&redis.Options{
 		Addr:     loadConfig.Redis.Addr,
 		Password: loadConfig.Redis.Password,
 		DB:       loadConfig.Redis.DB,
 	})
-
 	_, err = Client.Ping(ctx).Result()
 	if err != nil {
 		panic(err)

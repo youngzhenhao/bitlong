@@ -13,20 +13,17 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
 			return
 		}
-
 		parts := strings.Fields(authHeader)
 		if len(parts) != 2 || parts[0] != "Bearer" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header format must be 'Bearer {token}'"})
 			return
 		}
-
 		tokenString := parts[1]
 		claims, err := ValidateToken(tokenString)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
 		}
-
 		// Store the username in the context of the request
 		c.Set("username", claims.Username)
 

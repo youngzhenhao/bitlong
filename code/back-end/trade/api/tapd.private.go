@@ -12,9 +12,9 @@ import (
 )
 
 func assetLeaves(isGroup bool, id string, proofType universerpc.ProofType) (*universerpc.AssetLeafResponse, error) {
-	grpcHost := config.GetLoadConfig().Tapd.Host + ":" + strconv.Itoa(config.GetLoadConfig().Tapd.Port)
-	tlsCertPath := config.GetLoadConfig().Tapd.TlsCertPath
-	macaroonPath := config.GetLoadConfig().Tapd.MacaroonPath
+	grpcHost := config.GetLoadConfig().ApiConfig.Tapd.Host + ":" + strconv.Itoa(config.GetLoadConfig().ApiConfig.Tapd.Port)
+	tlsCertPath := config.GetLoadConfig().ApiConfig.Tapd.TlsCertPath
+	macaroonPath := config.GetLoadConfig().ApiConfig.Tapd.MacaroonPath
 	creds := utils.NewTlsCert(tlsCertPath)
 	macaroon := utils.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),

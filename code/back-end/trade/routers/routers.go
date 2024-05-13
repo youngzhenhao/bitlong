@@ -16,5 +16,8 @@ func SetupRouter() *gin.Engine {
 	if config.GetLoadConfig().Routers.FairLaunch {
 		setupFairLaunchRouter(r)
 	}
+	if config.GetLoadConfig().Routers.Ping {
+		SetupPingRouter(r)
+	}
 	return r
 }

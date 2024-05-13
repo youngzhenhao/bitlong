@@ -49,35 +49,12 @@ func SetFairLaunch() {
 	}(db)
 	s := &dao.ServerStore{DB: db}
 	var mintedInfo []models.MintedInfo
-	mintedInfo = append(mintedInfo, models.MintedInfo{
-		EncodedAddr:      "4",
-		AssetID:          "4",
-		AssetType:        "4",
-		Amount:           4,
-		ScriptKey:        "4",
-		InternalKey:      "4",
-		TaprootOutputKey: "4",
-		ProofCourierAddr: "4",
-		AssetVersion:     "4",
-		MintTime:         4,
-		Outpoint:         "4",
-		Address:          "4",
-	})
-	err = s.CreateOrUpdateFairLaunchInfo("fair_launch", &models.FairLaunchInfo{
-		ID:           "4",
-		AssetID:      "4",
-		Name:         "4",
-		Amount:       4,
-		Reserved:     4,
-		MintQuantity: 4,
-		StartTime:    4,
-		EndTime:      4,
-		Minted:       &mintedInfo,
-	})
+	mintedInfo = append(mintedInfo, models.MintedInfo{})
+	err = s.CreateOrUpdateFairLaunchInfo("fair_launch", &models.FairLaunchInfo{})
 	if err != nil {
 		return
 	}
-
+	// TODO: need to complete
 }
 
 func FairLaunchMint() {

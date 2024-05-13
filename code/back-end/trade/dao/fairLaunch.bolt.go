@@ -29,7 +29,7 @@ func GetServerDbMode() os.FileMode {
 	if serverDbMode == 0 {
 		return 0600
 	}
-	return serverDbMode
+	return os.FileMode(serverDbMode)
 }
 
 func GetServerDbTimeout() time.Duration {
@@ -40,7 +40,7 @@ func getServerDbTimeoutSecond() time.Duration {
 	if serverDbTimeoutSecond == 0 {
 		return 1
 	}
-	return serverDbTimeoutSecond
+	return time.Duration(serverDbTimeoutSecond)
 }
 
 func GetFairLaunchBucketName() string {

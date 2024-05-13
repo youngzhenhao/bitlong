@@ -3,7 +3,6 @@ package config
 import (
 	"gopkg.in/yaml.v3"
 	"os"
-	"time"
 	"trade/utils"
 )
 
@@ -29,30 +28,37 @@ type Config struct {
 		Login      bool `yaml:"login"`
 		FileServer bool `yaml:"file_server"`
 		FairLaunch bool `yaml:"fair_launch"`
+		Ping       bool `yaml:"ping"`
 	} `yaml:"routers"`
-	Lnd struct {
-		Host         string `yaml:"host"`
-		Port         int    `yaml:"port"`
-		TlsCertPath  string `yaml:"tls_cert_path"`
-		MacaroonPath string `yaml:"macaroon_path"`
-	} `yaml:"lnd"`
-	Tapd struct {
-		Host         string `yaml:"host"`
-		Port         int    `yaml:"port"`
-		TlsCertPath  string `yaml:"tls_cert_path"`
-		MacaroonPath string `yaml:"macaroon_path"`
-	} `yaml:"tapd"`
-	Litd struct {
-		Host         string `yaml:"host"`
-		Port         int    `yaml:"port"`
-		TlsCertPath  string `yaml:"tls_cert_path"`
-		MacaroonPath string `yaml:"macaroon_path"`
-	} `yaml:"litd"`
+	ApiConfig struct {
+		Lnd struct {
+			Host         string `yaml:"host"`
+			Port         int    `yaml:"port"`
+			TlsCertPath  string `yaml:"tls_cert_path"`
+			MacaroonPath string `yaml:"macaroon_path"`
+		} `yaml:"lnd"`
+		Tapd struct {
+			Host         string `yaml:"host"`
+			Port         int    `yaml:"port"`
+			TlsCertPath  string `yaml:"tls_cert_path"`
+			MacaroonPath string `yaml:"macaroon_path"`
+		} `yaml:"tapd"`
+		Litd struct {
+			Host         string `yaml:"host"`
+			Port         int    `yaml:"port"`
+			TlsCertPath  string `yaml:"tls_cert_path"`
+			MacaroonPath string `yaml:"macaroon_path"`
+		} `yaml:"litd"`
+	} `yaml:"api_config"`
 	Bolt struct {
-		DbPath          string        `yaml:"db_path"`
-		DbMode          os.FileMode   `yaml:"db_mode"`
-		DbTimeoutSecond time.Duration `yaml:"db_timeout_second"`
+		DbPath          string `yaml:"db_path"`
+		DbMode          uint32 `yaml:"db_mode"`
+		DbTimeoutSecond int64  `yaml:"db_timeout_second"`
 	} `yaml:"bolt"`
+	BasicAuth []struct {
+		Username string `yaml:"username"`
+		Password string `yaml:"password"`
+	} `yaml:"basic_auth"`
 }
 
 var config Config

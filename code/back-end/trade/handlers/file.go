@@ -11,7 +11,6 @@ import (
 )
 
 func FileUpload(c *gin.Context) {
-	//fileName := c.Query("filename")
 	saveName := uuid.New().String()
 	saveDir := "files"
 	file, header, err := c.Request.FormFile("file")
@@ -27,8 +26,6 @@ func FileUpload(c *gin.Context) {
 		return
 	}
 	uploadFileNameWithSuffix := path.Base(header.Filename)
-	//uploadFileType := path.Ext(uploadFileNameWithSuffix)
-	//saveName = fileName + uploadFileType
 	saveName = uploadFileNameWithSuffix
 	savePath := saveDir + "/" + saveName
 	var localFileInfo os.FileInfo
@@ -75,7 +72,7 @@ func FileUpload(c *gin.Context) {
 }
 
 func FileDownload(c *gin.Context) {
-	filePath := "files/" + c.Query("file")
+	filePath := "/root/files/" + c.Query("file")
 	fileTmp, err := os.Open(filePath)
 	defer func(fileTmp *os.File) {
 		err := fileTmp.Close()

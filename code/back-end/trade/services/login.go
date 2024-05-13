@@ -1,10 +1,10 @@
 package services
 
 import (
-	"AssetsTrade/middleware"
-	"AssetsTrade/models"
 	"errors"
 	"gorm.io/gorm"
+	"trade/middleware"
+	"trade/models"
 )
 
 func Login(creds models.User) (string, error) {

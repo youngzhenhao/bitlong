@@ -1,8 +1,8 @@
 package services
 
 import (
-	"AssetsTrade/middleware"
-	"AssetsTrade/models"
+	"trade/middleware"
+	"trade/models"
 )
 
 func Migrate() {

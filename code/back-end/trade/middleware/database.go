@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"AssetsTrade/config"
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"trade/config"
 )
 
 var DB *gorm.DB

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"AssetsTrade/models"
+	"trade/models"
 )
 
 func GetAssetInfo(id string) *models.AssetIssuanceLeaf {

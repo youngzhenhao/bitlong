@@ -1,4 +1,4 @@
-module AssetsTrade
+module trade
 
 go 1.22.2
 

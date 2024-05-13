@@ -1,8 +1,8 @@
 package routers
 
 import (
-	"AssetsTrade/handlers"
 	"github.com/gin-gonic/gin"
+	"trade/handlers"
 )
 
 //	 TODO:	Set fair launch

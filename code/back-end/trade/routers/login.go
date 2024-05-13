@@ -1,9 +1,9 @@
 package routers
 
 import (
-	"AssetsTrade/handlers"
-	"AssetsTrade/middleware"
 	"github.com/gin-gonic/gin"
+	"trade/handlers"
+	"trade/middleware"
 )
 
 func SetupLoginRouter(router *gin.Engine) *gin.Engine {

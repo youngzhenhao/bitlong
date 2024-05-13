@@ -1,10 +1,10 @@
 package config
 
 import (
-	"AssetsTrade/utils"
 	"fmt"
 	"gopkg.in/yaml.v3"
 	"os"
+	"trade/utils"
 )
 
 type Config struct {

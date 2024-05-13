@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"AssetsTrade/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -9,11 +8,9 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"trade/utils"
 )
 
-// UploadFile
-// @Description: Upload a single file
-// @param c
 func FileUpload(c *gin.Context) {
 	//fileName := c.Query("filename")
 	saveName := uuid.New().String()

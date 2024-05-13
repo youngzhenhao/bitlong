@@ -1,10 +1,10 @@
 package main
 
 import (
-	"AssetsTrade/config"
-	"AssetsTrade/middleware"
-	"AssetsTrade/routers"
 	"fmt"
+	"trade/config"
+	"trade/middleware"
+	"trade/routers"
 )
 
 func main() {

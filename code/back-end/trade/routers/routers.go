@@ -1,8 +1,8 @@
 package routers
 
 import (
-	"AssetsTrade/config"
 	"github.com/gin-gonic/gin"
+	"trade/config"
 )
 
 func SetupRouter() *gin.Engine {

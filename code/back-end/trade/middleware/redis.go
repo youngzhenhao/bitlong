@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"AssetsTrade/config"
 	"context"
 	"github.com/go-redis/redis/v8"
 	"time"
+	"trade/config"
 )
 
 var ctx = context.Background()

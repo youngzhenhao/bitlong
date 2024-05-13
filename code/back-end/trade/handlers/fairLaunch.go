@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"AssetsTrade/services"
 	"github.com/gin-gonic/gin"
+	"trade/services"
 )
 
 func GetFairLaunchInfo(c *gin.Context) {

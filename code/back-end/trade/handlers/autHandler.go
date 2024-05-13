@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"AssetsTrade/models"
-	"AssetsTrade/services"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"trade/models"
+	"trade/services"
 )
 
 func LoginHandler(c *gin.Context) {

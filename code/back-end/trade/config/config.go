@@ -14,13 +14,15 @@ type Config struct {
 		Driver   string `yaml:"driver"`
 		Host     string `yaml:"host"`
 		Port     string `yaml:"port"`
-		User     string `yaml:"user"`
+		Username string `yaml:"username"`
 		Password string `yaml:"password"`
 		DBName   string `yaml:"dbname"`
 		SSLMode  string `yaml:"sslmode"`
 	} `yaml:"database"`
 	Redis struct {
-		Addr     string `yaml:"addr"`
+		Host     string `yaml:"host"`
+		Port     string `yaml:"port"`
+		Username string `yaml:"username"`
 		Password string `yaml:"password"`
 		DB       int    `yaml:"db"`
 	} `yaml:"redis"`

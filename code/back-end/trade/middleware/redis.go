@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-redis/redis/v8"
 	"time"
 	"trade/config"
@@ -15,8 +16,10 @@ func RedisConnect() {
 	if err != nil {
 		panic("failed to load config: " + err.Error())
 	}
+	redisAddr := fmt.Sprintf("%s:%s", loadConfig.Redis.Host, loadConfig.Redis.Port)
 	Client = redis.NewClient(&redis.Options{
-		Addr:     loadConfig.Redis.Addr,
+		Addr:     redisAddr,
+		Username: loadConfig.Redis.Username,
 		Password: loadConfig.Redis.Password,
 		DB:       loadConfig.Redis.DB,
 	})

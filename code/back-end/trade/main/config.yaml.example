@@ -4,12 +4,14 @@ database:
   driver: mysql
   host: localhost
   port: 3306
-  user: root
+  username: root
   password: password
   dbname: dbname
   sslmode: disable
 redis:
-  addr: localhost:6379
+  host: localhost
+  port: 6379
+  username: ""
   password: ""
   db: 0
 routers:

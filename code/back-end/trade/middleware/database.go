@@ -15,7 +15,7 @@ func DbConnect() {
 		panic("failed to load config: " + err.Error())
 	}
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		loadConfig.Database.User,
+		loadConfig.Database.Username,
 		loadConfig.Database.Password,
 		loadConfig.Database.Host,
 		loadConfig.Database.Port,

@@ -13,6 +13,7 @@ import (
 func setupFairLaunchRouter(router *gin.Engine) *gin.Engine {
 	fairLaunch := router.Group("/fair_launch")
 	{
+		fairLaunch.GET("/all", handlers.GetAllFairLaunchInfo)
 		fairLaunch.GET("/info/:id", handlers.GetFairLaunchInfo)
 		fairLaunch.GET("/minted/:id", handlers.GetMintedInfo)
 		fairLaunch.POST("/set", handlers.SetFairLaunchInfo)

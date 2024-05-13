@@ -31,3 +31,7 @@ litd:
   port: 8443
   tls_cert_path: ""
   macaroon_path: ""
+bolt:
+  db_path: "/root/database/server.db"
+  db_mode: 0600
+  db_timeout_second: 1

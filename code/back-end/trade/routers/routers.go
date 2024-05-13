@@ -7,13 +7,13 @@ import (
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
-	if config.GetConfig().Routers.Login {
+	if config.GetLoadConfig().Routers.Login {
 		SetupLoginRouter(r)
 	}
-	if config.GetConfig().Routers.FileServer {
+	if config.GetLoadConfig().Routers.FileServer {
 		setupFileServerRouter(r)
 	}
-	if config.GetConfig().Routers.FairLaunch {
+	if config.GetLoadConfig().Routers.FairLaunch {
 		setupFairLaunchRouter(r)
 	}
 	return r

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"io"
@@ -19,7 +18,7 @@ func FileUpload(c *gin.Context) {
 	result := true
 	if err != nil {
 		result = false
-		fmt.Printf("%s %v\n", utils.GetTimeNow(), err)
+		utils.LogError("", err)
 		c.JSON(http.StatusOK, gin.H{
 			"time":   utils.GetTimeNow(),
 			"result": result,
@@ -37,7 +36,7 @@ func FileUpload(c *gin.Context) {
 	if err != nil || !localFileInfo.IsDir() {
 		err := os.MkdirAll(saveDir, 0755)
 		if err != nil {
-			fmt.Printf("%s mkdir %s error %v\n", utils.GetTimeNow(), saveDir, err)
+			utils.LogInfos("mkdir", saveDir, "error.", err.Error())
 			result = false
 			c.JSON(http.StatusOK, gin.H{
 				"time":   utils.GetTimeNow(),
@@ -49,12 +48,12 @@ func FileUpload(c *gin.Context) {
 	}
 	out, err := os.Create(savePath)
 	if err != nil {
-		fmt.Printf("%s create file %s error %v\n", utils.GetTimeNow(), savePath, err)
+		utils.LogInfos("create file", saveDir, "error.", err.Error())
 	}
 	defer func(out *os.File) {
 		err := out.Close()
 		if err != nil {
-			fmt.Printf("%s close file %s error %v\n", utils.GetTimeNow(), savePath, err)
+			utils.LogInfos("close file", saveDir, "error.", err.Error())
 		}
 	}(out)
 	_, err = io.Copy(out, file)
@@ -81,12 +80,12 @@ func FileDownload(c *gin.Context) {
 	defer func(fileTmp *os.File) {
 		err := fileTmp.Close()
 		if err != nil {
-			fmt.Printf("%s close file error %v\n", utils.GetTimeNow(), err)
+			utils.LogError("close file error", err)
 		}
 	}(fileTmp)
 	fileName := path.Base(filePath)
 	if filePath == "" || fileName == "" || err != nil {
-		fmt.Printf("%s file not found %v\n", utils.GetTimeNow(), err)
+		utils.LogError("file not found", err)
 		c.Redirect(http.StatusFound, "/404")
 		return
 	}

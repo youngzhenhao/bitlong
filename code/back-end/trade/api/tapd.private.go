@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"encoding/hex"
-	"fmt"
 	"github.com/lightninglabs/taproot-assets/taprpc/universerpc"
 	"google.golang.org/grpc"
 	"strconv"
@@ -13,21 +12,19 @@ import (
 )
 
 func assetLeaves(isGroup bool, id string, proofType universerpc.ProofType) (*universerpc.AssetLeafResponse, error) {
-	grpcHost := config.GetConfig().Tapd.Host + ":" + strconv.Itoa(config.GetConfig().Tapd.Port)
-	tlsCertPath := config.GetConfig().Tapd.TlsCertPath
-	macaroonPath := config.GetConfig().Tapd.MacaroonPath
+	grpcHost := config.GetLoadConfig().Tapd.Host + ":" + strconv.Itoa(config.GetLoadConfig().Tapd.Port)
+	tlsCertPath := config.GetLoadConfig().Tapd.TlsCertPath
+	macaroonPath := config.GetLoadConfig().Tapd.MacaroonPath
 	creds := utils.NewTlsCert(tlsCertPath)
 	macaroon := utils.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(utils.NewMacaroonCredential(macaroon)))
 	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", utils.GetTimeNow(), err)
+		utils.LogError("did not connect: grpc.Dial", err)
 	}
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", utils.GetTimeNow(), err)
-		}
+		utils.LogError("conn Close Error", err)
 	}(conn)
 	request := &universerpc.ID{
 		ProofType: proofType,
@@ -59,7 +56,7 @@ func assetLeavesSpecified(id string, proofType string) *universerpc.AssetLeafRes
 	}
 	response, err := assetLeaves(false, id, _proofType)
 	if err != nil {
-		fmt.Printf("%s universerpc AssetLeaves Error: %v\n", utils.GetTimeNow(), err)
+		utils.LogError("Universe AssetLeaves Error", err)
 		return nil
 	}
 	return response
@@ -94,7 +91,7 @@ func processAssetIssuanceLeaf(response *universerpc.AssetLeafResponse) *models.A
 func assetLeafIssuanceInfo(id string) *models.AssetIssuanceLeaf {
 	response := assetLeavesSpecified(id, universerpc.ProofType_PROOF_TYPE_ISSUANCE.String())
 	if response == nil {
-		fmt.Printf("%s Universerpc asset leaves issuance error.\n", utils.GetTimeNow())
+		utils.LogInfo("Universe asset leaves issuance error.")
 		return nil
 	}
 	return processAssetIssuanceLeaf(response)

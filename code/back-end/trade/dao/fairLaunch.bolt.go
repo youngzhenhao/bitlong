@@ -4,30 +4,68 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/boltdb/bolt"
+	"os"
 	"time"
+	"trade/config"
 	"trade/models"
 	"trade/utils"
 )
+
+var (
+	serverDbPath          = config.GetLoadConfig().Bolt.DbPath
+	serverDbMode          = config.GetLoadConfig().Bolt.DbMode
+	serverDbTimeoutSecond = config.GetLoadConfig().Bolt.DbTimeoutSecond
+	fairLaunchBucketName  = "fair_launch"
+)
+
+func GetServerDbPath() string {
+	if serverDbPath == "" {
+		return "/root/database/server.db"
+	}
+	return serverDbPath
+}
+
+func GetServerDbMode() os.FileMode {
+	if serverDbMode == 0 {
+		return 0600
+	}
+	return serverDbMode
+}
+
+func GetServerDbTimeout() time.Duration {
+	return getServerDbTimeoutSecond() * time.Second
+}
+
+func getServerDbTimeoutSecond() time.Duration {
+	if serverDbTimeoutSecond == 0 {
+		return 1
+	}
+	return serverDbTimeoutSecond
+}
+
+func GetFairLaunchBucketName() string {
+	return fairLaunchBucketName
+}
 
 type ServerStore struct {
 	DB *bolt.DB `json:"db"`
 }
 
 func InitServerDB() error {
-	_, err := createBucketInServerDB("/root/database/server.db", "fair_launch")
+	_, err := createBucketInServerDB(GetServerDbPath(), GetFairLaunchBucketName())
 	return err
 }
 
 func createBucketInServerDB(DBName, bucket string) (*bolt.Bucket, error) {
 	db, err := bolt.Open(DBName, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
-		fmt.Printf("%s bolt.Open :%v\n", utils.GetTimeNow(), err)
+		utils.LogError("bolt.Open", err)
 	}
 
 	defer func(db *bolt.DB) {
 		err := db.Close()
 		if err != nil {
-			fmt.Printf("%s db.Close :%v\n", utils.GetTimeNow(), err)
+			utils.LogError("db.Close", err)
 		}
 	}(db)
 	var b *bolt.Bucket

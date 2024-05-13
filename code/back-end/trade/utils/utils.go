@@ -36,7 +36,7 @@ func MakeJsonResult(success bool, error string, data any) string {
 func LnMarshalRespString(resp proto.Message) string {
 	jsonBytes, err := lnrpc.ProtoJSONMarshalOpts.Marshal(resp)
 	if err != nil {
-		fmt.Printf("%s unable to decode response: %v\n", GetTimeNow(), err)
+		LogError("unable to decode response", err)
 		return ""
 	}
 	return string(jsonBytes)
@@ -45,7 +45,7 @@ func LnMarshalRespString(resp proto.Message) string {
 func TapMarshalRespString(resp proto.Message) string {
 	jsonBytes, err := taprpc.ProtoJSONMarshalOpts.Marshal(resp)
 	if err != nil {
-		fmt.Printf("%s unable to decode response: %v\n", GetTimeNow(), err)
+		LogError("unable to decode response", err)
 		return ""
 	}
 	return string(jsonBytes)
@@ -129,4 +129,23 @@ func ToBTC(sat int) float64 {
 
 func ToSat(btc float64) int {
 	return int(btc * 1e8)
+}
+
+func LogInfo(info string) {
+	fmt.Printf("%s %s\n", GetTimeNow(), info)
+}
+
+func LogInfos(infos ...string) {
+	var info string
+	for i, _info := range infos {
+		if i != 0 {
+			info += " "
+		}
+		info += _info
+	}
+	fmt.Printf("%s %s\n", GetTimeNow(), info)
+}
+
+func LogError(description string, err error) {
+	fmt.Printf("%s %s :%v\n", GetTimeNow(), description, err)
 }

@@ -16,6 +16,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"path/filepath"
 	"time"
 	"trade/models"
 )
@@ -148,4 +149,24 @@ func LogInfos(infos ...string) {
 
 func LogError(description string, err error) {
 	fmt.Printf("%s %s :%v\n", GetTimeNow(), description, err)
+}
+
+func CreateFile(filePath, content string) bool {
+	dir := filepath.Dir(filePath)
+	if dir != "." {
+		if _, err := os.Stat(dir); os.IsNotExist(err) {
+			err := os.MkdirAll(dir, 0644)
+			if err != nil {
+				fmt.Printf("MkdirAll error: %v", err)
+				return false
+			}
+		}
+	}
+	err := os.WriteFile(filePath, []byte(content), 0644)
+	if err != nil {
+		LogError("WriteFile error", err)
+		return false
+	}
+	LogInfo("Successes!")
+	return true
 }

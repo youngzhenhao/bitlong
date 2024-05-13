@@ -1,45 +1,44 @@
-server:
-  port: 8080
-database:
-  driver: mysql
-  host: localhost
-  port: 3306
-  username: root
-  password: password
-  dbname: dbname
-  sslmode: disable
+gin_config:
+    bind: ""
+    port: ""
+gorm_config:
+    mysql:
+        host: ""
+        port: ""
+        username: ""
+        password: ""
+        dbname: ""
 redis:
-  host: localhost
-  port: 6379
-  username: ""
-  password: ""
-  db: 0
+    host: ""
+    port: ""
+    username: ""
+    password: ""
+    db: 0
 routers:
-  login: false
-  file_server: false
-  fair_launch: true
-  ping: false
+    login: false
+    file_server: false
+    fair_launch: false
+    ping: false
 api_config:
-  lnd:
-    host: "127.0.0.1"
-    port: 10009
-    tls_cert_path: ""
-    macaroon_path: ""
-  tapd:
-    host: "127.0.0.1"
-    port: 8443
-    tls_cert_path: ""
-    macaroon_path: ""
-  litd:
-    host: "127.0.0.1"
-    port: 8443
-    tls_cert_path: ""
-    macaroon_path: ""
+    lnd:
+        host: ""
+        port: 0
+        tls_cert_path: ""
+        macaroon_path: ""
+    tapd:
+        host: ""
+        port: 0
+        tls_cert_path: ""
+        macaroon_path: ""
+    litd:
+        host: ""
+        port: 0
+        tls_cert_path: ""
+        macaroon_path: ""
 bolt:
-  db_path: "/root/database/server.db"
-  db_mode: 0600
-  db_timeout_second: 1
-basic_auth:
-  -
-    username:
-    password:
+    db_path: ""
+    db_mode: 0
+    db_timeout_second: 0
+admin_users:
+    - username: ""
+      password: ""

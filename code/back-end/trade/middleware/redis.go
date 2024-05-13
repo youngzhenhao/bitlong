@@ -8,8 +8,10 @@ import (
 	"trade/config"
 )
 
-var ctx = context.Background()
-var Client *redis.Client
+var (
+	ctx    = context.Background()
+	Client *redis.Client
+)
 
 func RedisConnect() {
 	loadConfig, err := config.LoadConfig("config.yaml")

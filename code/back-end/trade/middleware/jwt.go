@@ -6,7 +6,9 @@ import (
 	"time"
 )
 
-var jwtKey = []byte("my_secret_key")
+var (
+	jwtKey = []byte("my_secret_key")
+)
 
 type Claims struct {
 	Username string `json:"username"`

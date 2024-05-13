@@ -1056,3 +1056,14 @@ func AssetIDAndTransferScriptKeyToOutpoint(id string, scriptKey string) string {
 	}
 	return ""
 }
+
+// GetAllAssetListWithoutProcession
+// ONLY_FOR_TEST
+// TODO: Need to look for the change transaction anchored outpoint, amount, and is_spent in previous witness.
+func GetAllAssetListWithoutProcession() string {
+	response := allAssetList()
+	if response == nil {
+		return MakeJsonResult(false, "Null list asset response.", nil)
+	}
+	return MakeJsonResult(true, "", response)
+}

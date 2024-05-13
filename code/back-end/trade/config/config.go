@@ -7,18 +7,19 @@ import (
 )
 
 type Config struct {
-	Server struct {
+	GinConfig struct {
+		Bind string `yaml:"bind"`
 		Port string `yaml:"port"`
-	} `yaml:"server"`
-	Database struct {
-		Driver   string `yaml:"driver"`
-		Host     string `yaml:"host"`
-		Port     string `yaml:"port"`
-		Username string `yaml:"username"`
-		Password string `yaml:"password"`
-		DBName   string `yaml:"dbname"`
-		SSLMode  string `yaml:"sslmode"`
-	} `yaml:"database"`
+	} `yaml:"gin_config"`
+	GormConfig struct {
+		Mysql struct {
+			Host     string `yaml:"host"`
+			Port     string `yaml:"port"`
+			Username string `yaml:"username"`
+			Password string `yaml:"password"`
+			DBName   string `yaml:"dbname"`
+		} `yaml:"mysql"`
+	} `yaml:"gorm_config"`
 	Redis struct {
 		Host     string `yaml:"host"`
 		Port     string `yaml:"port"`
@@ -57,13 +58,17 @@ type Config struct {
 		DbMode          uint32 `yaml:"db_mode"`
 		DbTimeoutSecond int64  `yaml:"db_timeout_second"`
 	} `yaml:"bolt"`
-	BasicAuth []struct {
-		Username string `yaml:"username"`
-		Password string `yaml:"password"`
-	} `yaml:"basic_auth"`
+	AdminUsers []BasicAuth `yaml:"admin_users"`
 }
 
-var config Config
+type BasicAuth struct {
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+}
+
+var (
+	config Config
+)
 
 func GetConfig() *Config {
 	return &config

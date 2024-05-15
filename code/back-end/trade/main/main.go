@@ -5,31 +5,36 @@ import (
 	"trade/config"
 	"trade/middleware"
 	"trade/routers"
-	"trade/utils"
 )
 
 func main() {
+
 	loadConfig, err := config.LoadConfig("config.yaml")
 	if err != nil {
 		panic("failed to load config: " + err.Error())
 	}
-	if loadConfig.Routers.Login {
-		middleware.DbConnect()
-		// If you need to migrate the database table structure
-		// models.Migrate()
-		// Initialize the Redis connection
-		middleware.RedisConnect()
-	}
-	r := routers.SetupRouter()
-	bind := loadConfig.GinConfig.Bind
-	port := loadConfig.GinConfig.Port
-	addr := fmt.Sprintf("%s:%s", bind, port)
-	if port == "" {
-		port = "8080"
-	}
-	err = r.Run(addr)
-	if err != nil {
-		utils.LogError("", err)
-		return
+
+	if true {
+		if loadConfig.Routers.Login {
+			// Initialize the database connection
+			middleware.DbConnect()
+			// If you need to migrate the database table structure
+			// models.Migrate()
+			// Initialize the Redis connection
+			middleware.RedisConnect()
+		}
+		r := routers.SetupRouter()
+		// Read the port number from the configuration file
+
+		port := loadConfig.GinConfig.Port
+		if port == "" {
+			// Default port number
+			port = "8080"
+		}
+		// Start the server
+		err = r.Run(fmt.Sprintf(":%s", port))
+		if err != nil {
+			return
+		}
 	}
 }

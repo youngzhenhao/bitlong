@@ -11,6 +11,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/lightninglabs/taproot-assets/taprpc"
 	"github.com/lightningnetwork/lnd/lnrpc"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/protobuf/proto"
 	"log"
@@ -113,6 +114,29 @@ func GetMacaroon(macaroonPath string) string {
 	}
 	macaroon := hex.EncodeToString(macaroonBytes)
 	return macaroon
+}
+
+func GetConn(grpcHost, tlsCertPath, macaroonPath string) (*grpc.ClientConn, func()) {
+	creds := NewTlsCert(tlsCertPath)
+	var (
+		conn *grpc.ClientConn
+		err  error
+	)
+	if macaroonPath != "" {
+		macaroon := GetMacaroon(macaroonPath)
+		conn, err = grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+			grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+	} else {
+		conn, err = grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds))
+	}
+	if err != nil {
+		LogError("did not connect: grpc.Dial", err)
+		return nil, func() {}
+	}
+	return conn, func() {
+		err := conn.Close()
+		LogError("conn Close Error", err)
+	}
 }
 
 func GetEnv(key string, filename ...string) string {

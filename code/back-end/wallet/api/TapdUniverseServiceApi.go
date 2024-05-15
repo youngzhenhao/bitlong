@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/btcsuite/btcd/wire"
-	"github.com/lightninglabs/taproot-assets/taprpc"
 	"github.com/lightninglabs/taproot-assets/taprpc/universerpc"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
@@ -126,14 +125,32 @@ func GetAssetInfo(id string) string {
 	timeStamp := msgBlock.Header.Timestamp
 	createTime := timeStamp.Unix()
 
+	assetId := hex.EncodeToString(proof.DecodedProof.Asset.AssetGenesis.GetAssetId())
+	assetType := proof.DecodedProof.Asset.AssetGenesis.AssetType.String()
+	assetIsGroup := false
+	if proof.DecodedProof.Asset.AssetGroup != nil {
+		assetIsGroup = true
+	}
+	amount := proof.DecodedProof.Asset.Amount
+	var newMeta Meta
+
+	meta := hex.EncodeToString(proof.DecodedProof.MetaReveal.Data)
+	newMeta.GetMetaFromStr(meta)
+
 	var assetInfo = struct {
-		Asset      *taprpc.Asset `json:"asset"`
-		Meta       string        `json:"meta"`
-		CreateTime int64         `json:"createTime"`
+		AssetId      string `json:"assetId"`
+		AssetType    string `json:"assetType"`
+		AssetIsGroup bool   `json:"assetIsGroup"`
+		Amount       uint64 `json:"amount"`
+		Meta         string `json:"meta"`
+		CreateTime   int64  `json:"createTime"`
 	}{
-		Asset:      proof.DecodedProof.Asset,
-		Meta:       hex.EncodeToString(proof.DecodedProof.MetaReveal.Data),
-		CreateTime: createTime,
+		AssetId:      assetId,
+		AssetType:    assetType,
+		AssetIsGroup: assetIsGroup,
+		Amount:       amount,
+		Meta:         newMeta.Description,
+		CreateTime:   createTime,
 	}
 	return MakeJsonResult(true, "", assetInfo)
 }

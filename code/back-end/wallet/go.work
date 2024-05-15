@@ -10,4 +10,5 @@ use (
 	api
 	lib/taproot-assets@v0.3.3
 	lib/cert@v1.2.2
+	./lib/btcwallet@v0.16.10-0.20240127010340-16b422a2e8bf
 )

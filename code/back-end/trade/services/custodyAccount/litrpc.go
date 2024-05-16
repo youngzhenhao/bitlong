@@ -1,4 +1,4 @@
-package custodian
+package custodyAccount
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"trade/utils"
 )
 
-func accountCreate(balance uint64, expirationDate int64, label string) (string, string) {
+func accountCreate(balance uint64, expirationDate int64, label string) (*litrpc.Account, []byte, error) {
 	litdconf := config.GetConfig().ApiConfig.Litd
 
 	grpcHost := litdconf.Host + ":" + strconv.Itoa(litdconf.Port)
@@ -26,12 +26,34 @@ func accountCreate(balance uint64, expirationDate int64, label string) (string, 
 	client := litrpc.NewAccountsClient(conn)
 	response, err := client.CreateAccount(context.Background(), request)
 	if err != nil {
-		return "Error: " + err.Error(), ""
+		return nil, nil, err
 	}
-	return response.String(), response.Account.Id
+
+	return response.Account, response.Macaroon, err
 }
 
-func accountInfo(id string) string {
+func queryId(label string) (string, error) {
+	litdconf := config.GetConfig().ApiConfig.Litd
+
+	grpcHost := litdconf.Host + ":" + strconv.Itoa(litdconf.Port)
+	tlsCertPath := litdconf.TlsCertPath
+	macaroonPath := litdconf.MacaroonPath
+
+	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
+	defer connClose()
+
+	request := &litrpc.AccountInfoRequest{
+		Label: label,
+	}
+	client := litrpc.NewAccountsClient(conn)
+	response, err := client.AccountInfo(context.Background(), request)
+	if err != nil {
+		return "", err
+	}
+	return response.Id, err
+}
+
+func accountInfo(id string) (*litrpc.Account, error) {
 	litdconf := config.GetConfig().ApiConfig.Litd
 
 	grpcHost := litdconf.Host + ":" + strconv.Itoa(litdconf.Port)
@@ -47,12 +69,12 @@ func accountInfo(id string) string {
 	client := litrpc.NewAccountsClient(conn)
 	response, err := client.AccountInfo(context.Background(), request)
 	if err != nil {
-		return "Error: " + err.Error()
+		return nil, err
 	}
-	return response.String()
+	return response, err
 }
 
-func accountRemove(id string) string {
+func accountRemove(id string) error {
 	litdconf := config.GetConfig().ApiConfig.Litd
 
 	grpcHost := litdconf.Host + ":" + strconv.Itoa(litdconf.Port)
@@ -66,15 +88,11 @@ func accountRemove(id string) string {
 		Id: id,
 	}
 	client := litrpc.NewAccountsClient(conn)
-	response, err := client.RemoveAccount(context.Background(), request)
-	if err != nil {
-		return "Error: " + err.Error()
-	}
-	return response.String()
-
+	_, err := client.RemoveAccount(context.Background(), request)
+	return err
 }
 
-func accountUpdate(id string, balance int64, expirationDate int64) string {
+func accountUpdate(id string, balance int64, expirationDate int64) (*litrpc.Account, error) {
 	litdconf := config.GetConfig().ApiConfig.Litd
 
 	grpcHost := litdconf.Host + ":" + strconv.Itoa(litdconf.Port)
@@ -92,12 +110,12 @@ func accountUpdate(id string, balance int64, expirationDate int64) string {
 	client := litrpc.NewAccountsClient(conn)
 	response, err := client.UpdateAccount(context.Background(), request)
 	if err != nil {
-		return "Error: " + err.Error()
+		return nil, err
 	}
-	return response.String()
+	return response, err
 }
 
-func acountList() string {
+func acountList() ([]*litrpc.Account, error) {
 	litdconf := config.GetConfig().ApiConfig.Litd
 
 	grpcHost := litdconf.Host + ":" + strconv.Itoa(litdconf.Port)
@@ -111,9 +129,9 @@ func acountList() string {
 	client := litrpc.NewAccountsClient(conn)
 	response, err := client.ListAccounts(context.Background(), request)
 	if err != nil {
-		return "Error: " + err.Error()
+		return nil, err
 	}
-	return response.String()
+	return response.Accounts, err
 }
 
 func getLitdInfo() string {
@@ -154,3 +172,15 @@ func getStatus() string {
 	}
 	return response.String()
 }
+
+// TODO:开具发票
+func invoiceCreate() {}
+
+// TODO:支付发票
+func invoicePay() {}
+
+// TODO:开通通道
+func channelOpen() {}
+
+// TODO:关闭通道
+func channelClose() {}

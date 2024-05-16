@@ -1399,9 +1399,10 @@ func SendPaymentSync(invoice string) string {
 	response, err := client.SendPaymentSync(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s lnrpc SendPaymentSync :%v\n", GetTimeNow(), err)
-		return "false"
+		return MakeJsonResult(false, err.Error(), nil)
 	}
-	return hex.EncodeToString(response.PaymentHash)
+	paymentHash := hex.EncodeToString(response.PaymentHash)
+	return MakeJsonResult(true, "", paymentHash)
 }
 
 func SendPaymentSync0amt(invoice string, amt int64) string {

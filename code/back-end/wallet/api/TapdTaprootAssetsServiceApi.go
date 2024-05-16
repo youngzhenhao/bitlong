@@ -480,10 +480,6 @@ func fetchAssetMeta(isHash bool, data string) (*taprpc.AssetMeta, error) {
 	return response, err
 }
 
-// ListBalances
-//
-//	@Description: ListBalances lists asset balances
-//	@return string
 func listBalances(useGroupKey bool, assetFilter, groupKeyFilter []byte) (*taprpc.ListBalancesResponse, error) {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")

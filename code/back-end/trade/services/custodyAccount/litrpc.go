@@ -9,12 +9,6 @@ import (
 	"trade/utils"
 )
 
-type rpcConf struct {
-	grpcHost     string
-	tlsCertPath  string
-	macaroonPath string
-}
-
 func accountCreate(balance uint64, expirationDate int64, label string) (*litrpc.Account, []byte, error) {
 	litdconf := config.GetConfig().ApiConfig.Litd
 
@@ -22,7 +16,6 @@ func accountCreate(balance uint64, expirationDate int64, label string) (*litrpc.
 	tlsCertPath := litdconf.TlsCertPath
 	macaroonPath := litdconf.MacaroonPath
 
-	println(macaroonPath)
 	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
 	defer connClose()
 
@@ -37,7 +30,7 @@ func accountCreate(balance uint64, expirationDate int64, label string) (*litrpc.
 		return nil, nil, err
 	}
 
-	return response.Account, response.Macaroon, err
+	return response.Account, response.Macaroon, nil
 }
 
 func queryId(label string) (string, error) {
@@ -182,26 +175,26 @@ func getStatus() string {
 }
 
 // TODO:开具发票
-func invoiceCreate(amount int64) string {
+func invoiceCreate(amount int64, memo string, macaroonPath string) (string, error) {
 	lndconf := config.GetConfig().ApiConfig.Lnd
 
 	grpcHost := lndconf.Host + ":" + strconv.Itoa(lndconf.Port)
 	tlsCertPath := lndconf.TlsCertPath
-	macaroonPath := lndconf.MacaroonPath
 
 	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
 	defer connClose()
 
 	request := &lnrpc.Invoice{
 		Value: amount,
+		Memo:  memo,
 	}
+
 	client := lnrpc.NewLightningClient(conn)
 	response, err := client.AddInvoice(context.Background(), request)
 	if err != nil {
-		return err.Error()
+		return "", err
 	}
-	return response.PaymentRequest
-
+	return response.PaymentRequest, err
 }
 
 // TODO:支付发票
@@ -212,3 +205,24 @@ func channelOpen() {}
 
 // TODO:关闭通道
 func channelClose() {}
+
+func invoiceDecode(invoice string) (*lnrpc.PayReq, error) {
+	lndconf := config.GetConfig().ApiConfig.Lnd
+
+	grpcHost := lndconf.Host + ":" + strconv.Itoa(lndconf.Port)
+	tlsCertPath := lndconf.TlsCertPath
+	macaroonPath := lndconf.MacaroonPath
+
+	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
+	defer connClose()
+
+	request := &lnrpc.PayReqString{
+		PayReq: invoice,
+	}
+	client := lnrpc.NewLightningClient(conn)
+	response, err := client.DecodePayReq(context.Background(), request)
+	if err != nil {
+		return nil, err
+	}
+	return response, err
+}

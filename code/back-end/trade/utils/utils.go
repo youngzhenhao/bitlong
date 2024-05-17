@@ -135,7 +135,9 @@ func GetConn(grpcHost, tlsCertPath, macaroonPath string) (*grpc.ClientConn, func
 	}
 	return conn, func() {
 		err := conn.Close()
-		LogError("conn Close Error", err)
+		if err != nil {
+			LogError("conn Close Error", err)
+		}
 	}
 }
 

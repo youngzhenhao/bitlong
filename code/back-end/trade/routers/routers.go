@@ -19,5 +19,7 @@ func SetupRouter() *gin.Engine {
 	if config.GetLoadConfig().Routers.Ping {
 		SetupPingRouter(r)
 	}
+	SetupCustodyAccountRouter(r)
+
 	return r
 }

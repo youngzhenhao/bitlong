@@ -2,6 +2,7 @@ package custodyAccount
 
 import (
 	"fmt"
+	"os"
 	"trade/models"
 )
 
@@ -89,4 +90,25 @@ func PayInvoice() {
 	//TODO: 调用Lit节点发票支付接口
 	//TODO: 更新数据库相关信息
 	//TODO: 返回支付结果
+}
+
+func saveMacaroon(macaroon []byte, macaroonFile string) error {
+	file, err := os.OpenFile(macaroonFile, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		panic(err)
+	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(file)
+
+	// 将字节切片写入指定位置
+	data := macaroon
+	_, err = file.Write(data)
+	if err != nil {
+		return err
+	}
+	return nil
 }

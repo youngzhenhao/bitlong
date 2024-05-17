@@ -3,10 +3,17 @@ package custodyAccount
 import (
 	"context"
 	"github.com/lightninglabs/lightning-terminal/litrpc"
+	"github.com/lightningnetwork/lnd/lnrpc"
 	"strconv"
 	"trade/config"
 	"trade/utils"
 )
+
+type rpcConf struct {
+	grpcHost     string
+	tlsCertPath  string
+	macaroonPath string
+}
 
 func accountCreate(balance uint64, expirationDate int64, label string) (*litrpc.Account, []byte, error) {
 	litdconf := config.GetConfig().ApiConfig.Litd
@@ -15,6 +22,7 @@ func accountCreate(balance uint64, expirationDate int64, label string) (*litrpc.
 	tlsCertPath := litdconf.TlsCertPath
 	macaroonPath := litdconf.MacaroonPath
 
+	println(macaroonPath)
 	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
 	defer connClose()
 
@@ -174,7 +182,27 @@ func getStatus() string {
 }
 
 // TODO:开具发票
-func invoiceCreate() {}
+func invoiceCreate(amount int64) string {
+	lndconf := config.GetConfig().ApiConfig.Lnd
+
+	grpcHost := lndconf.Host + ":" + strconv.Itoa(lndconf.Port)
+	tlsCertPath := lndconf.TlsCertPath
+	macaroonPath := lndconf.MacaroonPath
+
+	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
+	defer connClose()
+
+	request := &lnrpc.Invoice{
+		Value: amount,
+	}
+	client := lnrpc.NewLightningClient(conn)
+	response, err := client.AddInvoice(context.Background(), request)
+	if err != nil {
+		return err.Error()
+	}
+	return response.PaymentRequest
+
+}
 
 // TODO:支付发票
 func invoicePay() {}

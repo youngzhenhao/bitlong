@@ -3,7 +3,6 @@ package custodyAccount
 import (
 	"fmt"
 	"os"
-	"trade/models"
 )
 
 // TODO: 创建托管账户
@@ -11,16 +10,12 @@ func CreateCustodyAccount() {
 	// TODO: 读取请求的用户信息
 	label := "test user 1"
 	//根据用户信息创建托管账户
-	acc, macaroon, err := accountCreate(0, 0, label)
+	_, macaroon, err := accountCreate(0, 0, label)
 	if err != nil {
 		fmt.Println(err)
 	}
 	//TODO: 创建存储托管账户信息对象
-	var CstAccount models.CustodyAccount
-	CstAccount.UserID = 1
-	CstAccount.UserAccountCode = 1
-	CstAccount.AccountID = acc.Id
-	CstAccount.Label = label
+
 	//TODO: 存储马卡龙信息
 	fmt.Print(macaroon)
 	//TODO: 存储托管账户信息

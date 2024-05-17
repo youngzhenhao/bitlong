@@ -19,14 +19,15 @@ type Config struct {
 			Password string `yaml:"password"`
 			DBName   string `yaml:"dbname"`
 		} `yaml:"mysql"`
+		Redis struct {
+			Host     string `yaml:"host"`
+			Port     string `yaml:"port"`
+			Username string `yaml:"username"`
+			Password string `yaml:"password"`
+			DB       int    `yaml:"db"`
+		} `yaml:"redis"`
 	} `yaml:"gorm_config"`
-	Redis struct {
-		Host     string `yaml:"host"`
-		Port     string `yaml:"port"`
-		Username string `yaml:"username"`
-		Password string `yaml:"password"`
-		DB       int    `yaml:"db"`
-	} `yaml:"redis"`
+
 	Routers struct {
 		Login      bool `yaml:"login"`
 		FileServer bool `yaml:"file_server"`
@@ -87,7 +88,7 @@ func LoadConfig(path string) (*Config, error) {
 }
 
 func GetLoadConfig() *Config {
-	loadConfig, err := LoadConfig("config.yaml")
+	loadConfig, err := LoadConfig("/Users/wanglei/Downloads/trade/main/config.yaml")
 	if err != nil {
 		utils.LogError("[ERROR] Failed to load config", err)
 		return &Config{}

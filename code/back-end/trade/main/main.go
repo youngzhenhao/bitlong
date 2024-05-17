@@ -17,12 +17,24 @@ func main() {
 	if true {
 		if loadConfig.Routers.Login {
 			// Initialize the database connection
-			middleware.DbConnect()
-			// If you need to migrate the database table structure
-			// models.Migrate()
-			// Initialize the Redis connection
-			middleware.RedisConnect()
+
 		}
+		middleware.DbConnect()
+		middleware.RedisConnect()
+		//users, err := services.GenericQuery[models.User](&models.User{}, services.QueryParams{"Username": "John", "Status": "active"})
+		//condition := &models.User{Username: "John", Status: 1}
+
+		// 调用GenericQuery来根据条件查询用户
+		//users, err := services.GenericQueryByObject[models.User](condition)
+		//if err != nil {
+		//	fmt.Printf("Error while fetching users: %v\n", err)
+		//	return
+		//}
+		//
+		//fmt.Printf("Found %d users\n", len(users))
+		//for _, user := range users {
+		//	fmt.Println(user)
+		//}
 		r := routers.SetupRouter()
 		// Read the port number from the configuration file
 

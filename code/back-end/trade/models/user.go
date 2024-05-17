@@ -6,6 +6,11 @@ import (
 
 type User struct {
 	gorm.Model
-	Username string `gorm:"unique" json:"username"`
-	Password string `json:"password"`
+	Username string `gorm:"unique;column:user_name" json:"userName"` // 正确地将unique和column选项放在同一个gorm标签内
+	Password string `gorm:"column:password" json:"password"`
+	Status   int16  `gorm:"column:status;type:smallint" json:"status"`
+}
+
+func (User) TableName() string {
+	return "user"
 }

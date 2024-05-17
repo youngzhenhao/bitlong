@@ -18,12 +18,12 @@ func RedisConnect() {
 	if err != nil {
 		panic("failed to load config: " + err.Error())
 	}
-	redisAddr := fmt.Sprintf("%s:%s", loadConfig.Redis.Host, loadConfig.Redis.Port)
+	redisAddr := fmt.Sprintf("%s:%s", loadConfig.GormConfig.Redis.Host, loadConfig.GormConfig.Redis.Port)
 	Client = redis.NewClient(&redis.Options{
 		Addr:     redisAddr,
-		Username: loadConfig.Redis.Username,
-		Password: loadConfig.Redis.Password,
-		DB:       loadConfig.Redis.DB,
+		Username: loadConfig.GormConfig.Redis.Username,
+		Password: loadConfig.GormConfig.Redis.Password,
+		DB:       loadConfig.GormConfig.Redis.DB,
 	})
 	_, err = Client.Ping(ctx).Result()
 	if err != nil {

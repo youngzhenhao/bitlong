@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/lightninglabs/lightning-terminal/litrpc"
 	"github.com/lightningnetwork/lnd/lnrpc"
+	"github.com/lightningnetwork/lnd/lnrpc/routerrpc"
 	"strconv"
 	"trade/config"
 	"trade/utils"
@@ -33,27 +34,6 @@ func accountCreate(balance uint64, expirationDate int64, label string) (*litrpc.
 	return response.Account, response.Macaroon, nil
 }
 
-func queryId(label string) (string, error) {
-	litdconf := config.GetConfig().ApiConfig.Litd
-
-	grpcHost := litdconf.Host + ":" + strconv.Itoa(litdconf.Port)
-	tlsCertPath := litdconf.TlsCertPath
-	macaroonPath := litdconf.MacaroonPath
-
-	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
-	defer connClose()
-
-	request := &litrpc.AccountInfoRequest{
-		Label: label,
-	}
-	client := litrpc.NewAccountsClient(conn)
-	response, err := client.AccountInfo(context.Background(), request)
-	if err != nil {
-		return "", err
-	}
-	return response.Id, err
-}
-
 func accountInfo(id string) (*litrpc.Account, error) {
 	litdconf := config.GetConfig().ApiConfig.Litd
 
@@ -73,6 +53,46 @@ func accountInfo(id string) (*litrpc.Account, error) {
 		return nil, err
 	}
 	return response, err
+}
+
+func acountList() ([]*litrpc.Account, error) {
+	litdconf := config.GetConfig().ApiConfig.Litd
+
+	grpcHost := litdconf.Host + ":" + strconv.Itoa(litdconf.Port)
+	tlsCertPath := litdconf.TlsCertPath
+	macaroonPath := litdconf.MacaroonPath
+
+	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
+	defer connClose()
+
+	request := &litrpc.ListAccountsRequest{}
+	client := litrpc.NewAccountsClient(conn)
+	response, err := client.ListAccounts(context.Background(), request)
+	if err != nil {
+		return nil, err
+	}
+	return response.Accounts, err
+}
+
+func accountQueryId(label string) (string, error) {
+	litdconf := config.GetConfig().ApiConfig.Litd
+
+	grpcHost := litdconf.Host + ":" + strconv.Itoa(litdconf.Port)
+	tlsCertPath := litdconf.TlsCertPath
+	macaroonPath := litdconf.MacaroonPath
+
+	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
+	defer connClose()
+
+	request := &litrpc.AccountInfoRequest{
+		Label: label,
+	}
+	client := litrpc.NewAccountsClient(conn)
+	response, err := client.AccountInfo(context.Background(), request)
+	if err != nil {
+		return "", err
+	}
+	return response.Id, err
 }
 
 func accountRemove(id string) error {
@@ -116,26 +136,13 @@ func accountUpdate(id string, balance int64, expirationDate int64) (*litrpc.Acco
 	return response, err
 }
 
-func acountList() ([]*litrpc.Account, error) {
-	litdconf := config.GetConfig().ApiConfig.Litd
+// TODO:开通通道
+func channelOpen() {}
 
-	grpcHost := litdconf.Host + ":" + strconv.Itoa(litdconf.Port)
-	tlsCertPath := litdconf.TlsCertPath
-	macaroonPath := litdconf.MacaroonPath
+// TODO:关闭通道
+func channelClose() {}
 
-	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
-	defer connClose()
-
-	request := &litrpc.ListAccountsRequest{}
-	client := litrpc.NewAccountsClient(conn)
-	response, err := client.ListAccounts(context.Background(), request)
-	if err != nil {
-		return nil, err
-	}
-	return response.Accounts, err
-}
-
-func getLitdInfo() string {
+func LitdInfo() string {
 	litdconf := config.GetConfig().ApiConfig.Litd
 
 	grpcHost := litdconf.Host + ":" + strconv.Itoa(litdconf.Port)
@@ -155,7 +162,7 @@ func getLitdInfo() string {
 	return response.String()
 }
 
-func getStatus() string {
+func LitdStatus() string {
 	litdconf := config.GetConfig().ApiConfig.Litd
 
 	grpcHost := litdconf.Host + ":" + strconv.Itoa(litdconf.Port)
@@ -174,8 +181,8 @@ func getStatus() string {
 	return response.String()
 }
 
-// TODO:开具发票
-func invoiceCreate(amount int64, memo string, macaroonPath string) (string, error) {
+// 开具发票
+func invoiceCreate(amount int64, memo string, macaroonPath string) (*lnrpc.AddInvoiceResponse, error) {
 	lndconf := config.GetConfig().ApiConfig.Lnd
 
 	grpcHost := lndconf.Host + ":" + strconv.Itoa(lndconf.Port)
@@ -192,19 +199,10 @@ func invoiceCreate(amount int64, memo string, macaroonPath string) (string, erro
 	client := lnrpc.NewLightningClient(conn)
 	response, err := client.AddInvoice(context.Background(), request)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return response.PaymentRequest, err
+	return response, err
 }
-
-// TODO:支付发票
-func invoicePay() {}
-
-// TODO:开通通道
-func channelOpen() {}
-
-// TODO:关闭通道
-func channelClose() {}
 
 func invoiceDecode(invoice string) (*lnrpc.PayReq, error) {
 	lndconf := config.GetConfig().ApiConfig.Lnd
@@ -225,4 +223,57 @@ func invoiceDecode(invoice string) (*lnrpc.PayReq, error) {
 		return nil, err
 	}
 	return response, err
+}
+
+func invoiceFind(rHash []byte) (*lnrpc.Invoice, error) {
+	lndconf := config.GetConfig().ApiConfig.Lnd
+
+	grpcHost := lndconf.Host + ":" + strconv.Itoa(lndconf.Port)
+	tlsCertPath := lndconf.TlsCertPath
+	macaroonPath := lndconf.MacaroonPath
+
+	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
+	defer connClose()
+
+	request := &lnrpc.PaymentHash{
+		RHash: rHash,
+	}
+	client := lnrpc.NewLightningClient(conn)
+	response, err := client.LookupInvoice(context.Background(), request)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+// TODO:支付非0发票
+func invoicePay(macaroonPath string, invoice string, feeLimit int64) (*lnrpc.Payment, error) {
+	lndconf := config.GetConfig().ApiConfig.Lnd
+
+	grpcHost := lndconf.Host + ":" + strconv.Itoa(lndconf.Port)
+	tlsCertPath := lndconf.TlsCertPath
+
+	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
+	defer connClose()
+
+	request := &routerrpc.SendPaymentRequest{
+		PaymentRequest: invoice,
+		FeeLimitSat:    feeLimit,
+		TimeoutSeconds: 10,
+	}
+
+	client := routerrpc.NewRouterClient(conn)
+	stream, err := client.SendPaymentV2(context.Background(), request)
+	if err != nil {
+		return nil, err
+	}
+	for {
+		payment, err := stream.Recv()
+		if err != nil {
+			return nil, err
+		}
+		if payment != nil {
+			return payment, nil
+		}
+	}
 }

@@ -79,32 +79,50 @@ func DeleteCustodianAccount() error {
 }
 
 // ApplyInvoice TODO: 使用指定账户申请一张发票
-func ApplyInvoice(id string, amount int64, memo string) (string, error) {
+func ApplyInvoice(accountCode string, amount int64, memo string) (*lnrpc.AddInvoiceResponse, error) {
 	//获取马卡龙路径
 	var macaroonFile string
 	macaroonDir := config.GetConfig().ApiConfig.CustodyAccount.MacaroonDir
 
-	if id == "admin" {
+	if accountCode == "admin" {
 		macaroonFile = config.GetConfig().ApiConfig.Lnd.MacaroonPath
 	} else {
-		macaroonFile = filepath.Join(macaroonDir, id+".macaroon")
+		macaroonFile = filepath.Join(macaroonDir, accountCode+".macaroon")
+	}
+	if macaroonFile == "" {
+		return nil, fmt.Errorf("macaroon file not found")
 	}
 	//调用Lit节点发票申请接口
 	return invoiceCreate(amount, memo, macaroonFile)
 }
 
 // PayInvoice TODO: 使用指定账户支付发票
-func PayInvoice() {
-	//TODO: 验证账户信息，发票信息，发票金额是否正确
-	//TODO: 获取托管账户macaroon
-	//TODO: 调用Lit节点发票支付接口
-	//TODO: 更新数据库相关信息
-	//TODO: 返回支付结果
+func PayInvoice(accountCode string, invoice string, feeLimit int64) (*lnrpc.Payment, error) {
+	//获取马卡龙路径
+	var macaroonFile string
+	macaroonDir := config.GetConfig().ApiConfig.CustodyAccount.MacaroonDir
+
+	if accountCode == "admin" {
+		macaroonFile = config.GetConfig().ApiConfig.Lnd.MacaroonPath
+	} else {
+		macaroonFile = filepath.Join(macaroonDir, accountCode+".macaroon")
+	}
+	if macaroonFile == "" {
+		return nil, fmt.Errorf("macaroon file not found")
+	}
+
+	return invoicePay(macaroonFile, invoice, feeLimit)
+
 }
 
 // DecodeInvoice  解析发票信息
 func DecodeInvoice(invoice string) (*lnrpc.PayReq, error) {
 	return invoiceDecode(invoice)
+}
+
+// FindInvoice TODO: 查询节点内部发票
+func FindInvoice(rHash []byte) (*lnrpc.Invoice, error) {
+	return invoiceFind(rHash)
 }
 
 // saveMacaroon 保存macaroon字节切片到指定文件

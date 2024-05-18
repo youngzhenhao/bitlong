@@ -14,6 +14,7 @@ func SetupCustodyAccountRouter(router *gin.Engine) *gin.Engine {
 
 	Invoice := custody.Group("/invoice")
 	Invoice.GET("/apply", handlers.ApplyInvoiceCA)
+	Invoice.GET("/pay", handlers.PayInvoice)
 
 	//custody.Use(middleware.AuthMiddleware())
 	//{

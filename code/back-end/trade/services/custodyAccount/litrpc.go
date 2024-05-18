@@ -204,6 +204,7 @@ func invoiceCreate(amount int64, memo string, macaroonPath string) (*lnrpc.AddIn
 	return response, err
 }
 
+// 解析发票
 func invoiceDecode(invoice string) (*lnrpc.PayReq, error) {
 	lndconf := config.GetConfig().ApiConfig.Lnd
 
@@ -225,6 +226,7 @@ func invoiceDecode(invoice string) (*lnrpc.PayReq, error) {
 	return response, err
 }
 
+// 在节点上查询发票
 func invoiceFind(rHash []byte) (*lnrpc.Invoice, error) {
 	lndconf := config.GetConfig().ApiConfig.Lnd
 
@@ -246,7 +248,7 @@ func invoiceFind(rHash []byte) (*lnrpc.Invoice, error) {
 	return response, nil
 }
 
-// TODO:支付非0发票
+// 支付非0发票
 func invoicePay(macaroonPath string, invoice string, feeLimit int64) (*lnrpc.Payment, error) {
 	lndconf := config.GetConfig().ApiConfig.Lnd
 

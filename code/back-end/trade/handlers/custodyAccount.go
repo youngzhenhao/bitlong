@@ -2,12 +2,33 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/lightningnetwork/lnd/lnrpc"
 	"net/http"
 	"time"
 	"trade/middleware"
 	"trade/models"
 	"trade/services"
 	"trade/services/custodyAccount"
+)
+
+const (
+	BILL_TYPE_RECHARGE = 0
+	BILL_TYPE_PAYMENT  = 1
+)
+
+const (
+	AWAY_IN  = 0
+	AWAY_OUT = 1
+)
+
+const (
+	UNIT_SATOSHIS = 0
+)
+
+const (
+	PAY_UNKNOWN = 0
+	PAY_SUCCESS = 1
+	PAY_FAILED  = 2
 )
 
 // CreateCustodyAccount 创建托管账户
@@ -110,13 +131,34 @@ func PayInvoice(c *gin.Context) {
 
 	//TODO: 获取登录用户信息
 	//userId := uint(0)
-	//accountId := uint(0)
+	accountId := uint(0)
 	accountCode := "8bc6754444ab8020"
 
 	//TODO: 校验发票信息
 	invoice := "lntb30u1pnysgl9pp5tphfml5fayvw67vpd72y3aavekuzs6jv04ga7yvw7hhsy2l96cvsdqqcqzzsxqyz5vqsp55nlk7zltyecpktehpdgmknjaelyztwrnpqy6cy99447g83hhghhs9qyyssqm4ldvk854ap005x2fq72tp635xz5gzkuw9puz8q02pcs9qk30938rer3ah9avhpvpldv9mhwuqhuqa4gvd4ezeqqx955q9pgfvrlarqq8nnt3f"
 	feeLimit := int64(1000)
+	//检查数据库中是否有该发票的记录
+	a, err := services.GenericQueryByObject(&models.Balance{
+		Invoice: &invoice,
+	})
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+	if len(a) > 0 {
+		for _, v := range a {
+			if v.Status == PAY_SUCCESS {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "发票已被支付，请勿重复支付"})
+				return
+			}
+			if v.Status == PAY_UNKNOWN {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "发票锁定中，请稍后再试"})
+				return
+			}
+		}
+	}
 
+	//TODO: 判断账户余额是否足够
 	info, err := custodyAccount.DecodeInvoice(invoice)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
@@ -130,13 +172,32 @@ func PayInvoice(c *gin.Context) {
 		return
 	}
 
-	//TODO: 支付发票
+	// 支付发票
 	payment, err := custodyAccount.PayInvoice(accountCode, invoice, feeLimit)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
-	//TODO: 写入数据库
+	// 写入数据库
+	var balanceModel models.Balance
+	balanceModel.AccountId = accountId
+	balanceModel.BillType = BILL_TYPE_PAYMENT
+	balanceModel.Away = AWAY_OUT
+	balanceModel.Amount = float64(payment.ValueSat)
+	balanceModel.Unit = UNIT_SATOSHIS
+	balanceModel.Invoice = &invoice
+	balanceModel.PaymentHash = &payment.PaymentHash
+	if payment.Status == lnrpc.Payment_SUCCEEDED {
+		balanceModel.Status = PAY_SUCCESS
+	} else if payment.Status == lnrpc.Payment_FAILED {
+		balanceModel.Status = PAY_FAILED
+	} else {
+		balanceModel.Status = PAY_UNKNOWN
+	}
+	err = middleware.DB.Create(&balanceModel).Error
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"payment": payment})
-	//TODO: 返回信息，规范状态码
 }

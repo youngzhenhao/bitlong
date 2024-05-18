@@ -27,7 +27,6 @@ type Config struct {
 			DB       int    `yaml:"db"`
 		} `yaml:"redis"`
 	} `yaml:"gorm_config"`
-
 	Routers struct {
 		Login      bool `yaml:"login"`
 		FileServer bool `yaml:"file_server"`
@@ -53,6 +52,9 @@ type Config struct {
 			TlsCertPath  string `yaml:"tls_cert_path"`
 			MacaroonPath string `yaml:"macaroon_path"`
 		} `yaml:"litd"`
+		CustodyAccount struct {
+			MacaroonDir string `yaml:"macaroon_dir"`
+		} `yaml:"custody_account"`
 	} `yaml:"api_config"`
 	Bolt struct {
 		DbPath          string `yaml:"db_path"`
@@ -88,7 +90,7 @@ func LoadConfig(path string) (*Config, error) {
 }
 
 func GetLoadConfig() *Config {
-	loadConfig, err := LoadConfig("/Users/wanglei/Downloads/trade/main/config.yaml")
+	loadConfig, err := LoadConfig("config.yaml")
 	if err != nil {
 		utils.LogError("[ERROR] Failed to load config", err)
 		return &Config{}

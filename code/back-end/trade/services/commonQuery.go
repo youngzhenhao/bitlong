@@ -66,7 +66,9 @@ func GenericQueryByObject[T any](condition *T) ([]*T, error) {
 		fmt.Printf("Error querying database: %v\n", err)
 		return nil, err
 	}
-
+	if len(results) == 0 {
+		return nil, nil
+	}
 	// Optionally print the results (assuming model has a method String() string to print its details)
 	for _, result := range results {
 		fmt.Println(result)

@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"net/http"
+	"sync"
 	"time"
 	"trade/middleware"
 	"trade/models"
@@ -30,6 +32,8 @@ const (
 	PAY_SUCCESS = 1
 	PAY_FAILED  = 2
 )
+
+var mutex sync.Mutex
 
 // CreateCustodyAccount 创建托管账户
 func CreateCustodyAccount(c *gin.Context) {
@@ -58,6 +62,8 @@ func CreateCustodyAccount(c *gin.Context) {
 	accountModel.Label = &cstAccount.Label
 	accountModel.Status = 1
 	//写入数据库
+	mutex.Lock()
+	defer mutex.Unlock()
 	err = services.CreateAccount(&accountModel)
 	//TODO: 返回信息，规范状态码
 	if err != nil {
@@ -117,6 +123,8 @@ func ApplyInvoiceCA(c *gin.Context) {
 	invoiceModel.Expiry = &expiry
 
 	//写入数据库
+	mutex.Lock()
+	defer mutex.Unlock()
 	err = middleware.DB.Create(&invoiceModel).Error
 	//回信息，规范状态码
 	if err != nil {
@@ -135,7 +143,7 @@ func PayInvoice(c *gin.Context) {
 	accountCode := "8bc6754444ab8020"
 
 	//TODO: 校验发票信息
-	invoice := "lntb30u1pnysgl9pp5tphfml5fayvw67vpd72y3aavekuzs6jv04ga7yvw7hhsy2l96cvsdqqcqzzsxqyz5vqsp55nlk7zltyecpktehpdgmknjaelyztwrnpqy6cy99447g83hhghhs9qyyssqm4ldvk854ap005x2fq72tp635xz5gzkuw9puz8q02pcs9qk30938rer3ah9avhpvpldv9mhwuqhuqa4gvd4ezeqqx955q9pgfvrlarqq8nnt3f"
+	invoice := "lntb20u1pnysccypp55e38s043wrgy9wn33c326l7tnvf5l335gs5dz9cc56tgltp8cjtqdqqcqzzsxqyz5vqsp53dhdfywr4axzu9y8j90czwgnt3ukl8ndaft8waue7zkmrpyu67us9qyyssqfh2sghzu2ftnsxrwg4rjjqqfwp2tx6fjc7fsja6dvnkrwu5d890nhcr5f85vtj2jrrws4z6dufp2w7svr222n2pf4xzm52d3w0gp26cp75t65f"
 	feeLimit := int64(1000)
 	//检查数据库中是否有该发票的记录
 	a, err := services.GenericQueryByObject(&models.Balance{
@@ -147,27 +155,28 @@ func PayInvoice(c *gin.Context) {
 	}
 	if len(a) > 0 {
 		for _, v := range a {
-			if v.Status == PAY_SUCCESS {
+			if v.State == PAY_SUCCESS {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": "发票已被支付，请勿重复支付"})
 				return
 			}
-			if v.Status == PAY_UNKNOWN {
+			if v.State == PAY_UNKNOWN {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": "发票锁定中，请稍后再试"})
 				return
 			}
 		}
 	}
 
-	//TODO: 判断账户余额是否足够
+	// 判断账户余额是否足够
 	info, err := custodyAccount.DecodeInvoice(invoice)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 	}
-
-	//TODO: 判断发票支付条件
-	userbalance := int64(100000)
-
-	if info.NumSatoshis > userbalance {
+	userBalance, err := custodyAccount.QueryCustodyAccount(accountCode)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+	if info.NumSatoshis > userBalance.CurrentBalance {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "余额不足"})
 		return
 	}
@@ -188,16 +197,55 @@ func PayInvoice(c *gin.Context) {
 	balanceModel.Invoice = &invoice
 	balanceModel.PaymentHash = &payment.PaymentHash
 	if payment.Status == lnrpc.Payment_SUCCEEDED {
-		balanceModel.Status = PAY_SUCCESS
+		balanceModel.State = PAY_SUCCESS
 	} else if payment.Status == lnrpc.Payment_FAILED {
-		balanceModel.Status = PAY_FAILED
+		balanceModel.State = PAY_FAILED
 	} else {
-		balanceModel.Status = PAY_UNKNOWN
+		balanceModel.State = PAY_UNKNOWN
 	}
+	mutex.Lock()
+	defer mutex.Unlock()
 	err = middleware.DB.Create(&balanceModel).Error
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"payment": payment})
+}
+
+func PollPayment() {
+	//查询数据库，获取所有未确认的发票
+	a, err := services.GenericQueryByObject(&models.Balance{
+		State: PAY_UNKNOWN,
+	})
+	if err != nil {
+		fmt.Println(err)
+	}
+	if len(a) > 0 {
+		for _, v := range a {
+			temp, err := custodyAccount.TrackPayment(*v.PaymentHash)
+			if err != nil {
+				fmt.Println(err)
+			}
+			if temp.Status == lnrpc.Payment_SUCCEEDED {
+				v.State = PAY_SUCCESS
+				mutex.Lock()
+				defer mutex.Unlock()
+				err = middleware.DB.Save(&v).Error
+				if err != nil {
+					fmt.Println(err)
+				}
+			} else if temp.Status == lnrpc.Payment_FAILED {
+				v.State = PAY_FAILED
+				mutex.Lock()
+				defer mutex.Unlock()
+				err = middleware.DB.Save(&v).Error
+				if err != nil {
+					fmt.Println(err)
+				}
+			}
+
+		}
+	}
+
 }

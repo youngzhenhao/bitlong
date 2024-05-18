@@ -38,7 +38,7 @@ func CreateCustodyAccount(label string) (*litrpc.Account, error) {
 	return account, nil
 }
 
-// Update TODO: 托管账户充值
+// Update  托管账户充值
 func Update(id string, amount int64) error {
 	//更变托管账户余额
 	_, err := accountUpdate(id, amount, -1)
@@ -49,23 +49,12 @@ func Update(id string, amount int64) error {
 	return err
 }
 
-// QueryCustodyAccount TODO: 托管账户查询
-func QueryCustodyAccount() error {
-	//TODO: 获取托管账户ID
-	id := "test"
-	//从节点查询账户信息
-	account, err := accountInfo(id)
-	if err != nil {
-		return err
-	}
-	//TODO: 查询数据库相关信息
-
-	//TODO: 组合并返回账户信息
-	fmt.Println(account)
-	return err
+// QueryCustodyAccount  托管账户查询
+func QueryCustodyAccount(accountCode string) (*litrpc.Account, error) {
+	return accountInfo(accountCode)
 }
 
-// DeleteCustodianAccount TODO: 托管账户删除
+// DeleteCustodianAccount 托管账户删除
 func DeleteCustodianAccount() error {
 	//TODO: 获取托管账户ID
 	id := "test"
@@ -78,7 +67,7 @@ func DeleteCustodianAccount() error {
 	return err
 }
 
-// ApplyInvoice TODO: 使用指定账户申请一张发票
+// ApplyInvoice 使用指定账户申请一张发票
 func ApplyInvoice(accountCode string, amount int64, memo string) (*lnrpc.AddInvoiceResponse, error) {
 	//获取马卡龙路径
 	var macaroonFile string
@@ -96,7 +85,7 @@ func ApplyInvoice(accountCode string, amount int64, memo string) (*lnrpc.AddInvo
 	return invoiceCreate(amount, memo, macaroonFile)
 }
 
-// PayInvoice TODO: 使用指定账户支付发票
+// PayInvoice 使用指定账户支付发票
 func PayInvoice(accountCode string, invoice string, feeLimit int64) (*lnrpc.Payment, error) {
 	//获取马卡龙路径
 	var macaroonFile string
@@ -120,9 +109,14 @@ func DecodeInvoice(invoice string) (*lnrpc.PayReq, error) {
 	return invoiceDecode(invoice)
 }
 
-// FindInvoice TODO: 查询节点内部发票
+// FindInvoice 查询节点内部发票
 func FindInvoice(rHash []byte) (*lnrpc.Invoice, error) {
 	return invoiceFind(rHash)
+}
+
+// TrackPayment 跟踪支付状态
+func TrackPayment(paymentHash string) (*lnrpc.Payment, error) {
+	return paymentTrack(paymentHash)
 }
 
 // saveMacaroon 保存macaroon字节切片到指定文件

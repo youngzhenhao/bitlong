@@ -13,7 +13,7 @@ type Balance struct {
 	Unit        int     `gorm:"column:Unit" json:"unit"`
 	Invoice     *string `gorm:"column:invoice" json:"invoice"`
 	PaymentHash *string `gorm:"column:payment_hash" json:"paymentHash"`
-	Status      int16   `gorm:"column:status;type:smallint" json:"status"`
+	State       int16   `gorm:"column:State;type:smallint" json:"State"`
 }
 
 func (Balance) TableName() string {

@@ -2,6 +2,7 @@ package custodyAccount
 
 import (
 	"context"
+	"encoding/hex"
 	"github.com/lightninglabs/lightning-terminal/litrpc"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/lightningnetwork/lnd/lnrpc/routerrpc"
@@ -266,6 +267,35 @@ func invoicePay(macaroonPath string, invoice string, feeLimit int64) (*lnrpc.Pay
 
 	client := routerrpc.NewRouterClient(conn)
 	stream, err := client.SendPaymentV2(context.Background(), request)
+	if err != nil {
+		return nil, err
+	}
+	for {
+		payment, err := stream.Recv()
+		if err != nil {
+			return nil, err
+		}
+		if payment != nil {
+			return payment, nil
+		}
+	}
+}
+
+func paymentTrack(paymentHash string) (*lnrpc.Payment, error) {
+	lndconf := config.GetConfig().ApiConfig.Lnd
+
+	grpcHost := lndconf.Host + ":" + strconv.Itoa(lndconf.Port)
+	tlsCertPath := lndconf.TlsCertPath
+	macaroonPath := lndconf.MacaroonPath
+
+	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
+	defer connClose()
+	hash, _ := hex.DecodeString(paymentHash)
+	request := &routerrpc.TrackPaymentRequest{
+		PaymentHash: hash,
+	}
+	client := routerrpc.NewRouterClient(conn)
+	stream, err := client.TrackPaymentV2(context.Background(), request)
 	if err != nil {
 		return nil, err
 	}

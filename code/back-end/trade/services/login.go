@@ -2,7 +2,9 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
+	"log"
 	"trade/dao"
 	"trade/middleware"
 	"trade/models"
@@ -38,4 +40,8 @@ func ValidateUserAndGenerateToken(creds models.User) (string, error) {
 		return "", err
 	}
 	return token, nil
+}
+func (sm *CronService) FiveSecondTask() {
+	fmt.Println("5 secs runs")
+	log.Println("5 secs runs")
 }

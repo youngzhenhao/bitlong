@@ -2,7 +2,9 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
+	"log"
 	"trade/dao"
 	"trade/middleware"
 	"trade/models"
@@ -45,4 +47,11 @@ func UpdateUser(user *models.User) error {
 func DeleteUser(id uint) error {
 	var user models.User
 	return dao.DB.Delete(&user, id).Error
+}
+
+type CronService struct{}
+
+func (sm *CronService) SixSecondTask() {
+	fmt.Println("6 secs runs")
+	log.Println("6 secs runs")
 }

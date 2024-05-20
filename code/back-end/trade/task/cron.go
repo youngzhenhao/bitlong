@@ -2,13 +2,10 @@ package task
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"reflect"
 	"time"
-	"trade/config"
-	"trade/dao"
-	"trade/handlers"
+	"trade/middleware"
 	"trade/services"
 )
 
@@ -20,45 +17,19 @@ type Job struct {
 	Name           string
 	CronExpression string
 	FunctionName   string
-	PackagePath    string
-}
-
-func init() {
-	var err error
-	// Initialize MySQL Database
-	loadConfig, err := config.LoadConfig("config.yaml")
-	if err != nil {
-		panic("failed to load config: " + err.Error())
-	}
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		loadConfig.GormConfig.Mysql.Username,
-		loadConfig.GormConfig.Mysql.Password,
-		loadConfig.GormConfig.Mysql.Host,
-		loadConfig.GormConfig.Mysql.Port,
-		loadConfig.GormConfig.Mysql.DBName,
-	)
-	db, err = sql.Open("mysql", dsn)
-	if err != nil {
-		log.Fatal(err)
-	}
+	Package        string
 }
 
 func LoadJobs() ([]Job, error) {
 	var jobs []Job
-	rows, err := db.Query("SELECT name, cron_expression, function_name, package FROM scheduled_tasks")
+	// 使用GORM的方法进行查询
+	err := middleware.DB.Table("scheduled_tasks").Select("name, cron_expression, function_name, package").Scan(&jobs).Error
 	if err != nil {
 		log.Fatal("Failed to load tasks:", err)
 		return nil, err
 	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var job Job
-		if err := rows.Scan(&job.Name, &job.CronExpression, &job.FunctionName, &job.PackagePath); err != nil {
-			log.Fatal("Failed to read task data:", err)
-			return nil, err
-		}
-		fn := getFunction(job.PackagePath, job.FunctionName)
+	for _, job := range jobs {
+		fn := getFunction(job.Package, job.FunctionName)
 		if fn.IsValid() {
 			taskFunc := func() {
 				fn.Call(nil)
@@ -67,7 +38,7 @@ func LoadJobs() ([]Job, error) {
 
 			jobs = append(jobs, job)
 		} else {
-			log.Printf("Function %s not found in package %s", job.FunctionName, job.PackagePath)
+			log.Printf("Function %s not found in package %s", job.FunctionName, job.Package)
 		}
 	}
 	return jobs, nil
@@ -75,12 +46,14 @@ func LoadJobs() ([]Job, error) {
 
 func ExecuteWithLock(taskName string) {
 	lockKey := "lock:" + taskName
-	flag := dao.AcquireLock(lockKey, 1, 10*time.Minute)
-	if !flag {
-		fmt.Println("Failed to acquire lock for", taskName)
+	expiration := 10 * time.Second
+	// 尝试获取锁
+	identifier, acquired := middleware.AcquireLock(lockKey, expiration)
+	if !acquired {
+		log.Println("Failed to acquire lock" + lockKey)
 		return
 	}
-	defer dao.ReleaseLock(lockKey)
+	defer middleware.ReleaseLock(lockKey, identifier) //
 	ExecuteTask(taskName)
 }
 func getFunction(pkgName, funcName string) reflect.Value {
@@ -88,9 +61,6 @@ func getFunction(pkgName, funcName string) reflect.Value {
 	case "services":
 		// Assuming there is a struct that encapsulates the methods
 		manager := services.CronService{} // You need to define this struct
-		return reflect.ValueOf(&manager).MethodByName(funcName)
-	case "handlers":
-		manager := handlers.CronHandler{}
 		return reflect.ValueOf(&manager).MethodByName(funcName)
 	default:
 		return reflect.Value{}

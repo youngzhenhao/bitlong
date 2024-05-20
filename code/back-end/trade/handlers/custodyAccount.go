@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"sync"
 	"time"
-	"trade/dao"
+	"trade/middleware"
 	"trade/models"
 	"trade/services"
 	"trade/services/custodyAccount"
@@ -128,7 +128,7 @@ func ApplyInvoiceCA(c *gin.Context) {
 	//写入数据库
 	mutex.Lock()
 	defer mutex.Unlock()
-	err = dao.DB.Create(&invoiceModel).Error
+	err = middleware.DB.Create(&invoiceModel).Error
 	//回信息，规范状态码
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
@@ -208,7 +208,7 @@ func PayInvoice(c *gin.Context) {
 	}
 	mutex.Lock()
 	defer mutex.Unlock()
-	err = dao.DB.Create(&balanceModel).Error
+	err = middleware.DB.Create(&balanceModel).Error
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -237,7 +237,7 @@ func PollPayment() {
 				v.State = PAY_SUCCESS
 				mutex.Lock()
 				defer mutex.Unlock()
-				err = dao.DB.Save(&v).Error
+				err = middleware.DB.Save(&v).Error
 				if err != nil {
 					fmt.Println(err)
 				}
@@ -245,7 +245,7 @@ func PollPayment() {
 				v.State = PAY_FAILED
 				mutex.Lock()
 				defer mutex.Unlock()
-				err = dao.DB.Save(&v).Error
+				err = middleware.DB.Save(&v).Error
 				if err != nil {
 					fmt.Println(err)
 				}
@@ -285,7 +285,7 @@ func PollInvoice() {
 				v.Status = int16(temp.State)
 				mutex.Lock()
 				defer mutex.Unlock()
-				err = dao.DB.Save(&v).Error
+				err = middleware.DB.Save(&v).Error
 				if err != nil {
 					fmt.Println(err)
 				}

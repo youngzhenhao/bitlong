@@ -14,6 +14,7 @@ require (
 	github.com/lightninglabs/lightning-terminal v0.12.5-alpha
 	github.com/lightninglabs/taproot-assets v0.3.3
 	github.com/lightningnetwork/lnd v0.17.5-beta
+	github.com/robfig/cron/v3 v3.0.1
 	google.golang.org/grpc v1.63.2
 	google.golang.org/protobuf v1.34.1
 	gopkg.in/yaml.v3 v3.0.1

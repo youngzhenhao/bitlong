@@ -21,11 +21,12 @@ func main() {
 		return
 	}
 	r := routers.SetupRouter()
+	bind := loadConfig.GinConfig.Bind
 	port := loadConfig.GinConfig.Port
 	if port == "" {
 		port = "8080"
 	}
-	err = r.Run(fmt.Sprintf(":%s", port))
+	err = r.Run(fmt.Sprintf("%s:%s", bind, port))
 	if err != nil {
 		return
 	}

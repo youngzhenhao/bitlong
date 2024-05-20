@@ -19,7 +19,6 @@ func RedisConnect() {
 		panic("failed to load config: " + err.Error())
 	}
 	redisAddr := fmt.Sprintf("%s:%s", loadConfig.Redis.Host, loadConfig.Redis.Port)
-	fmt.Println(redisAddr)
 	Client = redis.NewClient(&redis.Options{
 		Addr:     redisAddr,
 		Username: loadConfig.Redis.Username,

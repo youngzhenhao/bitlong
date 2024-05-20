@@ -75,7 +75,6 @@ func CreateCustodyAccount(c *gin.Context) {
 }
 
 // UpdateCustodyAccount 更新托管账户余额
-
 func UpdateCustodyAccount(c *gin.Context) {
 
 	//TODO: 获取登录用户信息
@@ -219,10 +218,11 @@ func PayInvoice(c *gin.Context) {
 
 // PollPayment 遍历所有未确认的发票，轮询支付状态
 func PollPayment() {
-	//查询数据库，获取所有未确认的发票
-	a, err := services.GenericQueryByObject(&models.Balance{
-		State: PAY_UNKNOWN,
-	})
+	//查询数据库，获取所有未确认的支付
+	params := services.QueryParams{
+		"State": PAY_UNKNOWN,
+	}
+	a, err := services.GenericQuery(&models.Balance{}, params)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -231,6 +231,7 @@ func PollPayment() {
 			temp, err := custodyAccount.TrackPayment(*v.PaymentHash)
 			if err != nil {
 				fmt.Println(err)
+				continue
 			}
 			if temp.Status == lnrpc.Payment_SUCCEEDED {
 				v.State = PAY_SUCCESS
@@ -256,9 +257,10 @@ func PollPayment() {
 // PollInvoice 遍历所有未支付的发票，轮询发票状态
 func PollInvoice() {
 	//查询数据库，获取所有未支付的发票
-	a, err := services.GenericQueryByObject(&models.Invoice{
-		Status: 0,
-	})
+	params := services.QueryParams{
+		"Status": lnrpc.Invoice_OPEN,
+	}
+	a, err := services.GenericQuery(&models.Invoice{}, params)
 	if err != nil {
 		fmt.Println(err)
 	}

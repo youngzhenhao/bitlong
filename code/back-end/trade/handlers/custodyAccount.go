@@ -38,19 +38,17 @@ var mutex sync.Mutex
 
 // CreateCustodyAccount 创建托管账户
 func CreateCustodyAccount(c *gin.Context) {
-	//var creds models.Account
-	//if err := c.ShouldBindJSON(&creds); err != nil {
-	//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	//	return
-	//}
 	//TODO: 获取登录用户信息
+	userName := c.MustGet("username").(string)
 	//TODO: 校验登录用户信息
-	userName := "testname"
-	userId := uint(0)
-	Lebel := "testlabel"
+	params := services.QueryParams{
+		"user_name": userName,
+	}
+	a, err := services.GenericQuery(&models.User{}, params)
+	userId := a[0].ID
 
 	//创建账户
-	cstAccount, err := custodyAccount.CreateCustodyAccount(Lebel)
+	cstAccount, err := custodyAccount.CreateCustodyAccount()
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return

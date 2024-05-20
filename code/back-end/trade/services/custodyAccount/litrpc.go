@@ -11,7 +11,7 @@ import (
 	"trade/utils"
 )
 
-func accountCreate(balance uint64, expirationDate int64, label string) (*litrpc.Account, []byte, error) {
+func accountCreate(balance uint64, expirationDate int64) (*litrpc.Account, []byte, error) {
 	litdconf := config.GetConfig().ApiConfig.Litd
 
 	grpcHost := litdconf.Host + ":" + strconv.Itoa(litdconf.Port)
@@ -24,7 +24,6 @@ func accountCreate(balance uint64, expirationDate int64, label string) (*litrpc.
 	request := &litrpc.CreateAccountRequest{
 		AccountBalance: balance,
 		ExpirationDate: expirationDate,
-		Label:          label,
 	}
 	client := litrpc.NewAccountsClient(conn)
 	response, err := client.CreateAccount(context.Background(), request)

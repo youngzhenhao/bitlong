@@ -10,9 +10,9 @@ import (
 )
 
 // CreateCustodyAccount 创建托管账户并保持马卡龙文件
-func CreateCustodyAccount(label string) (*litrpc.Account, error) {
+func CreateCustodyAccount() (*litrpc.Account, error) {
 	//根据用户信息创建托管账户
-	account, macaroon, err := accountCreate(0, 0, label)
+	account, macaroon, err := accountCreate(0, 0)
 	if err != nil {
 		return nil, err
 	}

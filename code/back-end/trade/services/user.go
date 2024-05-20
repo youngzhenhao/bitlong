@@ -16,11 +16,9 @@ func ValidateUser(creds models.User) (string, error) {
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return "", errors.New("invalid credentials")
 	}
-	// Verify your password
 	if user.Password != creds.Password {
 		return "", errors.New("invalid credentials")
 	}
-	// Generate tokens for subsequent requests
 	token, err := middleware.GenerateToken(creds.Username)
 	if err != nil {
 		return "", err
@@ -33,8 +31,8 @@ func CreateUser(db *gorm.DB, user *models.User) error {
 	return db.Create(user).Error
 }
 
-// GetUser retrieves a user by ID
-func GetUser(id uint) (*models.User, error) {
+// ReadUser retrieves a user by ID
+func ReadUser(id uint) (*models.User, error) {
 	var user models.User
 	err := dao.DB.First(&user, id).Error
 	return &user, err

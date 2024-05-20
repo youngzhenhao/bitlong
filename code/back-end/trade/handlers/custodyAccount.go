@@ -74,10 +74,13 @@ func CreateCustodyAccount(c *gin.Context) {
 }
 
 // UpdateCustodyAccount 更新托管账户余额
+
 func UpdateCustodyAccount(c *gin.Context) {
+
 	//TODO: 获取登录用户信息
+
 	//TODO: 获取账户余额更新信息
-	id := "testid"
+	id := "tested"
 	amount := int64(12345)
 
 	//TODO: 更新托管账户余额
@@ -213,6 +216,7 @@ func PayInvoice(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"payment": payment})
 }
 
+// PollPayment 遍历所有未确认的发票，轮询支付状态
 func PollPayment() {
 	//查询数据库，获取所有未确认的发票
 	a, err := services.GenericQueryByObject(&models.Balance{
@@ -244,8 +248,6 @@ func PollPayment() {
 					fmt.Println(err)
 				}
 			}
-
 		}
 	}
-
 }

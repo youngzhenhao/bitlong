@@ -7,7 +7,7 @@ import (
 	"trade/config"
 	"trade/dao"
 	"trade/routers"
-	"trade/services"
+	"trade/task"
 )
 
 func main() {
@@ -24,17 +24,8 @@ func main() {
 		}
 		dao.InitMysql()
 		dao.RedisConnect()
-		//err = dao.DB.AutoMigrate(&models.Account{})
-		//err = dao.DB.AutoMigrate(&models.Balance{})
-		//err = dao.DB.AutoMigrate(&models.BalanceExt{})
-		//err = dao.DB.AutoMigrate(&models.Invoice{})
-		//err = dao.DB.AutoMigrate(&models.User{})
-		//if err != nil {
-		//	utils.LogError("AutoMigrate error", err)
-		//	return
-		//}
 
-		jobs, err := services.LoadJobs()
+		jobs, err := task.LoadJobs()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -43,7 +34,7 @@ func main() {
 		for _, job := range jobs {
 			// Schedule each job using cron
 			_, err := c.AddFunc(job.CronExpression, func() {
-				services.ExecuteWithLock(job.Name)
+				task.ExecuteWithLock(job.Name)
 			})
 			if err != nil {
 				log.Printf("Error scheduling job %s: %v\n", job.Name, err)

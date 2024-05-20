@@ -1,4 +1,4 @@
-package services
+package task
 
 import (
 	"database/sql"
@@ -8,7 +8,8 @@ import (
 	"time"
 	"trade/config"
 	"trade/dao"
-	"trade/task"
+	"trade/handlers"
+	"trade/services"
 )
 
 var (
@@ -21,8 +22,6 @@ type Job struct {
 	FunctionName   string
 	PackagePath    string
 }
-
-type CronService struct{}
 
 func init() {
 	var err error
@@ -64,7 +63,7 @@ func LoadJobs() ([]Job, error) {
 			taskFunc := func() {
 				fn.Call(nil)
 			}
-			task.RegisterTask(job.Name, taskFunc)
+			RegisterTask(job.Name, taskFunc)
 
 			jobs = append(jobs, job)
 		} else {
@@ -82,13 +81,16 @@ func ExecuteWithLock(taskName string) {
 		return
 	}
 	defer dao.ReleaseLock(lockKey)
-	task.ExecuteTask(taskName)
+	ExecuteTask(taskName)
 }
 func getFunction(pkgName, funcName string) reflect.Value {
 	switch pkgName {
 	case "services":
 		// Assuming there is a struct that encapsulates the methods
-		manager := CronService{} // You need to define this struct
+		manager := services.CronService{} // You need to define this struct
+		return reflect.ValueOf(&manager).MethodByName(funcName)
+	case "handlers":
+		manager := handlers.CronHandler{}
 		return reflect.ValueOf(&manager).MethodByName(funcName)
 	default:
 		return reflect.Value{}

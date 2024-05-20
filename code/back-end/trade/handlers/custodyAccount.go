@@ -293,3 +293,15 @@ func PollInvoice() {
 		}
 	}
 }
+
+type CronHandler struct {
+}
+
+func (sm *CronHandler) PollPaymentCron() {
+	fmt.Println("start cron job: PollPayment")
+	PollPayment()
+}
+func (sm *CronHandler) PollInvoiceCron() {
+	fmt.Println("start cron job: PollInvoice")
+	PollInvoice()
+}

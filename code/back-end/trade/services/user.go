@@ -10,12 +10,6 @@ import (
 	"trade/models"
 )
 
-//	func Migrate() {
-//		err := middleware.DB.AutoMigrate(&models.User{})
-//		if err != nil {
-//			return
-//		}
-//	}
 func ValidateUser(creds models.User) (string, error) {
 	var user models.User
 	result := dao.DB.Where("username = ?", creds.Username).First(&user)
@@ -56,6 +50,9 @@ func DeleteUser(id uint) error {
 	var user models.User
 	return dao.DB.Delete(&user, id).Error
 }
+
+type CronService struct{}
+
 func (sm *CronService) SixSecondTask() {
 	fmt.Println("6 secs runs")
 	log.Println("6 secs runs")

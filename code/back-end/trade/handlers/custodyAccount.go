@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/lightningnetwork/lnd/lnrpc"
@@ -241,6 +242,45 @@ func PollPayment() {
 				}
 			} else if temp.Status == lnrpc.Payment_FAILED {
 				v.State = PAY_FAILED
+				mutex.Lock()
+				defer mutex.Unlock()
+				err = middleware.DB.Save(&v).Error
+				if err != nil {
+					fmt.Println(err)
+				}
+			}
+		}
+	}
+}
+
+// PollInvoice 遍历所有未支付的发票，轮询发票状态
+func PollInvoice() {
+	//查询数据库，获取所有未支付的发票
+	a, err := services.GenericQueryByObject(&models.Invoice{
+		Status: 1,
+	})
+	if err != nil {
+		fmt.Println(err)
+	}
+	if len(a) > 0 {
+		for _, v := range a {
+			invoice, err := custodyAccount.DecodeInvoice(v.Invoice)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			rHash, err := hex.DecodeString(invoice.PaymentHash)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			temp, err := custodyAccount.FindInvoice(rHash)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			if int16(temp.State) != v.Status {
+				v.Status = int16(temp.State)
 				mutex.Lock()
 				defer mutex.Unlock()
 				err = middleware.DB.Save(&v).Error

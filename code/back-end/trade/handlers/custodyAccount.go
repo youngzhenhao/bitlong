@@ -257,7 +257,7 @@ func PollPayment() {
 func PollInvoice() {
 	//查询数据库，获取所有未支付的发票
 	a, err := services.GenericQueryByObject(&models.Invoice{
-		Status: 1,
+		Status: 0,
 	})
 	if err != nil {
 		fmt.Println(err)

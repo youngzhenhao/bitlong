@@ -2,19 +2,19 @@ package services
 
 import (
 	"gorm.io/gorm"
-	"trade/middleware"
+	"trade/dao"
 	"trade/models"
 )
 
 // CreateInvoice creates a new invoice record
 func CreateInvoice(invoice *models.Invoice) error {
-	return middleware.DB.Create(invoice).Error
+	return dao.DB.Create(invoice).Error
 }
 
 // GetInvoice retrieves an invoice by ID
 func GetInvoice(id uint) (*models.Invoice, error) {
 	var invoice models.Invoice
-	err := middleware.DB.First(&invoice, id).Error
+	err := dao.DB.First(&invoice, id).Error
 	return &invoice, err
 }
 
@@ -26,5 +26,5 @@ func UpdateInvoice(db *gorm.DB, invoice *models.Invoice) error {
 // DeleteInvoice soft deletes an invoice by ID
 func DeleteInvoice(id uint) error {
 	var invoice models.Invoice
-	return middleware.DB.Delete(&invoice, id).Error
+	return dao.DB.Delete(&invoice, id).Error
 }

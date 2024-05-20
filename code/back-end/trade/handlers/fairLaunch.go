@@ -3,13 +3,13 @@ package handlers
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"trade/cmd-test/deprecated"
 	"trade/models"
-	"trade/services"
 )
 
 func GetFairLaunchInfo(c *gin.Context) {
 	id := c.Param("id")
-	fairLaunch := services.GetFairLaunch(id)
+	fairLaunch := deprecated.GetFairLaunch(id)
 	if fairLaunch == nil {
 		c.JSON(http.StatusOK, models.JsonResult{
 			Success: false,
@@ -27,7 +27,7 @@ func GetFairLaunchInfo(c *gin.Context) {
 
 func GetMintedInfo(c *gin.Context) {
 	id := c.Param("id")
-	mintedInfo := services.GetMinted(id)
+	mintedInfo := deprecated.GetMinted(id)
 	if mintedInfo == nil {
 		c.JSON(http.StatusOK, models.JsonResult{
 			Success: false,
@@ -46,19 +46,19 @@ func GetMintedInfo(c *gin.Context) {
 func SetFairLaunchInfo(c *gin.Context) {
 	c.PostForm("asset_id")
 	// TODO: need to complete
-	services.SetFairLaunch()
+	deprecated.SetFairLaunch()
 
 }
 
 func MintFairLaunch(c *gin.Context) {
 	c.PostForm("asset_id")
 	// TODO: need to complete
-	services.FairLaunchMint()
+	deprecated.FairLaunchMint()
 
 }
 
 func GetAllFairLaunchInfo(c *gin.Context) {
-	allFairLaunch := services.GetAllFairLaunch()
+	allFairLaunch := deprecated.GetAllFairLaunch()
 	if allFairLaunch == nil {
 		c.JSON(http.StatusOK, models.JsonResult{
 			Success: false,

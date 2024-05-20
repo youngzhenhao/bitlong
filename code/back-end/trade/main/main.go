@@ -3,50 +3,35 @@ package main
 import (
 	"fmt"
 	"trade/config"
-	"trade/middleware"
+	"trade/dao"
+	"trade/models"
 	"trade/routers"
+	"trade/utils"
 )
 
 func main() {
-
 	loadConfig, err := config.LoadConfig("config.yaml")
 	if err != nil {
 		panic("failed to load config: " + err.Error())
 	}
-
-	if true {
-		if loadConfig.Routers.Login {
-			// Initialize the database connection
-
-		}
-		middleware.DbConnect()
-		middleware.RedisConnect()
-		//users, err := services.GenericQuery[models.User](&models.User{}, services.QueryParams{"Username": "John", "Status": "active"})
-		//condition := &models.User{Username: "John", Status: 1}
-
-		// 调用GenericQuery来根据条件查询用户
-		//users, err := services.GenericQueryByObject[models.User](condition)
-		//if err != nil {
-		//	fmt.Printf("Error while fetching users: %v\n", err)
-		//	return
-		//}
-		//
-		//fmt.Printf("Found %d users\n", len(users))
-		//for _, user := range users {
-		//	fmt.Println(user)
-		//}
-		r := routers.SetupRouter()
-		// Read the port number from the configuration file
-
-		port := loadConfig.GinConfig.Port
-		if port == "" {
-			// Default port number
-			port = "8080"
-		}
-		// Start the server
-		err = r.Run(fmt.Sprintf(":%s", port))
-		if err != nil {
-			return
-		}
+	dao.InitMysql()
+	dao.RedisConnect()
+	err = dao.DB.AutoMigrate(&models.Account{})
+	err = dao.DB.AutoMigrate(&models.Balance{})
+	err = dao.DB.AutoMigrate(&models.BalanceExt{})
+	err = dao.DB.AutoMigrate(&models.Invoice{})
+	err = dao.DB.AutoMigrate(&models.User{})
+	if err != nil {
+		utils.LogError("AutoMigrate error", err)
+		return
+	}
+	r := routers.SetupRouter()
+	port := loadConfig.GinConfig.Port
+	if port == "" {
+		port = "8080"
+	}
+	err = r.Run(fmt.Sprintf(":%s", port))
+	if err != nil {
+		return
 	}
 }

@@ -7,9 +7,7 @@ import (
 )
 
 func generateConfig() string {
-	var emptyConfig = Config{AdminUsers: make([]BasicAuth, 0)}
-	emptyConfig.AdminUsers = append(emptyConfig.AdminUsers, BasicAuth{})
-	conf, _ := yaml.Marshal(&emptyConfig)
+	conf, _ := yaml.Marshal(&Config{})
 	return string(conf)
 }
 

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"time"
+	"trade/dao"
 )
 
 var (
@@ -29,7 +30,7 @@ func GenerateToken(username string) (string, error) {
 		return "", err
 	}
 	// Store the token in Redis
-	err = RedisSet(tokenString, username, 5*time.Minute)
+	err = dao.RedisSet(tokenString, username, 5*time.Minute)
 	if err != nil {
 		return "", err
 	}
@@ -38,7 +39,7 @@ func GenerateToken(username string) (string, error) {
 
 func ValidateToken(tokenString string) (*Claims, error) {
 	// Get the token from Redis
-	_, err := RedisGet(tokenString)
+	_, err := dao.RedisGet(tokenString)
 	if err != nil {
 		return nil, errors.New("invalid token")
 	}

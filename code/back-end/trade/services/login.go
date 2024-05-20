@@ -3,13 +3,14 @@ package services
 import (
 	"errors"
 	"gorm.io/gorm"
+	"trade/dao"
 	"trade/middleware"
 	"trade/models"
 )
 
 func Login(creds models.User) (string, error) {
 	var user models.User
-	result := middleware.DB.Where("username = ?", creds.Username).First(&user)
+	result := dao.DB.Where("username = ?", creds.Username).First(&user)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return "", errors.New("invalid credentials")
 	}
@@ -27,7 +28,7 @@ func Login(creds models.User) (string, error) {
 
 func ValidateUserAndGenerateToken(creds models.User) (string, error) {
 	var user models.User
-	result := middleware.DB.Where("username = ?", creds.Username).First(&user)
+	result := dao.DB.Where("username = ?", creds.Username).First(&user)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return "", errors.New("invalid credentials")
 	}

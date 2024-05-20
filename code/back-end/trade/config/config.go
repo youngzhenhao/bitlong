@@ -19,17 +19,16 @@ type Config struct {
 			Password string `yaml:"password"`
 			DBName   string `yaml:"dbname"`
 		} `yaml:"mysql"`
-		Redis struct {
-			Host     string `yaml:"host"`
-			Port     string `yaml:"port"`
-			Username string `yaml:"username"`
-			Password string `yaml:"password"`
-			DB       int    `yaml:"db"`
-		} `yaml:"redis"`
 	} `yaml:"gorm_config"`
+	Redis struct {
+		Host     string `yaml:"host"`
+		Port     string `yaml:"port"`
+		Username string `yaml:"username"`
+		Password string `yaml:"password"`
+		DB       int    `yaml:"db"`
+	} `yaml:"redis"`
 	Routers struct {
 		Login      bool `yaml:"login"`
-		FileServer bool `yaml:"file_server"`
 		FairLaunch bool `yaml:"fair_launch"`
 		Ping       bool `yaml:"ping"`
 	} `yaml:"routers"`
@@ -56,12 +55,7 @@ type Config struct {
 			MacaroonDir string `yaml:"macaroon_dir"`
 		} `yaml:"custody_account"`
 	} `yaml:"api_config"`
-	Bolt struct {
-		DbPath          string `yaml:"db_path"`
-		DbMode          uint32 `yaml:"db_mode"`
-		DbTimeoutSecond int64  `yaml:"db_timeout_second"`
-	} `yaml:"bolt"`
-	AdminUsers []BasicAuth `yaml:"admin_users"`
+	AdminUser BasicAuth `yaml:"admin_user"`
 }
 
 type BasicAuth struct {

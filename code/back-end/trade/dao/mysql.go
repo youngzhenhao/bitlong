@@ -1,4 +1,4 @@
-package middleware
+package dao
 
 import (
 	"fmt"
@@ -12,8 +12,7 @@ var (
 	DB *gorm.DB
 )
 
-// TODO: Rename function
-func DbConnect() {
+func InitMysql() {
 	loadConfig, err := config.LoadConfig("config.yaml")
 	if err != nil {
 		panic("failed to load config: " + err.Error())
@@ -25,10 +24,9 @@ func DbConnect() {
 		loadConfig.GormConfig.Mysql.Port,
 		loadConfig.GormConfig.Mysql.DBName,
 	)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		utils.LogError("failed to connect database", err)
 		return
 	}
-	DB = db
 }

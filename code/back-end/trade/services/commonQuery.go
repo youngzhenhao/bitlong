@@ -5,7 +5,7 @@ import (
 	"log"
 	"reflect"
 	"strings"
-	"trade/middleware"
+	"trade/dao"
 )
 
 type QueryParams map[string]interface{}
@@ -28,7 +28,7 @@ func GenericQuery[T any](model *T, params QueryParams) ([]*T, error) {
 	modelType := reflect.TypeOf(model).Elem() // 获取到model的反射类型对象
 
 	// Start with a base model and apply filters.
-	query := middleware.DB.Model(model)
+	query := dao.DB.Model(model)
 
 	// Validate each key in the query parameters against the model's fields
 	for key, value := range params {
@@ -62,7 +62,7 @@ func GenericQueryByObject[T any](condition *T) ([]*T, error) {
 	var results []*T
 
 	// Start with a base model and apply filters using the condition instance where only non-zero values are considered.
-	if err := middleware.DB.Where(condition).Find(&results).Error; err != nil {
+	if err := dao.DB.Where(condition).Find(&results).Error; err != nil {
 		fmt.Printf("Error querying database: %v\n", err)
 		return nil, err
 	}

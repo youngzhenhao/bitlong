@@ -16,7 +16,6 @@ redis:
     db: 0
 routers:
     login: false
-    file_server: false
     fair_launch: false
     ping: false
 api_config:
@@ -35,10 +34,8 @@ api_config:
         port: 0
         tls_cert_path: ""
         macaroon_path: ""
-bolt:
-    db_path: ""
-    db_mode: 0
-    db_timeout_second: 0
-admin_users:
-    - username: ""
-      password: ""
+    custody_account:
+        macaroon_dir: ""
+admin_user:
+    username: ""
+    password: ""

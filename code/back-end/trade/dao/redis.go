@@ -1,4 +1,4 @@
-package middleware
+package dao
 
 import (
 	"context"
@@ -18,19 +18,20 @@ func RedisConnect() {
 	if err != nil {
 		panic("failed to load config: " + err.Error())
 	}
-	redisAddr := fmt.Sprintf("%s:%s", loadConfig.GormConfig.Redis.Host, loadConfig.GormConfig.Redis.Port)
+	redisAddr := fmt.Sprintf("%s:%s", loadConfig.Redis.Host, loadConfig.Redis.Port)
+	fmt.Println(redisAddr)
 	Client = redis.NewClient(&redis.Options{
 		Addr:     redisAddr,
-		Username: loadConfig.GormConfig.Redis.Username,
-		Password: loadConfig.GormConfig.Redis.Password,
-		DB:       loadConfig.GormConfig.Redis.DB,
+		Username: loadConfig.Redis.Username,
+		Password: loadConfig.Redis.Password,
+		DB:       loadConfig.Redis.DB,
 	})
 	_, err = Client.Ping(ctx).Result()
 	if err != nil {
 		panic(err)
 	}
 }
-func RedisSet(key string, value interface{}, expiration time.Duration) error {
+func RedisSet(key string, value any, expiration time.Duration) error {
 	return Client.Set(ctx, key, value, expiration).Err()
 }
 

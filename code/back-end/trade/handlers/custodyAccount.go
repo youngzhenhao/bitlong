@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"sync"
 	"time"
-	"trade/middleware"
+	"trade/dao"
 	"trade/models"
 	"trade/services"
 	"trade/services/custodyAccount"
@@ -128,7 +128,7 @@ func ApplyInvoiceCA(c *gin.Context) {
 	//写入数据库
 	mutex.Lock()
 	defer mutex.Unlock()
-	err = middleware.DB.Create(&invoiceModel).Error
+	err = dao.DB.Create(&invoiceModel).Error
 	//回信息，规范状态码
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
@@ -208,7 +208,7 @@ func PayInvoice(c *gin.Context) {
 	}
 	mutex.Lock()
 	defer mutex.Unlock()
-	err = middleware.DB.Create(&balanceModel).Error
+	err = dao.DB.Create(&balanceModel).Error
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -235,7 +235,7 @@ func PollPayment() {
 				v.State = PAY_SUCCESS
 				mutex.Lock()
 				defer mutex.Unlock()
-				err = middleware.DB.Save(&v).Error
+				err = dao.DB.Save(&v).Error
 				if err != nil {
 					fmt.Println(err)
 				}
@@ -243,7 +243,7 @@ func PollPayment() {
 				v.State = PAY_FAILED
 				mutex.Lock()
 				defer mutex.Unlock()
-				err = middleware.DB.Save(&v).Error
+				err = dao.DB.Save(&v).Error
 				if err != nil {
 					fmt.Println(err)
 				}

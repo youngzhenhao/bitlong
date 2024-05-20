@@ -10,9 +10,6 @@ func SetupRouter() *gin.Engine {
 	if config.GetLoadConfig().Routers.Login {
 		SetupLoginRouter(r)
 	}
-	if config.GetLoadConfig().Routers.FileServer {
-		setupFileServerRouter(r)
-	}
 	if config.GetLoadConfig().Routers.FairLaunch {
 		setupFairLaunchRouter(r)
 	}
@@ -20,6 +17,5 @@ func SetupRouter() *gin.Engine {
 		SetupPingRouter(r)
 	}
 	SetupCustodyAccountRouter(r)
-
 	return r
 }

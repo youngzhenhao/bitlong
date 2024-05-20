@@ -10,15 +10,15 @@ func GetFairLaunch(id string) *models.FairLaunchInfo {
 	return nil
 }
 
-func GetMinted(id string) *[]models.MintedInfo {
+func GetMinted(id string) *[]models.FairLaunchMintedInfo {
 	// TODO: need to complete
 
 	return nil
 }
 
 func SetFairLaunch() {
-
 	// TODO: need to complete
+
 }
 
 func FairLaunchMint() {
@@ -27,5 +27,7 @@ func FairLaunchMint() {
 }
 
 func GetAllFairLaunch() *[]models.FairLaunchInfo {
+	// TODO: need to complete
+
 	return nil
 }

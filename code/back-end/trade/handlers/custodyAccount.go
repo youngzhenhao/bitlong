@@ -283,7 +283,7 @@ func PollInvoice() {
 				v.Status = int16(temp.State)
 				mutex.Lock()
 				defer mutex.Unlock()
-				err = middleware.DB.Save(&v).Error
+				err = dao.DB.Save(&v).Error
 				if err != nil {
 					fmt.Println(err)
 				}

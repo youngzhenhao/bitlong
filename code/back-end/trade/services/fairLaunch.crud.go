@@ -1,41 +1,52 @@
 package services
 
-func CreateFairLaunchInfo() {
-	// TODO: need to complete
+import (
+	"gorm.io/gorm"
+	"trade/models"
+)
 
+type FairLaunchStore struct {
+	DB *gorm.DB
 }
 
-func ReadFairLaunchInfo() {
-	// TODO: need to complete
+// FairLaunchInfo
 
+func (f *FairLaunchStore) CreateFairLaunchInfo(fairLaunchInfo *models.FairLaunchInfo) error {
+	return f.DB.Create(fairLaunchInfo).Error
 }
 
-func UpdateFairLaunchInfo() {
-	// TODO: need to complete
-
+func (f *FairLaunchStore) ReadFairLaunchInfo(id int) (*models.FairLaunchInfo, error) {
+	var fairLaunchInfo models.FairLaunchInfo
+	err := f.DB.First(&fairLaunchInfo, id).Error
+	return &fairLaunchInfo, err
 }
 
-func DeleteFairLaunchInfo() {
-	// TODO: need to complete
-
+func (f *FairLaunchStore) UpdateFairLaunchInfo(fairLaunchInfo *models.FairLaunchInfo) error {
+	return f.DB.Save(fairLaunchInfo).Error
 }
 
-func CreateFairLaunchMintedInfo() {
-	// TODO: need to complete
-
+func (f *FairLaunchStore) DeleteFairLaunchInfo(id int) error {
+	var fairLaunchInfo models.FairLaunchInfo
+	return f.DB.Delete(&fairLaunchInfo, id).Error
 }
 
-func ReadFairLaunchMintedInfo() {
-	// TODO: need to complete
+// FairLaunchMintedInfo
 
+func (f *FairLaunchStore) CreateFairLaunchMintedInfo(fairLaunchMintedInfo *models.FairLaunchMintedInfo) error {
+	return f.DB.Create(fairLaunchMintedInfo).Error
 }
 
-func UpdateFairLaunchMintedInfo() {
-	// TODO: need to complete
-
+func (f *FairLaunchStore) ReadFairLaunchMintedInfo(id int) (*models.FairLaunchMintedInfo, error) {
+	var fairLaunchMintedInfo models.FairLaunchMintedInfo
+	err := f.DB.First(&fairLaunchMintedInfo, id).Error
+	return &fairLaunchMintedInfo, err
 }
 
-func DeleteFairLaunchMintedInfo() {
-	// TODO: need to complete
+func (f *FairLaunchStore) UpdateFairLaunchMintedInfo(fairLaunchMintedInfo *models.FairLaunchMintedInfo) error {
+	return f.DB.Save(fairLaunchMintedInfo).Error
+}
 
+func (f *FairLaunchStore) DeleteFairLaunchMintedInfo(id int) error {
+	var fairLaunchMintedInfo models.FairLaunchMintedInfo
+	return f.DB.Delete(&fairLaunchMintedInfo, id).Error
 }

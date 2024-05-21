@@ -39,3 +39,4 @@ api_config:
 admin_user:
     username: ""
     password: ""
+frps_server:

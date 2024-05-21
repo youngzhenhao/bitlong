@@ -83,5 +83,42 @@ func setupRouterOnPhone() *gin.Engine {
 		})
 	})
 
+	//TODO: Need to test
+	router.POST("/newAddr", func(c *gin.Context) {
+		assetID := c.PostForm("asset_id")
+		if assetID == "" {
+			fmt.Printf("%s asset id null.\n", GetTimeNow())
+			c.JSON(http.StatusOK, JsonResult{
+				Success: false,
+				Error:   "asset id null.",
+				Data:    "",
+			})
+		}
+		amountStr := c.PostForm("amount")
+		amountInt, err := strconv.Atoi(amountStr)
+		if err != nil || amountInt <= 0 {
+			fmt.Printf("%s amountInt less than or equal to zero || strconv.Atoi(amount) :%v\n", GetTimeNow(), err)
+			c.JSON(http.StatusOK, JsonResult{
+				Success: false,
+				Error:   "amountInt less than or equal to zero || strconv.Atoi(amount).",
+				Data:    "",
+			})
+		}
+		addr, err := newAddr(assetID, amountInt)
+		if err != nil {
+			LogError("new addr.", err)
+			c.JSON(http.StatusOK, JsonResult{
+				Success: false,
+				Error:   "new addr. " + err.Error(),
+				Data:    "",
+			})
+		}
+		addrStr := addr.Encoded
+		c.JSON(http.StatusOK, JsonResult{
+			Success: true,
+			Error:   "",
+			Data:    addrStr,
+		})
+	})
 	return router
 }

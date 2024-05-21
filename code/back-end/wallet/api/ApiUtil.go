@@ -148,3 +148,22 @@ func ToBTC(sat int) float64 {
 func ToSat(btc float64) int {
 	return int(btc * 1e8)
 }
+
+func LogInfo(info string) {
+	fmt.Printf("%s %s\n", GetTimeNow(), info)
+}
+
+func LogInfos(infos ...string) {
+	var info string
+	for i, _info := range infos {
+		if i != 0 {
+			info += " "
+		}
+		info += _info
+	}
+	fmt.Printf("%s %s\n", GetTimeNow(), info)
+}
+
+func LogError(description string, err error) {
+	fmt.Printf("%s %s :%v\n", GetTimeNow(), description, err)
+}

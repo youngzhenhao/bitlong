@@ -52,3 +52,9 @@ func (sm *CronService) SixSecondTask() {
 	fmt.Println("6 secs runs")
 	log.Println("6 secs runs")
 }
+
+func NameToId(name string) (int, error) {
+	user := models.User{Username: name}
+	err := middleware.DB.First(&user).Error
+	return int(user.ID), err
+}

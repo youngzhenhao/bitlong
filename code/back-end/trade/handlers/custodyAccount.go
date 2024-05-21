@@ -11,7 +11,6 @@ import (
 	"trade/middleware"
 	"trade/models"
 	"trade/services"
-	"trade/services/custodyAccount"
 )
 
 const (
@@ -55,7 +54,7 @@ func CreateCustodyAccount(c *gin.Context) {
 	}
 
 	//创建账户
-	cstAccount, err := custodyAccount.CreateCustodyAccount()
+	cstAccount, err := services.CreateCustodyAccount(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -92,11 +91,11 @@ func UpdateCustodyAccount(c *gin.Context) {
 	account, _ := services.ReadAccountByUserId(user.ID)
 
 	//TODO: 获取账户余额更新信息
-	acc, err := custodyAccount.QueryCustodyAccount(account.UserAccountCode)
+	acc, err := services.QueryCustodyAccount(account.UserAccountCode)
 	amount := int64(1)
 
 	//TODO: 更新托管账户余额
-	err = custodyAccount.Update(acc.Id, amount)
+	err = services.Update(acc.Id, amount)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -127,7 +126,7 @@ func ApplyInvoiceCA(c *gin.Context) {
 		return
 	}
 
-	//TODO: 判断申请金额是否超过通道余额
+	//TODO: 判断申请金额是否超过通道余额,检查申请内容是否合法
 	apply := struct {
 		Amount int64  `json:"amount"`
 		Memo   string `json:"memo"`
@@ -135,15 +134,18 @@ func ApplyInvoiceCA(c *gin.Context) {
 	if err := c.ShouldBindJSON(&apply); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 	}
-
+	if apply.Amount <= 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "发票信息不合法"})
+		return
+	}
 	//生成一张发票
-	invoiceRequest, err := custodyAccount.ApplyInvoice(account.UserAccountCode, apply.Amount, apply.Memo)
+	invoiceRequest, err := services.ApplyInvoice(account.UserAccountCode, apply.Amount, apply.Memo)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 	//获取发票信息
-	info, _ := custodyAccount.FindInvoice(invoiceRequest.RHash)
+	info, _ := services.FindInvoice(invoiceRequest.RHash)
 
 	//构建invoice对象
 	var invoiceModel models.Invoice
@@ -167,7 +169,7 @@ func ApplyInvoiceCA(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"invoiceModel": invoiceModel})
+	c.JSON(http.StatusOK, gin.H{"invoiceModel": info})
 }
 
 // PayInvoice CustodyAccountzhi付款发票
@@ -180,7 +182,10 @@ func PayInvoice(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户不存在"})
 		return
 	}
-	account, _ := services.ReadAccountByUserId(user.ID)
+	account, err := services.ReadAccountByUserId(user.ID)
+	if err != nil {
+
+	}
 
 	//TODO: 校验发票信息
 	pay := struct {
@@ -213,11 +218,11 @@ func PayInvoice(c *gin.Context) {
 	}
 
 	// 判断账户余额是否足够
-	info, err := custodyAccount.DecodeInvoice(pay.Invoice)
+	info, err := services.DecodeInvoice(pay.Invoice)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 	}
-	userBalance, err := custodyAccount.QueryCustodyAccount(account.UserAccountCode)
+	userBalance, err := services.QueryCustodyAccount(account.UserAccountCode)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -228,7 +233,7 @@ func PayInvoice(c *gin.Context) {
 	}
 
 	// 支付发票
-	payment, err := custodyAccount.PayInvoice(account.UserAccountCode, pay.Invoice, pay.FeeLimit)
+	payment, err := services.PayInvoice(account.UserAccountCode, pay.Invoice, pay.FeeLimit)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -271,7 +276,7 @@ func PollPayment() {
 	}
 	if len(a) > 0 {
 		for _, v := range a {
-			temp, err := custodyAccount.TrackPayment(*v.PaymentHash)
+			temp, err := services.TrackPayment(*v.PaymentHash)
 			if err != nil {
 				fmt.Println(err)
 				continue
@@ -309,7 +314,7 @@ func PollInvoice() {
 	}
 	if len(a) > 0 {
 		for _, v := range a {
-			invoice, err := custodyAccount.DecodeInvoice(v.Invoice)
+			invoice, err := services.DecodeInvoice(v.Invoice)
 			if err != nil {
 				fmt.Println(err)
 				continue
@@ -319,7 +324,7 @@ func PollInvoice() {
 				fmt.Println(err)
 				continue
 			}
-			temp, err := custodyAccount.FindInvoice(rHash)
+			temp, err := services.FindInvoice(rHash)
 			if err != nil {
 				fmt.Println(err)
 				continue

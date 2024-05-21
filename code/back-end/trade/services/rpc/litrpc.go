@@ -1,4 +1,4 @@
-package custodyAccount
+package rpc
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"trade/utils"
 )
 
-func accountCreate(balance uint64, expirationDate int64) (*litrpc.Account, []byte, error) {
+func AccountCreate(balance uint64, expirationDate int64) (*litrpc.Account, []byte, error) {
 	litdconf := config.GetConfig().ApiConfig.Litd
 
 	grpcHost := litdconf.Host + ":" + strconv.Itoa(litdconf.Port)
@@ -34,7 +34,7 @@ func accountCreate(balance uint64, expirationDate int64) (*litrpc.Account, []byt
 	return response.Account, response.Macaroon, nil
 }
 
-func accountInfo(id string) (*litrpc.Account, error) {
+func AccountInfo(id string) (*litrpc.Account, error) {
 	litdconf := config.GetConfig().ApiConfig.Litd
 
 	grpcHost := litdconf.Host + ":" + strconv.Itoa(litdconf.Port)
@@ -95,7 +95,7 @@ func accountQueryId(label string) (string, error) {
 	return response.Id, err
 }
 
-func accountRemove(id string) error {
+func AccountRemove(id string) error {
 	litdconf := config.GetConfig().ApiConfig.Litd
 
 	grpcHost := litdconf.Host + ":" + strconv.Itoa(litdconf.Port)
@@ -113,7 +113,7 @@ func accountRemove(id string) error {
 	return err
 }
 
-func accountUpdate(id string, balance int64, expirationDate int64) (*litrpc.Account, error) {
+func AccountUpdate(id string, balance int64, expirationDate int64) (*litrpc.Account, error) {
 	litdconf := config.GetConfig().ApiConfig.Litd
 
 	grpcHost := litdconf.Host + ":" + strconv.Itoa(litdconf.Port)
@@ -182,7 +182,7 @@ func LitdStatus() string {
 }
 
 // 开具发票
-func invoiceCreate(amount int64, memo string, macaroonPath string) (*lnrpc.AddInvoiceResponse, error) {
+func InvoiceCreate(amount int64, memo string, macaroonPath string) (*lnrpc.AddInvoiceResponse, error) {
 	lndconf := config.GetConfig().ApiConfig.Lnd
 
 	grpcHost := lndconf.Host + ":" + strconv.Itoa(lndconf.Port)
@@ -205,7 +205,7 @@ func invoiceCreate(amount int64, memo string, macaroonPath string) (*lnrpc.AddIn
 }
 
 // 解析发票
-func invoiceDecode(invoice string) (*lnrpc.PayReq, error) {
+func InvoiceDecode(invoice string) (*lnrpc.PayReq, error) {
 	lndconf := config.GetConfig().ApiConfig.Lnd
 
 	grpcHost := lndconf.Host + ":" + strconv.Itoa(lndconf.Port)
@@ -227,7 +227,7 @@ func invoiceDecode(invoice string) (*lnrpc.PayReq, error) {
 }
 
 // 在节点上查询发票
-func invoiceFind(rHash []byte) (*lnrpc.Invoice, error) {
+func InvoiceFind(rHash []byte) (*lnrpc.Invoice, error) {
 	lndconf := config.GetConfig().ApiConfig.Lnd
 
 	grpcHost := lndconf.Host + ":" + strconv.Itoa(lndconf.Port)
@@ -249,7 +249,7 @@ func invoiceFind(rHash []byte) (*lnrpc.Invoice, error) {
 }
 
 // 支付非0发票
-func invoicePay(macaroonPath string, invoice string, feeLimit int64) (*lnrpc.Payment, error) {
+func InvoicePay(macaroonPath string, invoice string, feeLimit int64) (*lnrpc.Payment, error) {
 	lndconf := config.GetConfig().ApiConfig.Lnd
 
 	grpcHost := lndconf.Host + ":" + strconv.Itoa(lndconf.Port)
@@ -280,7 +280,7 @@ func invoicePay(macaroonPath string, invoice string, feeLimit int64) (*lnrpc.Pay
 	}
 }
 
-func paymentTrack(paymentHash string) (*lnrpc.Payment, error) {
+func PaymentTrack(paymentHash string) (*lnrpc.Payment, error) {
 	lndconf := config.GetConfig().ApiConfig.Lnd
 
 	grpcHost := lndconf.Host + ":" + strconv.Itoa(lndconf.Port)

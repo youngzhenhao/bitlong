@@ -16,7 +16,7 @@ type FairLaunchInfo struct {
 
 type FairLaunchMintedInfo struct {
 	gorm.Model
-	FairLaunchInfoID string `json:"fair_launch_info_id" gorm:"type:varchar(255);not null"`
+	FairLaunchInfoID int    `json:"fair_launch_info_id" gorm:"not null"`
 	EncodedAddr      string `json:"encoded_addr" gorm:"type:varchar(255)"`
 	AssetID          string `json:"asset_id" gorm:"type:varchar(255);not null"`
 	AssetType        string `json:"asset_type" gorm:"type:varchar(255)"`

@@ -7,3 +7,5 @@ import (
 func GetAssetInfo(id string) *models.AssetIssuanceLeaf {
 	return assetLeafIssuanceInfo(id)
 }
+
+// TODO: Send, etc.

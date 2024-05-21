@@ -28,7 +28,7 @@ func DebugLevel() {
 func DecodeAddr(addr string) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -78,7 +78,7 @@ func FetchAssetMeta(isHash bool, data string) string {
 func GetInfoOfTap() string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -192,7 +192,7 @@ func FindAssetByAssetName(assetName string) string {
 func ListGroups() string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -233,7 +233,7 @@ func ListTransfers() string {
 func listTransfers() (*taprpc.ListTransfersResponse, error) {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -265,7 +265,7 @@ func listTransfers() (*taprpc.ListTransfersResponse, error) {
 func ListUtxos(includeLeased bool) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -307,7 +307,7 @@ func NewAddr(assetId string, amt int) string {
 func newAddr(assetId string, amt int) (*taprpc.Addr, error) {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -348,7 +348,7 @@ func QueryAddrs() {
 func SendAsset(tapAddrs string, feeRate int) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -396,7 +396,7 @@ func VerifyProof() {
 func TapStopDaemon() bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -424,7 +424,7 @@ func TapStopDaemon() bool {
 func decodeProof(proof []byte, depth uint32, withMetaReveal bool, withPrevWitnesses bool) (*taprpc.DecodeProofResponse, error) {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -453,7 +453,7 @@ func decodeProof(proof []byte, depth uint32, withMetaReveal bool, withPrevWitnes
 func fetchAssetMeta(isHash bool, data string) (*taprpc.AssetMeta, error) {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -487,7 +487,7 @@ func fetchAssetMeta(isHash bool, data string) (*taprpc.AssetMeta, error) {
 func listBalances(useGroupKey bool, assetFilter, groupKeyFilter []byte) (*taprpc.ListBalancesResponse, error) {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -555,7 +555,7 @@ func ListBalances() string {
 func listAssets(withWitness, includeSpent, includeLeased bool) (*taprpc.ListAssetResponse, error) {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)

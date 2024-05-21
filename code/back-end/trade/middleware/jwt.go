@@ -16,7 +16,7 @@ type Claims struct {
 }
 
 func GenerateToken(username string) (string, error) {
-	expirationTime := time.Now().Add(5 * time.Minute)
+	expirationTime := time.Now().Add(20 * time.Minute)
 	claims := &Claims{
 		Username: username,
 		StandardClaims: jwt.StandardClaims{
@@ -28,7 +28,25 @@ func GenerateToken(username string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	validateToken, err := RedisGet(username)
+	if validateToken != "" {
+		err := RedisDel(validateToken)
+		if err != nil {
+			return "", err
+		}
+		err1 := RedisDel(username)
+		if err1 != nil {
+			return "", err1
+		}
+	}
+	if err != nil {
+		return "", err
+	}
 	// Store the token in Redis
+	err = RedisSet(username, tokenString, 5*time.Minute)
+	if err != nil {
+		return "", err
+	}
 	err = RedisSet(tokenString, username, 5*time.Minute)
 	if err != nil {
 		return "", err

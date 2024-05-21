@@ -9,6 +9,15 @@ import (
 	"strings"
 )
 
+const (
+	UseMainNet  = "mainnet"
+	UseTestNet  = "testnet"
+	UseTestNet4 = "testnet4"
+	UseRegTest  = "regtest"
+)
+
+var NetWork = UseRegTest
+
 func ReadConfigFile(path string) map[string]string {
 	config := make(map[string]string)
 
@@ -78,4 +87,8 @@ func QueryConfigByKey(key string) (value string) {
 	fileConfig := ReadConfigFile(complexFolderPath)
 	value = fileConfig[key]
 	return
+}
+
+func SetNetwork(network string) {
+	NetWork = network
 }

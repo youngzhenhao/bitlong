@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"log"
 	"trade/middleware"
@@ -26,14 +27,21 @@ func ValidateUser(creds models.User) (string, error) {
 }
 
 // CreateUser creates a new user record
-func CreateUser(db *gorm.DB, user *models.User) error {
-	return db.Create(user).Error
+func CreateUser(user *models.User) error {
+	return middleware.DB.Create(user).Error
 }
 
 // ReadUser retrieves a user by ID
 func ReadUser(id uint) (*models.User, error) {
 	var user models.User
 	err := middleware.DB.First(&user, id).Error
+	return &user, err
+}
+
+// ReadUserByUsername retrieves a user by username
+func ReadUserByUsername(username string) (*models.User, error) {
+	var user models.User
+	err := middleware.DB.Where(&models.User{Username: username}).First(&user).Error
 	return &user, err
 }
 
@@ -53,8 +61,23 @@ func (sm *CronService) SixSecondTask() {
 	log.Println("6 secs runs")
 }
 
+<<<<<<< HEAD
 func NameToId(name string) (int, error) {
 	user := models.User{Username: name}
 	err := middleware.DB.First(&user).Error
 	return int(user.ID), err
+=======
+func hashPassword(password string) (string, error) {
+	// 使用bcrypt算法加密密码
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
+}
+func CheckPassword(hashedPassword, password string) bool {
+	// bcrypt.CompareHashAndPassword比较哈希密码和用户输入的密码。如果匹配则返回nil。
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	return err == nil
+>>>>>>> 4bb6f135f32897866de38ab15be5e9255152fe10
 }

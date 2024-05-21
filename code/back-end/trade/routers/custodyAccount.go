@@ -13,11 +13,11 @@ func SetupCustodyAccountRouter(router *gin.Engine) *gin.Engine {
 
 	custody.Use(middleware.AuthMiddleware())
 	{
-		custody.GET("/create", handlers.CreateCustodyAccount)
+		custody.POST("/create", handlers.CreateCustodyAccount)
 		Invoice := custody.Group("/invoice")
 		{
-			Invoice.GET("/apply", handlers.ApplyInvoiceCA)
-			Invoice.GET("/pay", handlers.PayInvoice)
+			Invoice.POST("/apply", handlers.ApplyInvoiceCA)
+			Invoice.POST("/pay", handlers.PayInvoice)
 		}
 	}
 

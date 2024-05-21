@@ -7,9 +7,7 @@ import (
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
-	if config.GetLoadConfig().Routers.Login {
-		SetupLoginRouter(r)
-	}
+	SetupLoginRouter(r)
 	if config.GetLoadConfig().Routers.FairLaunch {
 		setupFairLaunchRouter(r)
 	}

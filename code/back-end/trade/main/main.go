@@ -52,6 +52,11 @@ func main() {
 
 	// Setup HTTP server
 	r := routers.SetupRouter()
+
+	for _, routeInfo := range r.Routes() {
+		fmt.Println(routeInfo.Method, routeInfo.Path)
+	}
+
 	port := loadConfig.GinConfig.Port
 	if port == "" {
 		port = "8080" // Default port number

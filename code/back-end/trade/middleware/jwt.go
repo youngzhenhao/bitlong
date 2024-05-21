@@ -28,8 +28,26 @@ func GenerateToken(username string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	validateToken, err := RedisGet(username)
+	if validateToken != "" {
+		err := RedisDel(validateToken)
+		if err != nil {
+			return "", err
+		}
+		err1 := RedisDel(username)
+		if err1 != nil {
+			return "", err1
+		}
+	}
+	if err != nil {
+		return "", err
+	}
 	// Store the token in Redis
-	err = RedisSet(tokenString, username, 20*time.Minute)
+	err = RedisSet(username, tokenString, 5*time.Minute)
+	if err != nil {
+		return "", err
+	}
+	err = RedisSet(tokenString, username, 5*time.Minute)
 	if err != nil {
 		return "", err
 	}

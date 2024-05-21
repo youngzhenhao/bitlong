@@ -1,4 +1,4 @@
-package custodyAccount
+package services
 
 import (
 	"fmt"
@@ -6,13 +6,18 @@ import (
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"os"
 	"path/filepath"
+	"sync"
 	"trade/config"
+	"trade/models"
+	"trade/services/rpc"
 )
 
+var mutex sync.Mutex
+
 // CreateCustodyAccount 创建托管账户并保持马卡龙文件
-func CreateCustodyAccount() (*litrpc.Account, error) {
+func CreateCustodyAccount(user *models.User) (*litrpc.Account, error) {
 	//根据用户信息创建托管账户
-	account, macaroon, err := accountCreate(0, 0)
+	account, macaroon, err := rpc.AccountCreate(0, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -34,6 +39,19 @@ func CreateCustodyAccount() (*litrpc.Account, error) {
 		return nil, err
 	}
 
+	//构建账户对象
+	var accountModel models.Account
+	accountModel.UserName = user.Username
+	accountModel.UserId = user.ID
+	accountModel.UserAccountCode = account.Id
+	accountModel.Label = &account.Label
+	accountModel.Status = 1
+
+	//写入数据库
+	mutex.Lock()
+	defer mutex.Unlock()
+	err = CreateAccount(&accountModel)
+
 	//返回托管账户信息
 	return account, nil
 }
@@ -41,7 +59,7 @@ func CreateCustodyAccount() (*litrpc.Account, error) {
 // Update  托管账户充值
 func Update(id string, amount int64) error {
 	//更变托管账户余额
-	_, err := accountUpdate(id, amount, -1)
+	_, err := rpc.AccountUpdate(id, amount, -1)
 	if err != nil {
 		return err
 	}
@@ -51,7 +69,7 @@ func Update(id string, amount int64) error {
 
 // QueryCustodyAccount  托管账户查询
 func QueryCustodyAccount(accountCode string) (*litrpc.Account, error) {
-	return accountInfo(accountCode)
+	return rpc.AccountInfo(accountCode)
 }
 
 // DeleteCustodianAccount 托管账户删除
@@ -59,7 +77,7 @@ func DeleteCustodianAccount() error {
 	//TODO: 获取托管账户ID
 	id := "test"
 	//删除Lit节点托管账户
-	err := accountRemove(id)
+	err := rpc.AccountRemove(id)
 	//TODO: 更新数据库相关信息
 
 	//TODO: 返回删除结果
@@ -82,7 +100,7 @@ func ApplyInvoice(accountCode string, amount int64, memo string) (*lnrpc.AddInvo
 		return nil, fmt.Errorf("macaroon file not found")
 	}
 	//调用Lit节点发票申请接口
-	return invoiceCreate(amount, memo, macaroonFile)
+	return rpc.InvoiceCreate(amount, memo, macaroonFile)
 }
 
 // PayInvoice 使用指定账户支付发票
@@ -100,22 +118,22 @@ func PayInvoice(accountCode string, invoice string, feeLimit int64) (*lnrpc.Paym
 		return nil, fmt.Errorf("macaroon file not found")
 	}
 
-	return invoicePay(macaroonFile, invoice, feeLimit)
+	return rpc.InvoicePay(macaroonFile, invoice, feeLimit)
 }
 
 // DecodeInvoice  解析发票信息
 func DecodeInvoice(invoice string) (*lnrpc.PayReq, error) {
-	return invoiceDecode(invoice)
+	return rpc.InvoiceDecode(invoice)
 }
 
 // FindInvoice 查询节点内部发票
 func FindInvoice(rHash []byte) (*lnrpc.Invoice, error) {
-	return invoiceFind(rHash)
+	return rpc.InvoiceFind(rHash)
 }
 
 // TrackPayment 跟踪支付状态
 func TrackPayment(paymentHash string) (*lnrpc.Payment, error) {
-	return paymentTrack(paymentHash)
+	return rpc.PaymentTrack(paymentHash)
 }
 
 // saveMacaroon 保存macaroon字节切片到指定文件

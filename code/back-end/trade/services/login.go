@@ -11,7 +11,7 @@ import (
 
 func Login(creds models.User) (string, error) {
 	var user models.User
-	result := middleware.DB.Where("username = ?", creds.Username).First(&user)
+	result := middleware.DB.Where("user_name = ?", creds.Username).First(&user)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return "", errors.New("invalid credentials")
 	}

@@ -22,7 +22,7 @@ func LitdStopDaemon() bool {
 func litdStopDaemon() (*litrpc.StopDaemonResponse, error) {
 	grpcHost := base.QueryConfigByKey("litdhost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lit"), "testnet")
+	newFilePath := filepath.Join(base.Configure("lit"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "lit.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)

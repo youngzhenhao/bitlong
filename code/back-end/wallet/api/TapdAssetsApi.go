@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/lightninglabs/taproot-assets/taprpc"
 	"github.com/lightninglabs/taproot-assets/taprpc/universerpc"
+	"github.com/wallet/base"
 	"strconv"
 	"strings"
 )
@@ -186,7 +187,12 @@ type AssetsBalanceGroupBalance struct {
 // SyncUniverseFullSpecified @dev
 func SyncUniverseFullSpecified(universeHost string, id string, proofType string) string {
 	if universeHost == "" {
-		universeHost = "testnet.universe.lightning.finance:10029"
+		switch base.NetWork {
+		case base.UseTestNet:
+			universeHost = "testnet.universe.lightning.finance:10029"
+		case base.UseMainNet:
+			universeHost = "mainnet.universe.lightning.finance:10029"
+		}
 	}
 	var _proofType universerpc.ProofType
 	if proofType == "issuance" || proofType == "ISSUANCE" || proofType == "PROOF_TYPE_ISSUANCE" {
@@ -744,7 +750,13 @@ func GetAllAssetIdByListAll() []string {
 // @note: Deprecated
 // @dev: May be deprecated
 func SyncUniverseFullIssuanceByIdSlice(ids []string) string {
-	universeHost := "testnet.universe.lightning.finance:10029"
+	var universeHost string
+	switch base.NetWork {
+	case base.UseTestNet:
+		universeHost = "testnet.universe.lightning.finance:10029"
+	case base.UseMainNet:
+		universeHost = "mainnet.universe.lightning.finance:10029"
+	}
 	var targets []*universerpc.SyncTarget
 	for _, id := range ids {
 		targets = append(targets, &universerpc.SyncTarget{
@@ -768,7 +780,13 @@ func SyncUniverseFullIssuanceByIdSlice(ids []string) string {
 // @note: Deprecated
 // @dev: May be deprecated
 func SyncUniverseFullTransferByIdSlice(ids []string) string {
-	universeHost := "testnet.universe.lightning.finance:10029"
+	var universeHost string
+	switch base.NetWork {
+	case base.UseTestNet:
+		universeHost = "testnet.universe.lightning.finance:10029"
+	case base.UseMainNet:
+		universeHost = "mainnet.universe.lightning.finance:10029"
+	}
 	var targets []*universerpc.SyncTarget
 	for _, id := range ids {
 		targets = append(targets, &universerpc.SyncTarget{
@@ -791,7 +809,13 @@ func SyncUniverseFullTransferByIdSlice(ids []string) string {
 // @dev
 // @note: Sync all assets
 func SyncUniverseFullNoSlice() string {
-	universeHost := "testnet.universe.lightning.finance:10029"
+	var universeHost string
+	switch base.NetWork {
+	case base.UseTestNet:
+		universeHost = "testnet.universe.lightning.finance:10029"
+	case base.UseMainNet:
+		universeHost = "mainnet.universe.lightning.finance:10029"
+	}
 	var targets []*universerpc.SyncTarget
 
 	response, err := syncUniverse(universeHost, targets, universerpc.UniverseSyncMode_SYNC_FULL)

@@ -37,6 +37,13 @@ func ReadUser(id uint) (*models.User, error) {
 	return &user, err
 }
 
+// ReadUserByUsername retrieves a user by username
+func ReadUserByUsername(username string) (*models.User, error) {
+	var user models.User
+	err := middleware.DB.Where(&models.User{Username: username}).First(&user).Error
+	return &user, err
+}
+
 // UpdateUser updates an existing user
 func UpdateUser(user *models.User) error {
 	return middleware.DB.Save(user).Error

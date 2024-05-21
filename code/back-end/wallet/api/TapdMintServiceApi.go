@@ -21,7 +21,7 @@ import (
 func CancelBatch() bool {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -64,7 +64,7 @@ func FinalizeBatch(feeRate int) string {
 func ListBatches() string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -236,7 +236,7 @@ func (m *Meta) FetchAssetMeta(isHash bool, data string) string {
 func finalizeBatch(shortResponse bool, feeRate int) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -283,7 +283,7 @@ func finalizeBatch(shortResponse bool, feeRate int) string {
 func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, assetMetaData string, AssetMetaTypeIsJsonNotOpaque bool, amount int, newGroupedAsset bool, groupedAsset bool, groupKey string, groupAnchor string, shortResponse bool) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)

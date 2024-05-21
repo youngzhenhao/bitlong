@@ -101,7 +101,6 @@ func PayInvoice(accountCode string, invoice string, feeLimit int64) (*lnrpc.Paym
 	}
 
 	return invoicePay(macaroonFile, invoice, feeLimit)
-
 }
 
 // DecodeInvoice  解析发票信息

@@ -38,25 +38,32 @@ var mutex sync.Mutex
 
 // CreateCustodyAccount 创建托管账户
 func CreateCustodyAccount(c *gin.Context) {
-	//TODO: 获取登录用户信息
+	// 获取登录用户信息
 	userName := c.MustGet("username").(string)
-	//TODO: 校验登录用户信息
-	params := services.QueryParams{
-		"user_name": userName,
+
+	// 校验登录用户信息
+	user, err := services.ReadUserByUsername(userName)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户不存在"})
+		return
 	}
-	a, err := services.GenericQuery(&models.User{}, params)
-	userId := a[0].ID
+	// 判断用户是否已经创建账户
+	accounts, _ := services.ReadAccountByUserIds(user.ID)
+	if len(accounts) > 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "托管账户已存在"})
+		return
+	}
 
 	//创建账户
 	cstAccount, err := custodyAccount.CreateCustodyAccount()
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	//构建账户对象
 	var accountModel models.Account
-	accountModel.UserName = userName
-	accountModel.UserId = userId
+	accountModel.UserName = user.Username
+	accountModel.UserId = user.ID
 	accountModel.UserAccountCode = cstAccount.Id
 	accountModel.Label = &cstAccount.Label
 	accountModel.Status = 1
@@ -64,11 +71,11 @@ func CreateCustodyAccount(c *gin.Context) {
 	mutex.Lock()
 	defer mutex.Unlock()
 	err = services.CreateAccount(&accountModel)
-	//TODO: 返回信息，规范状态码
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{"accountModel": accountModel})
 }
 
@@ -76,13 +83,20 @@ func CreateCustodyAccount(c *gin.Context) {
 func UpdateCustodyAccount(c *gin.Context) {
 
 	//TODO: 获取登录用户信息
+	userName := c.MustGet("username").(string)
+	user, err := services.ReadUserByUsername(userName)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户不存在"})
+		return
+	}
+	account, _ := services.ReadAccountByUserId(user.ID)
 
 	//TODO: 获取账户余额更新信息
-	id := "tested"
-	amount := int64(12345)
+	acc, err := custodyAccount.QueryCustodyAccount(account.UserAccountCode)
+	amount := int64(1)
 
 	//TODO: 更新托管账户余额
-	err := custodyAccount.Update(id, amount)
+	err = custodyAccount.Update(acc.Id, amount)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -95,14 +109,35 @@ func UpdateCustodyAccount(c *gin.Context) {
 // ApplyInvoiceCA CustodyAccount开具发票
 func ApplyInvoiceCA(c *gin.Context) {
 	//TODO: 获取登录用户信息
-	userId := uint(0)
-	accountId := uint(0)
-	accountCode := "8bc6754444ab8020"
+	userName := c.MustGet("username").(string)
+	user, err := services.ReadUserByUsername(userName)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户不存在"})
+		return
+	}
+
+	account, err := services.ReadAccountByUserId(user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if account.UserAccountCode == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "未找到账户信息"})
+		//TODO 为用户创建托管账户
+		return
+	}
+
 	//TODO: 判断申请金额是否超过通道余额
-	memo := "testmemo"
-	amount := int64(1000)
+	apply := struct {
+		Amount int64  `json:"amount"`
+		Memo   string `json:"memo"`
+	}{}
+	if err := c.ShouldBindJSON(&apply); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+	}
+
 	//生成一张发票
-	invoiceRequest, err := custodyAccount.ApplyInvoice(accountCode, amount, memo)
+	invoiceRequest, err := custodyAccount.ApplyInvoice(account.UserAccountCode, apply.Amount, apply.Memo)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -112,10 +147,10 @@ func ApplyInvoiceCA(c *gin.Context) {
 
 	//构建invoice对象
 	var invoiceModel models.Invoice
-	invoiceModel.UserID = userId
+	invoiceModel.UserID = user.ID
 	invoiceModel.Invoice = invoiceRequest.PaymentRequest
-	invoiceModel.AccountID = &accountId
-	invoiceModel.Amount = float64(amount)
+	invoiceModel.AccountID = &account.ID
+	invoiceModel.Amount = float64(info.Value)
 
 	invoiceModel.Status = int16(info.State)
 	template := time.Unix(info.CreationDate, 0)
@@ -139,16 +174,26 @@ func ApplyInvoiceCA(c *gin.Context) {
 func PayInvoice(c *gin.Context) {
 
 	//TODO: 获取登录用户信息
-	//userId := uint(0)
-	accountId := uint(0)
-	accountCode := "8bc6754444ab8020"
+	userName := c.MustGet("username").(string)
+	user, err := services.ReadUserByUsername(userName)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户不存在"})
+		return
+	}
+	account, _ := services.ReadAccountByUserId(user.ID)
 
 	//TODO: 校验发票信息
-	invoice := "lntb20u1pnysccypp55e38s043wrgy9wn33c326l7tnvf5l335gs5dz9cc56tgltp8cjtqdqqcqzzsxqyz5vqsp53dhdfywr4axzu9y8j90czwgnt3ukl8ndaft8waue7zkmrpyu67us9qyyssqfh2sghzu2ftnsxrwg4rjjqqfwp2tx6fjc7fsja6dvnkrwu5d890nhcr5f85vtj2jrrws4z6dufp2w7svr222n2pf4xzm52d3w0gp26cp75t65f"
-	feeLimit := int64(1000)
+	pay := struct {
+		Invoice  string `json:"invoice"`
+		FeeLimit int64  `json:"feeLimit"`
+	}{}
+	if err := c.ShouldBindJSON(&pay); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+	}
+
 	//检查数据库中是否有该发票的记录
 	a, err := services.GenericQueryByObject(&models.Balance{
-		Invoice: &invoice,
+		Invoice: &pay.Invoice,
 	})
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
@@ -168,11 +213,11 @@ func PayInvoice(c *gin.Context) {
 	}
 
 	// 判断账户余额是否足够
-	info, err := custodyAccount.DecodeInvoice(invoice)
+	info, err := custodyAccount.DecodeInvoice(pay.Invoice)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 	}
-	userBalance, err := custodyAccount.QueryCustodyAccount(accountCode)
+	userBalance, err := custodyAccount.QueryCustodyAccount(account.UserAccountCode)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -183,19 +228,19 @@ func PayInvoice(c *gin.Context) {
 	}
 
 	// 支付发票
-	payment, err := custodyAccount.PayInvoice(accountCode, invoice, feeLimit)
+	payment, err := custodyAccount.PayInvoice(account.UserAccountCode, pay.Invoice, pay.FeeLimit)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 	// 写入数据库
 	var balanceModel models.Balance
-	balanceModel.AccountId = accountId
+	balanceModel.AccountId = account.ID
 	balanceModel.BillType = BILL_TYPE_PAYMENT
 	balanceModel.Away = AWAY_OUT
 	balanceModel.Amount = float64(payment.ValueSat)
 	balanceModel.Unit = UNIT_SATOSHIS
-	balanceModel.Invoice = &invoice
+	balanceModel.Invoice = &pay.Invoice
 	balanceModel.PaymentHash = &payment.PaymentHash
 	if payment.Status == lnrpc.Payment_SUCCEEDED {
 		balanceModel.State = PAY_SUCCESS

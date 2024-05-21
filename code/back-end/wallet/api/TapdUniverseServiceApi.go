@@ -17,7 +17,7 @@ func AddFederationServer() {}
 func assetLeafKeys(id string, proofType universerpc.ProofType) (*universerpc.AssetLeafKeyResponse, error) {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -171,7 +171,7 @@ func DeleteFederationServer() {}
 func UniverseInfo() string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -206,7 +206,7 @@ func InsertProof() {}
 func ListFederationServers() string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -288,7 +288,7 @@ func UniverseStats() {}
 func queryAssetRoot(id string) (*universerpc.QueryRootResponse, error) {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -319,7 +319,7 @@ func queryAssetRoot(id string) (*universerpc.QueryRootResponse, error) {
 func assetLeaves(isGroup bool, id string, proofType universerpc.ProofType) (*universerpc.AssetLeafResponse, error) {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -359,7 +359,7 @@ func assetLeaves(isGroup bool, id string, proofType universerpc.ProofType) (*uni
 func queryAssetStats(assetId string) (*universerpc.UniverseAssetStats, error) {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)
@@ -386,7 +386,7 @@ func queryAssetStats(assetId string) (*universerpc.UniverseAssetStats, error) {
 func syncUniverse(universeHost string, syncTargets []*universerpc.SyncTarget, syncMode universerpc.UniverseSyncMode) (*universerpc.SyncResponse, error) {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), "testnet")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
 	creds := NewTlsCert(tlsCertPath)
 	macaroon := GetMacaroon(macaroonPath)

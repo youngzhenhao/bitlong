@@ -91,7 +91,7 @@ func setupRouterOnPhone() *gin.Engine {
 			c.JSON(http.StatusOK, JsonResult{
 				Success: false,
 				Error:   "asset id null.",
-				Data:    "",
+				Data:    nil,
 			})
 		}
 		amountStr := c.PostForm("amount")
@@ -101,7 +101,7 @@ func setupRouterOnPhone() *gin.Engine {
 			c.JSON(http.StatusOK, JsonResult{
 				Success: false,
 				Error:   "amountInt less than or equal to zero || strconv.Atoi(amount).",
-				Data:    "",
+				Data:    nil,
 			})
 		}
 		addr, err := newAddr(assetID, amountInt)
@@ -110,14 +110,14 @@ func setupRouterOnPhone() *gin.Engine {
 			c.JSON(http.StatusOK, JsonResult{
 				Success: false,
 				Error:   "new addr. " + err.Error(),
-				Data:    "",
+				Data:    nil,
 			})
 		}
-		addrStr := addr.Encoded
+		//addrStr := addr.Encoded
 		c.JSON(http.StatusOK, JsonResult{
 			Success: true,
 			Error:   "",
-			Data:    addrStr,
+			Data:    addr,
 		})
 	})
 	return router

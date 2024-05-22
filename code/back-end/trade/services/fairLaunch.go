@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/lightninglabs/taproot-assets/taprpc"
 	"io"
 	"net/http"
 	"net/url"
@@ -90,24 +91,25 @@ func GetAddr(id string, amt int) string {
 }
 
 // TODO: Need to test
-func PostPhoneToNewAddr(remotePort string, assetId string, amount string) string {
+func PostPhoneToNewAddr(remotePort string, assetId string, amount string) *taprpc.Addr {
 	frpsForwardSocket := fmt.Sprintf("%s:%s", config.GetLoadConfig().FrpsServer, remotePort)
 	targetUrl := "http://" + frpsForwardSocket + "/addInvoice"
 	payload := url.Values{"asset_id": {assetId}, "amount": {amount}}
 	response, err := http.PostForm(targetUrl, payload)
 	if err != nil {
 		utils.LogError("http.PostForm.", err)
+		return nil
 	}
 	bodyBytes, _ := io.ReadAll(response.Body)
 
 	var addrResponse struct {
-		Success bool   `json:"success"`
-		Error   string `json:"error"`
-		Data    string `json:"data"`
+		Success bool         `json:"success"`
+		Error   string       `json:"error"`
+		Data    *taprpc.Addr `json:"data"`
 	}
 	if err := json.Unmarshal(bodyBytes, &addrResponse); err != nil {
 		utils.LogError("PPTNA json.Unmarshal.", err)
-		return ""
+		return nil
 	}
 	return addrResponse.Data
 }

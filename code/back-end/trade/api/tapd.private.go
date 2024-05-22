@@ -286,3 +286,32 @@ func sendAsset(tapAddrs string, feeRate int) (*taprpc.SendAssetResponse, error) 
 	}
 	return response, nil
 }
+
+func decodeAddr(addr string) (*taprpc.Addr, error) {
+	grpcHost := config.GetLoadConfig().ApiConfig.Tapd.Host + ":" + strconv.Itoa(config.GetLoadConfig().ApiConfig.Tapd.Port)
+	tlsCertPath := config.GetLoadConfig().ApiConfig.Tapd.TlsCertPath
+	macaroonPath := config.GetLoadConfig().ApiConfig.Tapd.MacaroonPath
+	creds := utils.NewTlsCert(tlsCertPath)
+	macaroon := utils.GetMacaroon(macaroonPath)
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(utils.NewMacaroonCredential(macaroon)))
+	if err != nil {
+		utils.LogError("did not connect: grpc.Dial", err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			utils.LogError("conn Close Error", err)
+		}
+	}(conn)
+	client := taprpc.NewTaprootAssetsClient(conn)
+	request := &taprpc.DecodeAddrRequest{
+		Addr: addr,
+	}
+	response, err := client.DecodeAddr(context.Background(), request)
+	if err != nil {
+		utils.LogError("taprpc DecodeAddr Error", err)
+		return nil, err
+	}
+	return response, nil
+}

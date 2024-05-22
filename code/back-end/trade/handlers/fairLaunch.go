@@ -87,6 +87,7 @@ func GetMintedInfo(c *gin.Context) {
 
 func SetFairLaunchInfo(c *gin.Context) {
 	var fairLaunchInfo models.FairLaunchInfo
+	// TODO: ShouldBind
 	err := c.ShouldBind(&fairLaunchInfo)
 	if err != nil {
 		utils.LogError("Wrong json to bind.", err)
@@ -119,7 +120,7 @@ func MintFairLaunch(c *gin.Context) {
 
 	// TODO: 0.Basic info and complete
 	fairLaunchMintedInfo = services.ProcessFairLaunchMintedInfo(fairLaunchMintedInfo)
-	// TODO:
+	// TODO: ShouldBind
 	err := c.ShouldBind(fairLaunchMintedInfo)
 	if err != nil {
 		utils.LogError("Wrong json to bind.", err)

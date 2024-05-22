@@ -1,4 +1,4 @@
-package serbicesrpc
+package servicesrpc
 
 import (
 	"context"

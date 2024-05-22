@@ -13,10 +13,18 @@ func GetAllFairLaunchInfo(c *gin.Context) {
 	allFairLaunch, err := services.GetAllFairLaunch()
 	if err != nil {
 		utils.LogError("Get all fair launch infos", err)
-		c.JSON(http.StatusOK, utils.MakeJsonResult(false, "Can not get all fair launch infos. "+err.Error(), ""))
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Can not get all fair launch infos. " + err.Error(),
+			Data:    "",
+		})
 		return
 	}
-	c.JSON(http.StatusOK, utils.MakeJsonResult(true, "", allFairLaunch))
+	c.JSON(http.StatusOK, models.JsonResult{
+		Success: true,
+		Error:   "",
+		Data:    allFairLaunch,
+	})
 }
 
 func GetFairLaunchInfo(c *gin.Context) {
@@ -24,16 +32,28 @@ func GetFairLaunchInfo(c *gin.Context) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		utils.LogError("id is not valid int", err)
-		c.JSON(http.StatusOK, utils.MakeJsonResult(false, "id is not valid int. "+err.Error(), ""))
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "id is not valid int. " + err.Error(),
+			Data:    "",
+		})
 		return
 	}
 	fairLaunch, err := services.GetFairLaunch(id)
 	if err != nil {
 		utils.LogError("Get fair launch info", err)
-		c.JSON(http.StatusOK, utils.MakeJsonResult(false, "Can not get fair launch info. "+err.Error(), ""))
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Can not get fair launch info. " + err.Error(),
+			Data:    "",
+		})
 		return
 	}
-	c.JSON(http.StatusOK, utils.MakeJsonResult(true, "", fairLaunch))
+	c.JSON(http.StatusOK, models.JsonResult{
+		Success: true,
+		Error:   "",
+		Data:    fairLaunch,
+	})
 }
 
 func GetMintedInfo(c *gin.Context) {
@@ -41,17 +61,28 @@ func GetMintedInfo(c *gin.Context) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		utils.LogError("id is not valid int", err)
-		c.JSON(http.StatusOK, utils.MakeJsonResult(false, "id is not valid int. "+err.Error(), ""))
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "id is not valid int. " + err.Error(),
+			Data:    "",
+		})
 		return
 	}
 	minted, err := services.GetMinted(id)
 	if err != nil {
 		utils.LogError("Get fair launch minted info", err)
-		c.JSON(http.StatusOK, utils.MakeJsonResult(false, "Can not get fair launch minted info. "+err.Error(), ""))
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Can not get fair launch minted info. " + err.Error(),
+			Data:    "",
+		})
 		return
 	}
-	c.JSON(http.StatusOK, utils.MakeJsonResult(true, "", minted))
-
+	c.JSON(http.StatusOK, models.JsonResult{
+		Success: true,
+		Error:   "",
+		Data:    minted,
+	})
 }
 
 func SetFairLaunchInfo(c *gin.Context) {
@@ -59,25 +90,97 @@ func SetFairLaunchInfo(c *gin.Context) {
 	err := c.ShouldBind(&fairLaunchInfo)
 	if err != nil {
 		utils.LogError("Wrong json to bind.", err)
-		c.JSON(http.StatusOK, utils.MakeJsonResult(false, "Wrong json to bind. "+err.Error(), ""))
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Wrong json to bind. " + err.Error(),
+			Data:    "",
+		})
 		return
 	}
 	err = services.SetFairLaunch(&fairLaunchInfo)
 	if err != nil {
 		utils.LogError("Set fair launch error.", err)
-		c.JSON(http.StatusOK, utils.MakeJsonResult(false, "Set fair launch error. "+err.Error(), ""))
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Set fair launch error. " + err.Error(),
+			Data:    "",
+		})
 		return
 	}
-	c.JSON(http.StatusOK, utils.MakeJsonResult(true, "", nil))
+	c.JSON(http.StatusOK, models.JsonResult{
+		Success: true,
+		Error:   "",
+		Data:    nil,
+	})
 }
 
 func MintFairLaunch(c *gin.Context) {
-	// TODO: receive mint info
-	// TODO: Pay Fee
-	// TODO: call services FairLaunchMint
+	var fairLaunchMintedInfo *models.FairLaunchMintedInfo
+
+	// TODO: 0.Basic info and complete
+	fairLaunchMintedInfo = services.ProcessFairLaunchMintedInfo(fairLaunchMintedInfo)
 	// TODO:
+	err := c.ShouldBind(fairLaunchMintedInfo)
+	if err != nil {
+		utils.LogError("Wrong json to bind.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Wrong json to bind. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
 
-	// TODO: need to complete
-	utils.LogInfo("MintFairLaunch triggered. This function did nothing, need to complete.")
+	// TODO: 1.Pay Fee
+	amount := fairLaunchMintedInfo.Amount
+	fee, err := services.CalculateFee(amount)
+	if err != nil {
+		utils.LogError("Calculate fee error", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Calculate fee error. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	limit := services.FeeLimit
+	// TODO: whether to use MustGet
+	username := c.MustGet("username").(string)
+	userId, err := services.NameToId(username)
+	if err != nil {
+		utils.LogError("Name to id error", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Name to id error. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	err = services.PayFee(fee, limit, userId)
+	if err != nil {
+		utils.LogError("Pay fee error", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Pay fee error. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
 
+	// TODO: 2.Fair launch mint service
+	err = services.FairLaunchMint(fairLaunchMintedInfo)
+	if err != nil {
+		utils.LogError("Fair launch mint error.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Fair launch mint error. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, models.JsonResult{
+		Success: true,
+		Error:   "",
+		Data:    nil,
+	})
 }

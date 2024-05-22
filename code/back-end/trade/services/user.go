@@ -61,16 +61,23 @@ func (sm *CronService) SixSecondTask() {
 	log.Println("6 secs runs")
 }
 
+func NameToId(name string) (int, error) {
+	user := models.User{Username: name}
+	err := middleware.DB.First(&user).Error
+	return int(user.ID), err
+}
+
 func hashPassword(password string) (string, error) {
-	// 使用bcrypt算法加密密码
+	// Passwords are encrypted using the bcrypt algorithm
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	if err != nil {
 		return "", err
 	}
 	return string(bytes), nil
 }
+
 func CheckPassword(hashedPassword, password string) bool {
-	// bcrypt.CompareHashAndPassword比较哈希密码和用户输入的密码。如果匹配则返回nil。
+	// bcrypt.CompareHashAndPassword Compare the hashed password with the password entered by the user. If there is a match, nil is returned.
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	return err == nil
 }

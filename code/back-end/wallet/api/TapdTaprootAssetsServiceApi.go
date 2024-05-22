@@ -295,8 +295,16 @@ func ListUtxos(includeLeased bool) string {
 // NewAddr
 //
 //	@Description:NewAddr makes a new address from the set of request params.
-//	@return bool
-func NewAddr(assetId string, amt int) bool {
+//	@return string
+func NewAddr(assetId string, amt int) string {
+	response, err := newAddr(assetId, amt)
+	if err != nil {
+		return MakeJsonResult(false, err.Error(), "")
+	}
+	return MakeJsonResult(true, "", response)
+}
+
+func newAddr(assetId string, amt int) (*taprpc.Addr, error) {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
@@ -323,10 +331,9 @@ func NewAddr(assetId string, amt int) bool {
 	response, err := client.NewAddr(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s taprpc NewAddr Error: %v\n", GetTimeNow(), err)
-		return false
+		return nil, err
 	}
-	fmt.Printf("%s %v\n", GetTimeNow(), response)
-	return true
+	return response, nil
 }
 
 func QueryAddrs() {
@@ -334,13 +341,11 @@ func QueryAddrs() {
 }
 
 // SendAsset
-//
-//	@Description:SendAsset uses one or multiple passed Taproot Asset address(es) to attempt to complete an asset send.
-//	The method returns information w.r.t the on chain send, as well as the proof file information the receiver needs to fully receive the asset.
-//	@return bool
-//
+// @Description:SendAsset uses one or multiple passed Taproot Asset address(es) to attempt to complete an asset send.
+// The method returns information w.r.t the on chain send, as well as the proof file information the receiver needs to fully receive the asset.
+// @return string
 // skipped function SendAsset with unsupported parameter or return types
-func SendAsset(tapAddrs string, feeRate int) bool {
+func SendAsset(tapAddrs string, feeRate int) string {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
@@ -367,10 +372,9 @@ func SendAsset(tapAddrs string, feeRate int) bool {
 	response, err := client.SendAsset(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s taprpc SendAsset Error: %v\n", GetTimeNow(), err)
-		return false
+		return MakeJsonResult(false, err.Error(), "")
 	}
-	fmt.Printf("%s %v\n", GetTimeNow(), response)
-	return true
+	return MakeJsonResult(true, "", response)
 }
 
 func SubscribeReceiveAssetEventNtfns() {

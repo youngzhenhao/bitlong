@@ -55,7 +55,9 @@ type Config struct {
 			MacaroonDir string `yaml:"macaroon_dir"`
 		} `yaml:"custody_account"`
 	} `yaml:"api_config"`
-	AdminUser BasicAuth `yaml:"admin_user"`
+	AdminUser     BasicAuth `yaml:"admin_user"`
+	FrpsServer    string    `yaml:"frps_server"`
+	IsAutoMigrate bool      `yaml:"is_auto_migrate"`
 }
 
 type BasicAuth struct {

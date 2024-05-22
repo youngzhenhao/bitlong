@@ -1,39 +1,11 @@
 package handlers
 
 import (
-	"encoding/hex"
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/lightningnetwork/lnd/lnrpc"
 	"net/http"
-	"sync"
-	"time"
-	"trade/middleware"
 	"trade/models"
 	"trade/services"
 )
-
-const (
-	BILL_TYPE_RECHARGE = 0
-	BILL_TYPE_PAYMENT  = 1
-)
-
-const (
-	AWAY_IN  = 0
-	AWAY_OUT = 1
-)
-
-const (
-	UNIT_SATOSHIS = 0
-)
-
-const (
-	PAY_UNKNOWN = 0
-	PAY_SUCCESS = 1
-	PAY_FAILED  = 2
-)
-
-var mutex sync.Mutex
 
 // CreateCustodyAccount 创建托管账户
 func CreateCustodyAccount(c *gin.Context) {
@@ -59,23 +31,7 @@ func CreateCustodyAccount(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	//构建账户对象
-	var accountModel models.Account
-	accountModel.UserName = user.Username
-	accountModel.UserId = user.ID
-	accountModel.UserAccountCode = cstAccount.Id
-	accountModel.Label = &cstAccount.Label
-	accountModel.Status = 1
-	//写入数据库
-	mutex.Lock()
-	defer mutex.Unlock()
-	err = services.CreateAccount(&accountModel)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"accountModel": accountModel})
+	c.JSON(http.StatusOK, gin.H{"accountModel": cstAccount})
 }
 
 // UpdateCustodyAccount 更新托管账户余额
@@ -139,40 +95,15 @@ func ApplyInvoiceCA(c *gin.Context) {
 		return
 	}
 	//生成一张发票
-	invoiceRequest, err := services.ApplyInvoice(account.UserAccountCode, apply.Amount, apply.Memo)
+	invoiceRequest, err := services.ApplyInvoice(user, account, apply.Amount, apply.Memo)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
-	//获取发票信息
-	info, _ := services.FindInvoice(invoiceRequest.RHash)
-
-	//构建invoice对象
-	var invoiceModel models.Invoice
-	invoiceModel.UserID = user.ID
-	invoiceModel.Invoice = invoiceRequest.PaymentRequest
-	invoiceModel.AccountID = &account.ID
-	invoiceModel.Amount = float64(info.Value)
-
-	invoiceModel.Status = int16(info.State)
-	template := time.Unix(info.CreationDate, 0)
-	invoiceModel.CreateDate = &template
-	expiry := int(info.Expiry)
-	invoiceModel.Expiry = &expiry
-
-	//写入数据库
-	mutex.Lock()
-	defer mutex.Unlock()
-	err = middleware.DB.Create(&invoiceModel).Error
-	//回信息，规范状态码
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"invoiceModel": info})
+	c.JSON(http.StatusOK, gin.H{"invoiceModel": invoiceRequest})
 }
 
-// PayInvoice CustodyAccountzhi付款发票
+// PayInvoice CustodyAccount付款发票
 func PayInvoice(c *gin.Context) {
 
 	//TODO: 获取登录用户信息
@@ -206,11 +137,11 @@ func PayInvoice(c *gin.Context) {
 	}
 	if len(a) > 0 {
 		for _, v := range a {
-			if v.State == PAY_SUCCESS {
+			if v.State == services.PAY_SUCCESS {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": "发票已被支付，请勿重复支付"})
 				return
 			}
-			if v.State == PAY_UNKNOWN {
+			if v.State == services.PAY_UNKNOWN {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": "发票锁定中，请稍后再试"})
 				return
 			}
@@ -233,123 +164,12 @@ func PayInvoice(c *gin.Context) {
 	}
 
 	// 支付发票
-	payment, err := services.PayInvoice(account.UserAccountCode, pay.Invoice, pay.FeeLimit)
+	payment, err := services.PayInvoice(account, pay.Invoice, pay.FeeLimit)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 	// 写入数据库
-	var balanceModel models.Balance
-	balanceModel.AccountId = account.ID
-	balanceModel.BillType = BILL_TYPE_PAYMENT
-	balanceModel.Away = AWAY_OUT
-	balanceModel.Amount = float64(payment.ValueSat)
-	balanceModel.Unit = UNIT_SATOSHIS
-	balanceModel.Invoice = &pay.Invoice
-	balanceModel.PaymentHash = &payment.PaymentHash
-	if payment.Status == lnrpc.Payment_SUCCEEDED {
-		balanceModel.State = PAY_SUCCESS
-	} else if payment.Status == lnrpc.Payment_FAILED {
-		balanceModel.State = PAY_FAILED
-	} else {
-		balanceModel.State = PAY_UNKNOWN
-	}
-	mutex.Lock()
-	defer mutex.Unlock()
-	err = middleware.DB.Create(&balanceModel).Error
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-		return
-	}
+
 	c.JSON(http.StatusOK, gin.H{"payment": payment})
-}
-
-// PollPayment 遍历所有未确认的发票，轮询支付状态
-func PollPayment() {
-	//查询数据库，获取所有未确认的支付
-	params := services.QueryParams{
-		"State": PAY_UNKNOWN,
-	}
-	a, err := services.GenericQuery(&models.Balance{}, params)
-	if err != nil {
-		fmt.Println(err)
-	}
-	if len(a) > 0 {
-		for _, v := range a {
-			temp, err := services.TrackPayment(*v.PaymentHash)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-			if temp.Status == lnrpc.Payment_SUCCEEDED {
-				v.State = PAY_SUCCESS
-				mutex.Lock()
-				defer mutex.Unlock()
-				err = middleware.DB.Save(&v).Error
-				if err != nil {
-					fmt.Println(err)
-				}
-			} else if temp.Status == lnrpc.Payment_FAILED {
-				v.State = PAY_FAILED
-				mutex.Lock()
-				defer mutex.Unlock()
-				err = middleware.DB.Save(&v).Error
-				if err != nil {
-					fmt.Println(err)
-				}
-			}
-		}
-	}
-}
-
-// PollInvoice 遍历所有未支付的发票，轮询发票状态
-func PollInvoice() {
-	//查询数据库，获取所有未支付的发票
-	params := services.QueryParams{
-		"Status": lnrpc.Invoice_OPEN,
-	}
-	a, err := services.GenericQuery(&models.Invoice{}, params)
-	if err != nil {
-		fmt.Println(err)
-	}
-	if len(a) > 0 {
-		for _, v := range a {
-			invoice, err := services.DecodeInvoice(v.Invoice)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-			rHash, err := hex.DecodeString(invoice.PaymentHash)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-			temp, err := services.FindInvoice(rHash)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-			if int16(temp.State) != v.Status {
-				v.Status = int16(temp.State)
-				mutex.Lock()
-				defer mutex.Unlock()
-				err = middleware.DB.Save(&v).Error
-				if err != nil {
-					fmt.Println(err)
-				}
-			}
-		}
-	}
-}
-
-type CronHandler struct {
-}
-
-func (sm *CronHandler) PollPaymentCron() {
-	fmt.Println("start cron job: PollPayment")
-	PollPayment()
-}
-func (sm *CronHandler) PollInvoiceCron() {
-	fmt.Println("start cron job: PollInvoice")
-	PollInvoice()
 }

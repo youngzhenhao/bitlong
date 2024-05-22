@@ -20,6 +20,5 @@ func SetupCustodyAccountRouter(router *gin.Engine) *gin.Engine {
 			Invoice.POST("/pay", handlers.PayInvoice)
 		}
 	}
-
 	return router
 }

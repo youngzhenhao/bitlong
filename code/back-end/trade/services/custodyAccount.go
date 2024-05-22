@@ -1,15 +1,38 @@
 package services
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/lightninglabs/lightning-terminal/litrpc"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 	"trade/config"
+	"trade/middleware"
 	"trade/models"
 	"trade/services/rpc"
+)
+
+const (
+	BILL_TYPE_RECHARGE = 0
+	BILL_TYPE_PAYMENT  = 1
+)
+
+const (
+	AWAY_IN  = 0
+	AWAY_OUT = 1
+)
+
+const (
+	UNIT_SATOSHIS = 0
+)
+
+const (
+	PAY_UNKNOWN = 0
+	PAY_SUCCESS = 1
+	PAY_FAILED  = 2
 )
 
 var mutex sync.Mutex
@@ -51,7 +74,9 @@ func CreateCustodyAccount(user *models.User) (*litrpc.Account, error) {
 	mutex.Lock()
 	defer mutex.Unlock()
 	err = CreateAccount(&accountModel)
-
+	if err != nil {
+		return nil, err
+	}
 	//返回托管账户信息
 	return account, nil
 }
@@ -86,39 +111,81 @@ func DeleteCustodianAccount() error {
 }
 
 // ApplyInvoice 使用指定账户申请一张发票
-func ApplyInvoice(accountCode string, amount int64, memo string) (*lnrpc.AddInvoiceResponse, error) {
+func ApplyInvoice(user *models.User, account *models.Account, amount int64, memo string) (*lnrpc.AddInvoiceResponse, error) {
 	//获取马卡龙路径
 	var macaroonFile string
 	macaroonDir := config.GetConfig().ApiConfig.CustodyAccount.MacaroonDir
 
-	if accountCode == "admin" {
+	if account.UserAccountCode == "admin" {
 		macaroonFile = config.GetConfig().ApiConfig.Lnd.MacaroonPath
 	} else {
-		macaroonFile = filepath.Join(macaroonDir, accountCode+".macaroon")
+		macaroonFile = filepath.Join(macaroonDir, account.UserAccountCode+".macaroon")
 	}
 	if macaroonFile == "" {
 		return nil, fmt.Errorf("macaroon file not found")
 	}
 	//调用Lit节点发票申请接口
-	return rpc.InvoiceCreate(amount, memo, macaroonFile)
+	invoice, err := rpc.InvoiceCreate(amount, memo, macaroonFile)
+	//获取发票信息
+	info, _ := FindInvoice(invoice.RHash)
+
+	//构建invoice对象
+	var invoiceModel models.Invoice
+	invoiceModel.UserID = user.ID
+	invoiceModel.Invoice = invoice.PaymentRequest
+	invoiceModel.AccountID = &account.ID
+	invoiceModel.Amount = float64(info.Value)
+
+	invoiceModel.Status = int16(info.State)
+	template := time.Unix(info.CreationDate, 0)
+	invoiceModel.CreateDate = &template
+	expiry := int(info.Expiry)
+	invoiceModel.Expiry = &expiry
+
+	//写入数据库
+	mutex.Lock()
+	defer mutex.Unlock()
+	err = middleware.DB.Create(&invoiceModel).Error
+	return invoice, err
 }
 
 // PayInvoice 使用指定账户支付发票
-func PayInvoice(accountCode string, invoice string, feeLimit int64) (*lnrpc.Payment, error) {
+func PayInvoice(account *models.Account, invoice string, feeLimit int64) (*lnrpc.Payment, error) {
 	//获取马卡龙路径
 	var macaroonFile string
 	macaroonDir := config.GetConfig().ApiConfig.CustodyAccount.MacaroonDir
 
-	if accountCode == "admin" {
+	if account.UserAccountCode == "admin" {
 		macaroonFile = config.GetConfig().ApiConfig.Lnd.MacaroonPath
 	} else {
-		macaroonFile = filepath.Join(macaroonDir, accountCode+".macaroon")
+		macaroonFile = filepath.Join(macaroonDir, account.UserAccountCode+".macaroon")
 	}
 	if macaroonFile == "" {
 		return nil, fmt.Errorf("macaroon file not found")
 	}
 
-	return rpc.InvoicePay(macaroonFile, invoice, feeLimit)
+	payment, err := rpc.InvoicePay(macaroonFile, invoice, feeLimit)
+	if err != nil {
+	}
+	var balanceModel models.Balance
+	balanceModel.AccountId = account.ID
+	balanceModel.BillType = BILL_TYPE_PAYMENT
+	balanceModel.Away = AWAY_OUT
+	balanceModel.Amount = float64(payment.ValueSat)
+	balanceModel.Unit = UNIT_SATOSHIS
+	balanceModel.Invoice = &payment.PaymentRequest
+	balanceModel.PaymentHash = &payment.PaymentHash
+	if payment.Status == lnrpc.Payment_SUCCEEDED {
+		balanceModel.State = PAY_SUCCESS
+	} else if payment.Status == lnrpc.Payment_FAILED {
+		balanceModel.State = PAY_FAILED
+	} else {
+		balanceModel.State = PAY_UNKNOWN
+	}
+	mutex.Lock()
+	defer mutex.Unlock()
+	err = middleware.DB.Create(&balanceModel).Error
+	return payment, err
 }
 
 // DecodeInvoice  解析发票信息
@@ -156,4 +223,91 @@ func saveMacaroon(macaroon []byte, macaroonFile string) error {
 		return err
 	}
 	return nil
+}
+
+// PollPayment 遍历所有未确认的发票，轮询支付状态
+func pollPayment() {
+	//查询数据库，获取所有未确认的支付
+	params := QueryParams{
+		"State": PAY_UNKNOWN,
+	}
+	a, err := GenericQuery(&models.Balance{}, params)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if len(a) > 0 {
+		for _, v := range a {
+			temp, err := TrackPayment(*v.PaymentHash)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			if temp.Status == lnrpc.Payment_SUCCEEDED {
+				v.State = PAY_SUCCESS
+				mutex.Lock()
+				defer mutex.Unlock()
+				err = middleware.DB.Save(&v).Error
+				if err != nil {
+					fmt.Println(err)
+				}
+			} else if temp.Status == lnrpc.Payment_FAILED {
+				v.State = PAY_FAILED
+				mutex.Lock()
+				defer mutex.Unlock()
+				err = middleware.DB.Save(&v).Error
+				if err != nil {
+					fmt.Println(err)
+				}
+			}
+		}
+	}
+}
+
+// PollInvoice 遍历所有未支付的发票，轮询发票状态
+func pollInvoice() {
+	//查询数据库，获取所有未支付的发票
+	params := QueryParams{
+		"Status": lnrpc.Invoice_OPEN,
+	}
+	a, err := GenericQuery(&models.Invoice{}, params)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if len(a) > 0 {
+		for _, v := range a {
+			invoice, err := DecodeInvoice(v.Invoice)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			rHash, err := hex.DecodeString(invoice.PaymentHash)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			temp, err := FindInvoice(rHash)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			if int16(temp.State) != v.Status {
+				v.Status = int16(temp.State)
+				mutex.Lock()
+				defer mutex.Unlock()
+				err = middleware.DB.Save(&v).Error
+				if err != nil {
+					fmt.Println(err)
+				}
+			}
+		}
+	}
+}
+
+func (sm *CronService) PollPaymentCron() {
+	fmt.Println("start cron job: PollPayment")
+	pollPayment()
+}
+func (sm *CronService) PollInvoiceCron() {
+	fmt.Println("start cron job: PollInvoice")
+	pollInvoice()
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/lightninglabs/taproot-assets/taprpc"
 	"github.com/lightninglabs/taproot-assets/taprpc/mintrpc"
 	"github.com/lightninglabs/taproot-assets/taprpc/universerpc"
-	"google.golang.org/grpc"
 	"strconv"
 	"strings"
 	"trade/config"
@@ -18,17 +17,8 @@ func assetLeaves(isGroup bool, id string, proofType universerpc.ProofType) (*uni
 	grpcHost := config.GetLoadConfig().ApiConfig.Tapd.Host + ":" + strconv.Itoa(config.GetLoadConfig().ApiConfig.Tapd.Port)
 	tlsCertPath := config.GetLoadConfig().ApiConfig.Tapd.TlsCertPath
 	macaroonPath := config.GetLoadConfig().ApiConfig.Tapd.MacaroonPath
-	creds := utils.NewTlsCert(tlsCertPath)
-	macaroon := utils.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(utils.NewMacaroonCredential(macaroon)))
-	if err != nil {
-		utils.LogError("did not connect: grpc.Dial", err)
-	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		utils.LogError("conn Close Error", err)
-	}(conn)
+	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
+	defer connClose()
 	request := &universerpc.ID{
 		ProofType: proofType,
 	}
@@ -104,19 +94,8 @@ func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, 
 	grpcHost := config.GetLoadConfig().ApiConfig.Tapd.Host + ":" + strconv.Itoa(config.GetLoadConfig().ApiConfig.Tapd.Port)
 	tlsCertPath := config.GetLoadConfig().ApiConfig.Tapd.TlsCertPath
 	macaroonPath := config.GetLoadConfig().ApiConfig.Tapd.MacaroonPath
-	creds := utils.NewTlsCert(tlsCertPath)
-	macaroon := utils.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(utils.NewMacaroonCredential(macaroon)))
-	if err != nil {
-		utils.LogError("did not connect: grpc.Dial", err)
-	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			utils.LogError("conn Close Error", err)
-		}
-	}(conn)
+	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
+	defer connClose()
 	client := mintrpc.NewMintClient(conn)
 	var _assetVersion taprpc.AssetVersion
 	if assetVersionIsV1 {
@@ -138,7 +117,6 @@ func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, 
 		_assetMetaType = taprpc.AssetMetaType_META_TYPE_OPAQUE
 	}
 	_groupKeyByteSlices := []byte(groupKey)
-
 	request := &mintrpc.MintAssetRequest{
 		Asset: &mintrpc.MintAsset{
 			AssetVersion: _assetVersion,
@@ -168,17 +146,8 @@ func finalizeBatch(shortResponse bool, feeRate int) string {
 	grpcHost := config.GetLoadConfig().ApiConfig.Tapd.Host + ":" + strconv.Itoa(config.GetLoadConfig().ApiConfig.Tapd.Port)
 	tlsCertPath := config.GetLoadConfig().ApiConfig.Tapd.TlsCertPath
 	macaroonPath := config.GetLoadConfig().ApiConfig.Tapd.MacaroonPath
-	creds := utils.NewTlsCert(tlsCertPath)
-	macaroon := utils.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(utils.NewMacaroonCredential(macaroon)))
-	if err != nil {
-		utils.LogError("did not connect: grpc.Dial", err)
-	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		utils.LogError("conn Close Error", err)
-	}(conn)
+	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
+	defer connClose()
 	client := mintrpc.NewMintClient(conn)
 	request := &mintrpc.FinalizeBatchRequest{
 		ShortResponse: shortResponse,
@@ -196,20 +165,8 @@ func fetchAssetMeta(isHash bool, data string) (*taprpc.AssetMeta, error) {
 	grpcHost := config.GetLoadConfig().ApiConfig.Tapd.Host + ":" + strconv.Itoa(config.GetLoadConfig().ApiConfig.Tapd.Port)
 	tlsCertPath := config.GetLoadConfig().ApiConfig.Tapd.TlsCertPath
 	macaroonPath := config.GetLoadConfig().ApiConfig.Tapd.MacaroonPath
-	creds := utils.NewTlsCert(tlsCertPath)
-	macaroon := utils.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(utils.NewMacaroonCredential(macaroon)))
-	if err != nil {
-		utils.LogError("did not connect: grpc.Dial", err)
-	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			utils.LogError("conn Close Error", err)
-		}
-	}(conn)
-
+	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
+	defer connClose()
 	client := taprpc.NewTaprootAssetsClient(conn)
 	request := &taprpc.FetchAssetMetaRequest{}
 	if isHash {
@@ -229,19 +186,8 @@ func newAddr(assetId string, amt int) (*taprpc.Addr, error) {
 	grpcHost := config.GetLoadConfig().ApiConfig.Tapd.Host + ":" + strconv.Itoa(config.GetLoadConfig().ApiConfig.Tapd.Port)
 	tlsCertPath := config.GetLoadConfig().ApiConfig.Tapd.TlsCertPath
 	macaroonPath := config.GetLoadConfig().ApiConfig.Tapd.MacaroonPath
-	creds := utils.NewTlsCert(tlsCertPath)
-	macaroon := utils.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(utils.NewMacaroonCredential(macaroon)))
-	if err != nil {
-		utils.LogError("did not connect: grpc.Dial", err)
-	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			utils.LogError("conn Close Error", err)
-		}
-	}(conn)
+	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
+	defer connClose()
 	client := taprpc.NewTaprootAssetsClient(conn)
 	_assetIdByteSlice, _ := hex.DecodeString(assetId)
 	request := &taprpc.NewAddrRequest{
@@ -260,19 +206,8 @@ func sendAsset(tapAddrs string, feeRate int) (*taprpc.SendAssetResponse, error) 
 	grpcHost := config.GetLoadConfig().ApiConfig.Tapd.Host + ":" + strconv.Itoa(config.GetLoadConfig().ApiConfig.Tapd.Port)
 	tlsCertPath := config.GetLoadConfig().ApiConfig.Tapd.TlsCertPath
 	macaroonPath := config.GetLoadConfig().ApiConfig.Tapd.MacaroonPath
-	creds := utils.NewTlsCert(tlsCertPath)
-	macaroon := utils.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(utils.NewMacaroonCredential(macaroon)))
-	if err != nil {
-		utils.LogError("did not connect: grpc.Dial", err)
-	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			utils.LogError("conn Close Error", err)
-		}
-	}(conn)
+	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
+	defer connClose()
 	client := taprpc.NewTaprootAssetsClient(conn)
 	addrs := strings.Split(tapAddrs, ",")
 	request := &taprpc.SendAssetRequest{
@@ -291,19 +226,8 @@ func decodeAddr(addr string) (*taprpc.Addr, error) {
 	grpcHost := config.GetLoadConfig().ApiConfig.Tapd.Host + ":" + strconv.Itoa(config.GetLoadConfig().ApiConfig.Tapd.Port)
 	tlsCertPath := config.GetLoadConfig().ApiConfig.Tapd.TlsCertPath
 	macaroonPath := config.GetLoadConfig().ApiConfig.Tapd.MacaroonPath
-	creds := utils.NewTlsCert(tlsCertPath)
-	macaroon := utils.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(utils.NewMacaroonCredential(macaroon)))
-	if err != nil {
-		utils.LogError("did not connect: grpc.Dial", err)
-	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			utils.LogError("conn Close Error", err)
-		}
-	}(conn)
+	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
+	defer connClose()
 	client := taprpc.NewTaprootAssetsClient(conn)
 	request := &taprpc.DecodeAddrRequest{
 		Addr: addr,

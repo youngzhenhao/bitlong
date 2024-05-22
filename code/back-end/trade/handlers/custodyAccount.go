@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"trade/models"
@@ -115,7 +116,12 @@ func PayInvoice(c *gin.Context) {
 	}
 	account, err := services.ReadAccountByUserId(user.ID)
 	if err != nil {
-
+		fmt.Println(err.Error())
+		return
+	}
+	if account.UserAccountCode == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "未找到账户信息"})
+		return
 	}
 
 	//TODO: 校验发票信息

@@ -1,10 +1,12 @@
 package services
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/lightninglabs/taproot-assets/taprpc"
+	"gorm.io/gorm"
 	"io"
 	"net/http"
 	"net/url"
@@ -76,29 +78,28 @@ func FairLaunchMint(fairLaunchMintedInfo *models.FairLaunchMintedInfo) error {
 		return err
 	}
 	// TODO: need to complete
-
-	// TODO: 5.Write to database of asset release
+	// TODO: 6.Write to database of asset release
 
 	return nil
 }
 
 func GetAddr(id string, amt int) string {
 	// TODO: need to complete
-	// TODO: Request User to generate a addr of receiving asset
-	// TODO: Response struct
+	// TODO: Request User to generate an addr of receiving asset
 	// TODO: Call PostPhoneToNewAddr
+	// TODO: User local_port and remote_port
 	utils.LogInfo("GetAddr triggered. This function did nothing, need to complete.")
 	return ""
 }
 
-func PostPhoneToNewAddr(remotePort string, assetId string, amount int) *taprpc.Addr {
+func PostPhoneToNewAddr(remotePort string, assetId string, amount int) (*taprpc.Addr, error) {
 	frpsForwardSocket := fmt.Sprintf("%s:%s", config.GetLoadConfig().FrpsServer, remotePort)
 	targetUrl := "http://" + frpsForwardSocket + "/newAddr"
 	payload := url.Values{"asset_id": {assetId}, "amount": {strconv.Itoa(amount)}}
 	response, err := http.PostForm(targetUrl, payload)
 	if err != nil {
 		utils.LogError("http.PostForm.", err)
-		return nil
+		return nil, err
 	}
 	bodyBytes, _ := io.ReadAll(response.Body)
 	var addrResponse struct {
@@ -108,20 +109,41 @@ func PostPhoneToNewAddr(remotePort string, assetId string, amount int) *taprpc.A
 	}
 	if err := json.Unmarshal(bodyBytes, &addrResponse); err != nil {
 		utils.LogError("PPTNA json.Unmarshal.", err)
-		return nil
+		return nil, err
 	}
-	return addrResponse.Data
+	return addrResponse.Data, nil
 }
 
 func calculateAmount(id int, amount int) int {
 	// TODO: need to complete
 	// TODO: add number logic, or judge number when mint
+	// TODO: Verify amount is valid
 	utils.LogInfo("calculateAmount triggered. This function did nothing, need to complete.")
 	return 0
 }
 
-func ProcessFairLaunchMintedInfo(fairLaunchMintedInfo *models.FairLaunchMintedInfo) *models.FairLaunchMintedInfo {
-	// TODO: need to complete
-	utils.LogInfo("ProcessFairLaunchMintedInfo triggered. This function did nothing, need to complete.")
-	return nil
+func ProcessFairLaunchMintedInfo(id int, addr string) (*models.FairLaunchMintedInfo, error) {
+	var fairLaunchMintedInfo models.FairLaunchMintedInfo
+	response, err := api.GetDecodedAddrInfo(addr)
+	if err != nil {
+		utils.LogError("Decoded Addr error.", err)
+		return nil, err
+	}
+	fairLaunchMintedInfo = models.FairLaunchMintedInfo{
+		Model:            gorm.Model{},
+		FairLaunchInfoID: id,
+		EncodedAddr:      addr,
+		AssetID:          hex.EncodeToString(response.AssetId),
+		AssetType:        response.AssetType.String(),
+		AddrAmount:       int(response.Amount),
+		ScriptKey:        hex.EncodeToString(response.ScriptKey),
+		InternalKey:      hex.EncodeToString(response.InternalKey),
+		TaprootOutputKey: hex.EncodeToString(response.TaprootOutputKey),
+		ProofCourierAddr: response.ProofCourierAddr,
+		MintTime:         utils.GetTimestamp(),
+		//deferred update
+		Outpoint: "",
+		Address:  "",
+	}
+	return &fairLaunchMintedInfo, nil
 }

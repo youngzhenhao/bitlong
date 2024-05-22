@@ -14,8 +14,13 @@ func setupFairLaunchRouter(router *gin.Engine) *gin.Engine {
 		fairLaunch.GET("/info/:id", handlers.GetFairLaunchInfo)
 		fairLaunch.GET("/minted/:id", handlers.GetMintedInfo)
 		fairLaunch.POST("/set", handlers.SetFairLaunchInfo)
-		// TODO: add query amount available
 		fairLaunch.POST("/mint", handlers.MintFairLaunch)
+
+		query := fairLaunch.Group("/query")
+		{
+			query.POST("/mint", handlers.QueryMintIsAvailable)
+		}
+
 	}
 	return router
 }

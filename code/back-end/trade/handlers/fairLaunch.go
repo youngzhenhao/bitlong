@@ -117,20 +117,33 @@ func SetFairLaunchInfo(c *gin.Context) {
 
 func MintFairLaunch(c *gin.Context) {
 	var fairLaunchMintedInfo *models.FairLaunchMintedInfo
-
 	// TODO: 0.Basic info and complete
-	fairLaunchMintedInfo = services.ProcessFairLaunchMintedInfo(fairLaunchMintedInfo)
-	// TODO: ShouldBind
-	err := c.ShouldBind(fairLaunchMintedInfo)
+	// TODO: Get an addr
+	idStr := c.PostForm("id")
+	//amount := c.PostForm("amount")
+	addr := c.PostForm("addr")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		utils.LogError("Wrong json to bind.", err)
+		utils.LogError("id is not valid int", err)
 		c.JSON(http.StatusOK, models.JsonResult{
 			Success: false,
-			Error:   "Wrong json to bind. " + err.Error(),
+			Error:   "id is not valid int. " + err.Error(),
 			Data:    "",
 		})
 		return
 	}
+	fairLaunchMintedInfo, _ = services.ProcessFairLaunchMintedInfo(id, addr)
+	// TODO: ShouldBind
+
+	//if err != nil {
+	//	utils.LogError("Wrong json to bind.", err)
+	//	c.JSON(http.StatusOK, models.JsonResult{
+	//		Success: false,
+	//		Error:   "Wrong json to bind. " + err.Error(),
+	//		Data:    "",
+	//	})
+	//	return
+	//}
 
 	// TODO: 1.Pay Fee
 	amount := fairLaunchMintedInfo.AddrAmount
@@ -183,4 +196,8 @@ func MintFairLaunch(c *gin.Context) {
 		Error:   "",
 		Data:    nil,
 	})
+}
+
+func QueryMintIsAvailable(c *gin.Context) {
+	// TODO: Check if a specific amount of minting asset is valid
 }

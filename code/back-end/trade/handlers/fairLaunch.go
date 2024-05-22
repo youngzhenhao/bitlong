@@ -87,7 +87,26 @@ func GetMintedInfo(c *gin.Context) {
 
 func SetFairLaunchInfo(c *gin.Context) {
 	var fairLaunchInfo models.FairLaunchInfo
+	_ = models.FairLaunchInfo{
+		Name:         "",
+		Amount:       0,
+		Reserved:     0,
+		MintQuantity: 0,
+		StartTime:    0,
+		EndTime:      0,
+		// add default
+		Status: 0,
+		// TODO： need to modify
+		ActualReserved:         0,
+		ReserveTotal:           0,
+		MintNumber:             0,
+		MintTotal:              0,
+		ActualMintTotalPercent: 0,
+		AssetID:                "",
+	}
+
 	// TODO: ShouldBind
+
 	err := c.ShouldBind(&fairLaunchInfo)
 	if err != nil {
 		utils.LogError("Wrong json to bind.", err)
@@ -117,10 +136,8 @@ func SetFairLaunchInfo(c *gin.Context) {
 
 func MintFairLaunch(c *gin.Context) {
 	var fairLaunchMintedInfo *models.FairLaunchMintedInfo
-	// TODO: 0.Basic info and complete
-	// TODO: Get an addr
+	// @dev: Get id and addr
 	idStr := c.PostForm("id")
-	//amount := c.PostForm("amount")
 	addr := c.PostForm("addr")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -133,8 +150,7 @@ func MintFairLaunch(c *gin.Context) {
 		return
 	}
 	fairLaunchMintedInfo, _ = services.ProcessFairLaunchMintedInfo(id, addr)
-	// TODO: ShouldBind
-
+	// @dev: ShouldBind
 	//if err != nil {
 	//	utils.LogError("Wrong json to bind.", err)
 	//	c.JSON(http.StatusOK, models.JsonResult{
@@ -144,7 +160,6 @@ func MintFairLaunch(c *gin.Context) {
 	//	})
 	//	return
 	//}
-
 	// TODO: 1.Pay Fee
 	amount := fairLaunchMintedInfo.AddrAmount
 	fee, err := services.CalculateFee(amount)

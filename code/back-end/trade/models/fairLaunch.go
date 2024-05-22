@@ -11,6 +11,12 @@ type FairLaunchInfo struct {
 	StartTime    int    `json:"start_time"`
 	EndTime      int    `json:"end_time"`
 	Status       int    `json:"status" gorm:"default:1"`
+	// calculate
+	ActualReserved         float64 `json:"actual_reserved"`
+	ReserveTotal           int     `json:"reserve_total"`
+	MintNumber             int     `json:"mint_number"`
+	MintTotal              int     `json:"mint_total"`
+	ActualMintTotalPercent float64 `json:"actual_mint_total_percent"`
 	//deferred update
 	AssetID string `json:"asset_id" gorm:"type:varchar(255)"`
 }

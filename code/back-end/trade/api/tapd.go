@@ -46,3 +46,11 @@ func SendAssetBool(assetId string, feeRate int) (bool, error) {
 	}
 	return true, nil
 }
+
+func DecodeAddr(addr string) string {
+	response, err := decodeAddr(addr)
+	if err != nil {
+		return utils.MakeJsonResult(false, err.Error(), "")
+	}
+	return utils.MakeJsonResult(true, "", response)
+}

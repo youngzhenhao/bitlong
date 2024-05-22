@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/lightninglabs/taproot-assets/taprpc"
 	"trade/models"
 	"trade/utils"
 )
@@ -53,4 +54,8 @@ func DecodeAddr(addr string) string {
 		return utils.MakeJsonResult(false, err.Error(), "")
 	}
 	return utils.MakeJsonResult(true, "", response)
+}
+
+func GetDecodedAddrInfo(addr string) (*taprpc.Addr, error) {
+	return decodeAddr(addr)
 }

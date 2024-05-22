@@ -1,10 +1,12 @@
 package services
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/lightninglabs/taproot-assets/taprpc"
+	"gorm.io/gorm"
 	"io"
 	"net/http"
 	"net/url"
@@ -120,8 +122,28 @@ func calculateAmount(id int, amount int) int {
 	return 0
 }
 
-func ProcessFairLaunchMintedInfo(fairLaunchMintedInfo *models.FairLaunchMintedInfo) *models.FairLaunchMintedInfo {
-	// TODO: need to complete
-	utils.LogInfo("ProcessFairLaunchMintedInfo triggered. This function did nothing, need to complete.")
-	return nil
+func ProcessFairLaunchMintedInfo(id int, addr string) (*models.FairLaunchMintedInfo, error) {
+	var fairLaunchMintedInfo models.FairLaunchMintedInfo
+	response, err := api.GetDecodedAddrInfo(addr)
+	if err != nil {
+		utils.LogError("Decoded Addr error.", err)
+		return nil, err
+	}
+	fairLaunchMintedInfo = models.FairLaunchMintedInfo{
+		Model:            gorm.Model{},
+		FairLaunchInfoID: id,
+		EncodedAddr:      addr,
+		AssetID:          hex.EncodeToString(response.AssetId),
+		AssetType:        response.AssetType.String(),
+		AddrAmount:       int(response.Amount),
+		ScriptKey:        hex.EncodeToString(response.ScriptKey),
+		InternalKey:      hex.EncodeToString(response.InternalKey),
+		TaprootOutputKey: hex.EncodeToString(response.TaprootOutputKey),
+		ProofCourierAddr: response.ProofCourierAddr,
+		MintTime:         utils.GetTimestamp(),
+		//deferred update
+		Outpoint: "",
+		Address:  "",
+	}
+	return &fairLaunchMintedInfo, nil
 }

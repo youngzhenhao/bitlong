@@ -196,3 +196,7 @@ func CreateFile(filePath, content string) bool {
 	LogInfo("Successes!")
 	return true
 }
+
+func GetTimestamp() int {
+	return int(time.Now().Unix())
+}

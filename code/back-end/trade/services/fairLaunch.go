@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"trade/api"
 	"trade/config"
 	"trade/middleware"
@@ -90,22 +91,20 @@ func GetAddr(id string, amt int) string {
 	return ""
 }
 
-// TODO: Need to test
-func PostPhoneToNewAddr(remotePort string, assetId string, amount string) *taprpc.Addr {
+func PostPhoneToNewAddr(remotePort string, assetId string, amount int) *taprpc.Addr {
 	frpsForwardSocket := fmt.Sprintf("%s:%s", config.GetLoadConfig().FrpsServer, remotePort)
-	targetUrl := "http://" + frpsForwardSocket + "/addInvoice"
-	payload := url.Values{"asset_id": {assetId}, "amount": {amount}}
+	targetUrl := "http://" + frpsForwardSocket + "/newAddr"
+	payload := url.Values{"asset_id": {assetId}, "amount": {strconv.Itoa(amount)}}
 	response, err := http.PostForm(targetUrl, payload)
 	if err != nil {
 		utils.LogError("http.PostForm.", err)
 		return nil
 	}
 	bodyBytes, _ := io.ReadAll(response.Body)
-
 	var addrResponse struct {
-		Success bool         `json:"success"`
-		Error   string       `json:"error"`
-		Data    *taprpc.Addr `json:"data"`
+		Success bool   `json:"success"`
+		Error   string `json:"error"`
+		Data    *taprpc.Addr
 	}
 	if err := json.Unmarshal(bodyBytes, &addrResponse); err != nil {
 		utils.LogError("PPTNA json.Unmarshal.", err)

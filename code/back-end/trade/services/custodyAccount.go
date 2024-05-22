@@ -12,7 +12,7 @@ import (
 	"trade/config"
 	"trade/middleware"
 	"trade/models"
-	"trade/services/rpc"
+	"trade/services/serbicesrpc"
 )
 
 const (
@@ -40,7 +40,7 @@ var mutex sync.Mutex
 // CreateCustodyAccount 创建托管账户并保持马卡龙文件
 func CreateCustodyAccount(user *models.User) (*litrpc.Account, error) {
 	//根据用户信息创建托管账户
-	account, macaroon, err := rpc.AccountCreate(0, 0)
+	account, macaroon, err := serbicesrpc.AccountCreate(0, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func CreateCustodyAccount(user *models.User) (*litrpc.Account, error) {
 // Update  托管账户充值
 func Update(id string, amount int64) error {
 	//更变托管账户余额
-	_, err := rpc.AccountUpdate(id, amount, -1)
+	_, err := serbicesrpc.AccountUpdate(id, amount, -1)
 	if err != nil {
 		return err
 	}
@@ -94,7 +94,7 @@ func Update(id string, amount int64) error {
 
 // QueryCustodyAccount  托管账户查询
 func QueryCustodyAccount(accountCode string) (*litrpc.Account, error) {
-	return rpc.AccountInfo(accountCode)
+	return serbicesrpc.AccountInfo(accountCode)
 }
 
 // DeleteCustodianAccount 托管账户删除
@@ -102,7 +102,7 @@ func DeleteCustodianAccount() error {
 	//TODO: 获取托管账户ID
 	id := "test"
 	//删除Lit节点托管账户
-	err := rpc.AccountRemove(id)
+	err := serbicesrpc.AccountRemove(id)
 	//TODO: 更新数据库相关信息
 
 	//TODO: 返回删除结果
@@ -125,7 +125,7 @@ func ApplyInvoice(user *models.User, account *models.Account, amount int64, memo
 		return nil, fmt.Errorf("macaroon file not found")
 	}
 	//调用Lit节点发票申请接口
-	invoice, err := rpc.InvoiceCreate(amount, memo, macaroonFile)
+	invoice, err := serbicesrpc.InvoiceCreate(amount, memo, macaroonFile)
 	//获取发票信息
 	info, _ := FindInvoice(invoice.RHash)
 
@@ -164,7 +164,7 @@ func PayInvoice(account *models.Account, invoice string, feeLimit int64) (*lnrpc
 		return nil, fmt.Errorf("macaroon file not found")
 	}
 
-	payment, err := rpc.InvoicePay(macaroonFile, invoice, feeLimit)
+	payment, err := serbicesrpc.InvoicePay(macaroonFile, invoice, feeLimit)
 	if err != nil {
 	}
 	var balanceModel models.Balance
@@ -190,17 +190,17 @@ func PayInvoice(account *models.Account, invoice string, feeLimit int64) (*lnrpc
 
 // DecodeInvoice  解析发票信息
 func DecodeInvoice(invoice string) (*lnrpc.PayReq, error) {
-	return rpc.InvoiceDecode(invoice)
+	return serbicesrpc.InvoiceDecode(invoice)
 }
 
 // FindInvoice 查询节点内部发票
 func FindInvoice(rHash []byte) (*lnrpc.Invoice, error) {
-	return rpc.InvoiceFind(rHash)
+	return serbicesrpc.InvoiceFind(rHash)
 }
 
 // TrackPayment 跟踪支付状态
 func TrackPayment(paymentHash string) (*lnrpc.Payment, error) {
-	return rpc.PaymentTrack(paymentHash)
+	return serbicesrpc.PaymentTrack(paymentHash)
 }
 
 // saveMacaroon 保存macaroon字节切片到指定文件

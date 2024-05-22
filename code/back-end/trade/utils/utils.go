@@ -124,10 +124,10 @@ func GetConn(grpcHost, tlsCertPath, macaroonPath string) (*grpc.ClientConn, func
 	)
 	if macaroonPath != "" {
 		macaroon := GetMacaroon(macaroonPath)
-		conn, err = grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		conn, err = grpc.NewClient(grpcHost, grpc.WithTransportCredentials(creds),
 			grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
 	} else {
-		conn, err = grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds))
+		conn, err = grpc.NewClient(grpcHost, grpc.WithTransportCredentials(creds))
 	}
 	if err != nil {
 		LogError("did not connect: grpc.Dial", err)

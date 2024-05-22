@@ -132,7 +132,7 @@ func MintFairLaunch(c *gin.Context) {
 	}
 
 	// TODO: 1.Pay Fee
-	amount := fairLaunchMintedInfo.Amount
+	amount := fairLaunchMintedInfo.AddrAmount
 	fee, err := services.CalculateFee(amount)
 	if err != nil {
 		utils.LogError("Calculate fee error", err)
@@ -144,7 +144,6 @@ func MintFairLaunch(c *gin.Context) {
 		return
 	}
 	limit := services.FeeLimit
-	// TODO: whether to use MustGet
 	username := c.MustGet("username").(string)
 	userId, err := services.NameToId(username)
 	if err != nil {

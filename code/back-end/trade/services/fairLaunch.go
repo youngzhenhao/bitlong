@@ -52,7 +52,7 @@ func FairLaunchMint(fairLaunchMintedInfo *models.FairLaunchMintedInfo) error {
 		return err
 	}
 	// TODO: 2.Calculate number of asset
-	amt := calculateAmount(int(fairLaunchInfo.ID), fairLaunchMintedInfo.Amount)
+	amt := calculateAmount(int(fairLaunchInfo.ID), fairLaunchMintedInfo.AddrAmount)
 	if amt == 0 {
 		err = errors.New("amount of asset to send is zero")
 		utils.LogError("", err)
@@ -74,6 +74,8 @@ func FairLaunchMint(fairLaunchMintedInfo *models.FairLaunchMintedInfo) error {
 		return err
 	}
 	// TODO: need to complete
+
+	// TODO: 5.Write to database of asset release
 
 	return nil
 }

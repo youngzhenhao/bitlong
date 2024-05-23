@@ -184,6 +184,17 @@ func SetFairLaunchInfo(c *gin.Context) {
 	}
 	// TODO: add judge logic
 
+	// TODO: add Pay release fee
+	err = services.PayReleaseFee()
+	if err != nil {
+		utils.LogError("Pay Release Fee.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Pay Release Fee. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
 	//assetTypeQuery, _ := api.QueryAssetType(assetType)
 	var isCollectible bool
 	if taprpc.AssetType(assetType) == taprpc.AssetType_COLLECTIBLE {
@@ -236,6 +247,7 @@ func SetFairLaunchInfo(c *gin.Context) {
 		})
 		return
 	}
+	// @dev: Process struct
 	fairLaunchInfo, err = services.ProcessFairLaunchInfo(imageData, name, assetType, amount, reserved, mintQuantity, startTime, endTime, description, batchKey, batchState, batchTxidAnchor, assetId, userId)
 	if err != nil {
 		utils.LogError("Process fair launch info.", err)
@@ -292,6 +304,7 @@ func SetFairLaunchInfo(c *gin.Context) {
 
 }
 
+// TODO: before this operation, user send request to check avaible amount and number of inventory and modify inverntory status
 func MintFairLaunch(c *gin.Context) {
 	var fairLaunchMintedInfo *models.FairLaunchMintedInfo
 	// @dev: Get id and addr
@@ -342,7 +355,8 @@ func MintFairLaunch(c *gin.Context) {
 		})
 		return
 	}
-	err = services.PayFee(fee, limit, userId)
+	// TODO: Pay mint fee
+	err = services.PayMintFee(fee, limit, userId)
 	if err != nil {
 		utils.LogError("Pay fee error", err)
 		c.JSON(http.StatusOK, models.JsonResult{

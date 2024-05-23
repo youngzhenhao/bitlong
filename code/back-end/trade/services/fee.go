@@ -12,8 +12,16 @@ func CalculateFee(amount int) (int, error) {
 	return 0, nil
 }
 
-func PayFee(fee int, limit int, userId int) error {
+// TODO: variables need to modify
+func PayMintFee(fee int, limit int, userId int) error {
 	// TODO: need to complete
-	utils.LogInfo("PayFee triggered. This function did nothing, need to complete.")
+	utils.LogInfo("PayMintFee triggered. This function did nothing, need to complete.")
+	return nil
+}
+
+// TODO: variables need to modify
+func PayReleaseFee() error {
+	// TODO: need to complete
+	utils.LogInfo("PayReleaseFee triggered. This function did nothing, need to complete.")
 	return nil
 }

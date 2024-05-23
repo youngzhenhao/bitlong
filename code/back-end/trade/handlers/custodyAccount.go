@@ -33,33 +33,6 @@ func CreateCustodyAccount(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"accountModel": cstAccount})
 }
 
-// UpdateCustodyAccount 更新托管账户余额
-func UpdateCustodyAccount(c *gin.Context) {
-
-	//TODO: 获取登录用户信息
-	userName := c.MustGet("username").(string)
-	user, err := services.ReadUserByUsername(userName)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户不存在"})
-		return
-	}
-	account, _ := services.ReadAccountByUserId(user.ID)
-
-	//TODO: 获取账户余额更新信息
-	_, err = services.QueryCustodyAccount(account.UserAccountCode)
-	amount := uint64(1)
-
-	//TODO: 更新托管账户余额
-	err = services.UpdateCustodyAccount(account, services.AWAY_IN, amount)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-		return
-	}
-	//TODO: 写入数据库
-
-	//TODO: 返回信息
-}
-
 // ApplyInvoiceCA CustodyAccount开具发票
 func ApplyInvoiceCA(c *gin.Context) {
 	// 获取登录用户信息
@@ -76,12 +49,15 @@ func ApplyInvoiceCA(c *gin.Context) {
 		return
 	}
 	if account.UserAccountCode == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "未找到账户信息"})
-		//TODO 为用户创建托管账户
-		return
+		// 为用户创建托管账户
+		account, err = services.CreateCustodyAccount(user)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "创建托管账户失败"})
+			return
+		}
 	}
 
-	//TODO: 判断申请金额是否超过通道余额,检查申请内容是否合法
+	// 判断申请金额是否超过通道余额,检查申请内容是否合法
 	apply := services.ApplyRequest{}
 	if err = c.ShouldBindJSON(&apply); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})

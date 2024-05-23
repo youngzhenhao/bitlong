@@ -90,5 +90,7 @@ func QueryConfigByKey(key string) (value string) {
 }
 
 func SetNetwork(network string) {
+	mu.Lock()
+	defer mu.Unlock()
 	NetWork = network
 }

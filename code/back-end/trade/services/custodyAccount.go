@@ -38,7 +38,7 @@ const (
 var mutex sync.Mutex
 
 // CreateCustodyAccount 创建托管账户并保持马卡龙文件
-func CreateCustodyAccount(user *models.User) (*litrpc.Account, error) {
+func CreateCustodyAccount(user *models.User) (*models.Account, error) {
 	//根据用户信息创建托管账户
 	account, macaroon, err := servicesrpc.AccountCreate(0, 0)
 	if err != nil {
@@ -81,7 +81,7 @@ func CreateCustodyAccount(user *models.User) (*litrpc.Account, error) {
 		return nil, err
 	}
 	//返回托管账户信息
-	return account, nil
+	return &accountModel, nil
 }
 
 // Update  托管账户更新

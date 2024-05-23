@@ -275,6 +275,7 @@ func CalculationExpressionBySeparateAmount(calculateSeparateAmount *CalculateSep
 }
 
 // TODO: update IsMinted and MintedID after fairLaunchMint
+
 func CreateInventoryInfoByFairLaunchInfo(fairLaunchInfo *models.FairLaunchInfo) error {
 	var FairLaunchInventoryInfos []models.FairLaunchInventoryInfo
 	items := fairLaunchInfo.MintNumber - 1
@@ -305,6 +306,7 @@ func CreateAssetReleaseInfoByFairLaunchInfo(fairLaunchInfo *models.FairLaunchInf
 }
 
 // TODO: Query all inventory by FairLaunchInfo id
+
 func GetAllInventoryInfoByFairLaunchInfoId(fairLaunchInfoId int) (*[]models.FairLaunchInventoryInfo, error) {
 	var fairLaunchInventoryInfos []models.FairLaunchInventoryInfo
 	err := middleware.DB.Where("fair_launch_info_id = ? AND status = ?", fairLaunchInfoId, 1).Find(&fairLaunchInventoryInfos).Error
@@ -360,6 +362,7 @@ func GetMintAmountByFairLaunchMintNumber(fairLaunchInfoId int, number int) (amou
 	return amount, err
 }
 
+// TODO: consider pay fee before change status to prevent user lock asset,or add unlock logic
 func CalculateMintAmountByMintNumberAndUpdateState(fairLaunchInfoId int, number int) (*[]models.FairLaunchInventoryInfo, error) {
 	if number <= 0 {
 		err := errors.New("mint number must be greater than zero")

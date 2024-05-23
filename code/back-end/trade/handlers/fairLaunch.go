@@ -185,7 +185,7 @@ func SetFairLaunchInfo(c *gin.Context) {
 	// TODO: add judge logic
 
 	// TODO: add Pay release fee
-	err = services.PayReleaseFee()
+	err = services.GetPayReleaseFeeState()
 	if err != nil {
 		utils.LogError("Pay Release Fee.", err)
 		c.JSON(http.StatusOK, models.JsonResult{
@@ -304,7 +304,8 @@ func SetFairLaunchInfo(c *gin.Context) {
 
 }
 
-// TODO: before this operation, user send request to check avaible amount and number of inventory and modify inverntory status
+// TODO: @Previous: before this operation, user send request to check avaible amount and number of inventory and modify inverntory status
+// TODO: User should payfee before these operation
 func MintFairLaunch(c *gin.Context) {
 	var fairLaunchMintedInfo *models.FairLaunchMintedInfo
 	// @dev: Get id and addr
@@ -356,7 +357,7 @@ func MintFairLaunch(c *gin.Context) {
 		return
 	}
 	// TODO: Pay mint fee
-	err = services.PayMintFee(fee, limit, userId)
+	err = services.GetPayMintFeeState(fee, limit, userId)
 	if err != nil {
 		utils.LogError("Pay fee error", err)
 		c.JSON(http.StatusOK, models.JsonResult{

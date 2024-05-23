@@ -110,3 +110,12 @@ func BatchTxidAnchorToAssetId(batchTxidAnchor string) (string, error) {
 	utils.LogError("", err)
 	return "", err
 }
+
+func QueryAssetType(assetType int) (string, error) {
+	if assetType == 0 {
+		return taprpc.AssetType_NORMAL.String(), nil
+	} else if assetType == 1 {
+		return taprpc.AssetType_COLLECTIBLE.String(), nil
+	}
+	return "", errors.New("not a valid asset type code")
+}

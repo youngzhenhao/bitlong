@@ -1,16 +1,20 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type FairLaunchInfo struct {
 	gorm.Model
+	ImageData              string  `json:"image_data"`
 	Name                   string  `json:"name" gorm:"type:varchar(255);not null"`
+	AssetType              int     `json:"asset_type"`
 	Amount                 int     `json:"amount"`
 	Reserved               int     `json:"reserved"`
 	MintQuantity           int     `json:"mint_quantity"`
 	StartTime              int     `json:"start_time"`
 	EndTime                int     `json:"end_time"`
-	Status                 int     `json:"status" default:"1" gorm:"default:1"`
+	Description            string  `json:"description"`
 	ActualReserved         float64 `json:"actual_reserved"`
 	ReserveTotal           int     `json:"reserve_total"`
 	MintNumber             int     `json:"mint_number"`
@@ -23,6 +27,11 @@ type FairLaunchInfo struct {
 	BatchState             string  `json:"batch_state" gorm:"type:varchar(255)"`
 	BatchTxidAnchor        string  `json:"batch_txid_anchor" gorm:"type:varchar(255)"`
 	AssetID                string  `json:"asset_id" gorm:"type:varchar(255)"`
+	UserID                 int     `json:"user_id"`
+	IsReservedSent         bool    `json:"is_reserved_sent"`
+	MintedNumber           int     `json:"minted_number"`
+	IsMintAll              bool    `json:"is_mint_all"`
+	Status                 int     `json:"status" default:"1" gorm:"default:1"`
 }
 
 type FairLaunchMintedInfo struct {

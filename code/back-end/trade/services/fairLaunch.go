@@ -160,7 +160,7 @@ func ProcessFairLaunchMintedInfo(id int, addr string) (*models.FairLaunchMintedI
 	return &fairLaunchMintedInfo, nil
 }
 
-func ProcessFairLaunchInfo(name string, amount int, reserved int, mintQuantity int, startTime int, endTime int) (*models.FairLaunchInfo, error) {
+func ProcessFairLaunchInfo(imageData string, name string, assetType int, amount int, reserved int, mintQuantity int, startTime int, endTime int, description string, batchKey string, batchState string, batchTxidAnchor string, assetId string, userId int) (*models.FairLaunchInfo, error) {
 	calculateSeparateAmount, err := AmountReservedAndMintQuantityToReservedTotalAndMintTotal(amount, reserved, mintQuantity)
 	if err != nil {
 		utils.LogError("Calculate separate amount", err)
@@ -168,13 +168,15 @@ func ProcessFairLaunchInfo(name string, amount int, reserved int, mintQuantity i
 	}
 	var fairLaunchInfo models.FairLaunchInfo
 	fairLaunchInfo = models.FairLaunchInfo{
-		Name:         name,
-		Amount:       amount,
-		Reserved:     reserved,
-		MintQuantity: mintQuantity,
-		StartTime:    startTime,
-		EndTime:      endTime,
-		//Status:                 0,
+		ImageData:              imageData,
+		Name:                   name,
+		AssetType:              assetType,
+		Amount:                 amount,
+		Reserved:               reserved,
+		MintQuantity:           mintQuantity,
+		StartTime:              startTime,
+		EndTime:                endTime,
+		Description:            description,
 		ActualReserved:         calculateSeparateAmount.ActualReserved,
 		ReserveTotal:           calculateSeparateAmount.ReserveTotal,
 		MintNumber:             calculateSeparateAmount.MintNumber,
@@ -183,7 +185,11 @@ func ProcessFairLaunchInfo(name string, amount int, reserved int, mintQuantity i
 		MintTotal:              calculateSeparateAmount.MintTotal,
 		ActualMintTotalPercent: calculateSeparateAmount.ActualMintTotalPercent,
 		CalculationExpression:  calculateSeparateAmount.CalculationExpression,
-		//AssetID:                "",
+		BatchKey:               batchKey,
+		BatchState:             batchState,
+		BatchTxidAnchor:        batchTxidAnchor,
+		AssetID:                assetId,
+		UserID:                 userId,
 	}
 	return &fairLaunchInfo, nil
 }
@@ -202,7 +208,6 @@ type CalculateSeparateAmount struct {
 	CalculationExpression  string
 }
 
-// TODO: need to add store db after this
 func AmountReservedAndMintQuantityToReservedTotalAndMintTotal(amount int, reserved int, mintQuantity int) (*CalculateSeparateAmount, error) {
 	if amount <= 0 || reserved <= 0 || mintQuantity <= 0 {
 		return nil, errors.New("amount reserved and mint amount must be greater than zero")
@@ -268,3 +273,8 @@ func CalculationExpressionBySeparateAmount(calculateSeparateAmount *CalculateSep
 	}
 	return "", errors.New("calculated result is not equal amount")
 }
+
+// TODO: update
+//		IsReservedSent
+//		MintedNumber
+//		Status

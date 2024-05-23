@@ -1,9 +1,13 @@
 package handlers
 
 import (
+	"encoding/hex"
+	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/lightninglabs/taproot-assets/taprpc"
 	"net/http"
 	"strconv"
+	"trade/api"
 	"trade/models"
 	"trade/services"
 	"trade/utils"
@@ -87,12 +91,37 @@ func GetMintedInfo(c *gin.Context) {
 
 func SetFairLaunchInfo(c *gin.Context) {
 	var fairLaunchInfo *models.FairLaunchInfo
+	imageData := c.PostForm("image_data")
 	name := c.PostForm("name")
+	assetTypeStr := c.PostForm("asset_type")
 	amountStr := c.PostForm("amount")
 	reservedStr := c.PostForm("reserved")
 	mintQuantityStr := c.PostForm("mint_quantity")
 	startTimeStr := c.PostForm("start_time")
 	endTimeStr := c.PostForm("end_time")
+	description := c.PostForm("description")
+	feeRateStr := c.PostForm("fee_rate")
+	username := c.MustGet("username").(string)
+	userId, err := services.NameToId(username)
+	if err != nil {
+		utils.LogError("Query user id by name.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Query user id by name." + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	assetType, err := strconv.Atoi(assetTypeStr)
+	if err != nil {
+		utils.LogError("strconv string to int.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "strconv string to int." + err.Error(),
+			Data:    "",
+		})
+		return
+	}
 	amount, err := strconv.Atoi(amountStr)
 	if err != nil {
 		utils.LogError("strconv string to int.", err)
@@ -143,7 +172,71 @@ func SetFairLaunchInfo(c *gin.Context) {
 		})
 		return
 	}
-	fairLaunchInfo, err = services.ProcessFairLaunchInfo(name, amount, reserved, mintQuantity, startTime, endTime)
+	feeRate, err := strconv.Atoi(feeRateStr)
+	if err != nil {
+		utils.LogError("strconv string to int.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "strconv string to int." + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	// TODO: add judge logic
+
+	//assetTypeQuery, _ := api.QueryAssetType(assetType)
+	var isCollectible bool
+	if taprpc.AssetType(assetType) == taprpc.AssetType_COLLECTIBLE {
+		isCollectible = true
+	}
+	newMeta := api.NewMeta(description, imageData)
+	mintResponse, err := api.MintAssetAndGetResponse(name, isCollectible, newMeta, amount, false)
+	if err != nil {
+		utils.LogError("Mint asset.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Mint asset." + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	batchKey := hex.EncodeToString(mintResponse.GetPendingBatch().GetBatchKey())
+	batchState := mintResponse.GetPendingBatch().GetState().String()
+	utils.LogInfos("Batch state:", batchState)
+	finalizeResponse, err := api.FinalizeBatchAndGetResponse(feeRate)
+	if err != nil {
+		utils.LogError("Finalize batch.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Finalize batch." + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	if hex.EncodeToString(finalizeResponse.GetBatch().GetBatchKey()) != batchKey {
+		err = errors.New("finalize batch key is not equal mint batch key")
+		utils.LogError("", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	batchTxidAnchor := finalizeResponse.GetBatch().GetBatchTxid()
+	batchState = finalizeResponse.GetBatch().GetState().String()
+	utils.LogInfos("Batch state:", batchState)
+	assetId, err := api.BatchTxidAnchorToAssetId(batchTxidAnchor)
+	if err != nil {
+		utils.LogError("Batch Anchor Txid To AssetId.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Batch Anchor Txid To AssetId." + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	fairLaunchInfo, err = services.ProcessFairLaunchInfo(imageData, name, assetType, amount, reserved, mintQuantity, startTime, endTime, description, batchKey, batchState, batchTxidAnchor, assetId, userId)
 	if err != nil {
 		utils.LogError("Process fair launch info.", err)
 		c.JSON(http.StatusOK, models.JsonResult{
@@ -154,12 +247,6 @@ func SetFairLaunchInfo(c *gin.Context) {
 		return
 	}
 	err = services.SetFairLaunch(fairLaunchInfo)
-	// TODO: get batch key
-	//	 TODO: update batch state
-	//  TODO: get batch txid
-
-	//  TODO:  Use BatchTxidAnchorToAssetId to update
-
 	if err != nil {
 		utils.LogError("Set fair launch error.", err)
 		c.JSON(http.StatusOK, models.JsonResult{
@@ -174,6 +261,7 @@ func SetFairLaunchInfo(c *gin.Context) {
 		Error:   "",
 		Data:    nil,
 	})
+	// TODO: update FairLaunchInfo later
 }
 
 func MintFairLaunch(c *gin.Context) {
@@ -257,4 +345,5 @@ func MintFairLaunch(c *gin.Context) {
 
 func QueryMintIsAvailable(c *gin.Context) {
 	// TODO: Check if a specific amount of minting asset is valid
+
 }

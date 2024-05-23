@@ -4,6 +4,12 @@ import (
 	"gorm.io/gorm"
 )
 
+var (
+	StatusNormal     = 1
+	StatusPending    = 2
+	StatusDeprecated = 0
+)
+
 type FairLaunchInfo struct {
 	gorm.Model
 	ImageData              string  `json:"image_data"`
@@ -48,12 +54,14 @@ type FairLaunchMintedInfo struct {
 	MintTime         int    `json:"mint_time"`
 	Outpoint         string `json:"outpoint" gorm:"type:varchar(255)"`
 	Address          string `json:"address" gorm:"type:varchar(255)"`
+	Status           int    `json:"status" gorm:"default:1"`
 }
 
 type FairLaunchInventoryInfo struct {
 	gorm.Model
-	FairLaunchInfoID int `json:"fair_launch_info_id" gorm:"not null"`
-	Quantity         int `json:"quantity"`
-	Status           int `json:"status" gorm:"default:1"`
-	MintedID         int `json:"minted_id"`
+	FairLaunchInfoID int  `json:"fair_launch_info_id" gorm:"not null"`
+	Quantity         int  `json:"quantity"`
+	IsMinted         bool `json:"is_minted"`
+	MintedID         int  `json:"minted_id"`
+	Status           int  `json:"status" gorm:"default:1"`
 }

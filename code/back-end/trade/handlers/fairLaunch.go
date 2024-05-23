@@ -202,7 +202,7 @@ func SetFairLaunchInfo(c *gin.Context) {
 	}
 	batchKey := hex.EncodeToString(mintResponse.GetPendingBatch().GetBatchKey())
 	batchState := mintResponse.GetPendingBatch().GetState().String()
-	utils.LogInfos("Batch state:", batchState)
+	//utils.LogInfos("Batch state:", batchState)
 	finalizeResponse, err := api.FinalizeBatchAndGetResponse(feeRate)
 	if err != nil {
 		utils.LogError("Finalize batch.", err)
@@ -225,7 +225,7 @@ func SetFairLaunchInfo(c *gin.Context) {
 	}
 	batchTxidAnchor := finalizeResponse.GetBatch().GetBatchTxid()
 	batchState = finalizeResponse.GetBatch().GetState().String()
-	utils.LogInfos("Batch state:", batchState)
+	//utils.LogInfos("Batch state:", batchState)
 	assetId, err := api.BatchTxidAnchorToAssetId(batchTxidAnchor)
 	if err != nil {
 		utils.LogError("Batch Anchor Txid To AssetId.", err)
@@ -246,6 +246,7 @@ func SetFairLaunchInfo(c *gin.Context) {
 		})
 		return
 	}
+	// @dev: Update dbs
 	err = services.SetFairLaunch(fairLaunchInfo)
 	if err != nil {
 		utils.LogError("Set fair launch error.", err)
@@ -256,12 +257,39 @@ func SetFairLaunchInfo(c *gin.Context) {
 		})
 		return
 	}
+	// @dev: update inventory
+	err = services.CreateInventoryInfoByFairLaunchInfo(fairLaunchInfo)
+	if err != nil {
+		utils.LogError("Create Inventory Info By FairLaunchInfo.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Create Inventory Info By FairLaunchInfo. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	// @dev: Update asset_releases
+	err = services.CreateAssetReleaseInfoByFairLaunchInfo(fairLaunchInfo)
+	if err != nil {
+		utils.LogError("Create Asset Release Info By FairLaunchInfo.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Create Asset Release Info By FairLaunchInfo. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
 	c.JSON(http.StatusOK, models.JsonResult{
 		Success: true,
 		Error:   "",
 		Data:    nil,
 	})
 	// TODO: update FairLaunchInfo later
+	// TODO: update
+	//		IsReservedSent
+	//		MintedNumber
+	//		Status
+
 }
 
 func MintFairLaunch(c *gin.Context) {

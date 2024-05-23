@@ -15,7 +15,7 @@ func setupFairLaunchRouter(router *gin.Engine) *gin.Engine {
 		fairLaunch.GET("/minted/:id", handlers.GetMintedInfo)
 		fairLaunch.POST("/set", handlers.SetFairLaunchInfo)
 		fairLaunch.POST("/mint", handlers.MintFairLaunch)
-
+		// TODO: add reserved sent, when userid same
 		query := fairLaunch.Group("/query")
 		{
 			query.POST("/mint", handlers.QueryMintIsAvailable)

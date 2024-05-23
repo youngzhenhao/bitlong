@@ -86,38 +86,80 @@ func GetMintedInfo(c *gin.Context) {
 }
 
 func SetFairLaunchInfo(c *gin.Context) {
-	var fairLaunchInfo models.FairLaunchInfo
-	_ = models.FairLaunchInfo{
-		Name:         "",
-		Amount:       0,
-		Reserved:     0,
-		MintQuantity: 0,
-		StartTime:    0,
-		EndTime:      0,
-		// add default
-		Status: 0,
-		// TODO： need to modify
-		ActualReserved:         0,
-		ReserveTotal:           0,
-		MintNumber:             0,
-		MintTotal:              0,
-		ActualMintTotalPercent: 0,
-		AssetID:                "",
-	}
-
-	// TODO: ShouldBind
-
-	err := c.ShouldBind(&fairLaunchInfo)
+	var fairLaunchInfo *models.FairLaunchInfo
+	name := c.PostForm("name")
+	amountStr := c.PostForm("amount")
+	reservedStr := c.PostForm("reserved")
+	mintQuantityStr := c.PostForm("mint_quantity")
+	startTimeStr := c.PostForm("start_time")
+	endTimeStr := c.PostForm("end_time")
+	amount, err := strconv.Atoi(amountStr)
 	if err != nil {
-		utils.LogError("Wrong json to bind.", err)
+		utils.LogError("strconv string to int.", err)
 		c.JSON(http.StatusOK, models.JsonResult{
 			Success: false,
-			Error:   "Wrong json to bind. " + err.Error(),
+			Error:   "strconv string to int." + err.Error(),
 			Data:    "",
 		})
 		return
 	}
-	err = services.SetFairLaunch(&fairLaunchInfo)
+	reserved, err := strconv.Atoi(reservedStr)
+	if err != nil {
+		utils.LogError("strconv string to int.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "strconv string to int." + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	mintQuantity, err := strconv.Atoi(mintQuantityStr)
+	if err != nil {
+		utils.LogError("strconv string to int.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "strconv string to int." + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	startTime, err := strconv.Atoi(startTimeStr)
+	if err != nil {
+		utils.LogError("strconv string to int.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "strconv string to int." + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	endTime, err := strconv.Atoi(endTimeStr)
+	if err != nil {
+		utils.LogError("strconv string to int.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "strconv string to int." + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	fairLaunchInfo, err = services.ProcessFairLaunchInfo(name, amount, reserved, mintQuantity, startTime, endTime)
+	if err != nil {
+		utils.LogError("Process fair launch info.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Process fair launch info." + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	err = services.SetFairLaunch(fairLaunchInfo)
+	// TODO: get batch key
+	//	 TODO: update batch state
+	//  TODO: get batch txid
+
+	//  TODO:  Use BatchTxidAnchorToAssetId to update
+
 	if err != nil {
 		utils.LogError("Set fair launch error.", err)
 		c.JSON(http.StatusOK, models.JsonResult{

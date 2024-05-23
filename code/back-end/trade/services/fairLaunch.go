@@ -8,8 +8,10 @@ import (
 	"github.com/lightninglabs/taproot-assets/taprpc"
 	"gorm.io/gorm"
 	"io"
+	"math"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strconv"
 	"trade/api"
 	"trade/config"
@@ -158,6 +160,34 @@ func ProcessFairLaunchMintedInfo(id int, addr string) (*models.FairLaunchMintedI
 	return &fairLaunchMintedInfo, nil
 }
 
+func ProcessFairLaunchInfo(name string, amount int, reserved int, mintQuantity int, startTime int, endTime int) (*models.FairLaunchInfo, error) {
+	calculateSeparateAmount, err := AmountReservedAndMintQuantityToReservedTotalAndMintTotal(amount, reserved, mintQuantity)
+	if err != nil {
+		utils.LogError("Calculate separate amount", err)
+		return nil, err
+	}
+	var fairLaunchInfo models.FairLaunchInfo
+	fairLaunchInfo = models.FairLaunchInfo{
+		Name:         name,
+		Amount:       amount,
+		Reserved:     reserved,
+		MintQuantity: mintQuantity,
+		StartTime:    startTime,
+		EndTime:      endTime,
+		//Status:                 0,
+		ActualReserved:         calculateSeparateAmount.ActualReserved,
+		ReserveTotal:           calculateSeparateAmount.ReserveTotal,
+		MintNumber:             calculateSeparateAmount.MintNumber,
+		IsFinalEnough:          calculateSeparateAmount.IsFinalEnough,
+		FinalQuantity:          calculateSeparateAmount.FinalQuantity,
+		MintTotal:              calculateSeparateAmount.MintTotal,
+		ActualMintTotalPercent: calculateSeparateAmount.ActualMintTotalPercent,
+		CalculationExpression:  calculateSeparateAmount.CalculationExpression,
+		//AssetID:                "",
+	}
+	return &fairLaunchInfo, nil
+}
+
 type CalculateSeparateAmount struct {
 	Amount                 int
 	Reserved               int
@@ -165,13 +195,14 @@ type CalculateSeparateAmount struct {
 	ReserveTotal           int
 	MintQuantity           int
 	MintNumber             int
+	IsFinalEnough          bool
+	FinalQuantity          int
 	MintTotal              int
 	ActualMintTotalPercent float64
+	CalculationExpression  string
 }
 
-// TODO: need to test
-// TODO: need to modify logic
-// TODO: / and %
+// TODO: need to add store db after this
 func AmountReservedAndMintQuantityToReservedTotalAndMintTotal(amount int, reserved int, mintQuantity int) (*CalculateSeparateAmount, error) {
 	if amount <= 0 || reserved <= 0 || mintQuantity <= 0 {
 		return nil, errors.New("amount reserved and mint amount must be greater than zero")
@@ -182,34 +213,58 @@ func AmountReservedAndMintQuantityToReservedTotalAndMintTotal(amount int, reserv
 	if amount <= mintQuantity {
 		return nil, errors.New("amount must be greater than mint quantity")
 	}
-	mintPercent := 100 - reserved
-	mintTotal := amount * mintPercent / 100
-	for mintTotal%mintQuantity != 0 {
-		mintTotal--
+	reservedTotal := int(math.Ceil(float64(amount) * float64(reserved) / 100))
+	mintTotal := amount - reservedTotal
+	remainder := mintTotal % mintQuantity
+	var finalQuantity int
+	var isFinalEnough bool
+	if remainder == 0 {
+		isFinalEnough = true
+		finalQuantity = mintQuantity
+	} else {
+		isFinalEnough = false
+		finalQuantity = remainder
 	}
 	if mintTotal <= 0 || mintTotal < mintQuantity {
 		return nil, errors.New("insufficient mint total amount")
 	}
-	ReservedTotal := amount - mintTotal
-	if ReservedTotal <= 0 {
+	reservedTotal = amount - mintTotal
+	if reservedTotal <= 0 {
 		return nil, errors.New("reserved amount is less equal than zero")
 	}
-	// mintTotal = mintQuantity * mintNumber
-	mintNumber := mintTotal / mintQuantity
+
+	mintNumber := int(math.Ceil(float64(mintTotal) / float64(mintQuantity)))
 	if mintNumber <= 0 {
 		return nil, errors.New("mint number is less equal than zero")
 	}
-	actualReserved := float64(ReservedTotal) * 100 / float64(amount)
-	actualReserved = utils.RoundToDecimalPlace(actualReserved, 2)
+	actualReserved := float64(reservedTotal) * 100 / float64(amount)
+	actualReserved = utils.RoundToDecimalPlace(actualReserved, 8)
+	actualMintTotalPercent := 100 - actualReserved
 	calculatedSeparateAmount := CalculateSeparateAmount{
 		Amount:                 amount,
 		Reserved:               reserved,
 		ActualReserved:         actualReserved,
-		ReserveTotal:           ReservedTotal,
+		ReserveTotal:           reservedTotal,
 		MintQuantity:           mintQuantity,
 		MintNumber:             mintNumber,
+		IsFinalEnough:          isFinalEnough,
+		FinalQuantity:          finalQuantity,
 		MintTotal:              mintTotal,
-		ActualMintTotalPercent: 100 - actualReserved,
+		ActualMintTotalPercent: actualMintTotalPercent,
+	}
+	var err error
+	calculatedSeparateAmount.CalculationExpression, err = CalculationExpressionBySeparateAmount(&calculatedSeparateAmount)
+	if err != nil {
+		utils.LogError("CalculationExpressionBySeparateAmount error.", err)
+		return nil, err
 	}
 	return &calculatedSeparateAmount, nil
+}
+
+func CalculationExpressionBySeparateAmount(calculateSeparateAmount *CalculateSeparateAmount) (string, error) {
+	calculated := calculateSeparateAmount.ReserveTotal + calculateSeparateAmount.MintQuantity*(calculateSeparateAmount.MintNumber-1) + calculateSeparateAmount.FinalQuantity
+	if reflect.DeepEqual(calculated, calculateSeparateAmount.Amount) {
+		return fmt.Sprintf("%d+%d*%d+%d=%d", calculateSeparateAmount.ReserveTotal, calculateSeparateAmount.MintQuantity, calculateSeparateAmount.MintNumber-1, calculateSeparateAmount.FinalQuantity, calculated), nil
+	}
+	return "", errors.New("calculated result is not equal amount")
 }

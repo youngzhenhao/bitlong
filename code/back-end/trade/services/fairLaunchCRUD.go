@@ -50,3 +50,28 @@ func (f *FairLaunchStore) DeleteFairLaunchMintedInfo(id uint) error {
 	var fairLaunchMintedInfo models.FairLaunchMintedInfo
 	return f.DB.Delete(&fairLaunchMintedInfo, id).Error
 }
+
+// FairLaunchInventoryInfo
+
+func (f *FairLaunchStore) CreateFairLaunchInventoryInfo(fairLaunchInventoryInfo *models.FairLaunchInventoryInfo) error {
+	return f.DB.Create(fairLaunchInventoryInfo).Error
+}
+
+func (f *FairLaunchStore) CreateFairLaunchInventoryInfos(fairLaunchInventoryInfos *[]models.FairLaunchInventoryInfo) error {
+	return f.DB.Create(fairLaunchInventoryInfos).Error
+}
+
+func (f *FairLaunchStore) ReadFairLaunchInventoryInfo(id uint) (*models.FairLaunchInventoryInfo, error) {
+	var fairLaunchInventoryInfo models.FairLaunchInventoryInfo
+	err := f.DB.First(&fairLaunchInventoryInfo, id).Error
+	return &fairLaunchInventoryInfo, err
+}
+
+func (f *FairLaunchStore) UpdateFairLaunchInventoryInfo(fairLaunchInventoryInfo *models.FairLaunchInventoryInfo) error {
+	return f.DB.Save(fairLaunchInventoryInfo).Error
+}
+
+func (f *FairLaunchStore) DeleteFairLaunchInventoryInfo(id uint) error {
+	var fairLaunchInventoryInfo models.FairLaunchInventoryInfo
+	return f.DB.Delete(&fairLaunchInventoryInfo, id).Error
+}

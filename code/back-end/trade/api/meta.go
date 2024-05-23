@@ -14,9 +14,10 @@ type Meta struct {
 	Image_Data  string `json:"image_data,omitempty"`
 }
 
-func NewMeta(description string) *Meta {
+func NewMeta(description string, imageData string) *Meta {
 	meta := Meta{
 		Description: description,
+		Image_Data:  imageData,
 	}
 	return &meta
 }

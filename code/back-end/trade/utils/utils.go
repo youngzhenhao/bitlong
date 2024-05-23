@@ -200,3 +200,19 @@ func CreateFile(filePath, content string) bool {
 func GetTimestamp() int {
 	return int(time.Now().Unix())
 }
+
+func Gcd(a, b int) int {
+	if b == 0 {
+		return a
+	}
+	return Gcd(b, a%b)
+}
+
+func ValueJsonString(value any) string {
+	resultJSON, err := json.MarshalIndent(value, "", "\t")
+	if err != nil {
+		LogError("MarshalIndent error", err)
+		return ""
+	}
+	return string(resultJSON)
+}

@@ -8,8 +8,10 @@ import (
 	"github.com/lightninglabs/taproot-assets/taprpc"
 	"gorm.io/gorm"
 	"io"
+	"math"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strconv"
 	"trade/api"
 	"trade/config"
@@ -49,23 +51,33 @@ func SetFairLaunch(fairLaunchInfo *models.FairLaunchInfo) error {
 
 // TODO: Need to test
 func FairLaunchMint(fairLaunchMintedInfo *models.FairLaunchMintedInfo) error {
-	// TODO: 1.Query info
+	// @dev: 1.Query info
+	// TODO: Use this fairLaunchInfo
 	fairLaunchInfo, err := GetFairLaunch(fairLaunchMintedInfo.FairLaunchInfoID)
 	if err != nil {
 		utils.LogError("Get fair launch by id of fairLaunchMintedInfo", err)
 		return err
 	}
-	// TODO: 2.Calculate number of asset
-	amt := calculateAmount(int(fairLaunchInfo.ID), fairLaunchMintedInfo.AddrAmount)
-	if amt == 0 {
-		err = errors.New("amount of asset to send is zero")
-		utils.LogError("", err)
-		return err
+	if fairLaunchInfo.Status != 1 {
+		utils.LogError("fair launch info status is 1.", err)
+		return errors.New("fair launch status is not valid")
 	}
-	// TODO: 3.Request an addr
-	addr := GetAddr(fairLaunchInfo.AssetID, amt)
-	// TODO: 4.Pay asset to addr
-	result, err := api.SendAssetBool(addr, 0)
+
+	//
+	//// TODO: 2.Calculate number of asset
+	//amt := calculateAmount(int(fairLaunchInfo.ID), fairLaunchMintedInfo.AddrAmount)
+	//if amt == 0 {
+	//	err = errors.New("amount of asset to send is zero")
+	//	utils.LogError("", err)
+	//	return err
+	//}
+	//// TODO: 3.Request an addr
+	//addr := GetAddr(fairLaunchInfo.AssetID, amt)
+	//
+
+	// @dev: 4.Pay asset to addr
+	// TODO: feeRate need to set
+	result, err := api.SendAssetBool(fairLaunchMintedInfo.EncodedAddr, 0)
 	if !result {
 		utils.LogError("Send asset error", err)
 		return err
@@ -114,7 +126,7 @@ func PostPhoneToNewAddr(remotePort string, assetId string, amount int) (*taprpc.
 	return addrResponse.Data, nil
 }
 
-func calculateAmount(id int, amount int) int {
+func CalculateAmount(id int, amount int) int {
 	// TODO: need to complete
 	// TODO: add number logic, or judge number when mint
 	// TODO: Verify amount is valid
@@ -147,3 +159,122 @@ func ProcessFairLaunchMintedInfo(id int, addr string) (*models.FairLaunchMintedI
 	}
 	return &fairLaunchMintedInfo, nil
 }
+
+func ProcessFairLaunchInfo(imageData string, name string, assetType int, amount int, reserved int, mintQuantity int, startTime int, endTime int, description string, batchKey string, batchState string, batchTxidAnchor string, assetId string, userId int) (*models.FairLaunchInfo, error) {
+	calculateSeparateAmount, err := AmountReservedAndMintQuantityToReservedTotalAndMintTotal(amount, reserved, mintQuantity)
+	if err != nil {
+		utils.LogError("Calculate separate amount", err)
+		return nil, err
+	}
+	var fairLaunchInfo models.FairLaunchInfo
+	fairLaunchInfo = models.FairLaunchInfo{
+		ImageData:              imageData,
+		Name:                   name,
+		AssetType:              assetType,
+		Amount:                 amount,
+		Reserved:               reserved,
+		MintQuantity:           mintQuantity,
+		StartTime:              startTime,
+		EndTime:                endTime,
+		Description:            description,
+		ActualReserved:         calculateSeparateAmount.ActualReserved,
+		ReserveTotal:           calculateSeparateAmount.ReserveTotal,
+		MintNumber:             calculateSeparateAmount.MintNumber,
+		IsFinalEnough:          calculateSeparateAmount.IsFinalEnough,
+		FinalQuantity:          calculateSeparateAmount.FinalQuantity,
+		MintTotal:              calculateSeparateAmount.MintTotal,
+		ActualMintTotalPercent: calculateSeparateAmount.ActualMintTotalPercent,
+		CalculationExpression:  calculateSeparateAmount.CalculationExpression,
+		BatchKey:               batchKey,
+		BatchState:             batchState,
+		BatchTxidAnchor:        batchTxidAnchor,
+		AssetID:                assetId,
+		UserID:                 userId,
+	}
+	return &fairLaunchInfo, nil
+}
+
+type CalculateSeparateAmount struct {
+	Amount                 int
+	Reserved               int
+	ActualReserved         float64
+	ReserveTotal           int
+	MintQuantity           int
+	MintNumber             int
+	IsFinalEnough          bool
+	FinalQuantity          int
+	MintTotal              int
+	ActualMintTotalPercent float64
+	CalculationExpression  string
+}
+
+func AmountReservedAndMintQuantityToReservedTotalAndMintTotal(amount int, reserved int, mintQuantity int) (*CalculateSeparateAmount, error) {
+	if amount <= 0 || reserved <= 0 || mintQuantity <= 0 {
+		return nil, errors.New("amount reserved and mint amount must be greater than zero")
+	}
+	if reserved > 99 {
+		return nil, errors.New("reserved amount must be less equal than 99")
+	}
+	if amount <= mintQuantity {
+		return nil, errors.New("amount must be greater than mint quantity")
+	}
+	reservedTotal := int(math.Ceil(float64(amount) * float64(reserved) / 100))
+	mintTotal := amount - reservedTotal
+	remainder := mintTotal % mintQuantity
+	var finalQuantity int
+	var isFinalEnough bool
+	if remainder == 0 {
+		isFinalEnough = true
+		finalQuantity = mintQuantity
+	} else {
+		isFinalEnough = false
+		finalQuantity = remainder
+	}
+	if mintTotal <= 0 || mintTotal < mintQuantity {
+		return nil, errors.New("insufficient mint total amount")
+	}
+	reservedTotal = amount - mintTotal
+	if reservedTotal <= 0 {
+		return nil, errors.New("reserved amount is less equal than zero")
+	}
+
+	mintNumber := int(math.Ceil(float64(mintTotal) / float64(mintQuantity)))
+	if mintNumber <= 0 {
+		return nil, errors.New("mint number is less equal than zero")
+	}
+	actualReserved := float64(reservedTotal) * 100 / float64(amount)
+	actualReserved = utils.RoundToDecimalPlace(actualReserved, 8)
+	actualMintTotalPercent := 100 - actualReserved
+	calculatedSeparateAmount := CalculateSeparateAmount{
+		Amount:                 amount,
+		Reserved:               reserved,
+		ActualReserved:         actualReserved,
+		ReserveTotal:           reservedTotal,
+		MintQuantity:           mintQuantity,
+		MintNumber:             mintNumber,
+		IsFinalEnough:          isFinalEnough,
+		FinalQuantity:          finalQuantity,
+		MintTotal:              mintTotal,
+		ActualMintTotalPercent: actualMintTotalPercent,
+	}
+	var err error
+	calculatedSeparateAmount.CalculationExpression, err = CalculationExpressionBySeparateAmount(&calculatedSeparateAmount)
+	if err != nil {
+		utils.LogError("CalculationExpressionBySeparateAmount error.", err)
+		return nil, err
+	}
+	return &calculatedSeparateAmount, nil
+}
+
+func CalculationExpressionBySeparateAmount(calculateSeparateAmount *CalculateSeparateAmount) (string, error) {
+	calculated := calculateSeparateAmount.ReserveTotal + calculateSeparateAmount.MintQuantity*(calculateSeparateAmount.MintNumber-1) + calculateSeparateAmount.FinalQuantity
+	if reflect.DeepEqual(calculated, calculateSeparateAmount.Amount) {
+		return fmt.Sprintf("%d+%d*%d+%d=%d", calculateSeparateAmount.ReserveTotal, calculateSeparateAmount.MintQuantity, calculateSeparateAmount.MintNumber-1, calculateSeparateAmount.FinalQuantity, calculated), nil
+	}
+	return "", errors.New("calculated result is not equal amount")
+}
+
+// TODO: update
+//		IsReservedSent
+//		MintedNumber
+//		Status

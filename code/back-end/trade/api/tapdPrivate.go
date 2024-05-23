@@ -90,7 +90,7 @@ func assetLeafIssuanceInfo(id string) *models.AssetIssuanceLeaf {
 	return processAssetIssuanceLeaf(response)
 }
 
-func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, assetMetaData string, AssetMetaTypeIsJsonNotOpaque bool, amount int, newGroupedAsset bool, groupedAsset bool, groupKey string, groupAnchor string, shortResponse bool) string {
+func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, assetMetaData string, AssetMetaTypeIsJsonNotOpaque bool, amount int, newGroupedAsset bool, groupedAsset bool, groupKey string, groupAnchor string, shortResponse bool) (*mintrpc.MintAssetResponse, error) {
 	grpcHost := config.GetLoadConfig().ApiConfig.Tapd.Host + ":" + strconv.Itoa(config.GetLoadConfig().ApiConfig.Tapd.Port)
 	tlsCertPath := config.GetLoadConfig().ApiConfig.Tapd.TlsCertPath
 	macaroonPath := config.GetLoadConfig().ApiConfig.Tapd.MacaroonPath
@@ -137,12 +137,12 @@ func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, 
 	response, err := client.MintAsset(context.Background(), request)
 	if err != nil {
 		utils.LogError("mintrpc MintAsset Error", err)
-		return utils.MakeJsonResult(false, err.Error(), nil)
+		return nil, err
 	}
-	return utils.MakeJsonResult(true, "", response)
+	return response, nil
 }
 
-func finalizeBatch(shortResponse bool, feeRate int) string {
+func finalizeBatch(shortResponse bool, feeRate int) (*mintrpc.FinalizeBatchResponse, error) {
 	grpcHost := config.GetLoadConfig().ApiConfig.Tapd.Host + ":" + strconv.Itoa(config.GetLoadConfig().ApiConfig.Tapd.Port)
 	tlsCertPath := config.GetLoadConfig().ApiConfig.Tapd.TlsCertPath
 	macaroonPath := config.GetLoadConfig().ApiConfig.Tapd.MacaroonPath
@@ -156,9 +156,9 @@ func finalizeBatch(shortResponse bool, feeRate int) string {
 	response, err := client.FinalizeBatch(context.Background(), request)
 	if err != nil {
 		utils.LogError("mintrpc FinalizeBatch Error", err)
-		return utils.MakeJsonResult(false, err.Error(), nil)
+		return nil, err
 	}
-	return utils.MakeJsonResult(true, "", response)
+	return response, nil
 }
 
 func fetchAssetMeta(isHash bool, data string) (*taprpc.AssetMeta, error) {
@@ -238,4 +238,20 @@ func decodeAddr(addr string) (*taprpc.Addr, error) {
 		return nil, err
 	}
 	return response, nil
+}
+
+func listAssets(withWitness, includeSpent, includeLeased bool) (*taprpc.ListAssetResponse, error) {
+	grpcHost := config.GetLoadConfig().ApiConfig.Tapd.Host + ":" + strconv.Itoa(config.GetLoadConfig().ApiConfig.Tapd.Port)
+	tlsCertPath := config.GetLoadConfig().ApiConfig.Tapd.TlsCertPath
+	macaroonPath := config.GetLoadConfig().ApiConfig.Tapd.MacaroonPath
+	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
+	defer connClose()
+	client := taprpc.NewTaprootAssetsClient(conn)
+	request := &taprpc.ListAssetRequest{
+		WithWitness:   withWitness,
+		IncludeSpent:  includeSpent,
+		IncludeLeased: includeLeased,
+	}
+	response, err := client.ListAssets(context.Background(), request)
+	return response, err
 }

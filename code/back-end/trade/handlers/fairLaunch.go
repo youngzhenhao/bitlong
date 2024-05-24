@@ -104,7 +104,7 @@ func SetFairLaunchInfo(c *gin.Context) {
 	description := c.PostForm("description")
 	feeRateStr := c.PostForm("fee_rate")
 	username := c.MustGet("username").(string)
-	releaseFeeInvoice := c.PostForm("release_fee_invoice")
+	issuanceFeeInvoice := c.PostForm("issuance_fee_invoice")
 	userId, err := services.NameToId(username)
 	if err != nil {
 		utils.LogError("Query user id by name.", err)
@@ -187,10 +187,10 @@ func SetFairLaunchInfo(c *gin.Context) {
 	}
 	// TODO: add judge logic
 
-	// TODO: check release fee paid
-	isReleaseFeePaid := services.IsReleaseFeePaid(releaseFeeInvoice)
-	if !isReleaseFeePaid {
-		err = errors.New("release fee did not been paid")
+	// TODO: check issuance fee paid
+	isIssuanceFeePaid := services.IsIssuanceFeePaid(issuanceFeeInvoice)
+	if !isIssuanceFeePaid {
+		err = errors.New("Issuance fee did not been paid")
 		utils.LogError("", err)
 		c.JSON(http.StatusOK, models.JsonResult{
 			Success: false,
@@ -252,7 +252,7 @@ func SetFairLaunchInfo(c *gin.Context) {
 		return
 	}
 	// @dev: Process struct
-	fairLaunchInfo, err = services.ProcessFairLaunchInfo(imageData, name, assetType, amount, reserved, mintQuantity, startTime, endTime, description, batchKey, batchState, batchTxidAnchor, assetId, userId, releaseFeeInvoice)
+	fairLaunchInfo, err = services.ProcessFairLaunchInfo(imageData, name, assetType, amount, reserved, mintQuantity, startTime, endTime, description, batchKey, batchState, batchTxidAnchor, assetId, userId, issuanceFeeInvoice)
 	if err != nil {
 		utils.LogError("Process fair launch info.", err)
 		c.JSON(http.StatusOK, models.JsonResult{
@@ -284,8 +284,8 @@ func SetFairLaunchInfo(c *gin.Context) {
 		})
 		return
 	}
-	// @dev: Update asset_releases
-	err = services.CreateAssetReleaseInfoByFairLaunchInfo(fairLaunchInfo)
+	// @dev: Update asset_issuances
+	err = services.CreateAssetIssuanceInfoByFairLaunchInfo(fairLaunchInfo)
 	if err != nil {
 		utils.LogError("Create Asset Release Info By FairLaunchInfo.", err)
 		c.JSON(http.StatusOK, models.JsonResult{

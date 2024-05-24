@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"log"
 	"os"
 )
@@ -25,27 +26,31 @@ func NewLogger(logName string, level LogLevel) *ServicesLogger {
 		level:  level}
 }
 
-func (ml *ServicesLogger) Debug(message string) {
+func (ml *ServicesLogger) Debug(message string, v ...interface{}) {
 	if ml.level >= DEBUG {
-		ml.logger.Printf("[Debug]: %s\n", message)
+		msg := fmt.Sprintf(message, v...)
+		ml.logger.Printf("[Debug]: %s\n", msg)
 	}
 }
 
-func (ml *ServicesLogger) Info(message string) {
+func (ml *ServicesLogger) Info(message string, v ...interface{}) {
 	if ml.level >= INFO {
-		ml.logger.Printf("[Log]: %s\n", message)
+		msg := fmt.Sprintf(message, v...)
+		ml.logger.Printf("[Log]: %s\n", msg)
 	}
 }
 
-func (ml *ServicesLogger) Warning(message string) {
+func (ml *ServicesLogger) Warning(message string, v ...interface{}) {
 	if ml.level >= WARNING {
-		ml.logger.Printf("[Warning]: %s\n", message)
+		msg := fmt.Sprintf(message, v...)
+		ml.logger.Printf("[Warning]: %s\n", msg)
 	}
 }
 
-func (ml *ServicesLogger) Error(message string) {
+func (ml *ServicesLogger) Error(message string, v ...interface{}) {
 	if ml.level >= ERROR {
-		ml.logger.Printf("[Error]: %s\n", message)
+		msg := fmt.Sprintf(message, v...)
+		ml.logger.Printf("[Error]: %s\n", msg)
 	}
 }
 

@@ -10,11 +10,42 @@ import (
 	"google.golang.org/grpc"
 	"path/filepath"
 	"strconv"
-	"strings"
 )
 
-func AddrReceives() {
+func AddrReceives() string {
+	response, err := addrReceives()
+	if err != nil {
+		return MakeJsonResult(false, err.Error(), nil)
+	}
+	return MakeJsonResult(true, "", response)
+}
 
+func addrReceives() (*taprpc.AddrReceivesResponse, error) {
+	grpcHost := base.QueryConfigByKey("taproothost")
+	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
+	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+	if err != nil {
+		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
+		}
+	}(conn)
+	client := taprpc.NewTaprootAssetsClient(conn)
+	request := &taprpc.AddrReceivesRequest{}
+	response, err := client.AddrReceives(context.Background(), request)
+	if err != nil {
+		fmt.Printf("%s taprpc DebugLevel Error: %v\n", GetTimeNow(), err)
+		return nil, err
+	}
+	return response, nil
 }
 
 func BurnAsset() {
@@ -340,12 +371,27 @@ func QueryAddrs() {
 
 }
 
+// jsonAddrs : ["addrs1","addrs2",...]
+func SendAssets(jsonAddrs string, feeRate int64) string {
+	var addrs []string
+	err := json.Unmarshal([]byte(jsonAddrs), &addrs)
+	if err != nil {
+		fmt.Printf("%s json.Unmarshal Error: %v\n", GetTimeNow(), err)
+		return MakeJsonResult(false, "Please use the correct json format", "")
+	}
+	response, err := sendAssets(addrs, uint32(feeRate))
+	if err != nil {
+		return MakeJsonResult(false, err.Error(), "")
+	}
+	return MakeJsonResult(true, "", response)
+}
+
 // SendAsset
 // @Description:SendAsset uses one or multiple passed Taproot Asset address(es) to attempt to complete an asset send.
 // The method returns information w.r.t the on chain send, as well as the proof file information the receiver needs to fully receive the asset.
 // @return string
 // skipped function SendAsset with unsupported parameter or return types
-func SendAsset(tapAddrs string, feeRate int) string {
+func sendAssets(addrs []string, feeRate uint32) (*taprpc.SendAssetResponse, error) {
 	grpcHost := base.QueryConfigByKey("taproothost")
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
@@ -364,17 +410,19 @@ func SendAsset(tapAddrs string, feeRate int) string {
 		}
 	}(conn)
 	client := taprpc.NewTaprootAssetsClient(conn)
-	addrs := strings.Split(tapAddrs, ",")
+
 	request := &taprpc.SendAssetRequest{
 		TapAddrs: addrs,
-		FeeRate:  uint32(feeRate),
+	}
+	if feeRate > 0 {
+		request.FeeRate = feeRate
 	}
 	response, err := client.SendAsset(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s taprpc SendAsset Error: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, err.Error(), "")
+		return nil, err
 	}
-	return MakeJsonResult(true, "", response)
+	return response, nil
 }
 
 func SubscribeReceiveAssetEventNtfns() {

@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/wallet/base"
@@ -75,7 +76,7 @@ func getInfoOfLnd() (*lnrpc.GetInfoResponse, error) {
 	return response, err
 }
 
-func sendCoins(addr string, amount int64, all bool) (*lnrpc.SendCoinsResponse, error) {
+func sendCoins(addr string, amount int64, feeRate uint64, all bool) (*lnrpc.SendCoinsResponse, error) {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
@@ -96,9 +97,15 @@ func sendCoins(addr string, amount int64, all bool) (*lnrpc.SendCoinsResponse, e
 
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.SendCoinsRequest{
-		Addr:    addr,
-		Amount:  amount,
-		SendAll: all,
+		Addr: addr,
+	}
+	if feeRate > 0 {
+		request.SatPerVbyte = feeRate
+	}
+	if all {
+		request.SendAll = true
+	} else {
+		request.Amount = amount
 	}
 	response, err := client.SendCoins(context.Background(), request)
 	return response, err
@@ -1442,16 +1449,64 @@ func SendPaymentSync0amt(invoice string, amt int64) string {
 //	@Description: SendCoins executes a request to send coins to a particular address. Unlike SendMany, this RPC call only allows creating a single output at a time.
 //	If neither target_conf, or sat_per_vbyte are set, then the internal wallet will consult its fee model to determine a fee for the default confirmation target.
 //	@return string
-func SendCoins(addr string, amount int64) string {
-	response, err := sendCoins(addr, amount, false)
+func SendCoins(addr string, amount int64, feeRate int64, sendAll bool) string {
+	response, err := sendCoins(addr, amount, uint64(feeRate), sendAll)
 	if err != nil {
 		return MakeJsonResult(false, err.Error(), nil)
 	}
 	return MakeJsonResult(true, "", response)
 }
 
+// jsonaddr :{"bcrt1pq83tk5uu0lpwk2gd7f736ttrmexed8xazfz3jmwj0ml26cwyurast4xk3w":1111,"bcrt1pra9w5dphnx75n0pjzcxlc5e8k9vg9sdupttyr36prn2t6ullr9eq0utvac":2222}
+func SendMany(jsonAddr string, feeRate int64) string {
+	addr := make(map[string]int64)
+	err := json.Unmarshal([]byte(jsonAddr), &addr)
+	if err != nil {
+		return MakeJsonResult(false, "Please use the correct json format", nil)
+	}
+	response, err := sendMany(addr, uint64(feeRate))
+	if err != nil {
+		return MakeJsonResult(false, err.Error(), nil)
+	}
+	return MakeJsonResult(true, "", response)
+}
+
+func sendMany(addr map[string]int64, feerate uint64) (*lnrpc.SendManyResponse, error) {
+	grpcHost := base.QueryConfigByKey("lndhost")
+	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
+	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
+	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
+	creds := NewTlsCert(tlsCertPath)
+	macaroon := GetMacaroon(macaroonPath)
+	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+	if err != nil {
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
+	}
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
+		}
+	}(conn)
+
+	client := lnrpc.NewLightningClient(conn)
+	request := &lnrpc.SendManyRequest{
+		AddrToAmount: addr,
+	}
+	if feerate > 0 {
+		request.SatPerVbyte = feerate
+	}
+	response, err := client.SendMany(context.Background(), request)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+// Deprecated: Please Use SendCoins
 func SendAllCoins(addr string) string {
-	response, err := sendCoins(addr, 0, true)
+	response, err := sendCoins(addr, 0, 0, true)
 	if err != nil {
 		return MakeJsonResult(false, err.Error(), nil)
 	}

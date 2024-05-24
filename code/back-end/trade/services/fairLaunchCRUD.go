@@ -75,3 +75,24 @@ func (f *FairLaunchStore) DeleteFairLaunchInventoryInfo(id uint) error {
 	var fairLaunchInventoryInfo models.FairLaunchInventoryInfo
 	return f.DB.Delete(&fairLaunchInventoryInfo, id).Error
 }
+
+// FairLaunchMintedUserInfo
+
+func (f *FairLaunchStore) CreateFairLaunchMintedUserInfo(fairLaunchMintedUserInfo *models.FairLaunchMintedUserInfo) error {
+	return f.DB.Create(fairLaunchMintedUserInfo).Error
+}
+
+func (f *FairLaunchStore) ReadFairLaunchMintedUserInfo(id uint) (*models.FairLaunchMintedUserInfo, error) {
+	var fairLaunchMintedUserInfo models.FairLaunchMintedUserInfo
+	err := f.DB.First(&fairLaunchMintedUserInfo, id).Error
+	return &fairLaunchMintedUserInfo, err
+}
+
+func (f *FairLaunchStore) UpdateFairLaunchMintedUserInfo(fairLaunchMintedUserInfo *models.FairLaunchMintedUserInfo) error {
+	return f.DB.Save(fairLaunchMintedUserInfo).Error
+}
+
+func (f *FairLaunchStore) DeleteFairLaunchMintedUserInfo(id uint) error {
+	var fairLaunchMintedUserInfo models.FairLaunchMintedUserInfo
+	return f.DB.Delete(&fairLaunchMintedUserInfo, id).Error
+}

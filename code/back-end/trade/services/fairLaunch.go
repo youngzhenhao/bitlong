@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"reflect"
 	"strconv"
+	"time"
 	"trade/api"
 	"trade/config"
 	"trade/middleware"
@@ -134,7 +135,7 @@ func CalculateAmount(id int, amount int) int {
 	return 0
 }
 
-func ProcessFairLaunchMintedInfo(id int, addr string) (*models.FairLaunchMintedInfo, error) {
+func ProcessFairLaunchMintedInfo(fairLaunchInfoID int, addr string, mintFeeInvoice string) (*models.FairLaunchMintedInfo, error) {
 	var fairLaunchMintedInfo models.FairLaunchMintedInfo
 	response, err := api.GetDecodedAddrInfo(addr)
 	if err != nil {
@@ -143,8 +144,9 @@ func ProcessFairLaunchMintedInfo(id int, addr string) (*models.FairLaunchMintedI
 	}
 	fairLaunchMintedInfo = models.FairLaunchMintedInfo{
 		Model:            gorm.Model{},
-		FairLaunchInfoID: id,
+		FairLaunchInfoID: fairLaunchInfoID,
 		EncodedAddr:      addr,
+		MintFeeInvoice:   mintFeeInvoice,
 		AssetID:          hex.EncodeToString(response.AssetId),
 		AssetType:        response.AssetType.String(),
 		AddrAmount:       int(response.Amount),
@@ -153,14 +155,14 @@ func ProcessFairLaunchMintedInfo(id int, addr string) (*models.FairLaunchMintedI
 		TaprootOutputKey: hex.EncodeToString(response.TaprootOutputKey),
 		ProofCourierAddr: response.ProofCourierAddr,
 		MintTime:         utils.GetTimestamp(),
-		//deferred update
-		Outpoint: "",
-		Address:  "",
+		// TODO: update
+		//		Outpoint
+		//		Address
 	}
 	return &fairLaunchMintedInfo, nil
 }
 
-func ProcessFairLaunchInfo(imageData string, name string, assetType int, amount int, reserved int, mintQuantity int, startTime int, endTime int, description string, batchKey string, batchState string, batchTxidAnchor string, assetId string, userId int) (*models.FairLaunchInfo, error) {
+func ProcessFairLaunchInfo(imageData string, name string, assetType int, amount int, reserved int, mintQuantity int, startTime int, endTime int, description string, batchKey string, batchState string, batchTxidAnchor string, assetId string, userId int, issuanceFeeInvoice string) (*models.FairLaunchInfo, error) {
 	calculateSeparateAmount, err := AmountReservedAndMintQuantityToReservedTotalAndMintTotal(amount, reserved, mintQuantity)
 	if err != nil {
 		utils.LogError("Calculate separate amount", err)
@@ -190,6 +192,8 @@ func ProcessFairLaunchInfo(imageData string, name string, assetType int, amount 
 		BatchTxidAnchor:        batchTxidAnchor,
 		AssetID:                assetId,
 		UserID:                 userId,
+		IssuanceFeeInvoice:     issuanceFeeInvoice,
+		Status:                 0,
 	}
 	return &fairLaunchInfo, nil
 }
@@ -293,16 +297,16 @@ func CreateInventoryInfoByFairLaunchInfo(fairLaunchInfo *models.FairLaunchInfo) 
 	return f.CreateFairLaunchInventoryInfos(&FairLaunchInventoryInfos)
 }
 
-func CreateAssetReleaseInfoByFairLaunchInfo(fairLaunchInfo *models.FairLaunchInfo) error {
-	assetRelease := models.AssetRelease{
-		AssetName:     fairLaunchInfo.Name,
-		AssetId:       fairLaunchInfo.AssetID,
-		AssetType:     fairLaunchInfo.AssetType,
-		ReleaseUserId: fairLaunchInfo.UserID,
-		ReleaseTime:   utils.GetTimestamp(),
+func CreateAssetIssuanceInfoByFairLaunchInfo(fairLaunchInfo *models.FairLaunchInfo) error {
+	assetIssuance := models.AssetIssuance{
+		AssetName:      fairLaunchInfo.Name,
+		AssetId:        fairLaunchInfo.AssetID,
+		AssetType:      fairLaunchInfo.AssetType,
+		IssuanceUserId: fairLaunchInfo.UserID,
+		IssuanceTime:   utils.GetTimestamp(),
 	}
-	a := AssetReleaseStore{DB: middleware.DB}
-	return a.CreateAssetRelease(&assetRelease)
+	a := AssetIssuanceStore{DB: middleware.DB}
+	return a.CreateAssetIssuance(&assetIssuance)
 }
 
 // TODO: Query all inventory by FairLaunchInfo id
@@ -362,6 +366,7 @@ func GetMintAmountByFairLaunchMintNumber(fairLaunchInfoId int, number int) (amou
 	return amount, err
 }
 
+// @previous
 // TODO: consider pay fee before change status to prevent user lock asset,or add unlock logic
 func CalculateMintAmountByMintNumberAndUpdateState(fairLaunchInfoId int, number int) (*[]models.FairLaunchInventoryInfo, error) {
 	if number <= 0 {
@@ -392,6 +397,17 @@ func CalculateMintAmountByMintNumberAndUpdateState(fairLaunchInfoId int, number 
 	return &mintInventoryInfos, err
 }
 
+// IsDuringMintTime
+// @dev: timestamp now is between start and end
+func IsDuringMintTime(start int, end int) bool {
+	now := int(time.Now().Unix())
+	return now >= start && now < end
+}
+
+func AmountAndQuantityToNumber(amount int, quantity int) int {
+	return int(math.Ceil(float64(amount) / float64(quantity)))
+}
+
 // TODO: update fairLaunchInventoryInfos which could be mint, set status to 2, set is_minted and minted_id after mint
 
 // TODO: check mint is valid, query inventory db
@@ -400,3 +416,8 @@ func CalculateMintAmountByMintNumberAndUpdateState(fairLaunchInfoId int, number 
 //		IsReservedSent
 //		MintedNumber
 //		Status
+
+func FairLaunchIssuance() {
+	// TODO: need to complete
+
+}

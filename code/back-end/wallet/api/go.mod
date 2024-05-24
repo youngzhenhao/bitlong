@@ -247,7 +247,7 @@ require (
 	go.uber.org/zap v1.23.0 // indirect
 	golang.org/x/arch v0.7.0 // indirect
 	golang.org/x/crypto v0.23.0 // indirect
-	golang.org/x/mobile v0.0.0-20240506190922-a1a533f289d3 // indirect
+	golang.org/x/mobile v0.0.0-20240520174638-fa72addaaa1b // indirect
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/oauth2 v0.17.0 // indirect

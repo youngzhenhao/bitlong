@@ -33,6 +33,14 @@ func GetNPublicKey() string {
 	}
 	return nPub
 }
+func GetJsonPublicKey() string {
+	keyInfo, err := service.GetJsonPublicKey()
+	if err != nil {
+		fmt.Printf("GetNPublicKey->errl1:%x", err)
+		return ""
+	}
+	return keyInfo
+}
 
 func SignMess(message string) string {
 	sign, err := service.SignMessage(message)

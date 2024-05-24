@@ -19,6 +19,11 @@ const (
 	keyId = "keyInfoId"
 )
 
+type PkInfo struct {
+	Pubkey  string `json:"pubkey"`
+	NpubKey string `json:"npubKey"`
+}
+
 func GenerateKeys(mnemonic, passphrase string) (string, error) {
 	retrievedKey, err := readDb()
 	if err != nil {
@@ -175,4 +180,26 @@ func GetPublicKey() (string, string, error) {
 		return "", "", err
 	}
 	return publicKeyHex, address, nil
+}
+
+func GetJsonPublicKey() (string, error) {
+	var pkInfo PkInfo
+	retrievedKey, err := readDb()
+	if err != nil {
+		fmt.Printf("err is :%v\n", err)
+		return "", err
+	}
+	publicKeyHex := fmt.Sprintf("%064X", retrievedKey.PublicKey)
+	fmt.Println("publicKeyHex", publicKeyHex)
+	address, err := getNoStrAddress(publicKeyHex)
+	if err != nil {
+		return "", err
+	}
+	pkInfo.Pubkey = publicKeyHex
+	pkInfo.NpubKey = address
+	marshal, err := json.Marshal(pkInfo)
+	if err != nil {
+		return "", err
+	}
+	return string(marshal), nil
 }

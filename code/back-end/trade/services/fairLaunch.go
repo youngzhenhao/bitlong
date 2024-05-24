@@ -162,7 +162,7 @@ func ProcessFairLaunchMintedInfo(fairLaunchInfoID int, addr string, mintFeeInvoi
 	return &fairLaunchMintedInfo, nil
 }
 
-func ProcessFairLaunchInfo(imageData string, name string, assetType int, amount int, reserved int, mintQuantity int, startTime int, endTime int, description string, batchKey string, batchState string, batchTxidAnchor string, assetId string, userId int, releaseFeeInvoice string) (*models.FairLaunchInfo, error) {
+func ProcessFairLaunchInfo(imageData string, name string, assetType int, amount int, reserved int, mintQuantity int, startTime int, endTime int, description string, feeRate int, userId int) (*models.FairLaunchInfo, error) {
 	calculateSeparateAmount, err := AmountReservedAndMintQuantityToReservedTotalAndMintTotal(amount, reserved, mintQuantity)
 	if err != nil {
 		utils.LogError("Calculate separate amount", err)
@@ -179,6 +179,7 @@ func ProcessFairLaunchInfo(imageData string, name string, assetType int, amount 
 		StartTime:              startTime,
 		EndTime:                endTime,
 		Description:            description,
+		FeeRate:                feeRate,
 		ActualReserved:         calculateSeparateAmount.ActualReserved,
 		ReserveTotal:           calculateSeparateAmount.ReserveTotal,
 		MintNumber:             calculateSeparateAmount.MintNumber,
@@ -187,12 +188,8 @@ func ProcessFairLaunchInfo(imageData string, name string, assetType int, amount 
 		MintTotal:              calculateSeparateAmount.MintTotal,
 		ActualMintTotalPercent: calculateSeparateAmount.ActualMintTotalPercent,
 		CalculationExpression:  calculateSeparateAmount.CalculationExpression,
-		BatchKey:               batchKey,
-		BatchState:             batchState,
-		BatchTxidAnchor:        batchTxidAnchor,
-		AssetID:                assetId,
 		UserID:                 userId,
-		ReleaseFeeInvoice:      releaseFeeInvoice,
+		Status:                 0,
 	}
 	return &fairLaunchInfo, nil
 }
@@ -296,16 +293,16 @@ func CreateInventoryInfoByFairLaunchInfo(fairLaunchInfo *models.FairLaunchInfo) 
 	return f.CreateFairLaunchInventoryInfos(&FairLaunchInventoryInfos)
 }
 
-func CreateAssetReleaseInfoByFairLaunchInfo(fairLaunchInfo *models.FairLaunchInfo) error {
-	assetRelease := models.AssetRelease{
-		AssetName:     fairLaunchInfo.Name,
-		AssetId:       fairLaunchInfo.AssetID,
-		AssetType:     fairLaunchInfo.AssetType,
-		ReleaseUserId: fairLaunchInfo.UserID,
-		ReleaseTime:   utils.GetTimestamp(),
+func CreateAssetIssuanceInfoByFairLaunchInfo(fairLaunchInfo *models.FairLaunchInfo) error {
+	assetIssuance := models.AssetIssuance{
+		AssetName:      fairLaunchInfo.Name,
+		AssetId:        fairLaunchInfo.AssetID,
+		AssetType:      fairLaunchInfo.AssetType,
+		IssuanceUserId: fairLaunchInfo.UserID,
+		IssuanceTime:   utils.GetTimestamp(),
 	}
-	a := AssetReleaseStore{DB: middleware.DB}
-	return a.CreateAssetRelease(&assetRelease)
+	a := AssetIssuanceStore{DB: middleware.DB}
+	return a.CreateAssetIssuance(&assetIssuance)
 }
 
 // TODO: Query all inventory by FairLaunchInfo id
@@ -415,3 +412,24 @@ func AmountAndQuantityToNumber(amount int, quantity int) int {
 //		IsReservedSent
 //		MintedNumber
 //		Status
+
+func FairLaunchIssuance() {
+	// TODO: need to complete
+	utils.LogInfo("FairLaunchIssuance triggered.")
+}
+
+// CreateInventoryAndAssetIssuanceInfoByFairLaunchInfo
+// @Description: Update inventory and asset issuance
+// @param fairLaunchInfo
+// @return err
+func CreateInventoryAndAssetIssuanceInfoByFairLaunchInfo(fairLaunchInfo *models.FairLaunchInfo) (err error) {
+	err = CreateInventoryInfoByFairLaunchInfo(fairLaunchInfo)
+	if err != nil {
+		return err
+	}
+	err = CreateAssetIssuanceInfoByFairLaunchInfo(fairLaunchInfo)
+	if err != nil {
+		return err
+	}
+	return nil
+}

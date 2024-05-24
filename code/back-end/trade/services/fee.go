@@ -27,15 +27,15 @@ func IsMintFeePaid(invoice string) bool {
 }
 
 // TODO: variables need to modify
-func GetPayReleaseFeeState(invoice string) error {
+func GetPayIssuanceFeeState(invoice string) error {
 	// TODO: need to complete
-	utils.LogInfo("GetPayReleaseFeeState triggered. This function did nothing, need to complete.")
+	utils.LogInfo("GetPayIssuanceFeeState triggered. This function did nothing, need to complete.")
 	return nil
 }
 
-func IsReleaseFeePaid(invoice string) bool {
-	_ = GetPayReleaseFeeState(invoice)
+func IsIssuanceFeePaid(invoice string) bool {
+	_ = GetPayIssuanceFeeState(invoice)
 	// TODO: need to complete
-	utils.LogInfo("IsReleaseFeePaid triggered. This function did nothing, need to complete.")
+	utils.LogInfo("IsIssuanceFeePaid triggered. This function did nothing, need to complete.")
 	return true
 }

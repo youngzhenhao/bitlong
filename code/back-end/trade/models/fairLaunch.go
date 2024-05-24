@@ -4,57 +4,73 @@ import (
 	"gorm.io/gorm"
 )
 
+type (
+	FairLaunchState       int
+	FairLaunchMintedState int
+)
+
 var (
-	StatusNormal     = 1
-	StatusPending    = 2
-	StatusDeprecated = 0
-	StatusUnknown    = 4
-	MintMaxNumber    = 10
+	MintMaxNumber                                          = 10
+	StatusDeprecated                                       = 0
+	StatusNormal                                           = 1
+	StatusPending                                          = 2
+	StatusUnknown                                          = 4
+	FairLaunchStateNoPay             FairLaunchState       = 0
+	FairLaunchStatePaidPending       FairLaunchState       = 1
+	FairLaunchStatePaidNoIssue       FairLaunchState       = 2
+	FairLaunchStateIssuedPending     FairLaunchState       = 3
+	FairLaunchStateIssued            FairLaunchState       = 4
+	FairLaunchMintedStateNoPay       FairLaunchMintedState = 0
+	FairLaunchMintedStatePaidPending FairLaunchMintedState = 1
+	FairLaunchMintedStatePaidNoSend  FairLaunchMintedState = 2
+	FairLaunchMintedStateSentPending FairLaunchMintedState = 3
+	FairLaunchMintedStateSent        FairLaunchMintedState = 4
 )
 
 type FairLaunchInfo struct {
 	gorm.Model
-	ImageData              string  `json:"image_data"`
-	Name                   string  `json:"name" gorm:"type:varchar(255);not null"`
-	AssetType              int     `json:"asset_type"`
-	Amount                 int     `json:"amount"`
-	Reserved               int     `json:"reserved"`
-	MintQuantity           int     `json:"mint_quantity"`
-	StartTime              int     `json:"start_time"`
-	EndTime                int     `json:"end_time"`
-	Description            string  `json:"description"`
-	ActualReserved         float64 `json:"actual_reserved"`
-	ReserveTotal           int     `json:"reserve_total"`
-	MintNumber             int     `json:"mint_number"`
-	IsFinalEnough          bool    `json:"is_final_enough"`
-	FinalQuantity          int     `json:"final_quantity"`
-	MintTotal              int     `json:"mint_total"`
-	ActualMintTotalPercent float64 `json:"actual_mint_total_percent"`
-	CalculationExpression  string  `json:"calculation_expression" gorm:"type:varchar(255)"`
-	BatchKey               string  `json:"batch_key" gorm:"type:varchar(255)"`
-	BatchState             string  `json:"batch_state" gorm:"type:varchar(255)"`
-	BatchTxidAnchor        string  `json:"batch_txid_anchor" gorm:"type:varchar(255)"`
-	AssetID                string  `json:"asset_id" gorm:"type:varchar(255)"`
-	UserID                 int     `json:"user_id"`
-	ReleaseFeeInvoice      string  `json:"release_fee_invoice" gorm:"type:varchar(255)"`
-	IsReservedSent         bool    `json:"is_reserved_sent"`
-	MintedNumber           int     `json:"minted_number"`
-	IsMintAll              bool    `json:"is_mint_all"`
-	Status                 int     `json:"status" default:"1" gorm:"default:1"`
+	ImageData              string          `json:"image_data"`
+	Name                   string          `json:"name" gorm:"type:varchar(255);not null"`
+	AssetType              int             `json:"asset_type"`
+	Amount                 int             `json:"amount"`
+	Reserved               int             `json:"reserved"`
+	MintQuantity           int             `json:"mint_quantity"`
+	StartTime              int             `json:"start_time"`
+	EndTime                int             `json:"end_time"`
+	Description            string          `json:"description"`
+	FeeRate                int             `json:"fee_rate"`
+	ActualReserved         float64         `json:"actual_reserved"`
+	ReserveTotal           int             `json:"reserve_total"`
+	MintNumber             int             `json:"mint_number"`
+	IsFinalEnough          bool            `json:"is_final_enough"`
+	FinalQuantity          int             `json:"final_quantity"`
+	MintTotal              int             `json:"mint_total"`
+	ActualMintTotalPercent float64         `json:"actual_mint_total_percent"`
+	CalculationExpression  string          `json:"calculation_expression" gorm:"type:varchar(255)"`
+	BatchKey               string          `json:"batch_key" gorm:"type:varchar(255)"`
+	BatchState             string          `json:"batch_state" gorm:"type:varchar(255)"`
+	BatchTxidAnchor        string          `json:"batch_txid_anchor" gorm:"type:varchar(255)"`
+	AssetID                string          `json:"asset_id" gorm:"type:varchar(255)"`
+	UserID                 int             `json:"user_id"`
+	IssuanceFeeInvoice     string          `json:"issuance_fee_invoice" gorm:"type:varchar(255)"`
+	IsReservedSent         bool            `json:"is_reserved_sent"`
+	MintedNumber           int             `json:"minted_number"`
+	IsMintAll              bool            `json:"is_mint_all"`
+	Status                 int             `json:"status" default:"1" gorm:"default:1"`
+	State                  FairLaunchState `json:"state"`
 }
 
 type SetFairLaunchInfoRequest struct {
-	ImageData         string `json:"image_data"`
-	Name              string `json:"name"`
-	AssetType         int    `json:"asset_type"`
-	Amount            int    `json:"amount"`
-	Reserved          int    `json:"reserved"`
-	MintQuantity      int    `json:"mint_quantity"`
-	StartTime         int    `json:"start_time"`
-	EndTime           int    `json:"end_time"`
-	Description       string `json:"description"`
-	FeeRate           int    `json:"fee_rate"`
-	ReleaseFeeInvoice string `json:"release_fee_invoice"`
+	ImageData    string `json:"image_data"`
+	Name         string `json:"name"`
+	AssetType    int    `json:"asset_type"`
+	Amount       int    `json:"amount"`
+	Reserved     int    `json:"reserved"`
+	MintQuantity int    `json:"mint_quantity"`
+	StartTime    int    `json:"start_time"`
+	EndTime      int    `json:"end_time"`
+	Description  string `json:"description"`
+	FeeRate      int    `json:"fee_rate"`
 }
 
 type FairLaunchMintedInfo struct {

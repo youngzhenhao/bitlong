@@ -75,20 +75,28 @@ type SetFairLaunchInfoRequest struct {
 
 type FairLaunchMintedInfo struct {
 	gorm.Model
-	FairLaunchInfoID int    `json:"fair_launch_info_id" gorm:"not null"`
-	EncodedAddr      string `json:"encoded_addr" gorm:"type:varchar(255)"`
-	MintFeeInvoice   string `json:"mint_fee_invoice" gorm:"type:varchar(255)"`
-	AssetID          string `json:"asset_id" gorm:"type:varchar(255)"`
-	AssetType        string `json:"asset_type" gorm:"type:varchar(255)"`
-	AddrAmount       int    `json:"amount_addr"`
-	ScriptKey        string `json:"script_key" gorm:"type:varchar(255)"`
-	InternalKey      string `json:"internal_key" gorm:"type:varchar(255)"`
-	TaprootOutputKey string `json:"taproot_output_key" gorm:"type:varchar(255)"`
-	ProofCourierAddr string `json:"proof_courier_addr" gorm:"type:varchar(255)"`
-	MintTime         int    `json:"mint_time"`
-	Outpoint         string `json:"outpoint" gorm:"type:varchar(255)"`
-	Address          string `json:"address" gorm:"type:varchar(255)"`
-	Status           int    `json:"status" gorm:"default:1"`
+	FairLaunchInfoID int                   `json:"fair_launch_info_id" gorm:"not null"`
+	MintedNumber     int                   `json:"minted_number"`
+	EncodedAddr      string                `json:"encoded_addr" gorm:"type:varchar(255)"`
+	MintFeeInvoice   string                `json:"mint_fee_invoice" gorm:"type:varchar(255)"`
+	UserID           int                   `json:"user_id"`
+	AssetID          string                `json:"asset_id" gorm:"type:varchar(255)"`
+	AssetType        string                `json:"asset_type" gorm:"type:varchar(255)"`
+	AddrAmount       int                   `json:"amount_addr"`
+	ScriptKey        string                `json:"script_key" gorm:"type:varchar(255)"`
+	InternalKey      string                `json:"internal_key" gorm:"type:varchar(255)"`
+	TaprootOutputKey string                `json:"taproot_output_key" gorm:"type:varchar(255)"`
+	ProofCourierAddr string                `json:"proof_courier_addr" gorm:"type:varchar(255)"`
+	MintTime         int                   `json:"mint_time"`
+	Outpoint         string                `json:"outpoint" gorm:"type:varchar(255)"`
+	Address          string                `json:"address" gorm:"type:varchar(255)"`
+	Status           int                   `json:"status" gorm:"default:1"`
+	State            FairLaunchMintedState `json:"state"`
+}
+
+type MintFairLaunchRequest struct {
+	FairLaunchInfoID int `json:"fair_launch_info_id"`
+	MintedNumber     int `json:"minted_number"`
 }
 
 type FairLaunchMintedUserInfo struct {

@@ -2,9 +2,14 @@ package services
 
 type CronService struct{}
 
-func (sm *CronService) FairLaunchIssuance() {
+func (cs *CronService) FairLaunchIssuance() {
 	FairLaunchDebugLogger.Info("start cron job: FairLaunchIssuance")
 	FairLaunchIssuance()
+}
+
+func (cs *CronService) FairLaunchMint() {
+	FairLaunchDebugLogger.Info("start cron job: FairLaunchMint")
+	FairLaunchMint()
 }
 
 func (sm *CronService) PollPaymentCron() {

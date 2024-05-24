@@ -1,18 +1,16 @@
 package handlers
 
 import (
-	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
-	"trade/middleware"
 	"trade/models"
 	"trade/services"
 	"trade/utils"
 )
 
 func GetAllFairLaunchInfo(c *gin.Context) {
-	allFairLaunch, err := services.GetAllFairLaunch()
+	allFairLaunch, err := services.GetAllFairLaunchInfos()
 	if err != nil {
 		utils.LogError("Get all fair launch infos", err)
 		c.JSON(http.StatusOK, models.JsonResult{
@@ -41,7 +39,7 @@ func GetFairLaunchInfo(c *gin.Context) {
 		})
 		return
 	}
-	fairLaunch, err := services.GetFairLaunch(id)
+	fairLaunch, err := services.GetFairLaunchInfo(id)
 	if err != nil {
 		utils.LogError("Get fair launch info", err)
 		c.JSON(http.StatusOK, models.JsonResult{
@@ -70,7 +68,7 @@ func GetMintedInfo(c *gin.Context) {
 		})
 		return
 	}
-	minted, err := services.GetMinted(id)
+	minted, err := services.GetFairLaunchMintedInfo(id)
 	if err != nil {
 		utils.LogError("Get fair launch minted info", err)
 		c.JSON(http.StatusOK, models.JsonResult{
@@ -136,10 +134,10 @@ func SetFairLaunchInfo(c *gin.Context) {
 		})
 		return
 	}
-	// @dev: Update db to State models.FairLaunchStateNoPay
-	err = services.SetFairLaunch(fairLaunchInfo)
+	// @dev: Update db, State models.FairLaunchStateNoPay
+	err = services.SetFairLaunchInfo(fairLaunchInfo)
 	if err != nil {
-		utils.LogError("Set fair launch error.", err)
+		utils.LogError("Set fair launch info.", err)
 		c.JSON(http.StatusOK, models.JsonResult{
 			Success: false,
 			Error:   "Set fair launch error. " + err.Error(),
@@ -147,54 +145,30 @@ func SetFairLaunchInfo(c *gin.Context) {
 		})
 		return
 	}
+	c.JSON(http.StatusOK, models.JsonResult{
+		Success: true,
+		Error:   "",
+		Data:    nil,
+	})
 }
 
-// TODO: use scheduled task
 func MintFairLaunch(c *gin.Context) {
 	var fairLaunchMintedInfo *models.FairLaunchMintedInfo
-	// @dev: Get id, addr and pay-fee-invoice
-	idStr := c.PostForm("id")
-	mintFeeInvoice := c.PostForm("mint_fee_invoice")
-	addr := c.PostForm("addr")
-	fairLaunchInfoID, err := strconv.Atoi(idStr)
+	var mintFairLaunchRequest models.MintFairLaunchRequest
+	// @notice: only receive id and number
+	err := c.ShouldBindJSON(&mintFairLaunchRequest)
 	if err != nil {
-		utils.LogError("id is not valid int", err)
+		utils.LogError("Should Bind JSON mintFairLaunchRequest.", err)
 		c.JSON(http.StatusOK, models.JsonResult{
 			Success: false,
-			Error:   "id is not valid int. " + err.Error(),
+			Error:   "Should Bind JSON mintFairLaunchRequest. " + err.Error(),
 			Data:    "",
 		})
 		return
 	}
-	fairLaunchMintedInfo, _ = services.ProcessFairLaunchMintedInfo(fairLaunchInfoID, addr, mintFeeInvoice)
-	// @dev: ShouldBind
-	//if err != nil {
-	//	utils.LogError("Wrong json to bind.", err)
-	//	c.JSON(http.StatusOK, models.JsonResult{
-	//		Success: false,
-	//		Error:   "Wrong json to bind. " + err.Error(),
-	//		Data:    "",
-	//	})
-	//	return
-	//}
-
-	// @previous: 1.Pay Fee
-
-	//amount := fairLaunchMintedInfo.AddrAmount
-
-	// @previous: CalculatedFee
-	//_, err = services.CalculateFee(amount)
-	//if err != nil {
-	//	utils.LogError("Calculate fee error", err)
-	//	c.JSON(http.StatusOK, models.JsonResult{
-	//		Success: false,
-	//		Error:   "Calculate fee error. " + err.Error(),
-	//		Data:    "",
-	//	})
-	//	return
-	//}
-
-	username := c.MustGet("username").(string)
+	// TODO: Use MustGet. bob ONLY FOR TEST
+	username := "bob"
+	//username := c.MustGet("username").(string)
 	// @dev: userId
 	userId, err := services.NameToId(username)
 	if err != nil {
@@ -206,84 +180,29 @@ func MintFairLaunch(c *gin.Context) {
 		})
 		return
 	}
-	// @dev: check whether mint fee is paid
-	isMintFeePaid := services.IsMintFeePaid(mintFeeInvoice)
-	if !isMintFeePaid {
-		err = errors.New("mint fee did not been paid")
-		utils.LogError("", err)
+	fairLaunchInfoID := mintFairLaunchRequest.FairLaunchInfoID
+	mintedNumber := mintFairLaunchRequest.MintedNumber
+	fairLaunchMintedInfo, _ = services.ProcessFairLaunchMintedInfo(fairLaunchInfoID, mintedNumber, userId)
+	// @dev: Update db, State models.FairLaunchMintedStateNoPay
+	err = services.SetFairLaunchMintedInfo(fairLaunchMintedInfo)
+	if err != nil {
+		utils.LogError("Set fair launch minted info.", err)
 		c.JSON(http.StatusOK, models.JsonResult{
 			Success: false,
-			Error:   "" + err.Error(),
+			Error:   "Set fair launch minted info. " + err.Error(),
 			Data:    "",
 		})
 		return
 	}
-	var fairLaunchMintedUserInfo models.FairLaunchMintedUserInfo
-	err = middleware.DB.Where("user_id = ? AND fair_launch_info_id =? AND status = ?", userId, fairLaunchInfoID, models.StatusNormal).First(&fairLaunchMintedUserInfo).Error
-	var noMintedUserInfo bool
-	if err != nil {
-		utils.LogError("select fair launch minted user info.", err)
-		//c.JSON(http.StatusOK, models.JsonResult{
-		//	Success: false,
-		//	Error:   "select fair launch minted user info. " + err.Error(),
-		//	Data:    "",
-		//})
-		noMintedUserInfo = true
-	}
-	fairLaunchInfo, err := services.GetFairLaunch(fairLaunchInfoID)
-	if err != nil {
-		utils.LogError("Get fair launch info.", err)
-		c.JSON(http.StatusOK, models.JsonResult{
-			Success: false,
-			Error:   "Get fair launch info. " + err.Error(),
-			Data:    "",
-		})
-	}
-	mintNumber := services.AmountAndQuantityToNumber(fairLaunchMintedInfo.AddrAmount, fairLaunchInfo.MintQuantity)
-	mintedNumber := fairLaunchMintedUserInfo.MintedNumber
-	if mintNumber > models.MintMaxNumber-mintedNumber {
-		err = errors.New("mint number out of max")
-		utils.LogError("", err)
-		c.JSON(http.StatusOK, models.JsonResult{
-			Success: false,
-			Error:   "" + err.Error(),
-			Data:    "",
-		})
-	}
-	// TODO: Fair launch mint service
-	err = services.FairLaunchMint(fairLaunchMintedInfo)
-	if err != nil {
-		utils.LogError("Fair launch mint error.", err)
-		c.JSON(http.StatusOK, models.JsonResult{
-			Success: false,
-			Error:   "Fair launch mint error. " + err.Error(),
-			Data:    "",
-		})
-		return
-	}
-	// TODO: update db
-	//		minted
-	//		minted user
-	if noMintedUserInfo {
-		// TODO: Create
-	} else {
-		// TODO: update
-		//err = middleware.DB.Where().Update()
-	}
-
 	c.JSON(http.StatusOK, models.JsonResult{
 		Success: true,
 		Error:   "",
 		Data:    nil,
 	})
-	// TODO: update db status later
-
 }
 
 func QueryMintIsAvailable(c *gin.Context) {
-	// TODO: Check if a specific amount of minting asset is valid
-	//id := c.PostForm("id")
-	//amount := c.PostForm("amount")
+	// TODO: Check if a specific id and amount of minting asset is valid
 
 }
 

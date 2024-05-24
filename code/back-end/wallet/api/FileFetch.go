@@ -5,12 +5,13 @@ import (
 	"github.com/wallet/base"
 )
 
-func SetPath(path string) {
+func SetPath(path string, network string) {
 	err := base.SetFilePath(path)
 	if err != nil {
 		fmt.Println("set file path error. ", err)
 		return
 	}
+	base.SetNetwork(network)
 }
 
 func GetPath() string {

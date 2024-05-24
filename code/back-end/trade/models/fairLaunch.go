@@ -4,6 +4,14 @@ import (
 	"gorm.io/gorm"
 )
 
+var (
+	StatusNormal     = 1
+	StatusPending    = 2
+	StatusDeprecated = 0
+	StatusUnknown    = 4
+	MintMaxNumber    = 10
+)
+
 type FairLaunchInfo struct {
 	gorm.Model
 	ImageData              string  `json:"image_data"`
@@ -28,16 +36,32 @@ type FairLaunchInfo struct {
 	BatchTxidAnchor        string  `json:"batch_txid_anchor" gorm:"type:varchar(255)"`
 	AssetID                string  `json:"asset_id" gorm:"type:varchar(255)"`
 	UserID                 int     `json:"user_id"`
+	ReleaseFeeInvoice      string  `json:"release_fee_invoice" gorm:"type:varchar(255)"`
 	IsReservedSent         bool    `json:"is_reserved_sent"`
 	MintedNumber           int     `json:"minted_number"`
 	IsMintAll              bool    `json:"is_mint_all"`
 	Status                 int     `json:"status" default:"1" gorm:"default:1"`
 }
 
+type SetFairLaunchInfoRequest struct {
+	ImageData         string `json:"image_data"`
+	Name              string `json:"name"`
+	AssetType         int    `json:"asset_type"`
+	Amount            int    `json:"amount"`
+	Reserved          int    `json:"reserved"`
+	MintQuantity      int    `json:"mint_quantity"`
+	StartTime         int    `json:"start_time"`
+	EndTime           int    `json:"end_time"`
+	Description       string `json:"description"`
+	FeeRate           int    `json:"fee_rate"`
+	ReleaseFeeInvoice string `json:"release_fee_invoice"`
+}
+
 type FairLaunchMintedInfo struct {
 	gorm.Model
 	FairLaunchInfoID int    `json:"fair_launch_info_id" gorm:"not null"`
 	EncodedAddr      string `json:"encoded_addr" gorm:"type:varchar(255)"`
+	MintFeeInvoice   string `json:"mint_fee_invoice" gorm:"type:varchar(255)"`
 	AssetID          string `json:"asset_id" gorm:"type:varchar(255)"`
 	AssetType        string `json:"asset_type" gorm:"type:varchar(255)"`
 	AddrAmount       int    `json:"amount_addr"`
@@ -48,12 +72,22 @@ type FairLaunchMintedInfo struct {
 	MintTime         int    `json:"mint_time"`
 	Outpoint         string `json:"outpoint" gorm:"type:varchar(255)"`
 	Address          string `json:"address" gorm:"type:varchar(255)"`
+	Status           int    `json:"status" gorm:"default:1"`
+}
+
+type FairLaunchMintedUserInfo struct {
+	gorm.Model
+	UserID           int `json:"user_id" gorm:"not null"`
+	FairLaunchInfoID int `json:"fair_launch_info_id" gorm:"not null"`
+	MintedNumber     int `json:"minted_number"`
+	Status           int `json:"status" default:"1" gorm:"default:1"`
 }
 
 type FairLaunchInventoryInfo struct {
 	gorm.Model
-	FairLaunchInfoID int `json:"fair_launch_info_id" gorm:"not null"`
-	Quantity         int `json:"quantity"`
-	Status           int `json:"status" gorm:"default:1"`
-	MintedID         int `json:"minted_id"`
+	FairLaunchInfoID int  `json:"fair_launch_info_id" gorm:"not null"`
+	Quantity         int  `json:"quantity"`
+	IsMinted         bool `json:"is_minted"`
+	MintedID         int  `json:"minted_id"`
+	Status           int  `json:"status" gorm:"default:1"`
 }

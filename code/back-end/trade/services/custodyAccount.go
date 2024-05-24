@@ -85,10 +85,10 @@ func CreateCustodyAccount(user *models.User) (*models.Account, error) {
 }
 
 // Update  托管账户更新
-func UpdateCustodyAccount(account *models.Account, away uint, balance uint64) error {
+func UpdateCustodyAccount(account *models.Account, away uint, balance uint64) (uint, error) {
 	acc, err := servicesrpc.AccountInfo(account.UserAccountCode)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	var amount int64
 
@@ -98,13 +98,14 @@ func UpdateCustodyAccount(account *models.Account, away uint, balance uint64) er
 	case AWAY_OUT:
 		amount = acc.CurrentBalance - int64(balance)
 	default:
-		return fmt.Errorf("away error")
+		return 0, fmt.Errorf("away error")
 	}
-
-	//更变托管账户余额
-	_, err = servicesrpc.AccountUpdate(account.UserAccountCode, amount, -1)
-	if err != nil {
-		return err
+	if account.UserAccountCode != "admin" {
+		//更变托管账户余额
+		_, err = servicesrpc.AccountUpdate(account.UserAccountCode, amount, -1)
+		if err != nil {
+			return 0, err
+		}
 	}
 	//构建数据库存储对象
 	ba := models.Balance{}
@@ -122,9 +123,44 @@ func UpdateCustodyAccount(account *models.Account, away uint, balance uint64) er
 	err = middleware.DB.Create(&ba).Error
 	if err != nil {
 		CUST.Error(err.Error())
-		return err
+		return 0, err
 	}
-	return nil
+	return ba.ID, nil
+}
+
+func PayAmountInside(payUserId, receiveUserId uint, gasFee, serveFee uint64) (uint, error) {
+	amount := gasFee + serveFee
+	payAccount, err := ReadAccountByUserId(payUserId)
+	if err != nil {
+		CUST.Error("ReadAccountByUserId error:%v", err)
+		return 0, err
+	}
+	outId, err := UpdateCustodyAccount(payAccount, AWAY_OUT, amount)
+	if err != nil {
+		CUST.Error("UpdateCustodyAccount error:%v", err)
+		return 0, err
+	}
+	remark := fmt.Sprintf("gasFee:%v ,serverFee:%v", gasFee, serveFee)
+	Ext := models.BalanceExt{
+		BalanceId:   outId,
+		BillExtDesc: &remark,
+	}
+	err = CreateBalanceExt(&Ext)
+	if err != nil {
+		CUST.Error("CreateBalanceExt error:%v", err)
+	}
+
+	receiveAccount, err := ReadAccountByUserId(receiveUserId)
+	if err != nil {
+		CUST.Error("ReadAccountByUserId error:%v", err)
+		return 0, err
+	}
+	Id, err := UpdateCustodyAccount(receiveAccount, AWAY_IN, amount)
+	if err != nil {
+		CUST.Error("UpdateCustodyAccount error:%v", err)
+		return 0, err
+	}
+	return Id, nil
 }
 
 // QueryCustodyAccount  托管账户查询

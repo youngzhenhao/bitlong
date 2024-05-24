@@ -4,19 +4,27 @@ import (
 	"gorm.io/gorm"
 )
 
-type FairLaunchState int
+type (
+	FairLaunchState       int
+	FairLaunchMintedState int
+)
 
 var (
-	MintMaxNumber                               = 10
-	StatusNormal                                = 1
-	StatusPending                               = 2
-	StatusDeprecated                            = 0
-	StatusUnknown                               = 4
-	FairLaunchStateNoPay        FairLaunchState = 0
-	FairLaunchStatePayPending   FairLaunchState = 1
-	FairLaunchStatePaidNoIssue  FairLaunchState = 2
-	FairLaunchStateIssuePending FairLaunchState = 3
-	FairLaunchStateIssued       FairLaunchState = 4
+	MintMaxNumber                                          = 10
+	StatusDeprecated                                       = 0
+	StatusNormal                                           = 1
+	StatusPending                                          = 2
+	StatusUnknown                                          = 4
+	FairLaunchStateNoPay             FairLaunchState       = 0
+	FairLaunchStatePaidPending       FairLaunchState       = 1
+	FairLaunchStatePaidNoIssue       FairLaunchState       = 2
+	FairLaunchStateIssuedPending     FairLaunchState       = 3
+	FairLaunchStateIssued            FairLaunchState       = 4
+	FairLaunchMintedStateNoPay       FairLaunchMintedState = 0
+	FairLaunchMintedStatePaidPending FairLaunchMintedState = 1
+	FairLaunchMintedStatePaidNoSend  FairLaunchMintedState = 2
+	FairLaunchMintedStateSentPending FairLaunchMintedState = 3
+	FairLaunchMintedStateSent        FairLaunchMintedState = 4
 )
 
 type FairLaunchInfo struct {
@@ -30,6 +38,7 @@ type FairLaunchInfo struct {
 	StartTime              int             `json:"start_time"`
 	EndTime                int             `json:"end_time"`
 	Description            string          `json:"description"`
+	FeeRate                int             `json:"fee_rate"`
 	ActualReserved         float64         `json:"actual_reserved"`
 	ReserveTotal           int             `json:"reserve_total"`
 	MintNumber             int             `json:"mint_number"`
@@ -52,17 +61,16 @@ type FairLaunchInfo struct {
 }
 
 type SetFairLaunchInfoRequest struct {
-	ImageData          string `json:"image_data"`
-	Name               string `json:"name"`
-	AssetType          int    `json:"asset_type"`
-	Amount             int    `json:"amount"`
-	Reserved           int    `json:"reserved"`
-	MintQuantity       int    `json:"mint_quantity"`
-	StartTime          int    `json:"start_time"`
-	EndTime            int    `json:"end_time"`
-	Description        string `json:"description"`
-	FeeRate            int    `json:"fee_rate"`
-	IssuanceFeeInvoice string `json:"issuance_fee_invoice"`
+	ImageData    string `json:"image_data"`
+	Name         string `json:"name"`
+	AssetType    int    `json:"asset_type"`
+	Amount       int    `json:"amount"`
+	Reserved     int    `json:"reserved"`
+	MintQuantity int    `json:"mint_quantity"`
+	StartTime    int    `json:"start_time"`
+	EndTime      int    `json:"end_time"`
+	Description  string `json:"description"`
+	FeeRate      int    `json:"fee_rate"`
 }
 
 type FairLaunchMintedInfo struct {

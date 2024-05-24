@@ -50,5 +50,6 @@ func (ml *ServicesLogger) Error(message string) {
 }
 
 var (
-	CUST = NewLogger("CUST", ERROR)
+	CUST                  = NewLogger("CUST", ERROR)
+	FairLaunchDebugLogger = NewLogger("FLDL", ERROR)
 )

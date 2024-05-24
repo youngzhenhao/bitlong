@@ -1,13 +1,10 @@
 package handlers
 
 import (
-	"encoding/hex"
 	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/lightninglabs/taproot-assets/taprpc"
 	"net/http"
 	"strconv"
-	"trade/api"
 	"trade/middleware"
 	"trade/models"
 	"trade/services"
@@ -92,19 +89,9 @@ func GetMintedInfo(c *gin.Context) {
 
 func SetFairLaunchInfo(c *gin.Context) {
 	var fairLaunchInfo *models.FairLaunchInfo
-	// TODO: Use SetFairLaunchInfoRequest c.ShouldBind
-	imageData := c.PostForm("image_data")
-	name := c.PostForm("name")
-	assetTypeStr := c.PostForm("asset_type")
-	amountStr := c.PostForm("amount")
-	reservedStr := c.PostForm("reserved")
-	mintQuantityStr := c.PostForm("mint_quantity")
-	startTimeStr := c.PostForm("start_time")
-	endTimeStr := c.PostForm("end_time")
-	description := c.PostForm("description")
-	feeRateStr := c.PostForm("fee_rate")
-	username := c.MustGet("username").(string)
-	issuanceFeeInvoice := c.PostForm("issuance_fee_invoice")
+	// TODO: Use MustGet. alice ONLY FOR TEST
+	//username := c.MustGet("username").(string)
+	username := "alice"
 	userId, err := services.NameToId(username)
 	if err != nil {
 		utils.LogError("Query user id by name.", err)
@@ -115,144 +102,31 @@ func SetFairLaunchInfo(c *gin.Context) {
 		})
 		return
 	}
-	assetType, err := strconv.Atoi(assetTypeStr)
+	// @dev: Use SetFairLaunchInfoRequest c.ShouldBind
+	var setFairLaunchInfoRequest models.SetFairLaunchInfoRequest
+	err = c.ShouldBindJSON(&setFairLaunchInfoRequest)
 	if err != nil {
-		utils.LogError("strconv string to int.", err)
+		utils.LogError("Should Bind JSON setFairLaunchInfoRequest.", err)
 		c.JSON(http.StatusOK, models.JsonResult{
 			Success: false,
-			Error:   "strconv string to int." + err.Error(),
+			Error:   "Should Bind JSON setFairLaunchInfoRequest. " + err.Error(),
 			Data:    "",
 		})
 		return
 	}
-	amount, err := strconv.Atoi(amountStr)
-	if err != nil {
-		utils.LogError("strconv string to int.", err)
-		c.JSON(http.StatusOK, models.JsonResult{
-			Success: false,
-			Error:   "strconv string to int." + err.Error(),
-			Data:    "",
-		})
-		return
-	}
-	reserved, err := strconv.Atoi(reservedStr)
-	if err != nil {
-		utils.LogError("strconv string to int.", err)
-		c.JSON(http.StatusOK, models.JsonResult{
-			Success: false,
-			Error:   "strconv string to int." + err.Error(),
-			Data:    "",
-		})
-		return
-	}
-	mintQuantity, err := strconv.Atoi(mintQuantityStr)
-	if err != nil {
-		utils.LogError("strconv string to int.", err)
-		c.JSON(http.StatusOK, models.JsonResult{
-			Success: false,
-			Error:   "strconv string to int." + err.Error(),
-			Data:    "",
-		})
-		return
-	}
-	startTime, err := strconv.Atoi(startTimeStr)
-	if err != nil {
-		utils.LogError("strconv string to int.", err)
-		c.JSON(http.StatusOK, models.JsonResult{
-			Success: false,
-			Error:   "strconv string to int." + err.Error(),
-			Data:    "",
-		})
-		return
-	}
-	endTime, err := strconv.Atoi(endTimeStr)
-	if err != nil {
-		utils.LogError("strconv string to int.", err)
-		c.JSON(http.StatusOK, models.JsonResult{
-			Success: false,
-			Error:   "strconv string to int." + err.Error(),
-			Data:    "",
-		})
-		return
-	}
-	feeRate, err := strconv.Atoi(feeRateStr)
-	if err != nil {
-		utils.LogError("strconv string to int.", err)
-		c.JSON(http.StatusOK, models.JsonResult{
-			Success: false,
-			Error:   "strconv string to int." + err.Error(),
-			Data:    "",
-		})
-		return
-	}
-	// TODO: add judge logic
-
-	// TODO: check issuance fee paid
-	isIssuanceFeePaid := services.IsIssuanceFeePaid(issuanceFeeInvoice)
-	if !isIssuanceFeePaid {
-		err = errors.New("Issuance fee did not been paid")
-		utils.LogError("", err)
-		c.JSON(http.StatusOK, models.JsonResult{
-			Success: false,
-			Error:   "" + err.Error(),
-			Data:    "",
-		})
-		return
-	}
-	//assetTypeQuery, _ := api.QueryAssetType(assetType)
-	var isCollectible bool
-	if taprpc.AssetType(assetType) == taprpc.AssetType_COLLECTIBLE {
-		isCollectible = true
-	}
-	newMeta := api.NewMeta(description, imageData)
-	mintResponse, err := api.MintAssetAndGetResponse(name, isCollectible, newMeta, amount, false)
-	if err != nil {
-		utils.LogError("Mint asset.", err)
-		c.JSON(http.StatusOK, models.JsonResult{
-			Success: false,
-			Error:   "Mint asset." + err.Error(),
-			Data:    "",
-		})
-		return
-	}
-	batchKey := hex.EncodeToString(mintResponse.GetPendingBatch().GetBatchKey())
-	batchState := mintResponse.GetPendingBatch().GetState().String()
-	//utils.LogInfos("Batch state:", batchState)
-	finalizeResponse, err := api.FinalizeBatchAndGetResponse(feeRate)
-	if err != nil {
-		utils.LogError("Finalize batch.", err)
-		c.JSON(http.StatusOK, models.JsonResult{
-			Success: false,
-			Error:   "Finalize batch." + err.Error(),
-			Data:    "",
-		})
-		return
-	}
-	if hex.EncodeToString(finalizeResponse.GetBatch().GetBatchKey()) != batchKey {
-		err = errors.New("finalize batch key is not equal mint batch key")
-		utils.LogError("", err)
-		c.JSON(http.StatusOK, models.JsonResult{
-			Success: false,
-			Error:   err.Error(),
-			Data:    "",
-		})
-		return
-	}
-	batchTxidAnchor := finalizeResponse.GetBatch().GetBatchTxid()
-	batchState = finalizeResponse.GetBatch().GetState().String()
-	//utils.LogInfos("Batch state:", batchState)
-	assetId, err := api.BatchTxidAnchorToAssetId(batchTxidAnchor)
-	if err != nil {
-		utils.LogError("Batch Anchor Txid To AssetId.", err)
-		c.JSON(http.StatusOK, models.JsonResult{
-			Success: false,
-			Error:   "Batch Anchor Txid To AssetId." + err.Error(),
-			Data:    "",
-		})
-		return
-	}
-	// @dev: Process struct
-	fairLaunchInfo, err = services.ProcessFairLaunchInfo(imageData, name, assetType, amount, reserved, mintQuantity, startTime, endTime, description, batchKey, batchState, batchTxidAnchor, assetId, userId, issuanceFeeInvoice)
+	imageData := setFairLaunchInfoRequest.ImageData
+	name := setFairLaunchInfoRequest.Name
+	assetType := setFairLaunchInfoRequest.AssetType
+	amount := setFairLaunchInfoRequest.Amount
+	reserved := setFairLaunchInfoRequest.Reserved
+	mintQuantity := setFairLaunchInfoRequest.MintQuantity
+	startTime := setFairLaunchInfoRequest.StartTime
+	endTime := setFairLaunchInfoRequest.EndTime
+	description := setFairLaunchInfoRequest.Description
+	feeRate := setFairLaunchInfoRequest.FeeRate
+	// @dev: Process struct, update later
+	// @notice: State is 0 now
+	fairLaunchInfo, err = services.ProcessFairLaunchInfo(imageData, name, assetType, amount, reserved, mintQuantity, startTime, endTime, description, feeRate, userId)
 	if err != nil {
 		utils.LogError("Process fair launch info.", err)
 		c.JSON(http.StatusOK, models.JsonResult{
@@ -262,7 +136,7 @@ func SetFairLaunchInfo(c *gin.Context) {
 		})
 		return
 	}
-	// @dev: Update dbs
+	// @dev: Update db to State models.FairLaunchStateNoPay
 	err = services.SetFairLaunch(fairLaunchInfo)
 	if err != nil {
 		utils.LogError("Set fair launch error.", err)
@@ -273,41 +147,7 @@ func SetFairLaunchInfo(c *gin.Context) {
 		})
 		return
 	}
-	// @dev: update inventory
-	err = services.CreateInventoryInfoByFairLaunchInfo(fairLaunchInfo)
-	if err != nil {
-		utils.LogError("Create Inventory Info By FairLaunchInfo.", err)
-		c.JSON(http.StatusOK, models.JsonResult{
-			Success: false,
-			Error:   "Create Inventory Info By FairLaunchInfo. " + err.Error(),
-			Data:    "",
-		})
-		return
-	}
-	// @dev: Update asset_issuances
-	err = services.CreateAssetIssuanceInfoByFairLaunchInfo(fairLaunchInfo)
-	if err != nil {
-		utils.LogError("Create Asset Release Info By FairLaunchInfo.", err)
-		c.JSON(http.StatusOK, models.JsonResult{
-			Success: false,
-			Error:   "Create Asset Release Info By FairLaunchInfo. " + err.Error(),
-			Data:    "",
-		})
-		return
-	}
-	c.JSON(http.StatusOK, models.JsonResult{
-		Success: true,
-		Error:   "",
-		Data:    fairLaunchInfo,
-	})
-	// TODO: update FairLaunchInfo later
-	//		IsReservedSent
-	//		MintedNumber
-	//		Status
 }
-
-// @Previous: before this operation, user send request to check avaible amount and number of inventory and modify inverntory status
-// TODO: User should finish paying mint fee before this operation
 
 // TODO: use scheduled task
 func MintFairLaunch(c *gin.Context) {

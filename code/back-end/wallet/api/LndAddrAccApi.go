@@ -8,7 +8,6 @@ import (
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/wallet/api/connect"
 	"github.com/wallet/base"
-	"google.golang.org/grpc"
 	"path/filepath"
 	"strings"
 	"time"
@@ -20,23 +19,12 @@ import (
 // @Description:NewAddress creates a new address under control of the local wallet.
 // @return string
 func GetNewAddress_P2TR() string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
+
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.NewAddressRequest{
 		Type: lnrpc.AddressType_TAPROOT_PUBKEY,
@@ -62,23 +50,11 @@ func GetNewAddress_P2TR() string {
 // @Description:NewAddress creates a new address under control of the local wallet.
 // @return string
 func GetNewAddress_P2WKH() string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.NewAddressRequest{
 		Type: lnrpc.AddressType_WITNESS_PUBKEY_HASH,
@@ -104,23 +80,11 @@ func GetNewAddress_P2WKH() string {
 // @Description: NewAddress creates a new address under control of the local wallet.
 // @return string
 func GetNewAddress_NP2WKH() string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.NewAddressRequest{
 		Type: lnrpc.AddressType_NESTED_PUBKEY_HASH,

@@ -8,9 +8,6 @@ import (
 	"github.com/btcsuite/btcd/wire"
 	"github.com/lightningnetwork/lnd/lnrpc/chainrpc"
 	"github.com/wallet/api/connect"
-	"github.com/wallet/base"
-	"google.golang.org/grpc"
-	"path/filepath"
 )
 
 func GetBlockWrap(blockHash string) string {
@@ -25,23 +22,11 @@ func GetBlockWrap(blockHash string) string {
 }
 
 func GetBlock(blockHashStr string) (response *chainrpc.GetBlockResponse, err error) {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
 
 	blockHash, err := chainhash.NewHashFromStr(blockHashStr)
 	client := chainrpc.NewChainKitClient(conn)

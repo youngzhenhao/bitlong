@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"github.com/lightninglabs/lightning-terminal/litrpc"
 	"github.com/wallet/api/connect"
-	"github.com/wallet/base"
-	"google.golang.org/grpc"
-	"path/filepath"
 )
 
 func SubServerStatus() string {
@@ -41,23 +38,11 @@ func GetLitStatus() bool {
 }
 
 func subServerStatus() (*litrpc.SubServerStatusResp, error) {
-	grpcHost := base.QueryConfigByKey("litdhost")
-	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lit"), base.NetWork)
-	macaroonPath := filepath.Join(newFilePath, "lit.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("litd", true)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
 
 	client := litrpc.NewStatusClient(conn)
 	request := &litrpc.SubServerStatusReq{}

@@ -22,19 +22,11 @@ import (
 //	Once the cipherseed is obtained and verified by the user, the InitWallet method should be used to commit the newly generated seed, and create the wallet.
 //	@return string
 func GenSeed() string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	creds := connect.NewTlsCert(tlsCertPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
 	client := lnrpc.NewWalletUnlockerClient(conn)
 	//passphrase := ""
 	//var aezeedPassphrase = []byte(passphrase)
@@ -64,19 +56,11 @@ func GenSeed() string {
 //	Once it has been verified by the user, the seed can be fed into this RPC in order to commit the new wallet.
 //	@return bool
 func InitWallet(seed, password string) bool {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	creds := connect.NewTlsCert(tlsCertPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
 
 	var (
 		cipherSeedMnemonic      []string
@@ -143,19 +127,11 @@ func InitWallet(seed, password string) bool {
 //	@Description: UnlockWallet is used at startup of lnd to provide a password to unlock the wallet database.
 //	@return bool
 func UnlockWallet(password string) bool {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	creds := connect.NewTlsCert(tlsCertPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
 	client := lnrpc.NewWalletUnlockerClient(conn)
 	request := &lnrpc.UnlockWalletRequest{
 		WalletPassword: []byte(password),

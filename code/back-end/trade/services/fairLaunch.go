@@ -1,11 +1,16 @@
 package services
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/lightninglabs/taproot-assets/taprpc"
 	"math"
 	"reflect"
+	"strconv"
+	"strings"
 	"time"
+	"trade/api"
 	"trade/middleware"
 	"trade/models"
 	"trade/utils"
@@ -23,11 +28,16 @@ func GetFairLaunchInfo(id int) (*models.FairLaunchInfo, error) {
 	return f.ReadFairLaunchInfo(uint(id))
 }
 
-func GetFairLaunchMintedInfo(id int) (*[]models.FairLaunchMintedInfo, error) {
+func GetFairLaunchMintedInfo(id int) (*models.FairLaunchMintedInfo, error) {
+	f := FairLaunchStore{DB: middleware.DB}
+	return f.ReadFairLaunchMintedInfo(uint(id))
+}
+
+func GetFairLaunchMintedInfosByFairLaunchId(fairLaunchId int) (*[]models.FairLaunchMintedInfo, error) {
 	f := FairLaunchStore{DB: middleware.DB}
 	var fairLaunchMintedInfos []models.FairLaunchMintedInfo
 	//err := f.DB.Where("fair_launch_info_id = ?", int(uint(id))).Find(&fairLaunchMintedInfos).Error
-	err := f.DB.Where(&models.FairLaunchMintedInfo{FairLaunchInfoID: int(uint(id))}).Find(&fairLaunchMintedInfos).Error
+	err := f.DB.Where(&models.FairLaunchMintedInfo{FairLaunchInfoID: int(uint(fairLaunchId))}).Find(&fairLaunchMintedInfos).Error
 	return &fairLaunchMintedInfos, err
 }
 
@@ -95,7 +105,7 @@ func ProcessFairLaunchInfo(imageData string, name string, assetType int, amount 
 // @param userId
 // @return *models.FairLaunchMintedInfo
 // @return error
-func ProcessFairLaunchMintedInfo(fairLaunchInfoID int, mintedNumber int, userId int) (*models.FairLaunchMintedInfo, error) {
+func ProcessFairLaunchMintedInfo(fairLaunchInfoID int, mintedNumber int, addr string, userId int) (*models.FairLaunchMintedInfo, error) {
 	var fairLaunchMintedInfo models.FairLaunchMintedInfo
 	isFairLaunchMintTimeRight, err := IsFairLaunchMintTimeRight(fairLaunchInfoID)
 	if err != nil {
@@ -105,10 +115,22 @@ func ProcessFairLaunchMintedInfo(fairLaunchInfoID int, mintedNumber int, userId 
 		err = errors.New("not valid mint time")
 		return nil, err
 	}
+	decodedAddrInfo, err := api.GetDecodedAddrInfo(addr)
+	if err != nil {
+		return nil, err
+	}
 	fairLaunchMintedInfo = models.FairLaunchMintedInfo{
 		FairLaunchInfoID: fairLaunchInfoID,
 		MintedNumber:     mintedNumber,
+		EncodedAddr:      addr,
 		UserID:           userId,
+		AssetID:          hex.EncodeToString(decodedAddrInfo.AssetId),
+		AssetType:        decodedAddrInfo.AssetType.String(),
+		AddrAmount:       int(decodedAddrInfo.Amount),
+		ScriptKey:        hex.EncodeToString(decodedAddrInfo.ScriptKey),
+		InternalKey:      hex.EncodeToString(decodedAddrInfo.InternalKey),
+		TaprootOutputKey: hex.EncodeToString(decodedAddrInfo.TaprootOutputKey),
+		ProofCourierAddr: decodedAddrInfo.ProofCourierAddr,
 		MintTime:         utils.GetTimestamp(),
 		State:            models.FairLaunchMintedStateNoPay,
 	}
@@ -218,6 +240,7 @@ func CreateInventoryInfoByFairLaunchInfo(fairLaunchInfo *models.FairLaunchInfo) 
 		FairLaunchInventoryInfos = append(FairLaunchInventoryInfos, models.FairLaunchInventoryInfo{
 			FairLaunchInfoID: int(fairLaunchInfo.ID),
 			Quantity:         fairLaunchInfo.MintQuantity,
+			State:            models.FairLaunchInventoryStateOpen,
 		})
 	}
 	FairLaunchInventoryInfos = append(FairLaunchInventoryInfos, models.FairLaunchInventoryInfo{
@@ -251,7 +274,7 @@ func CreateAssetIssuanceInfoByFairLaunchInfo(fairLaunchInfo *models.FairLaunchIn
 // @return error
 func GetAllInventoryInfoByFairLaunchInfoId(fairLaunchInfoId int) (*[]models.FairLaunchInventoryInfo, error) {
 	var fairLaunchInventoryInfos []models.FairLaunchInventoryInfo
-	err := middleware.DB.Where("fair_launch_info_id = ? AND status = ?", fairLaunchInfoId, 1).Find(&fairLaunchInventoryInfos).Error
+	err := middleware.DB.Where("fair_launch_info_id = ? AND status = ?", fairLaunchInfoId, models.StatusNormal).Find(&fairLaunchInventoryInfos).Error
 	if err != nil {
 		utils.LogError("Get all inventory info by fair launch id. ", err)
 		return nil, err
@@ -266,7 +289,7 @@ func GetAllInventoryInfoByFairLaunchInfoId(fairLaunchInfoId int) (*[]models.Fair
 // @return error
 func GetInventoryCouldBeMintedByFairLaunchInfoId(fairLaunchInfoId int) (*[]models.FairLaunchInventoryInfo, error) {
 	var fairLaunchInventoryInfos []models.FairLaunchInventoryInfo
-	err := middleware.DB.Where("fair_launch_info_id = ? AND status = ? AND is_minted = ?", fairLaunchInfoId, models.StatusNormal, false).Find(&fairLaunchInventoryInfos).Error
+	err := middleware.DB.Where("fair_launch_info_id = ? AND status = ? AND is_minted = ? AND state = ?", fairLaunchInfoId, models.StatusNormal, false, models.FairLaunchInventoryStateOpen).Find(&fairLaunchInventoryInfos).Error
 	if err != nil {
 		utils.LogError("Get all inventory info could be minted by fair launch id. ", err)
 		return nil, err
@@ -318,34 +341,39 @@ func GetMintAmountByFairLaunchMintNumber(fairLaunchInfoId int, number int) (amou
 	return amount, err
 }
 
-// LockInventoryByFairLaunchIdAndMintNumber
+// LockInventoryByFairLaunchMintedIdAndMintNumber
 // @Description: Calculate MintAmount By id and MintNumber, then Update State, this function will lock inventory
 // @param fairLaunchInfoId
 // @param number
 // @return *[]models.FairLaunchInventoryInfo
 // @return error
-func LockInventoryByFairLaunchIdAndMintNumber(fairLaunchInfoId int, number int) (*[]models.FairLaunchInventoryInfo, error) {
+func LockInventoryByFairLaunchMintedIdAndMintNumber(fairLaunchMintedInfoId int, number int) (*[]models.FairLaunchInventoryInfo, error) {
 	if number <= 0 {
 		err := errors.New("mint number must be greater than zero")
-		utils.LogError("", err)
+		FairLaunchDebugLogger.Error("", err)
 		return nil, err
 	}
-	fairLaunchInventoryInfos, err := GetInventoryCouldBeMintedByFairLaunchInfoId(fairLaunchInfoId)
+	fairLaunchMintedInfo, err := GetFairLaunchMintedInfo(fairLaunchMintedInfoId)
 	if err != nil {
-		utils.LogError("", err)
+		FairLaunchDebugLogger.Error("Get FairLaunchMintedInfo", err)
+		return nil, err
+	}
+	fairLaunchInventoryInfos, err := GetInventoryCouldBeMintedByFairLaunchInfoId(fairLaunchMintedInfo.FairLaunchInfoID)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Get Inventory Could Be Minted By FairLaunchInfoId", err)
 		return nil, err
 	}
 	allNum := len(*fairLaunchInventoryInfos)
 	if allNum < number {
 		err = errors.New("not enough mint amount")
-		utils.LogError("", err)
+		FairLaunchDebugLogger.Error("", err)
 		return nil, err
 	}
 	mintInventoryInfos := (*fairLaunchInventoryInfos)[:number]
-	for _, inventory := range mintInventoryInfos {
-		inventory.Status = models.StatusPending
-	}
-	err = middleware.DB.Model(&mintInventoryInfos).Update("status", models.StatusPending).Error
+	//for _, inventory := range mintInventoryInfos {
+	//	inventory.Status = models.StatusPending
+	//}
+	err = middleware.DB.Model(&mintInventoryInfos).Updates(map[string]any{"state": models.FairLaunchInventoryStateLocked, "minted_id": fairLaunchMintedInfoId}).Error
 	return &mintInventoryInfos, err
 }
 
@@ -403,6 +431,7 @@ func AmountAndQuantityToNumber(amount int, quantity int) int {
 
 // CreateInventoryAndAssetIssuanceInfoByFairLaunchInfo
 // @Description: Update inventory and asset issuance
+// maybe deprecated
 // @param fairLaunchInfo
 // @return err
 func CreateInventoryAndAssetIssuanceInfoByFairLaunchInfo(fairLaunchInfo *models.FairLaunchInfo) (err error) {
@@ -570,24 +599,185 @@ func ProcessAllFairLaunchInfos() (*[]ProcessionResult, error) {
 	return &processionResults, nil
 }
 
+func UpdateFairLaunchInfoPaidId(fairLaunchInfo *models.FairLaunchInfo, paidId int) (err error) {
+	fairLaunchInfo.IssuanceFeePaidID = paidId
+	f := FairLaunchStore{DB: middleware.DB}
+	return f.UpdateFairLaunchInfo(fairLaunchInfo)
+}
+
+func ChangeFairLaunchInfoState(fairLaunchInfo *models.FairLaunchInfo, state models.FairLaunchState) (err error) {
+	fairLaunchInfo.State = state
+	f := FairLaunchStore{DB: middleware.DB}
+	return f.UpdateFairLaunchInfo(fairLaunchInfo)
+}
+
+func UpdateFairLaunchInfoBatchKeyAndBatchState(fairLaunchInfo *models.FairLaunchInfo, batchKey string, batchState string) (err error) {
+	fairLaunchInfo.BatchKey = batchKey
+	fairLaunchInfo.BatchState = batchState
+	f := FairLaunchStore{DB: middleware.DB}
+	return f.UpdateFairLaunchInfo(fairLaunchInfo)
+}
+
+func UpdateFairLaunchInfoBatchTxidAndAssetId(fairLaunchInfo *models.FairLaunchInfo, batchTxidAnchor string, batchState string, assetId string) (err error) {
+	fairLaunchInfo.BatchTxidAnchor = batchTxidAnchor
+	fairLaunchInfo.BatchState = batchState
+	fairLaunchInfo.AssetID = assetId
+	f := FairLaunchStore{DB: middleware.DB}
+	return f.UpdateFairLaunchInfo(fairLaunchInfo)
+}
+
+func FairLaunchTapdMint(fairLaunchInfo *models.FairLaunchInfo) (err error) {
+	// @dev: 1.taprpc MintAsset
+	var isCollectible bool
+	if taprpc.AssetType(fairLaunchInfo.AssetType) == taprpc.AssetType_COLLECTIBLE {
+		isCollectible = true
+	}
+	newMeta := api.NewMeta(fairLaunchInfo.Description, fairLaunchInfo.ImageData)
+	mintResponse, err := api.MintAssetAndGetResponse(fairLaunchInfo.Name, isCollectible, newMeta, fairLaunchInfo.Amount, false)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Tapd Mint Asset.", err)
+		return err
+	}
+	// @dev: 2.update batchKey and batchState
+	batchKey := hex.EncodeToString(mintResponse.GetPendingBatch().GetBatchKey())
+	batchState := mintResponse.GetPendingBatch().GetState().String()
+	err = UpdateFairLaunchInfoBatchKeyAndBatchState(fairLaunchInfo, batchKey, batchState)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Update FairLaunchInfo BatchKey And BatchState", err)
+		return err
+	}
+	return nil
+}
+
+func FairLaunchTapdMintFinalize(fairLaunchInfo *models.FairLaunchInfo) (err error) {
+	finalizeResponse, err := api.FinalizeBatchAndGetResponse(fairLaunchInfo.FeeRate)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Tapd Mint finalize.", err)
+		return err
+	}
+	if hex.EncodeToString(finalizeResponse.GetBatch().GetBatchKey()) != fairLaunchInfo.BatchKey {
+		err = errors.New("finalize batch key is not equal mint batch key")
+		FairLaunchDebugLogger.Error("Tapd Mint finalize.", err)
+		return err
+	}
+	batchTxidAnchor := finalizeResponse.GetBatch().GetBatchTxid()
+	batchState := finalizeResponse.GetBatch().GetState().String()
+	assetId, err := api.BatchTxidAnchorToAssetId(batchTxidAnchor)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Batch Anchor Txid To AssetId.", err)
+		return err
+	}
+	err = UpdateFairLaunchInfoBatchTxidAndAssetId(fairLaunchInfo, batchTxidAnchor, batchState, assetId)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Update FairLaunchInfo BatchTxid And AssetId.", err)
+		return err
+	}
+	return nil
+}
+
+func GetTransactionConfirmedNumber(txid string) (mumConfirmations int, err error) {
+	response, err := api.GetListChainTransactions()
+	if err != nil {
+		FairLaunchDebugLogger.Error("Get List ChainTransactions", err)
+		return 0, err
+	}
+	for _, transaction := range *response {
+		if txid == transaction.TxHash {
+			return transaction.NumConfirmations, nil
+		}
+	}
+	err = errors.New("did not match transaction hash")
+	return 0, err
+}
+
+func IsTransactionConfirmed(txid string) bool {
+	mumConfirmations, err := GetTransactionConfirmedNumber(txid)
+	if err != nil {
+		FairLaunchDebugLogger.Error("", err)
+		return false
+	}
+	return mumConfirmations > 0
+}
+
+// Procession
+
 func ProcessFairLaunchStateNoPayInfoService(fairLaunchInfo *models.FairLaunchInfo) (err error) {
-	// TODO: need to complete
-	// TODO: Call
+	// @dev: 1.pay fee
+	paidId, err := PayIssuanceFee()
+	if err != nil {
+		FairLaunchDebugLogger.Error("Pay Mint Fee.", err)
+		return nil
+	}
+	// @dev: 2.Store paidId
+	err = UpdateFairLaunchInfoPaidId(fairLaunchInfo, paidId)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Update FairLaunchInfo PaidId", err)
+		return err
+	}
+	// @dev: 3.Change state
+	err = ChangeFairLaunchInfoState(fairLaunchInfo, models.FairLaunchStatePaidPending)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Change FairLaunchInfo State.", err)
+		return err
+	}
 	return nil
 }
 
 func ProcessFairLaunchStatePaidPendingInfoService(fairLaunchInfo *models.FairLaunchInfo) (err error) {
-	// TODO: need to complete
+	// @dev: 1.fee paid
+	if IsIssuanceFeePaid(fairLaunchInfo.IssuanceFeePaidID) {
+		// @dev: Change state
+		err = ChangeFairLaunchInfoState(fairLaunchInfo, models.FairLaunchStatePaidNoIssue)
+		if err != nil {
+			FairLaunchDebugLogger.Error("Change FairLaunchInfo State.", err)
+			return err
+		}
+		return nil
+	}
+	// @dev: fee has not been paid
+	FairLaunchDebugLogger.Info("fairLaunchInfo:", fairLaunchInfo.ID, "is in Paid Pending State:", fairLaunchInfo.IssuanceFeePaidID)
 	return nil
 }
 
 func ProcessFairLaunchStatePaidNoIssueInfoService(fairLaunchInfo *models.FairLaunchInfo) (err error) {
-	// TODO: need to complete
+	// @dev: 1.tapd mint, add to batch, finalize
+	err = FairLaunchTapdMint(fairLaunchInfo)
+	if err != nil {
+		FairLaunchDebugLogger.Error("", err)
+		return err
+	}
+	// @TODO: Consider whether to use scheduled task to finalize
+	err = FairLaunchTapdMintFinalize(fairLaunchInfo)
+	if err != nil {
+		FairLaunchDebugLogger.Error("", err)
+		return err
+	}
+	// @dev: 2.Update asset issuance table
+	err = CreateAssetIssuanceInfoByFairLaunchInfo(fairLaunchInfo)
+	// @dev: 3.update inventory
+	err = CreateInventoryInfoByFairLaunchInfo(fairLaunchInfo)
+	// @dev: Change state
+	err = ChangeFairLaunchInfoState(fairLaunchInfo, models.FairLaunchStateIssuedPending)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Change FairLaunchInfo State.", err)
+		return err
+	}
 	return nil
 }
 
 func ProcessFairLaunchStateIssuedPendingInfoService(fairLaunchInfo *models.FairLaunchInfo) (err error) {
-	// TODO: need to complete
+	// @dev: 1.Is Transaction Confirmed
+	if IsTransactionConfirmed(fairLaunchInfo.BatchTxidAnchor) {
+		// @dev: Change state
+		err = ChangeFairLaunchInfoState(fairLaunchInfo, models.FairLaunchStateIssued)
+		if err != nil {
+			FairLaunchDebugLogger.Error("Change FairLaunchInfo State.", err)
+			return err
+		}
+		return nil
+	}
+	// @dev: Transaction has not been Confirmed
+	FairLaunchDebugLogger.Info("fairLaunchInfo:", fairLaunchInfo.ID, "is in Issued Pending State:", fairLaunchInfo.BatchTxidAnchor)
 	return nil
 }
 
@@ -739,36 +929,310 @@ func ProcessAllFairLaunchMintedInfos() (*[]ProcessionResult, error) {
 	return &processionResults, nil
 }
 
+func UpdateFairLaunchMintedInfoPaidId(fairLaunchMintedInfo *models.FairLaunchMintedInfo, paidId int) (err error) {
+	fairLaunchMintedInfo.MintFeePaidID = paidId
+	f := FairLaunchStore{DB: middleware.DB}
+	return f.UpdateFairLaunchMintedInfo(fairLaunchMintedInfo)
+}
+
+func ChangeFairLaunchMintedInfoState(fairLaunchMintedInfo *models.FairLaunchMintedInfo, state models.FairLaunchMintedState) (err error) {
+	fairLaunchMintedInfo.State = state
+	f := FairLaunchStore{DB: middleware.DB}
+	return f.UpdateFairLaunchMintedInfo(fairLaunchMintedInfo)
+}
+
+func LockInventoryByFairLaunchMintedInfo(fairLaunchMintedInfo *models.FairLaunchMintedInfo) (lockedInventory *[]models.FairLaunchInventoryInfo, err error) {
+	//fairLaunchId := fairLaunchMintedInfo.FairLaunchInfoID
+	//mintNumber := fairLaunchMintedInfo.MintedNumber
+	lockedInventory, err = LockInventoryByFairLaunchMintedIdAndMintNumber(int(fairLaunchMintedInfo.ID), fairLaunchMintedInfo.MintedNumber)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Lock Inventory By FairLaunchId And MintNumber", err)
+		return nil, err
+	}
+	return lockedInventory, nil
+}
+
+func GetAllUnsentFairLaunchMintedInfos() (fairLaunchMintedInfos *[]models.FairLaunchMintedInfo, err error) {
+	err = middleware.DB.Where("status = ? AND state = ? AND is_addr_sent = ?", models.StatusNormal, models.FairLaunchInventoryStateLocked, false).Find(fairLaunchMintedInfos).Error
+	if err != nil {
+		utils.LogError("Get all fairLaunch minted infos error. ", err)
+		return nil, err
+	}
+	return fairLaunchMintedInfos, err
+}
+
+// @dev: dprecated
+func UpdateFairLaunchMintedInfosIsAddrSent(fairLaunchMintedInfos *[]models.FairLaunchMintedInfo, isAddrSent bool) (err error) {
+	return middleware.DB.Model(&fairLaunchMintedInfos).Update("is_addr_sent", isAddrSent).Error
+}
+
+func SendAssetResponseScriptKeyAndInternalKeyToOutpoint(sendAssetResponse *taprpc.SendAssetResponse, scriptKey string, internalKey string) (outpoint string, err error) {
+	for _, output := range sendAssetResponse.Transfer.Outputs {
+		outputScriptKey := hex.EncodeToString(output.ScriptKey)
+		outputAnchorInternalKey := hex.EncodeToString(output.Anchor.InternalKey)
+		if outputScriptKey == scriptKey && outputAnchorInternalKey == internalKey {
+			return output.Anchor.Outpoint, nil
+		}
+	}
+	err = errors.New("can not find anchor outpoint value")
+	return "", err
+}
+
+// GetTransactionAndIndexByOutpoint
+// @dev: Split outpoint
+func GetTransactionAndIndexByOutpoint(outpoint string) (transaction string, index string) {
+	result := strings.Split(outpoint, ":")
+	return result[0], result[1]
+}
+
+func GetListChainTransactionsOutpointAddress(outpoint string) (address string, err error) {
+	response, err := api.GetListChainTransactions()
+	if err != nil {
+		FairLaunchDebugLogger.Error("Get List ChainTransactions", err)
+		return "", err
+	}
+	tx, indexStr := GetTransactionAndIndexByOutpoint(outpoint)
+	index, err := strconv.Atoi(indexStr)
+	if err != nil {
+		FairLaunchDebugLogger.Error("strconv.Atoi(indexStr)", err)
+		return "", err
+	}
+	for _, transaction := range *response {
+		if transaction.TxHash == tx {
+			return transaction.DestAddresses[index], nil
+		}
+	}
+	err = errors.New("did not match transaction outpoint")
+	return "", err
+}
+
+// @dev: Updated outpoint and is_addr_sent
+func UpdateFairLaunchMintedInfosBySendAssetResponse(fairLaunchMintedInfos *[]models.FairLaunchMintedInfo, sendAssetResponse *taprpc.SendAssetResponse) (err error) {
+	// deprecate anchor tx hash
+	_ = hex.EncodeToString(sendAssetResponse.Transfer.AnchorTxHash)
+	for _, fairLaunchMintedInfo := range *fairLaunchMintedInfos {
+		scriptKey := fairLaunchMintedInfo.ScriptKey
+		internalKey := fairLaunchMintedInfo.InternalKey
+		var outpoint string
+		outpoint, err = SendAssetResponseScriptKeyAndInternalKeyToOutpoint(sendAssetResponse, scriptKey, internalKey)
+		fairLaunchMintedInfo.OutpointTxHash, _ = GetTransactionAndIndexByOutpoint(outpoint)
+		if err != nil {
+			FairLaunchDebugLogger.Error("Send Asset Response ScriptKey And InternalKey To Outpoint", err)
+			return err
+		}
+		// @dev: Update outpoint and isAddrSent
+		fairLaunchMintedInfo.Outpoint = outpoint
+		fairLaunchMintedInfo.IsAddrSent = true
+		var address string
+		address, err = GetListChainTransactionsOutpointAddress(outpoint)
+		if err != nil {
+			FairLaunchDebugLogger.Error("Get List Chain Transactions Outpoint Address", err)
+			return err
+		}
+		fairLaunchMintedInfo.Address = address
+	}
+	return middleware.DB.Save(fairLaunchMintedInfos).Error
+}
+
+// @dev: Trigger after ProcessFairLaunchMintedStatePaidNoSendInfo
+func SendFairLaunchMintedAssetLocked() (err error) {
+	// @dev: all unsent
+	unsentFairLaunchMintedInfos, err := GetAllUnsentFairLaunchMintedInfos()
+	if err != nil {
+		FairLaunchDebugLogger.Error("Get All Unsent FairLaunchMintedInfos", err)
+		return err
+	}
+	// @dev: addr Slice
+	var addrSlice []string
+	for _, fairLaunchMintedInfo := range *unsentFairLaunchMintedInfos {
+		addrSlice = append(addrSlice, fairLaunchMintedInfo.EncodedAddr)
+	}
+	// @dev: Send Asset
+	response, err := api.SendAssetAddrSliceAndGetResponse(addrSlice, 0)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Send Asset AddrSlice And Get Response", err)
+		return err
+	}
+	// @dev: Update minted info
+	err = UpdateFairLaunchMintedInfosBySendAssetResponse(unsentFairLaunchMintedInfos, response)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Update By FairLaunchMintedInfos And SendAssetResponse", err)
+		return err
+	}
+	return nil
+}
+
+func GetAllLockedInventoryByFairLaunchMintedInfo(fairLaunchMintedInfo *models.FairLaunchMintedInfo) (*[]models.FairLaunchInventoryInfo, error) {
+	var fairLaunchInventoryInfos []models.FairLaunchInventoryInfo
+	err := middleware.DB.Where("status = ? AND state = ? AND minted_id = ?", models.StatusNormal, models.FairLaunchInventoryStateLocked, fairLaunchMintedInfo.ID).Find(&fairLaunchInventoryInfos).Error
+	if err != nil {
+		FairLaunchDebugLogger.Error("DB Find by state AND minted_id", err)
+		return nil, err
+	}
+	return &fairLaunchInventoryInfos, nil
+}
+
+func UpdateLockedInventoryByFairLaunchMintedInfo(fairLaunchMintedInfo *models.FairLaunchMintedInfo) (err error) {
+	fairLaunchMintedInfos, err := GetAllLockedInventoryByFairLaunchMintedInfo(fairLaunchMintedInfo)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Get All Locked Inventory By FairLaunchMintedInfo", err)
+		return err
+	}
+	// @dev: Update
+	err = middleware.DB.Model(&fairLaunchMintedInfos).Updates(map[string]any{"is_minted": true, "state": models.FairLaunchInventoryStateMinted}).Error
+	if err != nil {
+		FairLaunchDebugLogger.Error("DB Updates is_minted, state", err)
+		return err
+	}
+	return nil
+}
+
+func UpdateMintedNumberAndIsMintAllOfFairLaunchInfoByFairLaunchMintedInfo(fairLaunchMintedInfo *models.FairLaunchMintedInfo) (err error) {
+	fairLaunchInfoId := fairLaunchMintedInfo.FairLaunchInfoID
+	fairLaunchInfo, err := GetFairLaunchInfo(fairLaunchInfoId)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Get FairLaunchInfo", err)
+		return err
+	}
+	var isMintAll bool
+	if fairLaunchInfo.MintedNumber+fairLaunchMintedInfo.MintedNumber >= fairLaunchInfo.MintNumber {
+		isMintAll = true
+	}
+	fairLaunchInfo.MintedNumber += fairLaunchMintedInfo.MintedNumber
+	fairLaunchInfo.IsMintAll = isMintAll
+	return middleware.DB.Save(fairLaunchInfo).Error
+}
+
+// Procession
+
 func ProcessFairLaunchMintedStateNoPayInfo(fairLaunchMintedInfo *models.FairLaunchMintedInfo) (err error) {
-	// TODO: need to complete
+	// @dev: 1.pay fee
+	paidId, err := PayMintFee()
+	if err != nil {
+		FairLaunchDebugLogger.Error("Pay Issuance Fee.", err)
+		return nil
+	}
+	// @dev: 2.Store paidId
+	err = UpdateFairLaunchMintedInfoPaidId(fairLaunchMintedInfo, paidId)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Update FairLaunchMintedInfo PaidId", err)
+		return err
+	}
+	// @dev: 3.Change state
+	err = ChangeFairLaunchMintedInfoState(fairLaunchMintedInfo, models.FairLaunchMintedStatePaidPending)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Change FairLaunchMintedInfo State.", err)
+		return err
+	}
 	return nil
 }
 
 func ProcessFairLaunchMintedStatePaidPendingInfo(fairLaunchMintedInfo *models.FairLaunchMintedInfo) (err error) {
-	// TODO: need to complete
+	// @dev: 1.fee paid
+	if IsMintFeePaid(fairLaunchMintedInfo.MintFeePaidID) {
+		// @dev: Change state
+		err = ChangeFairLaunchMintedInfoState(fairLaunchMintedInfo, models.FairLaunchMintedStatePaidNoSend)
+		if err != nil {
+			FairLaunchDebugLogger.Error("Change FairLaunchMintedInfo State.", err)
+			return err
+		}
+		return nil
+	}
+	// @dev: fee has not been paid
+	FairLaunchDebugLogger.Info("fairLaunchMintedInfo:", fairLaunchMintedInfo.ID, "is in Paid Pending State:", fairLaunchMintedInfo.MintFeePaidID)
 	return nil
 }
 
 func ProcessFairLaunchMintedStatePaidNoSendInfo(fairLaunchMintedInfo *models.FairLaunchMintedInfo) (err error) {
-	// TODO: need to complete
+	// @dev: Locked Inventory
+	lockedInventory, err := LockInventoryByFairLaunchMintedInfo(fairLaunchMintedInfo)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Lock Inventory By FairLaunchMintedInfo", err)
+		return err
+	}
+	// @dev: Calculate mint amount
+	calculatedMintAmount := CalculateMintAmountByFairLaunchInventoryInfos(lockedInventory)
+	if calculatedMintAmount != fairLaunchMintedInfo.AddrAmount {
+		err = errors.New("calculated amount is not equal fairLaunchMintedInfo's addr amount")
+		FairLaunchDebugLogger.Error("calculatedMintAmount != fairLaunchMintedInfo.AddrAmount", err)
+		return err
+	}
+	// @dev: Change state
+	err = ChangeFairLaunchMintedInfoState(fairLaunchMintedInfo, models.FairLaunchMintedStateSentPending)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Change FairLaunchMintedInfo State.", err)
+		return err
+	}
 	return nil
 }
 
 func ProcessFairLaunchMintedStateSentPendingInfo(fairLaunchMintedInfo *models.FairLaunchMintedInfo) (err error) {
-	// TODO: need to complete
+	// @dev: 1.Is Transaction Confirmed
+	if IsTransactionConfirmed(fairLaunchMintedInfo.OutpointTxHash) {
+		// @dev: Change state
+		err = ChangeFairLaunchMintedInfoState(fairLaunchMintedInfo, models.FairLaunchMintedStateSent)
+		if err != nil {
+			FairLaunchDebugLogger.Error("Change FairLaunchMintedInfo State.", err)
+			return err
+		}
+		// TODO: Update MintedNumber and IsMintAll
+		err = UpdateMintedNumberAndIsMintAllOfFairLaunchInfoByFairLaunchMintedInfo(fairLaunchMintedInfo)
+		if err != nil {
+			FairLaunchDebugLogger.Error("Update MintedNumber And IsMintAll Of FairLaunchInfo By FairLaunchMintedInfo", err)
+			return err
+		}
+		// Update Inventory
+		err = UpdateLockedInventoryByFairLaunchMintedInfo(fairLaunchMintedInfo)
+		if err != nil {
+			FairLaunchDebugLogger.Error("Update Locked Inventory By FairLaunchMintedInfo", err)
+			return err
+		}
+		// Update minted user
+		f := FairLaunchStore{DB: middleware.DB}
+		err = f.CreateFairLaunchMintedUserInfo(&models.FairLaunchMintedUserInfo{
+			UserID:           fairLaunchMintedInfo.UserID,
+			FairLaunchInfoID: fairLaunchMintedInfo.FairLaunchInfoID,
+			MintedNumber:     fairLaunchMintedInfo.MintedNumber,
+		})
+		if err != nil {
+			FairLaunchDebugLogger.Error("Create FairLaunch Minted UserInfo", err)
+			return err
+		}
+		return nil
+	}
+	// @dev: Transaction has not been Confirmed
+	FairLaunchDebugLogger.Info("fairLaunchMintedInfo:", fairLaunchMintedInfo.ID, "is in Sent Pending State:", fairLaunchMintedInfo.OutpointTxHash)
 	return nil
 }
 
-// TODO: need to process all
+// FairLaunchIssuance
+// @Description: Scheduled Task
 func FairLaunchIssuance() {
-	// TODO: need to complete
-	FairLaunchDebugLogger.Info("FairLaunchIssuance triggered.")
-
+	processionResult, err := ProcessAllFairLaunchInfos()
+	if err != nil {
+		FairLaunchDebugLogger.Error("", err)
+		return
+	}
+	FairLaunchDebugLogger.Error(utils.ValueJsonString(processionResult))
 }
 
-// TODO: need to process all
+// FairLaunchMint
+// @Description: Scheduled Task
 func FairLaunchMint() {
-	// TODO: need to complete
-	FairLaunchDebugLogger.Info("FairLaunchMint triggered.")
+	processionResult, err := ProcessAllFairLaunchMintedInfos()
+	if err != nil {
+		FairLaunchDebugLogger.Error("", err)
+		return
+	}
+	FairLaunchDebugLogger.Error(utils.ValueJsonString(processionResult))
+}
 
+// SendFairLaunchAsset
+// @Description: Scheduled Task
+func SendFairLaunchAsset() {
+	err := SendFairLaunchMintedAssetLocked()
+	if err != nil {
+		FairLaunchDebugLogger.Error("", err)
+		return
+	}
 }

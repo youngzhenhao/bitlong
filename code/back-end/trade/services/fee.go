@@ -13,29 +13,43 @@ func CalculateFee(amount int) (int, error) {
 }
 
 // TODO: variables need to modify
-func GetPayMintFeeState(invoice string) error {
+func GetPayMintFeeState(paidId int) error {
 	// TODO: need to complete
 	utils.LogInfo("GetPayMintFeeState triggered. This function did nothing, need to complete.")
 	return nil
 }
 
-func IsMintFeePaid(invoice string) bool {
-	_ = GetPayMintFeeState(invoice)
+func IsMintFeePaid(paidId int) bool {
+	_ = GetPayMintFeeState(paidId)
 	// TODO: need to complete
 	utils.LogInfo("IsMintFeePaid triggered. This function did nothing, need to complete.")
 	return true
 }
 
 // TODO: variables need to modify
-func GetPayIssuanceFeeState(invoice string) error {
+func GetPayIssuanceFeeState(paidId int) error {
 	// TODO: need to complete
 	utils.LogInfo("GetPayIssuanceFeeState triggered. This function did nothing, need to complete.")
 	return nil
 }
 
-func IsIssuanceFeePaid(invoice string) bool {
-	_ = GetPayIssuanceFeeState(invoice)
+func IsIssuanceFeePaid(paidId int) bool {
+	_ = GetPayIssuanceFeeState(paidId)
 	// TODO: need to complete
 	utils.LogInfo("IsIssuanceFeePaid triggered. This function did nothing, need to complete.")
 	return true
 }
+
+func PayMintFee() (mintFeePaidId int, err error) {
+	// TODO: need to complete
+	utils.LogInfo("PayMintFee triggered. This function did nothing, need to complete.")
+	return 0, nil
+}
+
+func PayIssuanceFee() (IssuanceFeePaidId int, err error) {
+	// TODO: need to complete
+	utils.LogInfo("PayIssuanceFee triggered. This function did nothing, need to complete.")
+	return 0, nil
+}
+
+// Consider latest block all transactions, use fee median

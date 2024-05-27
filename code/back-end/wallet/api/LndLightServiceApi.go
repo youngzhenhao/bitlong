@@ -7,10 +7,7 @@ import (
 	"fmt"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/wallet/api/connect"
-	"github.com/wallet/base"
-	"google.golang.org/grpc"
 	"io"
-	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -21,24 +18,12 @@ import (
 //	all confirmed unspent outputs and all unconfirmed unspent outputs under control of the wallet.
 //	@return string
 func getWalletBalance() (*lnrpc.WalletBalanceResponse, error) {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
 
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.WalletBalanceRequest{}
 
@@ -54,23 +39,12 @@ func getWalletBalance() (*lnrpc.WalletBalanceResponse, error) {
 //	the chains it is connected to, and information concerning the number of open+pending channels.
 //	@return string
 func getInfoOfLnd() (*lnrpc.GetInfoResponse, error) {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.GetInfoRequest{}
 	response, err := client.GetInfo(context.Background(), request)
@@ -78,23 +52,12 @@ func getInfoOfLnd() (*lnrpc.GetInfoResponse, error) {
 }
 
 func sendCoins(addr string, amount int64, feeRate uint64, all bool) (*lnrpc.SendCoinsResponse, error) {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.SendCoinsRequest{
@@ -149,23 +112,12 @@ func GetIdentityPubkey() string {
 //	@Description:NewAddress creates a new address under control of the local wallet.
 //	@return string
 func GetNewAddress() string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.NewAddressRequest{}
 	response, err := client.NewAddress(context.Background(), request)
@@ -182,27 +134,12 @@ func GetNewAddress() string {
 //	Any duplicated invoices are rejected, therefore all invoices must have a unique payment preimage.
 //	@return string
 func AddInvoice(value int64, memo string) string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	//@dev: Only for testing
-	//grpcHost := GetEnv("grpcHost")
-	//tlsCertPath := GetEnv("tlsCertPath")
-	//macaroonPath := GetEnv("macaroonPath")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.Invoice{
 		Value: value,
@@ -224,23 +161,12 @@ func AddInvoice(value int64, memo string) string {
 //	By default, the first 100 invoices created will be returned. Backwards pagination is also supported through the Reversed flag.
 //	@return string
 func ListInvoices() string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ListInvoiceRequest{}
 	response, err := client.ListInvoices(context.Background(), request)
@@ -329,23 +255,12 @@ type InvoiceAll struct {
 //	The passed payment hash must be exactly 32 bytes, if not, an error is returned.
 //	@return string
 func LookupInvoice(rhash string) string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	b_rhash, _ := hex.DecodeString(rhash)
 	request := &lnrpc.PaymentHash{
@@ -367,23 +282,12 @@ func LookupInvoice(rhash string) string {
 //	Only available for non-externally funded channels in dev build.
 //	@return bool
 func AbandonChannel() bool {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.AbandonChannelRequest{}
 	response, err := client.AbandonChannel(context.Background(), request)
@@ -402,23 +306,12 @@ func AbandonChannel() bool {
 //	This is the safer variant of using PSBTs to manually fund a batch of channels through the OpenChannel RPC.
 //	@return bool
 func BatchOpenChannel() bool {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.BatchOpenChannelRequest{}
 	response, err := client.BatchOpenChannel(context.Background(), request)
@@ -436,23 +329,12 @@ func BatchOpenChannel() bool {
 //	This allows node operators to specify their own criteria for accepting inbound channels through a single persistent connection.
 //	@return bool
 func ChannelAcceptor() bool {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	stream, err := client.ChannelAcceptor(context.Background())
 	if err != nil {
@@ -479,23 +361,12 @@ func ChannelAcceptor() bool {
 //	@Description: ChannelBalance returns a report on the total funds across all open channels, categorized in local/remote, pending local/remote and unsettled local/remote balances.
 //	@return string
 func ChannelBalance() string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ChannelBalanceRequest{}
 	response, err := client.ChannelBalance(context.Background(), request)
@@ -512,23 +383,12 @@ func ChannelBalance() string {
 //	@Description: CheckMacaroonPermissions checks whether a request follows the constraints imposed on the macaroon and that the macaroon is authorized to follow the provided permissions.
 //	@return bool
 func CheckMacaroonPermissions() bool {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.CheckMacPermRequest{}
 	response, err := client.CheckMacaroonPermissions(context.Background(), request)
@@ -548,23 +408,12 @@ func CheckMacaroonPermissions() bool {
 //	If neither are specified, then a default lax, block confirmation target is used.
 //	@return bool
 func CloseChannel(fundingTxidStr string, outputIndex int) bool {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 
 	request := &lnrpc.CloseChannelRequest{
@@ -599,23 +448,12 @@ func CloseChannel(fundingTxidStr string, outputIndex int) bool {
 //	@Description: ClosedChannels returns a description of all the closed channels that this node was a participant in.
 //	@return string
 func ClosedChannels() string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ClosedChannelsRequest{}
 	response, err := client.ClosedChannels(context.Background(), request)
@@ -633,23 +471,12 @@ func ClosedChannels() string {
 //	Additionally, a multi-channel backup is returned as well, which contains a single encrypted blob containing the backups of each channel.
 //	@return bool
 func ExportAllChannelBackups() bool {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ChanBackupExportRequest{}
 	response, err := client.ExportAllChannelBackups(context.Background(), request)
@@ -668,23 +495,12 @@ func ExportAllChannelBackups() bool {
 //	The returned backup can either be restored using the RestoreChannelBackup method once lnd is running, or via the InitWallet and UnlockWallet methods from the WalletUnlocker service.
 //	@return bool
 func ExportChannelBackup() bool {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ExportChannelBackupRequest{}
 	response, err := client.ExportChannelBackup(context.Background(), request)
@@ -701,23 +517,12 @@ func ExportChannelBackup() bool {
 //	@Description:GetChanInfo returns the latest authenticated network announcement for the given channel identified by its channel ID: an 8-byte integer which uniquely identifies the location of transaction's funding output within the blockchain.
 //	@return string
 func GetChanInfo(chanId string) string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	chainIdUint64, err := strconv.ParseUint(chanId, 10, 64)
 	if err != nil {
@@ -740,23 +545,12 @@ func GetChanInfo(chanId string) string {
 //	As with all other sync calls, all byte slices are intended to be populated as hex encoded strings.
 //	@return string
 func OpenChannelSync(nodePubkey string, localFundingAmount int64) string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	_nodePubkeyByteSlice, _ := hex.DecodeString(nodePubkey)
 	request := &lnrpc.OpenChannelRequest{
@@ -787,23 +581,12 @@ func OpenChannelSync(nodePubkey string, localFundingAmount int64) string {
 //	Depending on the arguments specified in the OpenChannelRequest, this pending channel ID can then be used to manually progress the channel funding flow.
 //	@return bool
 func OpenChannel(nodePubkey string, localFundingAmount int64) bool {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	_nodePubkeyByteSlice, _ := hex.DecodeString(nodePubkey)
 	request := &lnrpc.OpenChannelRequest{
@@ -835,23 +618,12 @@ func OpenChannel(nodePubkey string, localFundingAmount int64) bool {
 //	@Description: ListChannels returns a description of all the open channels that this node is a participant in.
 //	@return string
 func ListChannels() string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ListChannelsRequest{}
 	response, err := client.ListChannels(context.Background(), request)
@@ -868,23 +640,12 @@ func ListChannels() string {
 //	A channel is pending if it has finished the funding workflow and is waiting for confirmations for the funding txn, or is in the process of closure, either initiated cooperatively or non-cooperatively.
 //	@return string
 func PendingChannels() string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.PendingChannelsRequest{}
 	response, err := client.PendingChannels(context.Background(), request)
@@ -907,23 +668,12 @@ func PendingChannels() string {
 //	NO_FIND: channel not found
 //	ERR: grpc error
 func GetChannelState(chanPoint string) string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ListChannelsRequest{}
@@ -988,23 +738,12 @@ func GetChannelState(chanPoint string) string {
 //	ERR: grpc error
 //	NO_FIND: channel not found
 func GetChannelInfo(chanPoint string) string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ListChannelsRequest{}
@@ -1028,23 +767,12 @@ func GetChannelInfo(chanPoint string) string {
 //	If we are able to unpack the backup, then the new channel will be shown under listchannels, as well as pending channels.
 //	@return bool
 func RestoreChannelBackups() bool {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.RestoreChanBackupRequest{}
 	response, err := client.RestoreChannelBackups(context.Background(), request)
@@ -1063,23 +791,12 @@ func RestoreChannelBackups() bool {
 //	Each time a channel is closed, we send a new update, which contains new new chan back ups, but the updated set of encrypted multi-chan backups with the closed channel(s) removed.
 //	@return bool
 func SubscribeChannelBackups() bool {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ChannelBackupSubscription{}
 	stream, err := client.SubscribeChannelBackups(context.Background(), request)
@@ -1109,23 +826,12 @@ func SubscribeChannelBackups() bool {
 //	Events include new active channels, inactive channels, and closed channels.
 //	@return bool
 func SubscribeChannelEvents() bool {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ChannelEventSubscription{}
 	stream, err := client.SubscribeChannelEvents(context.Background(), request)
@@ -1155,23 +861,12 @@ func SubscribeChannelEvents() bool {
 //	Events notified include: new nodes coming online, nodes updating their authenticated attributes, new channels being advertised, updates in the routing policy for a directional channel edge, and when channels are closed on-chain.
 //	@return bool
 func SubscribeChannelGraph() bool {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.GraphTopologySubscription{}
 	stream, err := client.SubscribeChannelGraph(context.Background(), request)
@@ -1200,23 +895,12 @@ func SubscribeChannelGraph() bool {
 //	@Description: UpdateChannelPolicy allows the caller to update the fee schedule and channel policies for all channels globally, or a particular channel.
 //	@return bool
 func UpdateChannelPolicy() bool {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.PolicyUpdateRequest{}
 	response, err := client.UpdateChannelPolicy(context.Background(), request)
@@ -1234,23 +918,12 @@ func UpdateChannelPolicy() bool {
 //	This method will accept either a packed Single or a packed Multi. Specifying both will result in an error.
 //	@return bool
 func VerifyChanBackup() bool {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ChanBackupSnapshot{}
 	response, err := client.VerifyChanBackup(context.Background(), request)
@@ -1268,23 +941,12 @@ func VerifyChanBackup() bool {
 //	This is distinct from establishing a channel with a peer.
 //	@return bool
 func ConnectPeer(pubkey, host string) bool {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ConnectPeerRequest{
 		Addr: &lnrpc.LightningAddress{
@@ -1312,23 +974,12 @@ func ConnectPeer(pubkey, host string) bool {
 //	Unfortunately this map type doesn't appear in the REST API documentation because of a bug in the grpc-gateway library.
 //	@return string
 func EstimateFee(addr string, amount int64) string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	addrToAmount := make(map[string]int64)
 	addrToAmount[addr] = amount
@@ -1348,23 +999,12 @@ func EstimateFee(addr string, amount int64) string {
 //	@Description:DecodePayReq takes an encoded payment request string and attempts to decode it, returning a full description of the conditions encoded within the payment request.
 //	@return int64
 func DecodePayReq(payReq string) int64 {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.PayReqString{
 		PayReq: payReq,
@@ -1383,23 +1023,12 @@ func DecodePayReq(payReq string) int64 {
 //	This RPC is intended to be consumed by clients of the REST proxy. Additionally, this RPC expects the destination's public key and the payment hash (if any) to be encoded as hex strings.
 //	@return string
 func SendPaymentSync(invoice string) string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.SendRequest{
 		PaymentRequest: invoice,
@@ -1414,23 +1043,12 @@ func SendPaymentSync(invoice string) string {
 }
 
 func SendPaymentSync0amt(invoice string, amt int64) string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.SendRequest{
 		PaymentRequest: invoice,
@@ -1483,23 +1101,12 @@ func SendMany(jsonAddr string, feeRate int64) string {
 }
 
 func sendMany(addr map[string]int64, feerate uint64) (*lnrpc.SendManyResponse, error) {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.SendManyRequest{
@@ -1529,23 +1136,13 @@ func SendAllCoins(addr string) string {
 //	@Description: Stop gracefully shuts down the Pool trader daemon.
 //	@return bool
 func LndStopDaemon() bool {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
+
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.StopRequest{}
 	response, err := client.StopDaemon(context.Background(), request)
@@ -1558,23 +1155,12 @@ func LndStopDaemon() bool {
 }
 
 func ListPermissions() string {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+
+	defer clearUp()
 	client := lnrpc.NewLightningClient(conn)
 	request := &lnrpc.ListPermissionsRequest{}
 	response, err := client.ListPermissions(context.Background(), request)

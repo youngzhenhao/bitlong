@@ -6,9 +6,6 @@ import (
 	"fmt"
 	"github.com/lightninglabs/taproot-assets/taprpc/assetwalletrpc"
 	"github.com/wallet/api/connect"
-	"github.com/wallet/base"
-	"google.golang.org/grpc"
-	"path/filepath"
 )
 
 // AnchorVirtualPsbts
@@ -21,23 +18,11 @@ import (
 //
 // skipped function AnchorVirtualPsbts with unsupported parameter or return types
 func AnchorVirtualPsbts(virtualPsbts []string) bool {
-	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("tapd", false)
 	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
 	client := assetwalletrpc.NewAssetWalletClient(conn)
 	_virtualPsbts := make([][]byte, 0)
 	for _, i := range virtualPsbts {
@@ -63,23 +48,11 @@ func AnchorVirtualPsbts(virtualPsbts []string) bool {
 //
 // skipped function FundVirtualPsbt with unsupported parameter or return types
 func FundVirtualPsbt(isPsbtNotRaw bool, psbt ...string) bool {
-	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("tapd", false)
 	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
 	client := assetwalletrpc.NewAssetWalletClient(conn)
 	request := &assetwalletrpc.FundVirtualPsbtRequest{}
 	if isPsbtNotRaw {
@@ -106,23 +79,11 @@ func FundVirtualPsbt(isPsbtNotRaw bool, psbt ...string) bool {
 //	While an internal key can also be used as the internal key of a script key, it is recommended to use the NextScriptKey RPC instead, to make sure the tweaked Taproot output key is also recognized as a local key.
 //	@return string
 func NextInternalKey(keyFamily int) string {
-	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("tapd", false)
 	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
 	client := assetwalletrpc.NewAssetWalletClient(conn)
 	request := &assetwalletrpc.NextInternalKeyRequest{
 		KeyFamily: uint32(keyFamily),
@@ -141,23 +102,11 @@ func NextInternalKey(keyFamily int) string {
 //	While an internal key can also be used as the internal key of a script key, it is recommended to use the NextScriptKey RPC instead, to make sure the tweaked Taproot output key is also recognized as a local key.
 //	@return string
 func NextScriptKey(keyFamily int) string {
-	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("tapd", false)
 	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
 	client := assetwalletrpc.NewAssetWalletClient(conn)
 	request := &assetwalletrpc.NextScriptKeyRequest{
 		KeyFamily: uint32(keyFamily),
@@ -176,23 +125,11 @@ func NextScriptKey(keyFamily int) string {
 //	That ownership proof is a signed virtual transaction spending the asset with a valid witness to prove the prover owns the keys that can spend the asset.
 //	@return bool
 func ProveAssetOwnership(assetId, scriptKey string) bool {
-	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("tapd", false)
 	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
 	client := assetwalletrpc.NewAssetWalletClient(conn)
 	_assetIdByteSlice, _ := hex.DecodeString(assetId)
 	_scriptKeyByteSlice, _ := hex.DecodeString(scriptKey)
@@ -216,23 +153,11 @@ func ProveAssetOwnership(assetId, scriptKey string) bool {
 //	@param internalKey
 //	@return string
 func QueryInternalKey(internalKey string) string {
-	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("tapd", false)
 	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
 	client := assetwalletrpc.NewAssetWalletClient(conn)
 	_internalKeyByteSlice, _ := hex.DecodeString(internalKey)
 
@@ -252,23 +177,11 @@ func QueryInternalKey(internalKey string) string {
 //	@Description:QueryScriptKey returns the full script key descriptor for the given tweaked script key.
 //	@return string
 func QueryScriptKey(tweakedScriptKey string) string {
-	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("tapd", false)
 	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
 	client := assetwalletrpc.NewAssetWalletClient(conn)
 	_tweakedScriptKeyByteSlice, _ := hex.DecodeString(tweakedScriptKey)
 	request := &assetwalletrpc.QueryScriptKeyRequest{
@@ -287,23 +200,11 @@ func QueryScriptKey(tweakedScriptKey string) string {
 //	@Description:RemoveUTXOLease removes the lease/lock/reservation of the given managed UTXO.
 //	@return bool
 func RemoveUTXOLease() bool {
-	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("tapd", false)
 	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
 	client := assetwalletrpc.NewAssetWalletClient(conn)
 	request := &assetwalletrpc.RemoveUTXOLeaseRequest{
 		Outpoint: nil,
@@ -322,23 +223,11 @@ func RemoveUTXOLease() bool {
 //	@Description:SignVirtualPsbt signs the inputs of a virtual transaction and prepares the commitments of the inputs and outputs.
 //	@return bool
 func SignVirtualPsbt(fundedPsbt string) bool {
-	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("tapd", false)
 	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
 	client := assetwalletrpc.NewAssetWalletClient(conn)
 	_fundedPsbtByteSlice, _ := hex.DecodeString(fundedPsbt)
 	request := &assetwalletrpc.SignVirtualPsbtRequest{
@@ -358,23 +247,11 @@ func SignVirtualPsbt(fundedPsbt string) bool {
 //	@Description:VerifyAssetOwnership verifies the asset ownership proof embedded in the given transition proof of an asset and returns true if the proof is valid.
 //	@return bool
 func VerifyAssetOwnership(proofWithWitness string) bool {
-	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("tapd", false)
 	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
 	client := assetwalletrpc.NewAssetWalletClient(conn)
 	_proofWithWitnessByteSlice, _ := hex.DecodeString(proofWithWitness)
 	request := &assetwalletrpc.VerifyAssetOwnershipRequest{

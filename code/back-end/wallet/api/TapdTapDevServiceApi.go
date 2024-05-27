@@ -6,9 +6,6 @@ import (
 	"fmt"
 	"github.com/lightninglabs/taproot-assets/taprpc/tapdevrpc"
 	"github.com/wallet/api/connect"
-	"github.com/wallet/base"
-	"google.golang.org/grpc"
-	"path/filepath"
 )
 
 // ImportProof
@@ -17,23 +14,11 @@ import (
 //	If successful, a new asset will be inserted on disk, spendable using the specified target script key, and internal key.
 //	@return bool
 func ImportProof(proofFile, genesisPoint string) bool {
-	grpcHost := base.QueryConfigByKey("taproothost")
-	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
-	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := connect.NewTlsCert(tlsCertPath)
-	macaroon := connect.GetMacaroon(macaroonPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("tapd", false)
 	if err != nil {
-		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close Error: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
 	client := tapdevrpc.NewTapDevClient(conn)
 	_proofFileByteSlice, _ := hex.DecodeString(proofFile)
 	request := &tapdevrpc.ImportProofRequest{

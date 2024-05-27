@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/lightningnetwork/lnd/lnrpc"
+	"github.com/wallet/api/connect"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
 	"path/filepath"
@@ -17,7 +18,7 @@ import (
 func GetStateForSubscribe() bool {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	creds := NewTlsCert(tlsCertPath)
+	creds := connect.NewTlsCert(tlsCertPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
@@ -55,7 +56,7 @@ func GetState() string {
 func getState() (*lnrpc.GetStateResponse, error) {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	creds := NewTlsCert(tlsCertPath)
+	creds := connect.NewTlsCert(tlsCertPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)

@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/lightninglabs/taproot-assets/taprpc/tapdevrpc"
+	"github.com/wallet/api/connect"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
 	"path/filepath"
@@ -20,10 +21,10 @@ func ImportProof(proofFile, genesisPoint string) bool {
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := NewTlsCert(tlsCertPath)
-	macaroon := GetMacaroon(macaroonPath)
+	creds := connect.NewTlsCert(tlsCertPath)
+	macaroon := connect.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}

@@ -7,6 +7,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/lightningnetwork/lnd/lnrpc/chainrpc"
+	"github.com/wallet/api/connect"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
 	"path/filepath"
@@ -28,10 +29,10 @@ func GetBlock(blockHashStr string) (response *chainrpc.GetBlockResponse, err err
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
 	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := NewTlsCert(tlsCertPath)
-	macaroon := GetMacaroon(macaroonPath)
+	creds := connect.NewTlsCert(tlsCertPath)
+	macaroon := connect.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}

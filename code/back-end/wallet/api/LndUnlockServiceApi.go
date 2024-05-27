@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/lightningnetwork/lnd/lnrpc"
+	"github.com/wallet/api/connect"
 	"github.com/wallet/base"
 	"golang.org/x/exp/rand"
 	"google.golang.org/grpc"
@@ -23,7 +24,7 @@ import (
 func GenSeed() string {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	creds := NewTlsCert(tlsCertPath)
+	creds := connect.NewTlsCert(tlsCertPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
@@ -65,7 +66,7 @@ func GenSeed() string {
 func InitWallet(seed, password string) bool {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	creds := NewTlsCert(tlsCertPath)
+	creds := connect.NewTlsCert(tlsCertPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
@@ -144,7 +145,7 @@ func InitWallet(seed, password string) bool {
 func UnlockWallet(password string) bool {
 	grpcHost := base.QueryConfigByKey("lndhost")
 	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	creds := NewTlsCert(tlsCertPath)
+	creds := connect.NewTlsCert(tlsCertPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
@@ -183,9 +184,9 @@ func ChangePassword(currentPassword, newPassword string) bool {
 		panic(err)
 	}
 	macaroon := hex.EncodeToString(macaroonBytes)
-	creds := NewTlsCert(tlsCertPath)
+	creds := connect.NewTlsCert(tlsCertPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}

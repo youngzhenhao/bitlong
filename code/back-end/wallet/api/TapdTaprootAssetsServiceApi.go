@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/lightninglabs/taproot-assets/taprpc"
+	"github.com/wallet/api/connect"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
 	"path/filepath"
@@ -25,10 +26,10 @@ func addrReceives() (*taprpc.AddrReceivesResponse, error) {
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := NewTlsCert(tlsCertPath)
-	macaroon := GetMacaroon(macaroonPath)
+	creds := connect.NewTlsCert(tlsCertPath)
+	macaroon := connect.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -61,10 +62,10 @@ func DecodeAddr(addr string) string {
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := NewTlsCert(tlsCertPath)
-	macaroon := GetMacaroon(macaroonPath)
+	creds := connect.NewTlsCert(tlsCertPath)
+	macaroon := connect.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -111,10 +112,10 @@ func GetInfoOfTap() string {
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := NewTlsCert(tlsCertPath)
-	macaroon := GetMacaroon(macaroonPath)
+	creds := connect.NewTlsCert(tlsCertPath)
+	macaroon := connect.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -225,10 +226,10 @@ func ListGroups() string {
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := NewTlsCert(tlsCertPath)
-	macaroon := GetMacaroon(macaroonPath)
+	creds := connect.NewTlsCert(tlsCertPath)
+	macaroon := connect.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -266,10 +267,10 @@ func listTransfers() (*taprpc.ListTransfersResponse, error) {
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := NewTlsCert(tlsCertPath)
-	macaroon := GetMacaroon(macaroonPath)
+	creds := connect.NewTlsCert(tlsCertPath)
+	macaroon := connect.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -298,10 +299,10 @@ func ListUtxos(includeLeased bool) string {
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := NewTlsCert(tlsCertPath)
-	macaroon := GetMacaroon(macaroonPath)
+	creds := connect.NewTlsCert(tlsCertPath)
+	macaroon := connect.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -340,10 +341,10 @@ func newAddr(assetId string, amt int) (*taprpc.Addr, error) {
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := NewTlsCert(tlsCertPath)
-	macaroon := GetMacaroon(macaroonPath)
+	creds := connect.NewTlsCert(tlsCertPath)
+	macaroon := connect.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -396,10 +397,10 @@ func sendAssets(addrs []string, feeRate uint32) (*taprpc.SendAssetResponse, erro
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := NewTlsCert(tlsCertPath)
-	macaroon := GetMacaroon(macaroonPath)
+	creds := connect.NewTlsCert(tlsCertPath)
+	macaroon := connect.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -446,10 +447,10 @@ func TapStopDaemon() bool {
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := NewTlsCert(tlsCertPath)
-	macaroon := GetMacaroon(macaroonPath)
+	creds := connect.NewTlsCert(tlsCertPath)
+	macaroon := connect.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -474,10 +475,10 @@ func decodeProof(proof []byte, depth uint32, withMetaReveal bool, withPrevWitnes
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := NewTlsCert(tlsCertPath)
-	macaroon := GetMacaroon(macaroonPath)
+	creds := connect.NewTlsCert(tlsCertPath)
+	macaroon := connect.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -503,10 +504,10 @@ func fetchAssetMeta(isHash bool, data string) (*taprpc.AssetMeta, error) {
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := NewTlsCert(tlsCertPath)
-	macaroon := GetMacaroon(macaroonPath)
+	creds := connect.NewTlsCert(tlsCertPath)
+	macaroon := connect.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -537,10 +538,10 @@ func listBalances(useGroupKey bool, assetFilter, groupKeyFilter []byte) (*taprpc
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := NewTlsCert(tlsCertPath)
-	macaroon := GetMacaroon(macaroonPath)
+	creds := connect.NewTlsCert(tlsCertPath)
+	macaroon := connect.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}
@@ -605,10 +606,10 @@ func listAssets(withWitness, includeSpent, includeLeased bool) (*taprpc.ListAsse
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := NewTlsCert(tlsCertPath)
-	macaroon := GetMacaroon(macaroonPath)
+	creds := connect.NewTlsCert(tlsCertPath)
+	macaroon := connect.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(NewMacaroonCredential(macaroon)))
+		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
 	if err != nil {
 		fmt.Printf("%s did not connect: grpc.Dial: %v\n", GetTimeNow(), err)
 	}

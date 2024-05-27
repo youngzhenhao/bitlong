@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/lightninglabs/taproot-assets/taprpc/rfqrpc"
+	"github.com/wallet/api/connect"
 	"github.com/wallet/base"
 	"google.golang.org/grpc"
 	"io"
@@ -21,8 +22,8 @@ func AddAssetBuyOrder() bool {
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := NewTlsCert(tlsCertPath)
-	macaroon := GetMacaroon(macaroonPath)
+	creds := connect.NewTlsCert(tlsCertPath)
+	macaroon := connect.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(api.NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -54,8 +55,8 @@ func AddAssetSellOffer() bool {
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := NewTlsCert(tlsCertPath)
-	macaroon := GetMacaroon(macaroonPath)
+	creds := connect.NewTlsCert(tlsCertPath)
+	macaroon := connect.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(api.NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -87,8 +88,8 @@ func QueryRfqAcceptedQuotes() string {
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := NewTlsCert(tlsCertPath)
-	macaroon := GetMacaroon(macaroonPath)
+	creds := connect.NewTlsCert(tlsCertPath)
+	macaroon := connect.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(api.NewMacaroonCredential(macaroon)))
 	if err != nil {
@@ -119,8 +120,8 @@ func SubscribeRfqEventNtfns() bool {
 	tlsCertPath := filepath.Join(base.Configure("lit"), "tls.cert")
 	newFilePath := filepath.Join(filepath.Join(base.Configure("tapd"), "data"), base.NetWork)
 	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	creds := NewTlsCert(tlsCertPath)
-	macaroon := GetMacaroon(macaroonPath)
+	creds := connect.NewTlsCert(tlsCertPath)
+	macaroon := connect.GetMacaroon(macaroonPath)
 	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(api.NewMacaroonCredential(macaroon)))
 	if err != nil {

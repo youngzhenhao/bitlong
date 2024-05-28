@@ -222,6 +222,25 @@ func sendAsset(tapAddrs string, feeRate int) (*taprpc.SendAssetResponse, error) 
 	return response, nil
 }
 
+func sendAssetAddrSlice(addrSlice []string, feeRate int) (*taprpc.SendAssetResponse, error) {
+	grpcHost := config.GetLoadConfig().ApiConfig.Tapd.Host + ":" + strconv.Itoa(config.GetLoadConfig().ApiConfig.Tapd.Port)
+	tlsCertPath := config.GetLoadConfig().ApiConfig.Tapd.TlsCertPath
+	macaroonPath := config.GetLoadConfig().ApiConfig.Tapd.MacaroonPath
+	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
+	defer connClose()
+	client := taprpc.NewTaprootAssetsClient(conn)
+	request := &taprpc.SendAssetRequest{
+		TapAddrs: addrSlice,
+		FeeRate:  uint32(feeRate),
+	}
+	response, err := client.SendAsset(context.Background(), request)
+	if err != nil {
+		utils.LogError("taprpc SendAsset Error", err)
+		return nil, err
+	}
+	return response, nil
+}
+
 func decodeAddr(addr string) (*taprpc.Addr, error) {
 	grpcHost := config.GetLoadConfig().ApiConfig.Tapd.Host + ":" + strconv.Itoa(config.GetLoadConfig().ApiConfig.Tapd.Port)
 	tlsCertPath := config.GetLoadConfig().ApiConfig.Tapd.TlsCertPath

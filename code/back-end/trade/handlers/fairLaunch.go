@@ -68,7 +68,7 @@ func GetMintedInfo(c *gin.Context) {
 		})
 		return
 	}
-	minted, err := services.GetFairLaunchMintedInfo(id)
+	minted, err := services.GetFairLaunchMintedInfosByFairLaunchId(id)
 	if err != nil {
 		utils.LogError("Get fair launch minted info", err)
 		c.JSON(http.StatusOK, models.JsonResult{
@@ -152,7 +152,7 @@ func SetFairLaunchInfo(c *gin.Context) {
 	})
 }
 
-func MintFairLaunch(c *gin.Context) {
+func SetFairLaunchMintedInfo(c *gin.Context) {
 	var fairLaunchMintedInfo *models.FairLaunchMintedInfo
 	var mintFairLaunchRequest models.MintFairLaunchRequest
 	// @notice: only receive id and number
@@ -162,6 +162,26 @@ func MintFairLaunch(c *gin.Context) {
 		c.JSON(http.StatusOK, models.JsonResult{
 			Success: false,
 			Error:   "Should Bind JSON mintFairLaunchRequest. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	// @dev: Ensure time is valid
+	isTimeRight, err := services.IsFairLaunchMintTimeRight(mintFairLaunchRequest.FairLaunchInfoID)
+	if err != nil {
+		utils.LogError("Is FairLaunch Mint Time Right.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Is FairLaunch Mint Time Right. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	if !isTimeRight {
+		utils.LogError("It is not Right FairLaunch Mint Time now.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "It is not Right FairLaunch Mint Time now. " + err.Error(),
 			Data:    "",
 		})
 		return
@@ -182,7 +202,17 @@ func MintFairLaunch(c *gin.Context) {
 	}
 	fairLaunchInfoID := mintFairLaunchRequest.FairLaunchInfoID
 	mintedNumber := mintFairLaunchRequest.MintedNumber
-	fairLaunchMintedInfo, _ = services.ProcessFairLaunchMintedInfo(fairLaunchInfoID, mintedNumber, userId)
+	addr := mintFairLaunchRequest.EncodedAddr
+	fairLaunchMintedInfo, err = services.ProcessFairLaunchMintedInfo(fairLaunchInfoID, mintedNumber, addr, userId)
+	if err != nil {
+		utils.LogError("Process FairLaunchMintedInfo.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Process FairLaunchMintedInfo " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
 	// @dev: Update db, State models.FairLaunchMintedStateNoPay
 	err = services.SetFairLaunchMintedInfo(fairLaunchMintedInfo)
 	if err != nil {
@@ -199,16 +229,6 @@ func MintFairLaunch(c *gin.Context) {
 		Error:   "",
 		Data:    nil,
 	})
-}
-
-func QueryMintIsAvailable(c *gin.Context) {
-	// TODO: Check if a specific id and amount of minting asset is valid
-
-}
-
-func MintFairLaunchReserved(c *gin.Context) {
-	// TODO: need to complete
-
 }
 
 func QueryInventory(c *gin.Context) {
@@ -239,4 +259,16 @@ func QueryInventory(c *gin.Context) {
 		Error:   "",
 		Data:    inventory,
 	})
+}
+
+// TODO: add more query
+
+func QueryMintIsAvailable(c *gin.Context) {
+	// TODO: Check if a specific id and amount of minting asset is valid
+
+}
+
+func MintFairLaunchReserved(c *gin.Context) {
+	// TODO: need to complete
+
 }

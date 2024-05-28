@@ -33,7 +33,7 @@ func (ml *ServicesLogger) Debug(message string, v ...interface{}) {
 	}
 }
 
-func (ml *ServicesLogger) Info(message string, v ...interface{}) {
+func (ml *ServicesLogger) Info(message string, v ...any) {
 	if ml.level >= INFO {
 		msg := fmt.Sprintf(message, v...)
 		ml.logger.Printf("[Log]: %s\n", msg)
@@ -47,7 +47,7 @@ func (ml *ServicesLogger) Warning(message string, v ...interface{}) {
 	}
 }
 
-func (ml *ServicesLogger) Error(message string, v ...interface{}) {
+func (ml *ServicesLogger) Error(message string, v ...any) {
 	if ml.level >= ERROR {
 		msg := fmt.Sprintf(message, v...)
 		ml.logger.Printf("[Error]: %s\n", msg)

@@ -49,20 +49,28 @@ func NewAddr(assetId string, amt int) string {
 	return utils.MakeJsonResult(true, "", response)
 }
 
-func SendAsset(assetId string, feeRate int) string {
-	response, err := sendAsset(assetId, feeRate)
+func SendAsset(addr string, feeRate int) string {
+	response, err := sendAsset(addr, feeRate)
 	if err != nil {
 		return utils.MakeJsonResult(false, err.Error(), "")
 	}
 	return utils.MakeJsonResult(true, "", response)
 }
 
-func SendAssetBool(assetId string, feeRate int) (bool, error) {
-	_, err := sendAsset(assetId, feeRate)
+func SendAssetBool(addr string, feeRate int) (bool, error) {
+	_, err := sendAsset(addr, feeRate)
 	if err != nil {
 		return false, err
 	}
 	return true, nil
+}
+
+func SendAssetAndGetResponse(addr string, feeRate int) (*taprpc.SendAssetResponse, error) {
+	return sendAsset(addr, feeRate)
+}
+
+func SendAssetAddrSliceAndGetResponse(addrSlice []string, feeRate int) (*taprpc.SendAssetResponse, error) {
+	return sendAssetAddrSlice(addrSlice, feeRate)
 }
 
 func DecodeAddr(addr string) string {

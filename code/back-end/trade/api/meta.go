@@ -11,13 +11,13 @@ import (
 type Meta struct {
 	Acronym     string `json:"acronym,omitempty"`
 	Description string `json:"description,omitempty"`
-	Image_Data  string `json:"image_data,omitempty"`
+	ImageData   string `json:"image_data,omitempty"`
 }
 
 func NewMeta(description string, imageData string) *Meta {
 	meta := Meta{
 		Description: description,
-		Image_Data:  imageData,
+		ImageData:   imageData,
 	}
 	return &meta
 }
@@ -30,7 +30,7 @@ func (m *Meta) LoadImage(file string) (bool, error) {
 			return false, err
 		}
 		imageStr := dataurl.EncodeBytes(image)
-		m.Image_Data = imageStr
+		m.ImageData = imageStr
 	}
 	return true, nil
 }

@@ -5,26 +5,30 @@ import (
 )
 
 type (
-	FairLaunchState       int
-	FairLaunchMintedState int
+	FairLaunchState          int
+	FairLaunchMintedState    int
+	FairLaunchInventoryState int
 )
 
 var (
-	MintMaxNumber                                          = 10
-	StatusDeprecated                                       = 0
-	StatusNormal                                           = 1
-	StatusPending                                          = 2
-	StatusUnknown                                          = 4
-	FairLaunchStateNoPay             FairLaunchState       = 0
-	FairLaunchStatePaidPending       FairLaunchState       = 1
-	FairLaunchStatePaidNoIssue       FairLaunchState       = 2
-	FairLaunchStateIssuedPending     FairLaunchState       = 3
-	FairLaunchStateIssued            FairLaunchState       = 4
-	FairLaunchMintedStateNoPay       FairLaunchMintedState = 0
-	FairLaunchMintedStatePaidPending FairLaunchMintedState = 1
-	FairLaunchMintedStatePaidNoSend  FairLaunchMintedState = 2
-	FairLaunchMintedStateSentPending FairLaunchMintedState = 3
-	FairLaunchMintedStateSent        FairLaunchMintedState = 4
+	MintMaxNumber                                             = 10
+	StatusDeprecated                                          = 0
+	StatusNormal                                              = 1
+	StatusPending                                             = 2
+	StatusUnknown                                             = 4
+	FairLaunchStateNoPay             FairLaunchState          = 0
+	FairLaunchStatePaidPending       FairLaunchState          = 1
+	FairLaunchStatePaidNoIssue       FairLaunchState          = 2
+	FairLaunchStateIssuedPending     FairLaunchState          = 3
+	FairLaunchStateIssued            FairLaunchState          = 4
+	FairLaunchMintedStateNoPay       FairLaunchMintedState    = 0
+	FairLaunchMintedStatePaidPending FairLaunchMintedState    = 1
+	FairLaunchMintedStatePaidNoSend  FairLaunchMintedState    = 2
+	FairLaunchMintedStateSentPending FairLaunchMintedState    = 3
+	FairLaunchMintedStateSent        FairLaunchMintedState    = 4
+	FairLaunchInventoryStateOpen     FairLaunchInventoryState = 0
+	FairLaunchInventoryStateLocked   FairLaunchInventoryState = 1
+	FairLaunchInventoryStateMinted   FairLaunchInventoryState = 2
 )
 
 type FairLaunchInfo struct {
@@ -52,7 +56,7 @@ type FairLaunchInfo struct {
 	BatchTxidAnchor        string          `json:"batch_txid_anchor" gorm:"type:varchar(255)"`
 	AssetID                string          `json:"asset_id" gorm:"type:varchar(255)"`
 	UserID                 int             `json:"user_id"`
-	IssuanceFeeInvoice     string          `json:"issuance_fee_invoice" gorm:"type:varchar(255)"`
+	IssuanceFeePaidID      int             `json:"issuance_fee_paid_id"`
 	IsReservedSent         bool            `json:"is_reserved_sent"`
 	MintedNumber           int             `json:"minted_number"`
 	IsMintAll              bool            `json:"is_mint_all"`
@@ -78,7 +82,7 @@ type FairLaunchMintedInfo struct {
 	FairLaunchInfoID int                   `json:"fair_launch_info_id" gorm:"not null"`
 	MintedNumber     int                   `json:"minted_number"`
 	EncodedAddr      string                `json:"encoded_addr" gorm:"type:varchar(255)"`
-	MintFeeInvoice   string                `json:"mint_fee_invoice" gorm:"type:varchar(255)"`
+	MintFeePaidID    int                   `json:"mint_fee_paid_id"`
 	UserID           int                   `json:"user_id"`
 	AssetID          string                `json:"asset_id" gorm:"type:varchar(255)"`
 	AssetType        string                `json:"asset_type" gorm:"type:varchar(255)"`
@@ -88,6 +92,8 @@ type FairLaunchMintedInfo struct {
 	TaprootOutputKey string                `json:"taproot_output_key" gorm:"type:varchar(255)"`
 	ProofCourierAddr string                `json:"proof_courier_addr" gorm:"type:varchar(255)"`
 	MintTime         int                   `json:"mint_time"`
+	IsAddrSent       bool                  `json:"is_addr_sent"`
+	OutpointTxHash   string                `json:"anchor_tx_hash" gorm:"type:varchar(255)"`
 	Outpoint         string                `json:"outpoint" gorm:"type:varchar(255)"`
 	Address          string                `json:"address" gorm:"type:varchar(255)"`
 	Status           int                   `json:"status" gorm:"default:1"`
@@ -95,8 +101,9 @@ type FairLaunchMintedInfo struct {
 }
 
 type MintFairLaunchRequest struct {
-	FairLaunchInfoID int `json:"fair_launch_info_id"`
-	MintedNumber     int `json:"minted_number"`
+	FairLaunchInfoID int    `json:"fair_launch_info_id"`
+	MintedNumber     int    `json:"minted_number"`
+	EncodedAddr      string `json:"encoded_addr" gorm:"type:varchar(255)"`
 }
 
 type FairLaunchMintedUserInfo struct {
@@ -109,9 +116,10 @@ type FairLaunchMintedUserInfo struct {
 
 type FairLaunchInventoryInfo struct {
 	gorm.Model
-	FairLaunchInfoID int  `json:"fair_launch_info_id" gorm:"not null"`
-	Quantity         int  `json:"quantity"`
-	IsMinted         bool `json:"is_minted"`
-	MintedID         int  `json:"minted_id"`
-	Status           int  `json:"status" gorm:"default:1"`
+	FairLaunchInfoID int                      `json:"fair_launch_info_id" gorm:"not null"`
+	Quantity         int                      `json:"quantity"`
+	IsMinted         bool                     `json:"is_minted"`
+	MintedID         int                      `json:"minted_id"`
+	Status           int                      `json:"status" gorm:"default:1"`
+	State            FairLaunchInventoryState `json:"state"`
 }

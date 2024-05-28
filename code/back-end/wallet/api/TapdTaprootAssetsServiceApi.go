@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/lightninglabs/taproot-assets/taprpc"
 	"github.com/wallet/api/connect"
+	"github.com/wallet/api/rpcclient"
 	"strconv"
 )
 
@@ -43,21 +44,37 @@ func DebugLevel() {
 }
 
 func DecodeAddr(addr string) string {
-	conn, clearUp, err := connect.GetConnection("tapd", false)
+	response, err := rpcclient.DecodeAddr(addr)
 	if err != nil {
-		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
+		return MakeJsonResult(false, err.Error(), nil)
 	}
-	defer clearUp()
-	client := taprpc.NewTaprootAssetsClient(conn)
-	request := &taprpc.DecodeAddrRequest{
-		Addr: addr,
+	// make result struct
+	var result = struct {
+		Encoded          string `json:"encoded"`
+		AssetId          string `json:"asset_id"`
+		AssetType        int    `json:"asset_type"`
+		Amount           int    `json:"amount"`
+		GroupKey         string `json:"group_key"`
+		ScriptKey        string `json:"script_key"`
+		InternalKey      string `json:"internal_key"`
+		TapscriptSibling string `json:"tapscript_sibling"`
+		TaprootOutputKey string `json:"taproot_output_key"`
+		ProofCourierAddr string `json:"proof_courier_addr"`
+		AssetVersion     int    `json:"asset_version"`
+	}{
+		Encoded:          response.Encoded,
+		AssetId:          hex.EncodeToString(response.AssetId),
+		AssetType:        int(response.AssetType),
+		Amount:           int(response.Amount),
+		GroupKey:         hex.EncodeToString(response.GroupKey),
+		ScriptKey:        hex.EncodeToString(response.ScriptKey),
+		InternalKey:      hex.EncodeToString(response.InternalKey),
+		TapscriptSibling: hex.EncodeToString(response.TapscriptSibling),
+		TaprootOutputKey: hex.EncodeToString(response.TaprootOutputKey),
+		ProofCourierAddr: response.ProofCourierAddr,
+		AssetVersion:     int(response.AssetVersion),
 	}
-	response, err := client.DecodeAddr(context.Background(), request)
-	if err != nil {
-		fmt.Printf("%s taprpc DecodeAddr Error: %v\n", GetTimeNow(), err)
-		return ""
-	}
-	return response.String()
+	return MakeJsonResult(true, "", result)
 }
 
 func DecodeProof(rawProof string) {

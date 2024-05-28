@@ -105,7 +105,7 @@ func ProcessFairLaunchInfo(imageData string, name string, assetType int, amount 
 // @param userId
 // @return *models.FairLaunchMintedInfo
 // @return error
-func ProcessFairLaunchMintedInfo(fairLaunchInfoID int, mintedNumber int, addr string, userId int) (*models.FairLaunchMintedInfo, error) {
+func ProcessFairLaunchMintedInfo(fairLaunchInfoID int, mintedNumber int, mintedFeeRateSatPerKw int, addr string, userId int) (*models.FairLaunchMintedInfo, error) {
 	var fairLaunchMintedInfo models.FairLaunchMintedInfo
 	isFairLaunchMintTimeRight, err := IsFairLaunchMintTimeRight(fairLaunchInfoID)
 	if err != nil {
@@ -119,20 +119,22 @@ func ProcessFairLaunchMintedInfo(fairLaunchInfoID int, mintedNumber int, addr st
 	if err != nil {
 		return nil, err
 	}
+	//calculatedGasFeeRateSatPerKw, _ := CalculateGasFeeRateSatPerKw(mintedNumber, 6)
 	fairLaunchMintedInfo = models.FairLaunchMintedInfo{
-		FairLaunchInfoID: fairLaunchInfoID,
-		MintedNumber:     mintedNumber,
-		EncodedAddr:      addr,
-		UserID:           userId,
-		AssetID:          hex.EncodeToString(decodedAddrInfo.AssetId),
-		AssetType:        decodedAddrInfo.AssetType.String(),
-		AddrAmount:       int(decodedAddrInfo.Amount),
-		ScriptKey:        hex.EncodeToString(decodedAddrInfo.ScriptKey),
-		InternalKey:      hex.EncodeToString(decodedAddrInfo.InternalKey),
-		TaprootOutputKey: hex.EncodeToString(decodedAddrInfo.TaprootOutputKey),
-		ProofCourierAddr: decodedAddrInfo.ProofCourierAddr,
-		MintTime:         utils.GetTimestamp(),
-		State:            models.FairLaunchMintedStateNoPay,
+		FairLaunchInfoID:      fairLaunchInfoID,
+		MintedNumber:          mintedNumber,
+		MintedFeeRateSatPerKw: mintedFeeRateSatPerKw,
+		EncodedAddr:           addr,
+		UserID:                userId,
+		AssetID:               hex.EncodeToString(decodedAddrInfo.AssetId),
+		AssetType:             decodedAddrInfo.AssetType.String(),
+		AddrAmount:            int(decodedAddrInfo.Amount),
+		ScriptKey:             hex.EncodeToString(decodedAddrInfo.ScriptKey),
+		InternalKey:           hex.EncodeToString(decodedAddrInfo.InternalKey),
+		TaprootOutputKey:      hex.EncodeToString(decodedAddrInfo.TaprootOutputKey),
+		ProofCourierAddr:      decodedAddrInfo.ProofCourierAddr,
+		MintTime:              utils.GetTimestamp(),
+		State:                 models.FairLaunchMintedStateNoPay,
 	}
 	return &fairLaunchMintedInfo, nil
 }
@@ -309,6 +311,20 @@ func GetNumberOfInventoryCouldBeMinted(fairLaunchInfoId int) (int, error) {
 		return 0, err
 	}
 	return len(*fairLaunchInventoryInfos), err
+}
+
+// IsMintAvailable
+// @Description: Is Mint Available by fairLaunchInfoId and number
+// @param id
+// @param number
+// @return bool
+func IsMintAvailable(fairLaunchInfoId int, number int) bool {
+	inventoryNumber, err := GetNumberOfInventoryCouldBeMinted(fairLaunchInfoId)
+	if err != nil {
+		FairLaunchDebugLogger.Error("", err)
+		return false
+	}
+	return inventoryNumber >= number
 }
 
 // GetMintAmountByFairLaunchMintNumber
@@ -699,11 +715,18 @@ func IsTransactionConfirmed(txid string) bool {
 	return mumConfirmations > 0
 }
 
+func UpdateFairLaunchInfoReservedCouldMintAndState(fairLaunchInfo *models.FairLaunchInfo) (err error) {
+	fairLaunchInfo.ReservedCouldMint = true
+	fairLaunchInfo.State = models.FairLaunchStateIssued
+	f := FairLaunchStore{DB: middleware.DB}
+	return f.UpdateFairLaunchInfo(fairLaunchInfo)
+}
+
 // Procession
 
 func ProcessFairLaunchStateNoPayInfoService(fairLaunchInfo *models.FairLaunchInfo) (err error) {
 	// @dev: 1.pay fee
-	paidId, err := PayIssuanceFee()
+	paidId, err := PayIssuanceFee(fairLaunchInfo.UserID, fairLaunchInfo.FeeRate)
 	if err != nil {
 		FairLaunchDebugLogger.Error("Pay Mint Fee.", err)
 		return nil
@@ -768,10 +791,10 @@ func ProcessFairLaunchStatePaidNoIssueInfoService(fairLaunchInfo *models.FairLau
 func ProcessFairLaunchStateIssuedPendingInfoService(fairLaunchInfo *models.FairLaunchInfo) (err error) {
 	// @dev: 1.Is Transaction Confirmed
 	if IsTransactionConfirmed(fairLaunchInfo.BatchTxidAnchor) {
-		// @dev: Change state
-		err = ChangeFairLaunchInfoState(fairLaunchInfo, models.FairLaunchStateIssued)
+		// @dev: Update FairLaunchInfo ReservedCouldMint And Change State
+		err = UpdateFairLaunchInfoReservedCouldMintAndState(fairLaunchInfo)
 		if err != nil {
-			FairLaunchDebugLogger.Error("Change FairLaunchInfo State.", err)
+			FairLaunchDebugLogger.Error("Update FairLaunchInfo ReservedCouldMint And Change State.", err)
 			return err
 		}
 		return nil
@@ -1047,8 +1070,12 @@ func SendFairLaunchMintedAssetLocked() (err error) {
 	for _, fairLaunchMintedInfo := range *unsentFairLaunchMintedInfos {
 		addrSlice = append(addrSlice, fairLaunchMintedInfo.EncodedAddr)
 	}
+	feeRateSatPerKw, err := EstimateSmartFeeRateSatPerKw(6)
+	if err != nil {
+		return err
+	}
 	// @dev: Send Asset
-	response, err := api.SendAssetAddrSliceAndGetResponse(addrSlice, 0)
+	response, err := api.SendAssetAddrSliceAndGetResponse(addrSlice, feeRateSatPerKw)
 	if err != nil {
 		FairLaunchDebugLogger.Error("Send Asset AddrSlice And Get Response", err)
 		return err
@@ -1107,7 +1134,7 @@ func UpdateMintedNumberAndIsMintAllOfFairLaunchInfoByFairLaunchMintedInfo(fairLa
 
 func ProcessFairLaunchMintedStateNoPayInfo(fairLaunchMintedInfo *models.FairLaunchMintedInfo) (err error) {
 	// @dev: 1.pay fee
-	paidId, err := PayMintFee()
+	paidId, err := PayMintFee(fairLaunchMintedInfo.UserID, fairLaunchMintedInfo.MintedFeeRateSatPerKw)
 	if err != nil {
 		FairLaunchDebugLogger.Error("Pay Issuance Fee.", err)
 		return nil
@@ -1175,7 +1202,7 @@ func ProcessFairLaunchMintedStateSentPendingInfo(fairLaunchMintedInfo *models.Fa
 			FairLaunchDebugLogger.Error("Change FairLaunchMintedInfo State.", err)
 			return err
 		}
-		// TODO: Update MintedNumber and IsMintAll
+		// @dev: Update MintedNumber and IsMintAll
 		err = UpdateMintedNumberAndIsMintAllOfFairLaunchInfoByFairLaunchMintedInfo(fairLaunchMintedInfo)
 		if err != nil {
 			FairLaunchDebugLogger.Error("Update MintedNumber And IsMintAll Of FairLaunchInfo By FairLaunchMintedInfo", err)
@@ -1235,4 +1262,26 @@ func SendFairLaunchAsset() {
 		FairLaunchDebugLogger.Error("", err)
 		return
 	}
+}
+
+func SendFairLaunchReserved(fairLaunchInfo *models.FairLaunchInfo, addr string) (response *taprpc.SendAssetResponse, err error) {
+	decodedAddrInfo, err := api.GetDecodedAddrInfo(addr)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Get Decoded Addr Info", err)
+		return nil, err
+	}
+	if int(decodedAddrInfo.Amount) != fairLaunchInfo.ReserveTotal {
+		err = errors.New("wrong addr amount value")
+		FairLaunchDebugLogger.Error("", err)
+		return nil, err
+	}
+	// send
+	addrSlice := []string{addr}
+	feeRateSatPerKw, err := EstimateSmartFeeRateSatPerKw(6)
+	response, err = api.SendAssetAddrSliceAndGetResponse(addrSlice, feeRateSatPerKw)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Send Asset AddrSlice And Get Response", err)
+		return nil, err
+	}
+	return response, nil
 }

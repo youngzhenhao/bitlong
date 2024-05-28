@@ -36,6 +36,13 @@ api_config:
         macaroon_path: ""
     custody_account:
         macaroon_dir: ""
+    bitcoin:
+        host: ""
+        port: 0
+        rpcuser: ""
+        rpcpasswd: ""
+        http_post_mode: false
+        disable_tls: false
 admin_user:
     username: ""
     password: ""

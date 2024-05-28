@@ -54,6 +54,14 @@ type Config struct {
 		CustodyAccount struct {
 			MacaroonDir string `yaml:"macaroon_dir"`
 		} `yaml:"custody_account"`
+		Bitcoin struct {
+			Host         string `yaml:"host"`
+			Port         int    `yaml:"port"`
+			RpcUser      string `yaml:"rpcuser"`
+			RpcPasswd    string `yaml:"rpcpasswd"`
+			HTTPPostMode bool   `yaml:"http_post_mode"`
+			DisableTLS   bool   `yaml:"disable_tls"`
+		} `yaml:"bitcoin"`
 	} `yaml:"api_config"`
 	AdminUser     BasicAuth `yaml:"admin_user"`
 	FrpsServer    string    `yaml:"frps_server"`

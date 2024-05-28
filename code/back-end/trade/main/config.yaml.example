@@ -34,15 +34,15 @@ api_config:
         port: 0
         tls_cert_path: ""
         macaroon_path: ""
-    custody_account:
-        macaroon_dir: ""
-    bitcoin:
+    bitcoind:
         host: ""
         port: 0
         rpcuser: ""
         rpcpasswd: ""
         http_post_mode: false
         disable_tls: false
+    custody_account:
+        macaroon_dir: ""
 admin_user:
     username: ""
     password: ""

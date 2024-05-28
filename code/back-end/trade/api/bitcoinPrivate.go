@@ -9,11 +9,11 @@ import (
 
 func getBitcoinConnConfig() *rpcclient.ConnConfig {
 	return &rpcclient.ConnConfig{
-		Host:         fmt.Sprintf("%s:%d", config.GetLoadConfig().ApiConfig.Bitcoin.Host, config.GetLoadConfig().ApiConfig.Bitcoin.Port),
-		User:         config.GetLoadConfig().ApiConfig.Bitcoin.RpcUser,
-		Pass:         config.GetLoadConfig().ApiConfig.Bitcoin.RpcPasswd,
-		HTTPPostMode: config.GetLoadConfig().ApiConfig.Bitcoin.HTTPPostMode,
-		DisableTLS:   config.GetLoadConfig().ApiConfig.Bitcoin.DisableTLS,
+		Host:         fmt.Sprintf("%s:%d", config.GetLoadConfig().ApiConfig.Bitcoind.Host, config.GetLoadConfig().ApiConfig.Bitcoind.Port),
+		User:         config.GetLoadConfig().ApiConfig.Bitcoind.RpcUser,
+		Pass:         config.GetLoadConfig().ApiConfig.Bitcoind.RpcPasswd,
+		HTTPPostMode: config.GetLoadConfig().ApiConfig.Bitcoind.HTTPPostMode,
+		DisableTLS:   config.GetLoadConfig().ApiConfig.Bitcoind.DisableTLS,
 	}
 }
 

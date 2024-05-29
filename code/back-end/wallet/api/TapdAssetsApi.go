@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/lightninglabs/taproot-assets/taprpc"
 	"github.com/lightninglabs/taproot-assets/taprpc/universerpc"
+	"github.com/wallet/api/rpcclient"
 	"github.com/wallet/base"
 	"strconv"
 	"strings"
@@ -48,7 +49,7 @@ type AssetsTransfersOutput struct {
 // @dev: May be deprecated
 func SimplifyAssetsTransfer() *[]SimplifiedAssetsTransfer {
 	var simpleTransfers []SimplifiedAssetsTransfer
-	response, _ := listTransfers()
+	response, _ := rpcclient.ListTransfers()
 	for _, transfers := range response.Transfers {
 		var inputs []AssetsTransfersInput
 		for _, _input := range transfers.Inputs {
@@ -65,10 +66,10 @@ func SimplifyAssetsTransfer() *[]SimplifiedAssetsTransfer {
 				Anchor: AssetsTransfersOutputAnchor{
 					Outpoint: _output.Anchor.Outpoint,
 					Value:    int(_output.Anchor.Value),
-					//TaprootAssetRoot: hex.EncodeToString(_output.Anchor.TaprootAssetRoot),
-					//MerkleRoot:       hex.EncodeToString(_output.Anchor.MerkleRoot),
-					//TapscriptSibling: hex.EncodeToString(_output.Anchor.TapscriptSibling),
-					//NumPassiveAssets: int(_output.Anchor.NumPassiveAssets),
+					//TaprootAssetRoot: hex.EncodeToString(_output.anchor.TaprootAssetRoot),
+					//MerkleRoot:       hex.EncodeToString(_output.anchor.MerkleRoot),
+					//TapscriptSibling: hex.EncodeToString(_output.anchor.TapscriptSibling),
+					//NumPassiveAssets: int(_output.anchor.NumPassiveAssets),
 				},
 				ScriptKeyIsLocal: _output.ScriptKeyIsLocal,
 				Amount:           int(_output.Amount),

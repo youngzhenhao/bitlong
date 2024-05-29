@@ -157,13 +157,14 @@ func CalculateGasFee(number int, blocks int, byteSize int) (int, error) {
 	return gasFee, nil
 }
 
-func GetPayMintFeeState(paidId int) (int, error) {
-	balance, err := GetBalance(uint(paidId))
+func GetPayMintFeeState(paidId int) (bool, error) {
+	var balance models.Balance
+	err := middleware.DB.Where("state = ?", PAY_SUCCESS).First(&balance, paidId).Error
 	if err != nil {
 		FEE.Error("GetBalance", err)
-		return 0, err
+		return false, err
 	}
-	return int(balance.State), nil
+	return true, nil
 }
 
 func IsMintFeePaid(paidId int) bool {
@@ -172,31 +173,26 @@ func IsMintFeePaid(paidId int) bool {
 		FEE.Error("GetBalance", err)
 		return false
 	}
-	if state == PAY_SUCCESS {
-		return true
-	}
-	return false
+	return state
 }
 
-func GetPayIssuanceFeeState(paidId int) (int, error) {
-	balance, err := GetBalance(uint(paidId))
+func IsPayIssuanceFeeStatePaid(paidId int) (bool, error) {
+	var balance models.Balance
+	err := middleware.DB.Where("state = ?", PAY_SUCCESS).First(&balance, paidId).Error
 	if err != nil {
 		FEE.Error("GetBalance", err)
-		return 0, err
+		return false, err
 	}
-	return int(balance.State), nil
+	return true, nil
 }
 
 func IsIssuanceFeePaid(paidId int) bool {
-	state, err := GetPayIssuanceFeeState(paidId)
+	state, err := IsPayIssuanceFeeStatePaid(paidId)
 	if err != nil {
 		FEE.Error("GetBalance", err)
 		return false
 	}
-	if state == PAY_SUCCESS {
-		return true
-	}
-	return false
+	return state
 }
 
 func PayMintFee(userId int, feeRateSatPerKw int) (mintFeePaidId int, err error) {

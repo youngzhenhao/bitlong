@@ -725,7 +725,26 @@ func UpdateFairLaunchInfoReservedCouldMintAndState(fairLaunchInfo *models.FairLa
 	return f.UpdateFairLaunchInfo(fairLaunchInfo)
 }
 
-// Procession
+func GetFairLaunchInfoState(fairLaunchId int) (fairLaunchState models.FairLaunchState, err error) {
+	var fairLaunchInfo *models.FairLaunchInfo
+	fairLaunchInfo, err = GetFairLaunchInfo(fairLaunchId)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Get FairLaunchInfo", err)
+		return 0, err
+	}
+	return fairLaunchInfo.State, nil
+}
+
+func IsFairLaunchIssued(fairLaunchId int) bool {
+	state, err := GetFairLaunchInfoState(fairLaunchId)
+	if err != nil {
+		FairLaunchDebugLogger.Error("Get FairLaunchInfo State", err)
+		return false
+	}
+	return state == models.FairLaunchStateIssued
+}
+
+// FairLaunchInfos Procession
 
 func ProcessFairLaunchStateNoPayInfoService(fairLaunchInfo *models.FairLaunchInfo) (err error) {
 	// @dev: 1.pay fee
@@ -1147,7 +1166,7 @@ func UpdateMintedNumberAndIsMintAllOfFairLaunchInfoByFairLaunchMintedInfo(fairLa
 	return middleware.DB.Save(fairLaunchInfo).Error
 }
 
-// Procession
+// FairLaunchMintedInfos Procession
 
 func ProcessFairLaunchMintedStateNoPayInfo(fairLaunchMintedInfo *models.FairLaunchMintedInfo) (err error) {
 	// @dev: 1.pay fee

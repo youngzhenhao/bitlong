@@ -186,6 +186,17 @@ func SetFairLaunchMintedInfo(c *gin.Context) {
 		})
 		return
 	}
+	fairLaunchInfoID := mintFairLaunchRequest.FairLaunchInfoID
+	isFairLaunchIssued := services.IsFairLaunchIssued(fairLaunchInfoID)
+	if !isFairLaunchIssued {
+		utils.LogError("FairLaunch is not Issued.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "FairLaunch is not Issued. " + err.Error(),
+			Data:    nil,
+		})
+		return
+	}
 	// @dev: Use MustGet. bob ONLY FOR TEST
 	username := c.MustGet("username").(string)
 	//username := "bob"
@@ -200,7 +211,6 @@ func SetFairLaunchMintedInfo(c *gin.Context) {
 		})
 		return
 	}
-	fairLaunchInfoID := mintFairLaunchRequest.FairLaunchInfoID
 	mintedNumber := mintFairLaunchRequest.MintedNumber
 	addr := mintFairLaunchRequest.EncodedAddr
 	mintedFeeRateSatPerKw := mintFairLaunchRequest.MintedFeeRateSatPerKw

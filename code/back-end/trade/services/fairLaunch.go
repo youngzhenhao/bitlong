@@ -322,6 +322,11 @@ func GetNumberOfInventoryCouldBeMinted(fairLaunchInfoId int) (int, error) {
 // @param number
 // @return bool
 func IsMintAvailable(fairLaunchInfoId int, number int) bool {
+	if !IsFairLaunchIssued(fairLaunchInfoId) {
+		err := errors.New("fairLaunch is not Issued")
+		FairLaunchDebugLogger.Error("", err)
+		return false
+	}
 	inventoryNumber, err := GetNumberOfInventoryCouldBeMinted(fairLaunchInfoId)
 	if err != nil {
 		FairLaunchDebugLogger.Error("", err)

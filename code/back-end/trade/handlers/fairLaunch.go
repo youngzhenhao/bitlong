@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"net/http"
 	"strconv"
 	"trade/models"
@@ -178,10 +179,11 @@ func SetFairLaunchMintedInfo(c *gin.Context) {
 		return
 	}
 	if !isTimeRight {
-		utils.LogError("It is not Right FairLaunch Mint Time now.", err)
+		err = errors.New("It is not Right FairLaunch Mint Time now")
+		utils.LogError("", err)
 		c.JSON(http.StatusOK, models.JsonResult{
 			Success: false,
-			Error:   "It is not Right FairLaunch Mint Time now. " + err.Error(),
+			Error:   err.Error(),
 			Data:    "",
 		})
 		return
@@ -189,10 +191,11 @@ func SetFairLaunchMintedInfo(c *gin.Context) {
 	fairLaunchInfoID := mintFairLaunchRequest.FairLaunchInfoID
 	isFairLaunchIssued := services.IsFairLaunchIssued(fairLaunchInfoID)
 	if !isFairLaunchIssued {
-		utils.LogError("FairLaunch is not Issued.", err)
+		err = errors.New("FairLaunch is not Issued.")
+		utils.LogError("", err)
 		c.JSON(http.StatusOK, models.JsonResult{
 			Success: false,
-			Error:   "FairLaunch is not Issued. " + err.Error(),
+			Error:   err.Error(),
 			Data:    nil,
 		})
 		return
@@ -291,7 +294,9 @@ func QueryMintIsAvailable(c *gin.Context) {
 	c.JSON(http.StatusOK, models.JsonResult{
 		Success: true,
 		Error:   "",
-		Data:    isMintAvailable,
+		Data: gin.H{
+			"is_mint_available": isMintAvailable,
+		},
 	})
 }
 

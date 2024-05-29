@@ -144,7 +144,7 @@ func CalculateGasFeeRateSatPerB(number int, blocks int) (feeRateSatPerB int, err
 // @dev: not actual value
 func GetTransactionByteSize() int {
 	// TODO: need to complete
-	return 250
+	return 170
 }
 
 func CalculateGasFee(number int, blocks int, byteSize int) (int, error) {

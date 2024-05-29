@@ -14,17 +14,18 @@ func Login(creds models.User) (string, error) {
 	result := middleware.DB.Where("user_name = ?", creds.Username).First(&user)
 	if result.Error != nil {
 		if !errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			// 如果有其他数据库错误，返回错误
+			// If there are other database errors, an error is returned
 			return "", result.Error
 		} else {
+			user.Username = creds.Username
 			password, err := hashPassword(creds.Password)
 			if err != nil {
 				return "", err
 			}
-			creds.Password = password
-			createUserErr := CreateUser(&creds)
-			if createUserErr != nil {
-				return "", createUserErr
+			user.Password = password
+			err = CreateUser(&user)
+			if err != nil {
+				return "", err
 			}
 		}
 	}

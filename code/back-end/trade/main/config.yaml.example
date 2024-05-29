@@ -43,6 +43,9 @@ api_config:
         disable_tls: false
     custody_account:
         macaroon_dir: ""
+fair_launch_config:
+    estimate_smart_fee_rate_blocks: 0
+    is_auto_update_fee_rate: false
 admin_user:
     username: ""
     password: ""

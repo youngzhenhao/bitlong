@@ -1087,7 +1087,7 @@ func SendFairLaunchMintedAssetLocked() (err error) {
 	for _, fairLaunchMintedInfo := range *unsentFairLaunchMintedInfos {
 		addrSlice = append(addrSlice, fairLaunchMintedInfo.EncodedAddr)
 	}
-	feeRateSatPerKw, err := EstimateSmartFeeRateSatPerKw(6)
+	feeRateSatPerKw, err := EstimateSmartFeeRateSatPerKw()
 	if err != nil {
 		return err
 	}
@@ -1294,7 +1294,7 @@ func SendFairLaunchReserved(fairLaunchInfo *models.FairLaunchInfo, addr string) 
 	}
 	// send
 	addrSlice := []string{addr}
-	feeRateSatPerKw, err := EstimateSmartFeeRateSatPerKw(6)
+	feeRateSatPerKw, err := EstimateSmartFeeRateSatPerKw()
 	response, err = api.SendAssetAddrSliceAndGetResponse(addrSlice, feeRateSatPerKw)
 	if err != nil {
 		FairLaunchDebugLogger.Error("Send Asset AddrSlice And Get Response", err)

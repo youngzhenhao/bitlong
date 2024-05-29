@@ -63,6 +63,10 @@ type Config struct {
 			MacaroonDir string `yaml:"macaroon_dir" json:"macaroon_dir"`
 		} `yaml:"custody_account" json:"custodyAccount"`
 	} `yaml:"api_config" json:"api_config"`
+	FairLaunchConfig struct {
+		EstimateSmartFeeRateBlocks int  `yaml:"estimate_smart_fee_rate_blocks" json:"estimate_smart_fee_rate_blocks"`
+		IsAutoUpdateFeeRate        bool `yaml:"is_auto_update_fee_rate" json:"is_auto_update_fee_rate"`
+	} `yaml:"fair_launch_config" json:"fair_launch_config"`
 	AdminUser     BasicAuth `yaml:"admin_user" json:"admin_user"`
 	FrpsServer    string    `yaml:"frps_server" json:"frps_server"`
 	IsAutoMigrate bool      `yaml:"is_auto_migrate" json:"is_auto_migrate"`

@@ -8,61 +8,69 @@ import (
 
 type Config struct {
 	GinConfig struct {
-		Bind string `yaml:"bind"`
-		Port string `yaml:"port"`
-	} `yaml:"gin_config"`
+		Bind string `yaml:"bind" json:"bind"`
+		Port string `yaml:"port" json:"port"`
+	} `yaml:"gin_config" json:"gin_config"`
 	GormConfig struct {
 		Mysql struct {
-			Host     string `yaml:"host"`
-			Port     string `yaml:"port"`
-			Username string `yaml:"username"`
-			Password string `yaml:"password"`
-			DBName   string `yaml:"dbname"`
-		} `yaml:"mysql"`
-	} `yaml:"gorm_config"`
+			Host     string `yaml:"host" json:"host"`
+			Port     string `yaml:"port" json:"port"`
+			Username string `yaml:"username" json:"username"`
+			Password string `yaml:"password" json:"password"`
+			DBName   string `yaml:"dbname" json:"dbname"`
+		} `yaml:"mysql" json:"mysql"`
+	} `yaml:"gorm_config" json:"gorm_config"`
 	Redis struct {
-		Host     string `yaml:"host"`
-		Port     string `yaml:"port"`
-		Username string `yaml:"username"`
-		Password string `yaml:"password"`
-		DB       int    `yaml:"db"`
-	} `yaml:"redis"`
+		Host     string `yaml:"host" json:"host"`
+		Port     string `yaml:"port" json:"port"`
+		Username string `yaml:"username" json:"username"`
+		Password string `yaml:"password" json:"password"`
+		DB       int    `yaml:"db" json:"db"`
+	} `yaml:"redis" json:"redis"`
 	Routers struct {
-		Login      bool `yaml:"login"`
-		FairLaunch bool `yaml:"fair_launch"`
-		Ping       bool `yaml:"ping"`
-	} `yaml:"routers"`
+		Login      bool `yaml:"login" json:"login"`
+		FairLaunch bool `yaml:"fair_launch" json:"fair_launch"`
+		Ping       bool `yaml:"ping" json:"ping"`
+	} `yaml:"routers" json:"routers"`
 	ApiConfig struct {
 		Lnd struct {
-			Host         string `yaml:"host"`
-			Port         int    `yaml:"port"`
-			TlsCertPath  string `yaml:"tls_cert_path"`
-			MacaroonPath string `yaml:"macaroon_path"`
-		} `yaml:"lnd"`
+			Host         string `yaml:"host" json:"host"`
+			Port         int    `yaml:"port" json:"port"`
+			TlsCertPath  string `yaml:"tls_cert_path" json:"tlsCertPath"`
+			MacaroonPath string `yaml:"macaroon_path" json:"macaroonPath"`
+		} `yaml:"lnd" json:"lnd"`
 		Tapd struct {
-			Host         string `yaml:"host"`
-			Port         int    `yaml:"port"`
-			TlsCertPath  string `yaml:"tls_cert_path"`
-			MacaroonPath string `yaml:"macaroon_path"`
-		} `yaml:"tapd"`
+			Host         string `yaml:"host" json:"host"`
+			Port         int    `yaml:"port" json:"port"`
+			TlsCertPath  string `yaml:"tls_cert_path" json:"tlsCertPath"`
+			MacaroonPath string `yaml:"macaroon_path" json:"macaroonPath"`
+		} `yaml:"tapd" json:"tapd"`
 		Litd struct {
-			Host         string `yaml:"host"`
-			Port         int    `yaml:"port"`
-			TlsCertPath  string `yaml:"tls_cert_path"`
-			MacaroonPath string `yaml:"macaroon_path"`
-		} `yaml:"litd"`
+			Host         string `yaml:"host" json:"host"`
+			Port         int    `yaml:"port" json:"port"`
+			TlsCertPath  string `yaml:"tls_cert_path" json:"tlsCertPath"`
+			MacaroonPath string `yaml:"macaroon_path" json:"macaroonPath"`
+		} `yaml:"litd" json:"litd"`
+		Bitcoind struct {
+			Host         string `yaml:"host" json:"host"`
+			Port         int    `yaml:"port" json:"port"`
+			RpcUser      string `yaml:"rpcuser" json:"rpcUser"`
+			RpcPasswd    string `yaml:"rpcpasswd" json:"rpcPasswd"`
+			HTTPPostMode bool   `yaml:"http_post_mode" json:"HTTPPostMode"`
+			DisableTLS   bool   `yaml:"disable_tls" json:"disableTLS"`
+		} `yaml:"bitcoind" json:"bitcoind"`
 		CustodyAccount struct {
-			MacaroonDir string `yaml:"macaroon_dir"`
-		} `yaml:"custody_account"`
-	} `yaml:"api_config"`
-	AdminUser     BasicAuth `yaml:"admin_user"`
-	FrpsServer    string    `yaml:"frps_server"`
-	IsAutoMigrate bool      `yaml:"is_auto_migrate"`
+			MacaroonDir string `yaml:"macaroon_dir" json:"macaroon_dir"`
+		} `yaml:"custody_account" json:"custodyAccount"`
+	} `yaml:"api_config" json:"api_config"`
+	AdminUser     BasicAuth `yaml:"admin_user" json:"admin_user"`
+	FrpsServer    string    `yaml:"frps_server" json:"frps_server"`
+	IsAutoMigrate bool      `yaml:"is_auto_migrate" json:"is_auto_migrate"`
 }
 
 type BasicAuth struct {
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
+	Username string `yaml:"username" json:"username"`
+	Password string `yaml:"password" json:"password"`
 }
 
 var (

@@ -87,9 +87,9 @@ func GetMintedInfo(c *gin.Context) {
 
 func SetFairLaunchInfo(c *gin.Context) {
 	var fairLaunchInfo *models.FairLaunchInfo
-	// TODO: Use MustGet. alice ONLY FOR TEST
-	//username := c.MustGet("username").(string)
-	username := "alice"
+	// @dev: Use MustGet. alice ONLY FOR TEST
+	username := c.MustGet("username").(string)
+	//username := "alice"
 	userId, err := services.NameToId(username)
 	if err != nil {
 		utils.LogError("Query user id by name.", err)
@@ -186,9 +186,9 @@ func SetFairLaunchMintedInfo(c *gin.Context) {
 		})
 		return
 	}
-	// TODO: Use MustGet. bob ONLY FOR TEST
-	username := "bob"
-	//username := c.MustGet("username").(string)
+	// @dev: Use MustGet. bob ONLY FOR TEST
+	username := c.MustGet("username").(string)
+	//username := "bob"
 	// @dev: userId
 	userId, err := services.NameToId(username)
 	if err != nil {
@@ -203,7 +203,8 @@ func SetFairLaunchMintedInfo(c *gin.Context) {
 	fairLaunchInfoID := mintFairLaunchRequest.FairLaunchInfoID
 	mintedNumber := mintFairLaunchRequest.MintedNumber
 	addr := mintFairLaunchRequest.EncodedAddr
-	fairLaunchMintedInfo, err = services.ProcessFairLaunchMintedInfo(fairLaunchInfoID, mintedNumber, addr, userId)
+	mintedFeeRateSatPerKw := mintFairLaunchRequest.MintedFeeRateSatPerKw
+	fairLaunchMintedInfo, err = services.ProcessFairLaunchMintedInfo(fairLaunchInfoID, mintedNumber, mintedFeeRateSatPerKw, addr, userId)
 	if err != nil {
 		utils.LogError("Process FairLaunchMintedInfo.", err)
 		c.JSON(http.StatusOK, models.JsonResult{
@@ -261,14 +262,95 @@ func QueryInventory(c *gin.Context) {
 	})
 }
 
-// TODO: add more query
-
 func QueryMintIsAvailable(c *gin.Context) {
-	// TODO: Check if a specific id and amount of minting asset is valid
-
+	// EncodedAddr And MintedFeeRateSatPerKw Could be null
+	var mintFairLaunchRequest models.MintFairLaunchRequest
+	err := c.ShouldBindJSON(&mintFairLaunchRequest)
+	if err != nil {
+		utils.LogError("Should Bind JSON mintFairLaunchRequest.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Should Bind JSON mintFairLaunchRequest. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	fairLaunchInfoID := mintFairLaunchRequest.FairLaunchInfoID
+	mintedNumber := mintFairLaunchRequest.MintedNumber
+	isMintAvailable := services.IsMintAvailable(fairLaunchInfoID, mintedNumber)
+	c.JSON(http.StatusOK, models.JsonResult{
+		Success: true,
+		Error:   "",
+		Data:    isMintAvailable,
+	})
 }
 
 func MintFairLaunchReserved(c *gin.Context) {
-	// TODO: need to complete
-
+	idStr := c.Param("id")
+	addr := c.PostForm("encoded_addr")
+	username := c.MustGet("username").(string)
+	userId, err := services.NameToId(username)
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		utils.LogError("id is not valid int", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "id is not valid int. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	isTimeRight, err := services.IsFairLaunchMintTimeRight(id)
+	if err != nil {
+		utils.LogError("Is FairLaunch Mint Time Right.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Is FairLaunch Mint Time Right. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	if !isTimeRight {
+		utils.LogInfo("It is not Valid Time Now.")
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "It is not Valid Time Now. ",
+			Data:    "",
+		})
+		return
+	}
+	fairLaunch, err := services.GetFairLaunchInfo(id)
+	if err != nil {
+		utils.LogError("Get fair launch info", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Can not get fair launch info. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	if userId != fairLaunch.UserID {
+		utils.LogInfo("Invalid user id.")
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Invalid user id. ",
+			Data:    "",
+		})
+		return
+	}
+	response, err := services.SendFairLaunchReserved(fairLaunch, addr)
+	if err != nil {
+		utils.LogError("Send FairLaunch Reserved.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Send FairLaunch Reserved. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, models.JsonResult{
+		Success: true,
+		Error:   "",
+		Data:    response,
+	})
 }

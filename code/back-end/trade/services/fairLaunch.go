@@ -76,7 +76,7 @@ func ProcessFairLaunchInfo(imageData string, name string, assetType int, amount 
 	fairLaunchInfo = models.FairLaunchInfo{
 		ImageData:              imageData,
 		Name:                   name,
-		AssetType:              assetType,
+		AssetType:              taprpc.AssetType(assetType),
 		Amount:                 amount,
 		Reserved:               reserved,
 		MintQuantity:           mintQuantity,

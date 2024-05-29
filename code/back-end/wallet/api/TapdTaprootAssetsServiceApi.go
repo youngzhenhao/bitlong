@@ -11,28 +11,43 @@ import (
 	"strconv"
 )
 
-func AddrReceives() string {
-	response, err := addrReceives()
+func AddrReceives(assetId string) string {
+	response, err := rpcclient.AddrReceives()
 	if err != nil {
 		return MakeJsonResult(false, err.Error(), nil)
 	}
-	return MakeJsonResult(true, "", response)
-}
-
-func addrReceives() (*taprpc.AddrReceivesResponse, error) {
-	conn, clearUp, err := connect.GetConnection("tapd", false)
-	if err != nil {
-		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
+	type addrEvent struct {
+		CreationTimeUnixSeconds int64           `json:"creation_time_unix_seconds"`
+		Addr                    *jsonResultAddr `json:"addr"`
+		Status                  string          `json:"status"`
+		Outpoint                string          `json:"outpoint"`
+		UtxoAmtSat              int64           `json:"utxo_amt_sat"`
+		TaprootSibling          string          `json:"taproot_sibling"`
+		ConfirmationHeight      int64           `json:"confirmation_height"`
+		HasProof                bool            `json:"has_proof"`
 	}
-	defer clearUp()
-	client := taprpc.NewTaprootAssetsClient(conn)
-	request := &taprpc.AddrReceivesRequest{}
-	response, err := client.AddrReceives(context.Background(), request)
-	if err != nil {
-		fmt.Printf("%s taprpc DebugLevel Error: %v\n", GetTimeNow(), err)
-		return nil, err
+	var addrEvents []addrEvent
+	for _, event := range response.Events {
+		if assetId != "" && assetId != hex.EncodeToString(event.Addr.AssetId) {
+			continue
+		}
+		e := addrEvent{}
+		e.CreationTimeUnixSeconds = int64(event.CreationTimeUnixSeconds)
+		a := jsonResultAddr{}
+		a.getData(event.Addr)
+		e.Addr = &a
+		e.Status = event.Status.String()
+		e.Outpoint = event.Outpoint
+		e.UtxoAmtSat = int64(event.UtxoAmtSat)
+		e.TaprootSibling = hex.EncodeToString(event.TaprootSibling)
+		e.ConfirmationHeight = int64(event.ConfirmationHeight)
+		e.HasProof = event.HasProof
+		addrEvents = append(addrEvents, e)
 	}
-	return response, nil
+	if len(addrEvents) == 0 {
+		return MakeJsonResult(true, "NOT_FOUND", nil)
+	}
+	return MakeJsonResult(true, "", addrEvents)
 }
 
 func BurnAsset() {
@@ -49,31 +64,9 @@ func DecodeAddr(addr string) string {
 		return MakeJsonResult(false, err.Error(), nil)
 	}
 	// make result struct
-	var result = struct {
-		Encoded          string `json:"encoded"`
-		AssetId          string `json:"asset_id"`
-		AssetType        int    `json:"asset_type"`
-		Amount           int    `json:"amount"`
-		GroupKey         string `json:"group_key"`
-		ScriptKey        string `json:"script_key"`
-		InternalKey      string `json:"internal_key"`
-		TapscriptSibling string `json:"tapscript_sibling"`
-		TaprootOutputKey string `json:"taproot_output_key"`
-		ProofCourierAddr string `json:"proof_courier_addr"`
-		AssetVersion     int    `json:"asset_version"`
-	}{
-		Encoded:          response.Encoded,
-		AssetId:          hex.EncodeToString(response.AssetId),
-		AssetType:        int(response.AssetType),
-		Amount:           int(response.Amount),
-		GroupKey:         hex.EncodeToString(response.GroupKey),
-		ScriptKey:        hex.EncodeToString(response.ScriptKey),
-		InternalKey:      hex.EncodeToString(response.InternalKey),
-		TapscriptSibling: hex.EncodeToString(response.TapscriptSibling),
-		TaprootOutputKey: hex.EncodeToString(response.TaprootOutputKey),
-		ProofCourierAddr: response.ProofCourierAddr,
-		AssetVersion:     int(response.AssetVersion),
-	}
+	result := jsonResultAddr{}
+	result.getData(response)
+
 	return MakeJsonResult(true, "", result)
 }
 
@@ -217,31 +210,28 @@ func ListGroups() string {
 
 // ListTransfers
 //
-//	@Description: ListTransfers lists outbound asset transfers tracked by the target daemon.
+//	@Description: ListTransfers lists outbound asset transfer tracked by the target daemon.
 //	@return string
-func ListTransfers() string {
-	response, err := listTransfers()
+func QueryAssetTransfers(assetId string) string {
+	response, err := rpcclient.ListTransfers()
 	if err != nil {
 		fmt.Printf("%s taprpc ListTransfers Error: %v\n", GetTimeNow(), err)
 		return MakeJsonResult(false, err.Error(), nil)
 	}
-	return MakeJsonResult(true, "", response)
-}
+	var transfers []transfer
+	for _, t := range response.Transfers {
+		if assetId != "" && assetId != hex.EncodeToString(t.Inputs[0].AssetId) {
+			continue
+		}
+		newTransfer := transfer{}
+		newTransfer.geData(t)
+		transfers = append(transfers, newTransfer)
+	}
 
-func listTransfers() (*taprpc.ListTransfersResponse, error) {
-	conn, clearUp, err := connect.GetConnection("tapd", false)
-	if err != nil {
-		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
+	if len(transfers) == 0 {
+		return MakeJsonResult(true, "NOT_FOUND", transfers)
 	}
-	defer clearUp()
-	client := taprpc.NewTaprootAssetsClient(conn)
-	request := &taprpc.ListTransfersRequest{}
-	response, err := client.ListTransfers(context.Background(), request)
-	if err != nil {
-		fmt.Printf("%s taprpc ListTransfers Error: %v\n", GetTimeNow(), err)
-		return nil, err
-	}
-	return response, err
+	return MakeJsonResult(true, "", transfers)
 }
 
 // ListUtxos
@@ -271,35 +261,37 @@ func ListUtxos(includeLeased bool) string {
 //	@Description:NewAddr makes a new address from the set of request params.
 //	@return string
 func NewAddr(assetId string, amt int) string {
-	response, err := newAddr(assetId, amt)
+	response, err := rpcclient.NewAddr(assetId, amt)
 	if err != nil {
 		return MakeJsonResult(false, err.Error(), "")
 	}
-	return MakeJsonResult(true, "", response)
+	result := jsonResultAddr{}
+	result.getData(response)
+
+	return MakeJsonResult(true, "", result)
 }
 
-func newAddr(assetId string, amt int) (*taprpc.Addr, error) {
-	conn, clearUp, err := connect.GetConnection("tapd", false)
+func QueryAddrs(assetId string) string {
+	addrRcv, err := rpcclient.QueryAddr()
 	if err != nil {
-		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
+		fmt.Printf("%s taprpc QueryAddrs Error: %v\n", GetTimeNow(), err)
+		return MakeJsonResult(false, err.Error(), "")
 	}
-	defer clearUp()
-	client := taprpc.NewTaprootAssetsClient(conn)
-	_assetIdByteSlice, _ := hex.DecodeString(assetId)
-	request := &taprpc.NewAddrRequest{
-		AssetId: _assetIdByteSlice,
-		Amt:     uint64(amt),
-	}
-	response, err := client.NewAddr(context.Background(), request)
-	if err != nil {
-		fmt.Printf("%s taprpc NewAddr Error: %v\n", GetTimeNow(), err)
-		return nil, err
-	}
-	return response, nil
-}
 
-func QueryAddrs() {
+	var addrs []jsonResultAddr
+	for _, a := range addrRcv.Addrs {
+		if assetId != "" && assetId != hex.EncodeToString(a.AssetId) {
+			continue
+		}
+		addrTemp := jsonResultAddr{}
+		addrTemp.getData(a)
+		addrs = append(addrs, addrTemp)
+	}
 
+	if len(addrs) == 0 {
+		return MakeJsonResult(true, "NOT_FOUND", addrs)
+	}
+	return MakeJsonResult(true, "", addrs)
 }
 
 // jsonAddrs : ["addrs1","addrs2",...]

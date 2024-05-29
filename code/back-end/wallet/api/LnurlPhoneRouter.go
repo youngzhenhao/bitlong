@@ -5,6 +5,7 @@ import (
 	"github.com/boltdb/bolt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/wallet/api/rpcclient"
 	"github.com/wallet/base"
 	"net/http"
 	"path/filepath"
@@ -104,7 +105,7 @@ func setupRouterOnPhone() *gin.Engine {
 				Data:    nil,
 			})
 		}
-		addr, err := newAddr(assetID, amountInt)
+		addr, err := rpcclient.NewAddr(assetID, amountInt)
 		if err != nil {
 			LogError("new addr.", err)
 			c.JSON(http.StatusOK, JsonResult{

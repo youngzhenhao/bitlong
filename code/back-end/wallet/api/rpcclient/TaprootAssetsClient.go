@@ -2,10 +2,10 @@ package rpcclient
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"github.com/lightninglabs/taproot-assets/taprpc"
 	"github.com/wallet/api/connect"
-	"time"
 )
 
 func getTaprootAssetsClient() (taprpc.TaprootAssetsClient, func(), error) {
@@ -16,6 +16,21 @@ func getTaprootAssetsClient() (taprpc.TaprootAssetsClient, func(), error) {
 	}
 	client := taprpc.NewTaprootAssetsClient(conn)
 	return client, clearUp, nil
+}
+
+func AddrReceives() (*taprpc.AddrReceivesResponse, error) {
+	client, clearUp, err := getTaprootAssetsClient()
+	if err != nil {
+		return nil, err
+	}
+	defer clearUp()
+
+	request := &taprpc.AddrReceivesRequest{}
+	response, err := client.AddrReceives(context.Background(), request)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
 }
 
 func DecodeAddr(addr string) (*taprpc.Addr, error) {
@@ -37,6 +52,51 @@ func DecodeAddr(addr string) (*taprpc.Addr, error) {
 	return response, nil
 }
 
-func GetTimeNow() any {
-	return time.Now().Format("2006/01/02 15:04:05")
+func QueryAddr() (*taprpc.QueryAddrResponse, error) {
+	client, clearUp, err := getTaprootAssetsClient()
+	if err != nil {
+		return nil, err
+	}
+	defer clearUp()
+	request := &taprpc.QueryAddrRequest{}
+	response, err := client.QueryAddrs(context.Background(), request)
+	if err != nil {
+		fmt.Printf("%s taprpc QueryAddr Error: %v\n", GetTimeNow(), err)
+		return nil, err
+	}
+	return response, nil
+}
+
+func NewAddr(assetId string, amt int) (*taprpc.Addr, error) {
+	client, clearUp, err := getTaprootAssetsClient()
+	if err != nil {
+		return nil, err
+	}
+	defer clearUp()
+
+	_assetIdByteSlice, _ := hex.DecodeString(assetId)
+	request := &taprpc.NewAddrRequest{
+		AssetId: _assetIdByteSlice,
+		Amt:     uint64(amt),
+	}
+	response, err := client.NewAddr(context.Background(), request)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func ListTransfers() (*taprpc.ListTransfersResponse, error) {
+	client, clearUp, err := getTaprootAssetsClient()
+	if err != nil {
+		return nil, err
+	}
+	defer clearUp()
+
+	request := &taprpc.ListTransfersRequest{}
+	response, err := client.ListTransfers(context.Background(), request)
+	if err != nil {
+		return nil, err
+	}
+	return response, err
 }

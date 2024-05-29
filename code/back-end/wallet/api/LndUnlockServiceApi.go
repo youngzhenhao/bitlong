@@ -2,13 +2,11 @@ package api
 
 import (
 	"context"
-	"encoding/hex"
 	"fmt"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/wallet/api/connect"
 	"github.com/wallet/base"
 	"golang.org/x/exp/rand"
-	"google.golang.org/grpc"
 	"os"
 	"path/filepath"
 	"strings"
@@ -22,7 +20,7 @@ import (
 //	Once the cipherseed is obtained and verified by the user, the InitWallet method should be used to commit the newly generated seed, and create the wallet.
 //	@return string
 func GenSeed() string {
-	conn, clearUp, err := connect.GetConnection("lnd", false)
+	conn, clearUp, err := connect.GetConnection("lnd", true)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
@@ -56,7 +54,7 @@ func GenSeed() string {
 //	Once it has been verified by the user, the seed can be fed into this RPC in order to commit the new wallet.
 //	@return bool
 func InitWallet(seed, password string) bool {
-	conn, clearUp, err := connect.GetConnection("lnd", false)
+	conn, clearUp, err := connect.GetConnection("lnd", true)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
@@ -127,7 +125,7 @@ func InitWallet(seed, password string) bool {
 //	@Description: UnlockWallet is used at startup of lnd to provide a password to unlock the wallet database.
 //	@return bool
 func UnlockWallet(password string) bool {
-	conn, clearUp, err := connect.GetConnection("lnd", false)
+	conn, clearUp, err := connect.GetConnection("lnd", true)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
@@ -151,27 +149,12 @@ func UnlockWallet(password string) bool {
 //	This will automatically unlock the wallet database if successful.
 //	@return bool
 func ChangePassword(currentPassword, newPassword string) bool {
-	grpcHost := base.QueryConfigByKey("lndhost")
-	tlsCertPath := filepath.Join(base.Configure("lnd"), "tls.cert")
-	newFilePath := filepath.Join(base.Configure("lnd"), "."+"macaroonfile")
-	macaroonPath := filepath.Join(newFilePath, "admin.macaroon")
-	macaroonBytes, err := os.ReadFile(macaroonPath)
-	if err != nil {
-		panic(err)
-	}
-	macaroon := hex.EncodeToString(macaroonBytes)
-	creds := connect.NewTlsCert(tlsCertPath)
-	conn, err := grpc.Dial(grpcHost, grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(connect.NewMacaroonCredential(macaroon)))
+	conn, clearUp, err := connect.GetConnection("lnd", false)
 	if err != nil {
 		fmt.Printf("%s did not connect: %v\n", GetTimeNow(), err)
 	}
-	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Printf("%s conn Close err: %v\n", GetTimeNow(), err)
-		}
-	}(conn)
+	defer clearUp()
+
 	client := lnrpc.NewWalletUnlockerClient(conn)
 	request := &lnrpc.ChangePasswordRequest{
 		CurrentPassword: []byte(currentPassword),

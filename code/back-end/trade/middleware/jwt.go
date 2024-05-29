@@ -3,6 +3,7 @@ package middleware
 import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-redis/redis/v8"
 	"time"
 )
 
@@ -39,7 +40,8 @@ func GenerateToken(username string) (string, error) {
 			return "", err1
 		}
 	}
-	if err != nil {
+
+	if err != nil && !errors.Is(err, redis.Nil) {
 		return "", err
 	}
 	// Store the token in Redis

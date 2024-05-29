@@ -264,6 +264,9 @@ func CreateAssetIssuanceInfoByFairLaunchInfo(fairLaunchInfo *models.FairLaunchIn
 		AssetType:      fairLaunchInfo.AssetType,
 		IssuanceUserId: fairLaunchInfo.UserID,
 		IssuanceTime:   utils.GetTimestamp(),
+		IsFairLaunch:   true,
+		FairLaunchID:   int(fairLaunchInfo.ID),
+		State:          models.AssetIssuanceStatePending,
 	}
 	a := AssetIssuanceStore{DB: middleware.DB}
 	return a.CreateAssetIssuance(&assetIssuance)
@@ -795,6 +798,20 @@ func ProcessFairLaunchStateIssuedPendingInfoService(fairLaunchInfo *models.FairL
 		err = UpdateFairLaunchInfoReservedCouldMintAndState(fairLaunchInfo)
 		if err != nil {
 			FairLaunchDebugLogger.Error("Update FairLaunchInfo ReservedCouldMint And Change State.", err)
+			return err
+		}
+		// @dev: Update Asset Issuance
+		var a = AssetIssuanceStore{DB: middleware.DB}
+		var assetIssuance *models.AssetIssuance
+		assetIssuance, err = a.ReadAssetIssuanceByFairLaunchId(fairLaunchInfo.ID)
+		if err != nil {
+			FairLaunchDebugLogger.Error("Read AssetIssuance By FairLaunchId.", err)
+			return err
+		}
+		assetIssuance.State = models.AssetIssuanceStateIssued
+		err = a.UpdateAssetIssuance(assetIssuance)
+		if err != nil {
+			FairLaunchDebugLogger.Error("Update AssetIssuance.", err)
 			return err
 		}
 		return nil

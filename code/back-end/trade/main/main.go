@@ -30,6 +30,9 @@ func main() {
 	if err := middleware.RedisConnect(); err != nil {
 		log.Fatalf("Failed to initialize redis: %v", err)
 	}
+	if !checkConfig() {
+		return
+	}
 	if config.GetLoadConfig().IsAutoMigrate {
 		err = dao.Migrate()
 	}
@@ -102,4 +105,14 @@ func main() {
 	// Perform any other shutdown tasks here
 	log.Println("Shutting down the server...")
 	os.Exit(0)
+}
+
+// check config
+func checkConfig() bool {
+	cfg := config.GetConfig()
+	if cfg.ApiConfig.CustodyAccount.MacaroonDir == "" {
+		fmt.Println("Custody account MacaroonDir is not set")
+		return false
+	}
+	return true
 }

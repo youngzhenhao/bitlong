@@ -15,26 +15,6 @@ import (
 	"trade/services/servicesrpc"
 )
 
-const (
-	BILL_TYPE_RECHARGE = 0
-	BILL_TYPE_PAYMENT  = 1
-)
-
-const (
-	AWAY_IN  = 0
-	AWAY_OUT = 1
-)
-
-const (
-	UNIT_SATOSHIS = 0
-)
-
-const (
-	PAY_UNKNOWN = 0
-	PAY_SUCCESS = 1
-	PAY_FAILED  = 2
-)
-
 var mutex sync.Mutex
 
 // CreateCustodyAccount 创建托管账户并保持马卡龙文件
@@ -85,7 +65,7 @@ func CreateCustodyAccount(user *models.User) (*models.Account, error) {
 }
 
 // Update  托管账户更新
-func UpdateCustodyAccount(account *models.Account, away uint, balance uint64) (uint, error) {
+func UpdateCustodyAccount(account *models.Account, away models.BalanceAway, balance uint64) (uint, error) {
 	acc, err := servicesrpc.AccountInfo(account.UserAccountCode)
 	if err != nil {
 		return 0, err
@@ -93,9 +73,9 @@ func UpdateCustodyAccount(account *models.Account, away uint, balance uint64) (u
 	var amount int64
 
 	switch away {
-	case AWAY_IN:
+	case models.AWAY_IN:
 		amount = acc.CurrentBalance + int64(balance)
-	case AWAY_OUT:
+	case models.AWAY_OUT:
 		amount = acc.CurrentBalance - int64(balance)
 	default:
 		return 0, fmt.Errorf("away error")
@@ -111,10 +91,10 @@ func UpdateCustodyAccount(account *models.Account, away uint, balance uint64) (u
 	ba := models.Balance{}
 	ba.AccountId = account.ID
 	ba.Amount = float64(balance)
-	ba.Unit = UNIT_SATOSHIS
-	ba.BillType = BILL_TYPE_PAYMENT
+	ba.Unit = models.UNIT_SATOSHIS
+	ba.BillType = models.BILL_TYPE_PAYMENT
 	ba.Away = away
-	ba.State = PAY_SUCCESS
+	ba.State = models.STATE_SUCCESS
 	ba.Invoice = nil
 	ba.PaymentHash = nil
 	//更新数据库
@@ -135,7 +115,7 @@ func PayAmountInside(payUserId, receiveUserId uint, gasFee, serveFee uint64) (ui
 		CUST.Error("ReadAccountByUserId error:%v", err)
 		return 0, err
 	}
-	outId, err := UpdateCustodyAccount(payAccount, AWAY_OUT, amount)
+	outId, err := UpdateCustodyAccount(payAccount, models.AWAY_OUT, amount)
 	if err != nil {
 		CUST.Error("UpdateCustodyAccount error:%v", err)
 		return 0, err
@@ -155,7 +135,7 @@ func PayAmountInside(payUserId, receiveUserId uint, gasFee, serveFee uint64) (ui
 		CUST.Error("ReadAccountByUserId error:%v", err)
 		return 0, err
 	}
-	Id, err := UpdateCustodyAccount(receiveAccount, AWAY_IN, amount)
+	Id, err := UpdateCustodyAccount(receiveAccount, models.AWAY_IN, amount)
 	if err != nil {
 		CUST.Error("UpdateCustodyAccount error:%v", err)
 		return 0, err
@@ -251,11 +231,11 @@ func PayInvoice(account *models.Account, PayInvoiceRequest *PayInvoiceRequest) (
 	}
 	if len(a) > 0 {
 		for _, v := range a {
-			if v.State == PAY_SUCCESS {
+			if v.State == models.STATE_SUCCESS {
 				CUST.Info("该发票已支付")
 				return nil, fmt.Errorf("该发票已支付")
 			}
-			if v.State == PAY_UNKNOWN {
+			if v.State == models.STATE_UNKNOWN {
 				CUST.Info("该发票支付状态未知")
 				return nil, fmt.Errorf("该发票支付状态未知")
 			}
@@ -300,18 +280,18 @@ func PayInvoice(account *models.Account, PayInvoiceRequest *PayInvoiceRequest) (
 	}
 	var balanceModel models.Balance
 	balanceModel.AccountId = account.ID
-	balanceModel.BillType = BILL_TYPE_PAYMENT
-	balanceModel.Away = AWAY_OUT
+	balanceModel.BillType = models.BILL_TYPE_PAYMENT
+	balanceModel.Away = models.AWAY_OUT
 	balanceModel.Amount = float64(payment.ValueSat)
-	balanceModel.Unit = UNIT_SATOSHIS
+	balanceModel.Unit = models.UNIT_SATOSHIS
 	balanceModel.Invoice = &payment.PaymentRequest
 	balanceModel.PaymentHash = &payment.PaymentHash
 	if payment.Status == lnrpc.Payment_SUCCEEDED {
-		balanceModel.State = PAY_SUCCESS
+		balanceModel.State = models.STATE_SUCCESS
 	} else if payment.Status == lnrpc.Payment_FAILED {
-		balanceModel.State = PAY_FAILED
+		balanceModel.State = models.STATE_FAILED
 	} else {
-		balanceModel.State = PAY_UNKNOWN
+		balanceModel.State = models.STATE_UNKNOWN
 	}
 	mutex.Lock()
 	defer mutex.Unlock()
@@ -364,7 +344,7 @@ func saveMacaroon(macaroon []byte, macaroonFile string) error {
 func pollPayment() {
 	//查询数据库，获取所有未确认的支付
 	params := QueryParams{
-		"State": PAY_UNKNOWN,
+		"State": models.STATE_UNKNOWN,
 	}
 	a, err := GenericQuery(&models.Balance{}, params)
 	if err != nil {
@@ -379,7 +359,7 @@ func pollPayment() {
 				continue
 			}
 			if temp.Status == lnrpc.Payment_SUCCEEDED {
-				v.State = PAY_SUCCESS
+				v.State = models.STATE_SUCCESS
 				mutex.Lock()
 				defer mutex.Unlock()
 				err = middleware.DB.Save(&v).Error
@@ -387,7 +367,7 @@ func pollPayment() {
 					CUST.Warning(err.Error())
 				}
 			} else if temp.Status == lnrpc.Payment_FAILED {
-				v.State = PAY_FAILED
+				v.State = models.STATE_FAILED
 				mutex.Lock()
 				defer mutex.Unlock()
 				err = middleware.DB.Save(&v).Error

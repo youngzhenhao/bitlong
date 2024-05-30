@@ -159,7 +159,7 @@ func CalculateGasFee(number int, blocks int, byteSize int) (int, error) {
 
 func GetPayMintFeeState(paidId int) (bool, error) {
 	var balance models.Balance
-	err := middleware.DB.Where("state = ?", PAY_SUCCESS).First(&balance, paidId).Error
+	err := middleware.DB.Where("state = ?", models.STATE_SUCCESS).First(&balance, paidId).Error
 	if err != nil {
 		FEE.Error("GetBalance", err)
 		return false, err
@@ -178,7 +178,7 @@ func IsMintFeePaid(paidId int) bool {
 
 func IsPayIssuanceFeeStatePaid(paidId int) (bool, error) {
 	var balance models.Balance
-	err := middleware.DB.Where("state = ?", PAY_SUCCESS).First(&balance, paidId).Error
+	err := middleware.DB.Where("state = ?", models.STATE_SUCCESS).First(&balance, paidId).Error
 	if err != nil {
 		FEE.Error("GetBalance", err)
 		return false, err

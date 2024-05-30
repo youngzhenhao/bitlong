@@ -16,10 +16,13 @@ func Migrate() error {
 	if err = middleware.DB.AutoMigrate(&models.BalanceExt{}); err != nil {
 		return err
 	}
-	if err = middleware.DB.AutoMigrate(&models.Invoice{}); err != nil {
+	if err = middleware.DB.AutoMigrate(&models.User{}); err != nil {
 		return err
 	}
-	if err = middleware.DB.AutoMigrate(&models.User{}); err != nil {
+	if err = middleware.DB.AutoMigrate(&models.ScheduledTask{}); err != nil {
+		return err
+	}
+	if err = middleware.DB.AutoMigrate(&models.Invoice{}); err != nil {
 		return err
 	}
 	if err = middleware.DB.AutoMigrate(&models.FairLaunchInfo{}); err != nil {
@@ -35,9 +38,6 @@ func Migrate() error {
 		return err
 	}
 	if err = middleware.DB.AutoMigrate(&models.FeeRateInfo{}); err != nil {
-		return err
-	}
-	if err = middleware.DB.AutoMigrate(&models.ScheduledTask{}); err != nil {
 		return err
 	}
 	if err = middleware.DB.AutoMigrate(&models.AssetIssuance{}); err != nil {

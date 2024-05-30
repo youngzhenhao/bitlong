@@ -62,8 +62,8 @@ func (sm *CronService) SixSecondTask() {
 }
 
 func NameToId(name string) (int, error) {
-	user := models.User{Username: name}
-	err := middleware.DB.First(&user).Error
+	user := models.User{}
+	err := middleware.DB.Where("user_name = ?", name).First(&user).Error
 	return int(user.ID), err
 }
 

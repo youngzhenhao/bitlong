@@ -121,5 +121,5 @@ func processChainTransactions(response *lnrpc.TransactionDetails) *[]ChainTransa
 			PreviousOutpoints: previousOutpoints,
 		})
 	}
-	return nil
+	return &chainTransactions
 }

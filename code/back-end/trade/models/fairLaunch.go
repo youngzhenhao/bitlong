@@ -57,6 +57,8 @@ type FairLaunchInfo struct {
 	BatchTxidAnchor        string           `json:"batch_txid_anchor" gorm:"type:varchar(255)"`
 	AssetID                string           `json:"asset_id" gorm:"type:varchar(255)"`
 	UserID                 int              `json:"user_id"`
+	PayMethod              FeePaymentMethod `json:"pay_method"`
+	PaidSuccessTime        int              `json:"paid_success_time"`
 	IssuanceFeePaidID      int              `json:"issuance_fee_paid_id"`
 	ReservedCouldMint      bool             `json:"reserved_could_mint"`
 	IsReservedSent         bool             `json:"is_reserved_sent"`
@@ -86,6 +88,8 @@ type FairLaunchMintedInfo struct {
 	MintedFeeRateSatPerKw int                   `json:"minted_fee_rate_sat_per_kw"`
 	EncodedAddr           string                `json:"encoded_addr" gorm:"type:varchar(255)"`
 	MintFeePaidID         int                   `json:"mint_fee_paid_id"`
+	PayMethod             FeePaymentMethod      `json:"pay_method"`
+	PaidSuccessTime       int                   `json:"paid_success_time"`
 	UserID                int                   `json:"user_id"`
 	AssetID               string                `json:"asset_id" gorm:"type:varchar(255)"`
 	AssetType             string                `json:"asset_type" gorm:"type:varchar(255)"`
@@ -94,7 +98,7 @@ type FairLaunchMintedInfo struct {
 	InternalKey           string                `json:"internal_key" gorm:"type:varchar(255)"`
 	TaprootOutputKey      string                `json:"taproot_output_key" gorm:"type:varchar(255)"`
 	ProofCourierAddr      string                `json:"proof_courier_addr" gorm:"type:varchar(255)"`
-	MintTime              int                   `json:"mint_time"`
+	MintedTime            int                   `json:"minted_time"`
 	IsAddrSent            bool                  `json:"is_addr_sent"`
 	OutpointTxHash        string                `json:"anchor_tx_hash" gorm:"type:varchar(255)"`
 	Outpoint              string                `json:"outpoint" gorm:"type:varchar(255)"`

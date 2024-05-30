@@ -133,7 +133,7 @@ func ProcessFairLaunchMintedInfo(fairLaunchInfoID int, mintedNumber int, mintedF
 		InternalKey:           hex.EncodeToString(decodedAddrInfo.InternalKey),
 		TaprootOutputKey:      hex.EncodeToString(decodedAddrInfo.TaprootOutputKey),
 		ProofCourierAddr:      decodedAddrInfo.ProofCourierAddr,
-		MintTime:              utils.GetTimestamp(),
+		MintedTime:            utils.GetTimestamp(),
 		State:                 models.FairLaunchMintedStateNoPay,
 	}
 	return &fairLaunchMintedInfo, nil
@@ -473,6 +473,8 @@ func CreateInventoryAndAssetIssuanceInfoByFairLaunchInfo(fairLaunchInfo *models.
 // FairLaunchInfos
 
 func GetAllFairLaunchInfoByState(state models.FairLaunchState) (fairLaunchInfos *[]models.FairLaunchInfo, err error) {
+	_fairLaunchInfos := make([]models.FairLaunchInfo, 0)
+	fairLaunchInfos = &(_fairLaunchInfos)
 	err = middleware.DB.Where("status = ? AND state = ?", models.StatusNormal, state).Find(fairLaunchInfos).Error
 	if err != nil {
 		utils.LogError("Get all fairLaunch info by state. ", err)
@@ -502,6 +504,8 @@ func GetAllFairLaunchStateIssuedInfos() (fairLaunchInfos *[]models.FairLaunchInf
 }
 
 func GetAllValidFairLaunchInfos() (fairLaunchInfos *[]models.FairLaunchInfo, err error) {
+	_fairLaunchInfos := make([]models.FairLaunchInfo, 0)
+	fairLaunchInfos = &_fairLaunchInfos
 	err = middleware.DB.Where("status = ?", models.StatusNormal).Find(fairLaunchInfos).Error
 	if err != nil {
 		utils.LogError("Get all fairLaunch infos error. ", err)
@@ -617,7 +621,7 @@ func ProcessAllFairLaunchInfos() (*[]ProcessionResult, error) {
 		}
 	}
 	if processionResults == nil || len(processionResults) == 0 {
-		err = errors.New("procession results error")
+		err = errors.New("procession results null")
 		return nil, err
 	}
 	return &processionResults, nil
@@ -625,12 +629,20 @@ func ProcessAllFairLaunchInfos() (*[]ProcessionResult, error) {
 
 func UpdateFairLaunchInfoPaidId(fairLaunchInfo *models.FairLaunchInfo, paidId int) (err error) {
 	fairLaunchInfo.IssuanceFeePaidID = paidId
+	fairLaunchInfo.PayMethod = models.FeePaymentMethodCustodyAccount
 	f := FairLaunchStore{DB: middleware.DB}
 	return f.UpdateFairLaunchInfo(fairLaunchInfo)
 }
 
 func ChangeFairLaunchInfoState(fairLaunchInfo *models.FairLaunchInfo, state models.FairLaunchState) (err error) {
 	fairLaunchInfo.State = state
+	f := FairLaunchStore{DB: middleware.DB}
+	return f.UpdateFairLaunchInfo(fairLaunchInfo)
+}
+
+func ChangeFairLaunchInfoStateAndUpdatePaidSuccessTime(fairLaunchInfo *models.FairLaunchInfo) (err error) {
+	fairLaunchInfo.State = models.FairLaunchStatePaidNoIssue
+	fairLaunchInfo.PaidSuccessTime = utils.GetTimestamp()
 	f := FairLaunchStore{DB: middleware.DB}
 	return f.UpdateFairLaunchInfo(fairLaunchInfo)
 }
@@ -777,7 +789,7 @@ func ProcessFairLaunchStatePaidPendingInfoService(fairLaunchInfo *models.FairLau
 	// @dev: 1.fee paid
 	if IsIssuanceFeePaid(fairLaunchInfo.IssuanceFeePaidID) {
 		// @dev: Change state
-		err = ChangeFairLaunchInfoState(fairLaunchInfo, models.FairLaunchStatePaidNoIssue)
+		err = ChangeFairLaunchInfoStateAndUpdatePaidSuccessTime(fairLaunchInfo)
 		if err != nil {
 			FairLaunchDebugLogger.Error("Change FairLaunchInfo State.", err)
 			return err
@@ -848,6 +860,8 @@ func ProcessFairLaunchStateIssuedPendingInfoService(fairLaunchInfo *models.FairL
 // FairLaunchMintedInfos
 
 func GetAllFairLaunchMintedInfoByState(state models.FairLaunchMintedState) (fairLaunchMintedInfos *[]models.FairLaunchMintedInfo, err error) {
+	_fairLaunchMintedInfos := make([]models.FairLaunchMintedInfo, 0)
+	fairLaunchMintedInfos = &(_fairLaunchMintedInfos)
 	err = middleware.DB.Where("status = ? AND state = ?", models.StatusNormal, state).Find(fairLaunchMintedInfos).Error
 	if err != nil {
 		utils.LogError("Get all fairLaunch minted info by state. ", err)
@@ -877,7 +891,9 @@ func GetAllFairLaunchMintedStateSentInfo() (fairLaunchMintedInfos *[]models.Fair
 }
 
 func GetAllValidFairLaunchMintedInfos() (fairLaunchMintedInfos *[]models.FairLaunchMintedInfo, err error) {
-	err = middleware.DB.Where("status = ?", models.StatusNormal).Find(fairLaunchMintedInfos).Error
+	_fairLaunchMintedInfos := make([]models.FairLaunchMintedInfo, 0)
+	fairLaunchMintedInfos = &(_fairLaunchMintedInfos)
+	err = middleware.DB.Order("minted_time").Order("paid_success_time").Where("status = ?", models.StatusNormal).Find(fairLaunchMintedInfos).Error
 	if err != nil {
 		utils.LogError("Get all fairLaunch minted infos error. ", err)
 		return nil, err
@@ -987,7 +1003,7 @@ func ProcessAllFairLaunchMintedInfos() (*[]ProcessionResult, error) {
 		}
 	}
 	if processionResults == nil || len(processionResults) == 0 {
-		err = errors.New("procession results error")
+		err = errors.New("procession results null")
 		return nil, err
 	}
 	return &processionResults, nil
@@ -995,12 +1011,20 @@ func ProcessAllFairLaunchMintedInfos() (*[]ProcessionResult, error) {
 
 func UpdateFairLaunchMintedInfoPaidId(fairLaunchMintedInfo *models.FairLaunchMintedInfo, paidId int) (err error) {
 	fairLaunchMintedInfo.MintFeePaidID = paidId
+	fairLaunchMintedInfo.PayMethod = models.FeePaymentMethodCustodyAccount
 	f := FairLaunchStore{DB: middleware.DB}
 	return f.UpdateFairLaunchMintedInfo(fairLaunchMintedInfo)
 }
 
 func ChangeFairLaunchMintedInfoState(fairLaunchMintedInfo *models.FairLaunchMintedInfo, state models.FairLaunchMintedState) (err error) {
 	fairLaunchMintedInfo.State = state
+	f := FairLaunchStore{DB: middleware.DB}
+	return f.UpdateFairLaunchMintedInfo(fairLaunchMintedInfo)
+}
+
+func ChangeFairLaunchMintedInfoStateAndUpdatePaidSuccessTime(fairLaunchMintedInfo *models.FairLaunchMintedInfo) (err error) {
+	fairLaunchMintedInfo.State = models.FairLaunchMintedStatePaidNoSend
+	fairLaunchMintedInfo.PaidSuccessTime = utils.GetTimestamp()
 	f := FairLaunchStore{DB: middleware.DB}
 	return f.UpdateFairLaunchMintedInfo(fairLaunchMintedInfo)
 }
@@ -1017,6 +1041,8 @@ func LockInventoryByFairLaunchMintedInfo(fairLaunchMintedInfo *models.FairLaunch
 }
 
 func GetAllUnsentFairLaunchMintedInfos() (fairLaunchMintedInfos *[]models.FairLaunchMintedInfo, err error) {
+	_fairLaunchMintedInfos := make([]models.FairLaunchMintedInfo, 0)
+	fairLaunchMintedInfos = &(_fairLaunchMintedInfos)
 	err = middleware.DB.Where("status = ? AND state = ? AND is_addr_sent = ?", models.StatusNormal, models.FairLaunchInventoryStateLocked, false).Find(fairLaunchMintedInfos).Error
 	if err != nil {
 		utils.LogError("Get all fairLaunch minted infos error. ", err)
@@ -1199,7 +1225,7 @@ func ProcessFairLaunchMintedStatePaidPendingInfo(fairLaunchMintedInfo *models.Fa
 	// @dev: 1.fee paid
 	if IsMintFeePaid(fairLaunchMintedInfo.MintFeePaidID) {
 		// @dev: Change state
-		err = ChangeFairLaunchMintedInfoState(fairLaunchMintedInfo, models.FairLaunchMintedStatePaidNoSend)
+		err = ChangeFairLaunchMintedInfoStateAndUpdatePaidSuccessTime(fairLaunchMintedInfo)
 		if err != nil {
 			FairLaunchDebugLogger.Error("Change FairLaunchMintedInfo State.", err)
 			return err

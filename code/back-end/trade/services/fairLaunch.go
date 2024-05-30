@@ -1292,6 +1292,26 @@ func ProcessFairLaunchMintedStateSentPendingInfo(fairLaunchMintedInfo *models.Fa
 			FairLaunchDebugLogger.Error("Create FairLaunch Minted UserInfo", err)
 			return err
 		}
+		var account *models.Account
+		account, err = ReadAccountByUserId(uint(fairLaunchMintedInfo.UserID))
+		if err != nil {
+			FairLaunchDebugLogger.Error("Read Account By UserId", err)
+			return err
+		}
+		err = CreateBalance(&models.Balance{
+			AccountId:   account.ID,
+			BillType:    models.BILL_TYPE_ASSET_MINTED_SEND,
+			Away:        models.AWAY_OUT,
+			Amount:      float64(fairLaunchMintedInfo.AddrAmount),
+			Unit:        models.UNIT_ASSET_NORMAL,
+			Invoice:     &(fairLaunchMintedInfo.EncodedAddr),
+			PaymentHash: &(fairLaunchMintedInfo.OutpointTxHash),
+			State:       models.STATE_SUCCESS,
+		})
+		if err != nil {
+			FairLaunchDebugLogger.Error("Create Balance", err)
+			return err
+		}
 		return nil
 	}
 	// @dev: Transaction has not been Confirmed

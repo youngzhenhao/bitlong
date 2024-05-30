@@ -22,7 +22,7 @@ type Job struct {
 
 func LoadJobs() ([]Job, error) {
 	var jobs []Job
-	// 使用GORM的方法进行查询
+	// Use the GORM method for querying
 	err := middleware.DB.Table("scheduled_tasks").Select("name, cron_expression, function_name, package").Scan(&jobs).Error
 	if err != nil {
 		log.Fatal("Failed to load tasks:", err)
@@ -47,7 +47,7 @@ func LoadJobs() ([]Job, error) {
 func ExecuteWithLock(taskName string) {
 	lockKey := "lock:" + taskName
 	expiration := 10 * time.Second
-	// 尝试获取锁
+	// Try to get the lock
 	identifier, acquired := middleware.AcquireLock(lockKey, expiration)
 	if !acquired {
 		log.Println("Failed to acquire lock" + lockKey)

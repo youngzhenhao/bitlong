@@ -23,9 +23,10 @@ func (Balance) TableName() string {
 type BalanceType int16
 
 const (
-	BILL_TYPE_RECHARGE       BalanceType = 0
-	BILL_TYPE_PAYMENT        BalanceType = 1
-	BILL_TYPE_ASSET_TRANSFER BalanceType = 2
+	BILL_TYPE_RECHARGE          BalanceType = 0
+	BILL_TYPE_PAYMENT           BalanceType = 1
+	BILL_TYPE_ASSET_TRANSFER    BalanceType = 2
+	BILL_TYPE_ASSET_MINTED_SEND             = 3
 )
 
 type BalanceAway int16
@@ -38,7 +39,9 @@ const (
 type BalanceUnit int16
 
 const (
-	UNIT_SATOSHIS BalanceUnit = 0
+	UNIT_SATOSHIS          BalanceUnit = 0
+	UNIT_ASSET_NORMAL      BalanceUnit = 1
+	UNIT_ASSET_COLLECTIBLE BalanceUnit = 2
 )
 
 type BalanceState int16

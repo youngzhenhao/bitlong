@@ -10,8 +10,8 @@ func CreateBalance(balance *models.Balance) error {
 	return middleware.DB.Create(balance).Error
 }
 
-// GetBalance retrieves a balance by ID
-func GetBalance(id uint) (*models.Balance, error) {
+// ReadBalance retrieves a balance by ID
+func ReadBalance(id uint) (*models.Balance, error) {
 	var balance models.Balance
 	err := middleware.DB.First(&balance, id).Error
 	return &balance, err

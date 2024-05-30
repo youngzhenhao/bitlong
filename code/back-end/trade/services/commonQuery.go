@@ -11,7 +11,7 @@ import (
 type QueryParams map[string]interface{}
 
 func parseTagField(tag string) string {
-	// 解析结构体字段的gorm标签，提取column部分
+	// Parse the gorm tag of the struct field and extract the column part
 	tagParts := strings.Split(tag, ";")
 	for _, part := range tagParts {
 		if strings.HasPrefix(part, "column:") {
@@ -25,11 +25,10 @@ func parseTagField(tag string) string {
 // It filters records according to the provided params and returns a slice of found models or an error.
 func GenericQuery[T any](model *T, params QueryParams) ([]*T, error) {
 	var results []*T
-	modelType := reflect.TypeOf(model).Elem() // 获取到model的反射类型对象
-
+	// Obtain the reflection type object of the model
+	modelType := reflect.TypeOf(model).Elem()
 	// Start with a base model and apply filters.
 	query := middleware.DB.Model(model)
-
 	// Validate each key in the query parameters against the model's fields
 	for key, value := range params {
 		field, ok := modelType.FieldByName(key)
@@ -39,28 +38,25 @@ func GenericQuery[T any](model *T, params QueryParams) ([]*T, error) {
 		}
 		columnName := parseTagField(string(field.Tag.Get("gorm")))
 		if columnName == "" {
-			columnName = key // 使用字段名作为列名的后备方案
+			// Use the field name as a fallback to the column name
+			columnName = key
 		}
 		query = query.Where(columnName+" = ?", value)
 	}
-
 	// Execute the query and find the results.
 	if err := query.Find(&results).Error; err != nil {
 		log.Printf("Error querying database: %v", err)
 		return nil, err
 	}
-
 	// Optionally print the results (assuming model has a method String() string to print its details)
 	for _, result := range results {
 		fmt.Println(result)
 	}
-
 	return results, nil
 }
 
 func GenericQueryByObject[T any](condition *T) ([]*T, error) {
 	var results []*T
-
 	// Start with a base model and apply filters using the condition instance where only non-zero values are considered.
 	if err := middleware.DB.Where(condition).Find(&results).Error; err != nil {
 		fmt.Printf("Error querying database: %v\n", err)
@@ -73,6 +69,5 @@ func GenericQueryByObject[T any](condition *T) ([]*T, error) {
 	for _, result := range results {
 		fmt.Println(result)
 	}
-
 	return results, nil
 }

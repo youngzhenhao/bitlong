@@ -19,14 +19,13 @@ var mutex sync.Mutex
 
 // CreateCustodyAccount 创建托管账户并保持马卡龙文件
 func CreateCustodyAccount(user *models.User) (*models.Account, error) {
-	//根据用户信息创建托管账户
+	// Create a custody account based on user information
 	account, macaroon, err := servicesrpc.AccountCreate(0, 0)
 	if err != nil {
 		CUST.Error(err.Error())
 		return nil, err
 	}
-
-	//构建马卡龙存储路径
+	// Build a macaroon storage path
 	macaroonDir := config.GetConfig().ApiConfig.CustodyAccount.MacaroonDir
 	if _, err = os.Stat(macaroonDir); os.IsNotExist(err) {
 		err = os.MkdirAll(macaroonDir, os.ModePerm)
@@ -36,23 +35,20 @@ func CreateCustodyAccount(user *models.User) (*models.Account, error) {
 		}
 	}
 	macaroonFile := filepath.Join(macaroonDir, account.Id+".macaroon")
-
-	//存储马卡龙信息
+	// Store macaroon information
 	err = saveMacaroon(macaroon, macaroonFile)
 	if err != nil {
 		CUST.Error(err.Error())
 		return nil, err
 	}
-
-	//构建账户对象
+	// Build an account object
 	var accountModel models.Account
 	accountModel.UserName = user.Username
 	accountModel.UserId = user.ID
 	accountModel.UserAccountCode = account.Id
 	accountModel.Label = &account.Label
 	accountModel.Status = 1
-
-	//写入数据库
+	// Write to the database
 	mutex.Lock()
 	defer mutex.Unlock()
 	err = CreateAccount(&accountModel)
@@ -60,7 +56,7 @@ func CreateCustodyAccount(user *models.User) (*models.Account, error) {
 		CUST.Error(err.Error())
 		return nil, err
 	}
-	//返回托管账户信息
+	// Return to the escrow account information
 	return &accountModel, nil
 }
 
@@ -81,13 +77,13 @@ func UpdateCustodyAccount(account *models.Account, away models.BalanceAway, bala
 		return 0, fmt.Errorf("away error")
 	}
 	if account.UserAccountCode != "admin" {
-		//更变托管账户余额
+		// Change the escrow account balance
 		_, err = servicesrpc.AccountUpdate(account.UserAccountCode, amount, -1)
 		if err != nil {
 			return 0, err
 		}
 	}
-	//构建数据库存储对象
+	// Build a database storage object
 	ba := models.Balance{}
 	ba.AccountId = account.ID
 	ba.Amount = float64(balance)
@@ -97,7 +93,7 @@ func UpdateCustodyAccount(account *models.Account, away models.BalanceAway, bala
 	ba.State = models.STATE_SUCCESS
 	ba.Invoice = nil
 	ba.PaymentHash = nil
-	//更新数据库
+	// Update the database
 	mutex.Lock()
 	defer mutex.Unlock()
 	err = middleware.DB.Create(&ba).Error

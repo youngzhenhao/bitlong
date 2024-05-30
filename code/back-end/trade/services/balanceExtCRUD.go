@@ -10,8 +10,8 @@ func CreateBalanceExt(balanceExt *models.BalanceExt) error {
 	return middleware.DB.Create(balanceExt).Error
 }
 
-// GetBalanceExt retrieves a balance extension by ID
-func GetBalanceExt(id uint) (*models.BalanceExt, error) {
+// ReadBalanceExt retrieves a balance extension by ID
+func ReadBalanceExt(id uint) (*models.BalanceExt, error) {
 	var balanceExt models.BalanceExt
 	err := middleware.DB.First(&balanceExt, id).Error
 	return &balanceExt, err

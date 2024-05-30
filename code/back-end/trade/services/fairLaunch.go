@@ -727,6 +727,11 @@ func GetTransactionConfirmedNumber(txid string) (mumConfirmations int, err error
 }
 
 func IsTransactionConfirmed(txid string) bool {
+	if txid == "" {
+		err := errors.New("empty transaction hash")
+		FairLaunchDebugLogger.Error("", err)
+		return false
+	}
 	mumConfirmations, err := GetTransactionConfirmedNumber(txid)
 	if err != nil {
 		FairLaunchDebugLogger.Error("", err)
@@ -1030,7 +1035,7 @@ func ChangeFairLaunchMintedInfoStateAndUpdatePaidSuccessTime(fairLaunchMintedInf
 }
 
 func LockInventoryByFairLaunchMintedInfo(fairLaunchMintedInfo *models.FairLaunchMintedInfo) (lockedInventory *[]models.FairLaunchInventoryInfo, err error) {
-	//fairLaunchId := fairLaunchMintedInfo.FairLaunchInfoID
+	//fairLaunchId := fairLaunchMintedInfo.FairLaunchMintedInfoID
 	//mintNumber := fairLaunchMintedInfo.MintedNumber
 	lockedInventory, err = LockInventoryByFairLaunchMintedIdAndMintNumber(int(fairLaunchMintedInfo.ID), fairLaunchMintedInfo.MintedNumber)
 	if err != nil {
@@ -1043,7 +1048,7 @@ func LockInventoryByFairLaunchMintedInfo(fairLaunchMintedInfo *models.FairLaunch
 func GetAllUnsentFairLaunchMintedInfos() (fairLaunchMintedInfos *[]models.FairLaunchMintedInfo, err error) {
 	_fairLaunchMintedInfos := make([]models.FairLaunchMintedInfo, 0)
 	fairLaunchMintedInfos = &(_fairLaunchMintedInfos)
-	err = middleware.DB.Where("status = ? AND state = ? AND is_addr_sent = ?", models.StatusNormal, models.FairLaunchInventoryStateLocked, false).Find(fairLaunchMintedInfos).Error
+	err = middleware.DB.Where("status = ? AND state = ? AND is_addr_sent = ?", models.StatusNormal, models.FairLaunchMintedStateSentPending, false).Find(fairLaunchMintedInfos).Error
 	if err != nil {
 		utils.LogError("Get all fairLaunch minted infos error. ", err)
 		return nil, err
@@ -1098,6 +1103,7 @@ func GetListChainTransactionsOutpointAddress(outpoint string) (address string, e
 
 // @dev: Updated outpoint and is_addr_sent
 func UpdateFairLaunchMintedInfosBySendAssetResponse(fairLaunchMintedInfos *[]models.FairLaunchMintedInfo, sendAssetResponse *taprpc.SendAssetResponse) (err error) {
+	var fairLaunchMintedInfosUpdated []models.FairLaunchMintedInfo
 	// deprecate anchor tx hash
 	_ = hex.EncodeToString(sendAssetResponse.Transfer.AnchorTxHash)
 	for _, fairLaunchMintedInfo := range *fairLaunchMintedInfos {
@@ -1105,11 +1111,11 @@ func UpdateFairLaunchMintedInfosBySendAssetResponse(fairLaunchMintedInfos *[]mod
 		internalKey := fairLaunchMintedInfo.InternalKey
 		var outpoint string
 		outpoint, err = SendAssetResponseScriptKeyAndInternalKeyToOutpoint(sendAssetResponse, scriptKey, internalKey)
-		fairLaunchMintedInfo.OutpointTxHash, _ = GetTransactionAndIndexByOutpoint(outpoint)
 		if err != nil {
 			FairLaunchDebugLogger.Error("Send Asset Response ScriptKey And InternalKey To Outpoint", err)
 			return err
 		}
+		fairLaunchMintedInfo.OutpointTxHash, _ = GetTransactionAndIndexByOutpoint(outpoint)
 		// @dev: Update outpoint and isAddrSent
 		fairLaunchMintedInfo.Outpoint = outpoint
 		fairLaunchMintedInfo.IsAddrSent = true
@@ -1120,8 +1126,9 @@ func UpdateFairLaunchMintedInfosBySendAssetResponse(fairLaunchMintedInfos *[]mod
 			return err
 		}
 		fairLaunchMintedInfo.Address = address
+		fairLaunchMintedInfosUpdated = append(fairLaunchMintedInfosUpdated, fairLaunchMintedInfo)
 	}
-	return middleware.DB.Save(fairLaunchMintedInfos).Error
+	return middleware.DB.Save(&fairLaunchMintedInfosUpdated).Error
 }
 
 // @dev: Trigger after ProcessFairLaunchMintedStatePaidNoSendInfo
@@ -1261,6 +1268,11 @@ func ProcessFairLaunchMintedStatePaidNoSendInfo(fairLaunchMintedInfo *models.Fai
 }
 
 func ProcessFairLaunchMintedStateSentPendingInfo(fairLaunchMintedInfo *models.FairLaunchMintedInfo) (err error) {
+	if fairLaunchMintedInfo.OutpointTxHash == "" {
+		err = errors.New("no outpoint of transaction hash generated, asset may has not been sent")
+		FairLaunchDebugLogger.Error("fairLaunchMintedInfo.OutpointTxHash is null", err)
+		return err
+	}
 	// @dev: 1.Is Transaction Confirmed
 	if IsTransactionConfirmed(fairLaunchMintedInfo.OutpointTxHash) {
 		// @dev: Change state
@@ -1284,9 +1296,10 @@ func ProcessFairLaunchMintedStateSentPendingInfo(fairLaunchMintedInfo *models.Fa
 		// Update minted user
 		f := FairLaunchStore{DB: middleware.DB}
 		err = f.CreateFairLaunchMintedUserInfo(&models.FairLaunchMintedUserInfo{
-			UserID:           fairLaunchMintedInfo.UserID,
-			FairLaunchInfoID: fairLaunchMintedInfo.FairLaunchInfoID,
-			MintedNumber:     fairLaunchMintedInfo.MintedNumber,
+			UserID:                 fairLaunchMintedInfo.UserID,
+			FairLaunchMintedInfoID: int(fairLaunchMintedInfo.ID),
+			FairLaunchInfoID:       fairLaunchMintedInfo.FairLaunchInfoID,
+			MintedNumber:           fairLaunchMintedInfo.MintedNumber,
 		})
 		if err != nil {
 			FairLaunchDebugLogger.Error("Create FairLaunch Minted UserInfo", err)
@@ -1352,6 +1365,11 @@ func SendFairLaunchAsset() {
 }
 
 func SendFairLaunchReserved(fairLaunchInfo *models.FairLaunchInfo, addr string) (response *taprpc.SendAssetResponse, err error) {
+	if addr == "" {
+		err = errors.New("addr is null string")
+		FairLaunchDebugLogger.Error("Send FairLaunch Reserved", err)
+		return nil, err
+	}
 	decodedAddrInfo, err := api.GetDecodedAddrInfo(addr)
 	if err != nil {
 		FairLaunchDebugLogger.Error("Get Decoded Addr Info", err)
@@ -1365,6 +1383,10 @@ func SendFairLaunchReserved(fairLaunchInfo *models.FairLaunchInfo, addr string) 
 	// send
 	addrSlice := []string{addr}
 	feeRateSatPerKw, err := EstimateSmartFeeRateSatPerKw()
+	if err != nil {
+		FairLaunchDebugLogger.Error("Estimate Smart FeeRate SatPerKw", err)
+		return nil, err
+	}
 	response, err = api.SendAssetAddrSliceAndGetResponse(addrSlice, feeRateSatPerKw)
 	if err != nil {
 		FairLaunchDebugLogger.Error("Send Asset AddrSlice And Get Response", err)

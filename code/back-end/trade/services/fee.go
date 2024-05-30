@@ -235,7 +235,7 @@ func UpdateFeeRateInfoByBitcoind() (err error) {
 	var f = FeeRateInfoStore{DB: middleware.DB}
 	feeRateInfo, err = GetFeeRateInfoByName(string(GasFeeRateNameBitcoind))
 	if err != nil {
-		FEE.Error("Get FeeRateInfo By Bitcoind", err)
+		FEE.Error("Get FeeRateInfo By Bitcoind, Create now.", err)
 		//	Create FeeRateInfo
 		feeRateInfo = &models.FeeRateInfo{
 			Name: string(GasFeeRateNameBitcoind),
@@ -245,6 +245,7 @@ func UpdateFeeRateInfoByBitcoind() (err error) {
 			FEE.Error("Create FeeRate Info", err)
 			return err
 		}
+		FEE.Info("Bitcoind FeeRateInfo record created.", err)
 	}
 	feeRateInfo.EstimateSmartFeeRate, err = EstimateSmartFeeRate(config.GetLoadConfig().FairLaunchConfig.EstimateSmartFeeRateBlocks)
 	if err != nil {

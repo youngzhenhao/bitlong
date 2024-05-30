@@ -9,6 +9,7 @@ type Invoice struct {
 	gorm.Model
 	UserID     uint       `gorm:"not null;column:user_id" json:"userId"`
 	AccountID  *uint      `gorm:"column:account_id" json:"accountId"`
+	AssetId    string     `gorm:"column:asset_id;default:00" json:"assetId"`
 	Invoice    string     `gorm:"column:invoice" json:"invoice"`
 	Amount     float64    `gorm:"type:decimal(10,2);column:amount" json:"amount"`
 	CreateDate *time.Time `gorm:"column:create_date" json:"createDate"`

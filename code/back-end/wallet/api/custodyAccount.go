@@ -1,49 +1,19 @@
 package api
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
+	"github.com/wallet/api/apipost"
 )
 
-const (
-	// 申请发票请求地址
-	Server = "http://localhost:8080"
-	Apply  = "/api/v1/custody/apply-invoice"
-	Pay    = "/api/v1/custody/pay-invoice"
-)
+func ApplyInvoiceRequest(amount int64, memo string, token string) (string, error) {
+	user := "testuser"
+	pass := "testpass"
 
-func sendPostRequest(url string, token string, requestBody []byte) {
-
-	// 创建HTTP请求
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
+	token, err := apipost.Login(user, pass)
 	if err != nil {
-		fmt.Println("An error occurred while creating an HTTP request:", err)
-		return
+		return "", err
 	}
-
-	// 设置Authorization Header
-	req.Header.Set("Authorization", "Bearer "+token)
-	req.Header.Set("Content-Type", "application/json")
-
-	// 发送HTTP请求
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Println("An error occurred while sending a POST request:", err)
-		return
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			fmt.Println("An error occurred while closing the HTTP response body:", err)
-		}
-	}(resp.Body)
-}
-
-func ApplyInvoiceRequest(amount int64, memo string, token string) {
 	applyRequest := struct {
 		Amount int64  `json:"amount"`
 		Memo   string `json:"memo"`
@@ -52,8 +22,23 @@ func ApplyInvoiceRequest(amount int64, memo string, token string) {
 		Memo:   memo,
 	}
 	requestBody, _ := json.Marshal(applyRequest)
-	url := Server + Apply
-	sendPostRequest(url, token, requestBody)
+	url := apipost.Server + apipost.Apply
+	request, err := apipost.SendPostRequest(url, token, requestBody)
+	if err != nil {
+		return "", err
+	}
+	invoice := struct {
+		Error   string `json:"error"`
+		Invoice string `json:"invoice"`
+	}{}
+	err = json.Unmarshal(request, &invoice)
+	if err != nil {
+		return "", err
+	}
+	if invoice.Error != "" {
+		return "", fmt.Errorf(invoice.Error)
+	}
+	return invoice.Invoice, nil
 }
 
 func PayInvoiceRequest(invoiceId string, FeeLimit int64, token string) {
@@ -65,6 +50,6 @@ func PayInvoiceRequest(invoiceId string, FeeLimit int64, token string) {
 		FeeLimit: FeeLimit,
 	}
 	requestBody, _ := json.Marshal(payRequest)
-	url := Server + Pay
-	sendPostRequest(url, token, requestBody)
+	url := apipost.Server + apipost.Pay
+	apipost.SendPostRequest(url, token, requestBody)
 }

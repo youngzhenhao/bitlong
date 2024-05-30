@@ -57,7 +57,7 @@ func ApplyInvoiceCA(c *gin.Context) {
 		}
 	}
 
-	// 判断申请金额是否超过通道余额,检查申请内容是否合法
+	//TODO 判断申请金额是否超过通道余额,检查申请内容是否合法
 	apply := services.ApplyRequest{}
 	if err = c.ShouldBindJSON(&apply); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
@@ -72,7 +72,7 @@ func ApplyInvoiceCA(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"invoiceModel": invoiceRequest})
+	c.JSON(http.StatusOK, gin.H{"invoice": invoiceRequest.PaymentRequest})
 }
 
 // PayInvoice CustodyAccount付款发票

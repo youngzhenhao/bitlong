@@ -41,11 +41,8 @@ func Login(creds models.User) (string, error) {
 
 func ValidateUserAndGenerateToken(creds models.User) (string, error) {
 	var user models.User
-	result := middleware.DB.Where("username = ?", creds.Username).First(&user)
+	result := middleware.DB.Where("user_name = ?", creds.Username).First(&user)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return "", errors.New("invalid credentials")
-	}
-	if user.Password != creds.Password {
 		return "", errors.New("invalid credentials")
 	}
 	if !CheckPassword(user.Password, creds.Password) {
@@ -57,6 +54,7 @@ func ValidateUserAndGenerateToken(creds models.User) (string, error) {
 	}
 	return token, nil
 }
+
 func (sm *CronService) FiveSecondTask() {
 	fmt.Println("5 secs runs")
 	log.Println("5 secs runs")

@@ -33,8 +33,8 @@ func CreateCustodyAccount(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"accountModel": cstAccount})
 }
 
-// ApplyInvoiceCA CustodyAccount开具发票
-func ApplyInvoiceCA(c *gin.Context) {
+// ApplyInvoice CustodyAccount开具发票
+func ApplyInvoice(c *gin.Context) {
 	// 获取登录用户信息
 	userName := c.MustGet("username").(string)
 	user, err := services.ReadUserByUsername(userName)
@@ -73,6 +73,31 @@ func ApplyInvoiceCA(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"invoice": invoiceRequest.PaymentRequest})
+}
+
+func QueryInvoice(c *gin.Context) {
+	// 获取登录用户信息
+	userName := c.MustGet("username").(string)
+	user, err := services.ReadUserByUsername(userName)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户不存在"})
+		return
+	}
+
+	invoiceRequest := struct {
+		AssetId string `json:"asset_id"`
+	}{}
+	if err := c.ShouldBindJSON(&invoiceRequest); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Request is erro"})
+	}
+
+	// 查询账户发票
+	invoices, err := services.QueryInvoiceByUserId(user.ID, invoiceRequest.AssetId)
+	if err != nil {
+		fmt.Println(err.Error())
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "service error"})
+	}
+	c.JSON(http.StatusOK, gin.H{"invoices": invoices})
 }
 
 // PayInvoice CustodyAccount付款发票

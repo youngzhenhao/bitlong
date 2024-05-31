@@ -18,7 +18,8 @@ import (
 type ErrCode int
 
 const (
-	SUCCESS ErrCode = 0
+	OLD     ErrCode = -1
+	SUCCESS ErrCode = 200
 )
 
 type JsonResult struct {
@@ -32,7 +33,21 @@ func MakeJsonResult(success bool, error string, data any) string {
 	jsr := JsonResult{
 		Success: success,
 		Error:   error,
-		Code:    0,
+		Code:    -1,
+		Data:    data,
+	}
+	jstr, err := json.Marshal(jsr)
+	if err != nil {
+		return MakeJsonResult(false, err.Error(), nil)
+	}
+	return string(jstr)
+}
+
+func MakeJsonErrorResult(code ErrCode, error string, data any) string {
+	jsr := JsonResult{
+		Success: true,
+		Error:   error,
+		Code:    code,
 		Data:    data,
 	}
 	jstr, err := json.Marshal(jsr)

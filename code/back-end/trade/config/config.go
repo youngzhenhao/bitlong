@@ -27,13 +27,13 @@ type Config struct {
 		Password string `yaml:"password" json:"password"`
 		DB       int    `yaml:"db" json:"db"`
 	} `yaml:"redis" json:"redis"`
-	RouterBlock struct {
+	RouterDisable struct {
 		Login          bool `yaml:"login" json:"login"`
 		FairLaunch     bool `yaml:"fair_launch" json:"fair_launch"`
 		Fee            bool `yaml:"fee" json:"fee"`
 		CustodyAccount bool `yaml:"custody_account" json:"custody_account"`
 		Ping           bool `yaml:"ping" json:"ping"`
-	} `yaml:"router_block" json:"router_block"`
+	} `yaml:"router_disable" json:"router_disable"`
 	ApiConfig struct {
 		Lnd struct {
 			Host         string `yaml:"host" json:"host"`

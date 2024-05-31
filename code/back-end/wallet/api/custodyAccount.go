@@ -47,17 +47,6 @@ func PayInvoiceRequest(invoiceId string, FeeLimit int64, token string) ([]byte, 
 	return response, nil
 }
 
-// TODO:
-func QueryInvoicesRequest(invoiceId string, token string) ([]byte, error) {
-
-	return nil, nil
-}
-
-// TODO:
-func QueryPaymentsRequest(token string) ([]byte, error) {
-	return nil, nil
-}
-
 func QueryBalanceRequest(token string) ([]byte, error) {
 	url := Server + QuerybalanceUrl
 	response, err := SendPostRequest(url, token, nil)

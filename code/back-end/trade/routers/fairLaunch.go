@@ -7,7 +7,8 @@ import (
 )
 
 func setupFairLaunchRouter(router *gin.Engine) *gin.Engine {
-	fairLaunch := router.Group("/fair_launch")
+	version := router.Group("/v1")
+	fairLaunch := version.Group("/fair_launch")
 	fairLaunch.Use(middleware.AuthMiddleware())
 	{
 		fairLaunch.POST("/set", handlers.SetFairLaunchInfo)

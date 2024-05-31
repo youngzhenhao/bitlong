@@ -7,7 +7,8 @@ import (
 )
 
 func SetupFeeRouter(router *gin.Engine) *gin.Engine {
-	fee := router.Group("/fee")
+	version := router.Group("/v1")
+	fee := version.Group("/fee")
 	fee.Use(middleware.AuthMiddleware())
 	{
 		query := fee.Group("/query")

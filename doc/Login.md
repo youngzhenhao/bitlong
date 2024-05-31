@@ -32,15 +32,24 @@ func Login(username, password string) (string, error)
 ### 1.开户（开发票）
 第一次开发票的时候会在服务器给用户生成一个托管账户
 
-POST 开发票： 
+POST 开发票： /custodyAccount/invoice/apply
 开发票请求参数：
-func ApplyInvoiceRequest(amount int64, memo string, token string) ([]byte, error)
+请求头：
+Authorization ： "Bearer" token
 
-amount：开发票金额
-memo：开发票备注
-token：登录token
+请求体：
+格式 Json
+"amount": int 请求发票金额
+"memo": string 发票备注信息
 
-返回值：json字节流
+返回值：
+"invoice": string 发票号码
+"error": string 错误信息
+
+
+
+
+
 
 
 

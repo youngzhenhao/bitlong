@@ -8,16 +8,16 @@ import (
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
-	if !config.GetLoadConfig().RouterBlock.Login {
+	if !config.GetLoadConfig().RouterDisable.Login {
 		SetupLoginRouter(r)
 	}
-	if !config.GetLoadConfig().RouterBlock.FairLaunch {
+	if !config.GetLoadConfig().RouterDisable.FairLaunch {
 		setupFairLaunchRouter(r)
 	}
-	if !config.GetLoadConfig().RouterBlock.Fee {
+	if !config.GetLoadConfig().RouterDisable.Fee {
 		SetupFeeRouter(r)
 	}
-	if !config.GetLoadConfig().RouterBlock.CustodyAccount {
+	if !config.GetLoadConfig().RouterDisable.CustodyAccount {
 		SetupCustodyAccountRouter(r)
 	}
 	return r

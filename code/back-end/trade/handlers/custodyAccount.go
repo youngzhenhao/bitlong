@@ -110,3 +110,21 @@ func PayInvoice(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"payment": payment})
 }
+
+// QueryBalance CustodyAccount查询发票
+func QueryBalance(c *gin.Context) {
+	// 获取登录用户信息
+	userName := c.MustGet("username").(string)
+	user, err := services.ReadUserByUsername(userName)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户不存在"})
+		return
+	}
+
+	// 查询账户余额
+	balance, err := services.QueryAccountBalanceByUserId(user.ID)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+	}
+	c.JSON(http.StatusOK, gin.H{"balance": balance})
+}

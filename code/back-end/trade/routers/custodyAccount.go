@@ -16,9 +16,10 @@ func SetupCustodyAccountRouter(router *gin.Engine) *gin.Engine {
 		custody.POST("/create", handlers.CreateCustodyAccount)
 		Invoice := custody.Group("/invoice")
 		{
-			Invoice.POST("/apply", handlers.ApplyInvoiceCA)
+			Invoice.POST("/apply", handlers.ApplyInvoice)
 			Invoice.POST("/pay", handlers.PayInvoice)
 			Invoice.POST("/querybalance", handlers.QueryBalance)
+			Invoice.POST("/queryinvoice", handlers.QueryInvoice)
 		}
 	}
 	return router

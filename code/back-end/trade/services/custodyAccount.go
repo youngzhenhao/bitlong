@@ -315,6 +315,39 @@ func QueryAccountBalanceByUserId(userId uint) (uint64, error) {
 	return uint64(userBalance.CurrentBalance), nil
 }
 
+type InvoiceResponce struct {
+	Invoice string `json:"invoice"`
+	AssetId string `json:"asset_id"`
+	Amount  int64  `json:"amount"`
+	status  int16  `json:"status"`
+}
+
+func QueryInvoiceByUserId(userId uint, assetId string) ([]InvoiceResponce, error) {
+	params := QueryParams{
+		"UserID":  userId,
+		"AssetId": assetId,
+	}
+	a, err := GenericQuery(&models.Invoice{}, params)
+	if err != nil {
+		CUST.Error(err.Error())
+		return nil, err
+	}
+	if len(a) > 0 {
+		var invoices []InvoiceResponce
+		for _, v := range a {
+			var i InvoiceResponce
+			i.Invoice = v.Invoice
+			i.AssetId = v.AssetId
+			i.Amount = int64(v.Amount)
+			i.status = v.Status
+			invoices = append(invoices, i)
+		}
+		return invoices, nil
+	}
+	return nil, nil
+
+}
+
 // DecodeInvoice  解析发票信息
 func DecodeInvoice(invoice string) (*lnrpc.PayReq, error) {
 	return servicesrpc.InvoiceDecode(invoice)

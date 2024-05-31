@@ -299,6 +299,22 @@ func PayInvoice(account *models.Account, PayInvoiceRequest *PayInvoiceRequest) (
 	return payment, nil
 }
 
+func QueryAccountBalanceByUserId(userId uint) (uint64, error) {
+	// 查询账户
+	account, err := ReadAccountByUserId(userId)
+	if err != nil {
+		fmt.Println(err.Error())
+		return 0, err
+	}
+	// 查询账户余额
+	userBalance, err := QueryCustodyAccount(account.UserAccountCode)
+	if err != nil {
+		CUST.Error("Query failed: %s", err)
+		return 0, err
+	}
+	return uint64(userBalance.CurrentBalance), nil
+}
+
 // DecodeInvoice  解析发票信息
 func DecodeInvoice(invoice string) (*lnrpc.PayReq, error) {
 	return servicesrpc.InvoiceDecode(invoice)

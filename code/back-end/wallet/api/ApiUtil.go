@@ -15,16 +15,24 @@ import (
 	"time"
 )
 
+type ErrCode int
+
+const (
+	SUCCESS ErrCode = 0
+)
+
 type JsonResult struct {
-	Success bool   `json:"success"`
-	Error   string `json:"error"`
-	Data    any    `json:"data"`
+	Success bool    `json:"success"`
+	Error   string  `json:"error"`
+	Code    ErrCode `json:"code"`
+	Data    any     `json:"data"`
 }
 
 func MakeJsonResult(success bool, error string, data any) string {
 	jsr := JsonResult{
 		Success: success,
 		Error:   error,
+		Code:    0,
 		Data:    data,
 	}
 	jstr, err := json.Marshal(jsr)

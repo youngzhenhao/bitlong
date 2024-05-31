@@ -246,7 +246,7 @@ func SetFairLaunchMintedInfo(c *gin.Context) {
 }
 
 func QueryInventory(c *gin.Context) {
-	// call GetNumberOfInventoryCouldBeMinted
+	// call GetNumberAndAmountOfInventoryCouldBeMinted
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -290,12 +290,15 @@ func QueryMintIsAvailable(c *gin.Context) {
 	}
 	fairLaunchInfoID := mintFairLaunchRequest.FairLaunchInfoID
 	mintedNumber := mintFairLaunchRequest.MintedNumber
-	isMintAvailable := services.IsMintAvailable(fairLaunchInfoID, mintedNumber)
+	inventoryAmount, err := services.GetAmountOfInventoryCouldBeMintedByMintedNumber(fairLaunchInfoID, mintedNumber)
+	//isMintAvailable := services.IsMintAvailable(fairLaunchInfoID, mintedNumber)
+	isMintAvailable := inventoryAmount > 0
 	c.JSON(http.StatusOK, models.JsonResult{
 		Success: true,
 		Error:   "",
 		Data: gin.H{
 			"is_mint_available": isMintAvailable,
+			"inventory_amount":  inventoryAmount,
 		},
 	})
 }
@@ -367,5 +370,87 @@ func MintFairLaunchReserved(c *gin.Context) {
 		Success: true,
 		Error:   "",
 		Data:    response,
+	})
+}
+
+func GetIssuedFairLaunchInfo(c *gin.Context) {
+	var fairLaunchInfos *[]models.FairLaunchInfo
+	var err error
+	fairLaunchInfos, err = services.GetIssuedFairLaunchInfos()
+	if err != nil {
+		utils.LogError("Get Issued FairLaunchInfos.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Get Issued FairLaunchInfos. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, models.JsonResult{
+		Success: true,
+		Error:   "",
+		Data:    fairLaunchInfos,
+	})
+}
+
+func GetOwnFairLaunchInfo(c *gin.Context) {
+	var fairLaunchInfos *[]models.FairLaunchInfo
+	var err error
+	username := c.MustGet("username").(string)
+	userId, err := services.NameToId(username)
+	if err != nil {
+		utils.LogError("Query user id by name.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Query user id by name." + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	fairLaunchInfos, err = services.GetOwnFairLaunchInfosByUserId(userId)
+	if err != nil {
+		utils.LogError("Get Own Set FairLaunchInfos By UserId.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Get Own Set FairLaunchInfos By UserId. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, models.JsonResult{
+		Success: true,
+		Error:   "",
+		Data:    fairLaunchInfos,
+	})
+}
+
+func GetOwnFairLaunchMintedInfo(c *gin.Context) {
+	var fairLaunchMintedInfos *[]models.FairLaunchMintedInfo
+	var err error
+	username := c.MustGet("username").(string)
+	userId, err := services.NameToId(username)
+	if err != nil {
+		utils.LogError("Query user id by name.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Query user id by name." + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	fairLaunchMintedInfos, err = services.GetOwnFairLaunchMintedInfosByUserId(userId)
+	if err != nil {
+		utils.LogError("Get Own FairLaunchMintedInfos By UserId.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Get Own FairLaunchMintedInfos By UserId. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, models.JsonResult{
+		Success: true,
+		Error:   "",
+		Data:    fairLaunchMintedInfos,
 	})
 }

@@ -7,13 +7,20 @@ import (
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
-	SetupLoginRouter(r)
-	if config.GetLoadConfig().Routers.FairLaunch {
+	if !config.GetLoadConfig().RouterBlock.Login {
+		SetupLoginRouter(r)
+	}
+	if !config.GetLoadConfig().RouterBlock.FairLaunch {
 		setupFairLaunchRouter(r)
 	}
-	if config.GetLoadConfig().Routers.Ping {
+	if !config.GetLoadConfig().RouterBlock.Fee {
+		SetupFeeRouter(r)
+	}
+	if !config.GetLoadConfig().RouterBlock.CustodyAccount {
+		SetupCustodyAccountRouter(r)
+	}
+	if !config.GetLoadConfig().RouterBlock.Ping {
 		SetupPingRouter(r)
 	}
-	SetupCustodyAccountRouter(r)
 	return r
 }

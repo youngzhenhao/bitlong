@@ -119,6 +119,16 @@ func ProcessFairLaunchMintedInfo(fairLaunchInfoID int, mintedNumber int, mintedF
 	if err != nil {
 		return nil, err
 	}
+	var fairLaunchInfo *models.FairLaunchInfo
+	fairLaunchInfo, err = GetFairLaunchInfo(fairLaunchInfoID)
+	if err != nil {
+		return nil, err
+	}
+	decodedAddrAssetId := hex.EncodeToString(decodedAddrInfo.AssetId)
+	if fairLaunchInfo.AssetID != decodedAddrAssetId {
+		err = errors.New("decoded addr asset id is not equal fair launch info's asset id")
+		return nil, err
+	}
 	//calculatedGasFeeRateSatPerKw, _ := CalculateGasFeeRateSatPerKw(mintedNumber, 6)
 	fairLaunchMintedInfo = models.FairLaunchMintedInfo{
 		FairLaunchInfoID:      fairLaunchInfoID,
@@ -302,18 +312,52 @@ func GetInventoryCouldBeMintedByFairLaunchInfoId(fairLaunchInfoId int) (*[]model
 	return &fairLaunchInventoryInfos, err
 }
 
-// GetNumberOfInventoryCouldBeMinted
+func CalculateInventoryAmount(fairLaunchInventoryInfos *[]models.FairLaunchInventoryInfo) (amount int) {
+	if fairLaunchInventoryInfos == nil {
+		return 0
+	}
+	for _, fairLaunchInventoryInfo := range *(fairLaunchInventoryInfos) {
+		amount += fairLaunchInventoryInfo.Quantity
+	}
+	return amount
+}
+
+type InventoryNumberAndAmount struct {
+	Number int `json:"number"`
+	Amount int `json:"amount"`
+}
+
+// GetNumberAndAmountOfInventoryCouldBeMinted
 // @Description: call GetInventoryCouldBeMintedByFairLaunchInfoId
 // @param fairLaunchInfoId
 // @return int
 // @return error
-func GetNumberOfInventoryCouldBeMinted(fairLaunchInfoId int) (int, error) {
+func GetNumberAndAmountOfInventoryCouldBeMinted(fairLaunchInfoId int) (*InventoryNumberAndAmount, error) {
+	fairLaunchInventoryInfos, err := GetInventoryCouldBeMintedByFairLaunchInfoId(fairLaunchInfoId)
+	if err != nil {
+		utils.LogError("", err)
+		return nil, err
+	}
+	amount := CalculateInventoryAmount(fairLaunchInventoryInfos)
+	return &InventoryNumberAndAmount{
+		Number: len(*fairLaunchInventoryInfos),
+		Amount: amount,
+	}, err
+}
+
+func GetAmountOfInventoryCouldBeMintedByMintedNumber(fairLaunchInfoId int, mintedNumber int) (int, error) {
 	fairLaunchInventoryInfos, err := GetInventoryCouldBeMintedByFairLaunchInfoId(fairLaunchInfoId)
 	if err != nil {
 		utils.LogError("", err)
 		return 0, err
 	}
-	return len(*fairLaunchInventoryInfos), err
+	if mintedNumber > len(*fairLaunchInventoryInfos) {
+		err = errors.New("not enough inventory could be minted")
+		return 0, err
+	}
+	fairLaunchInventoryInfoSlice := (*fairLaunchInventoryInfos)[0:mintedNumber]
+	amount := CalculateInventoryAmount(&fairLaunchInventoryInfoSlice)
+	return amount, err
 }
 
 // IsMintAvailable
@@ -327,12 +371,12 @@ func IsMintAvailable(fairLaunchInfoId int, number int) bool {
 		FairLaunchDebugLogger.Error("", err)
 		return false
 	}
-	inventoryNumber, err := GetNumberOfInventoryCouldBeMinted(fairLaunchInfoId)
+	inventoryNumberAndAmount, err := GetNumberAndAmountOfInventoryCouldBeMinted(fairLaunchInfoId)
 	if err != nil {
 		FairLaunchDebugLogger.Error("", err)
 		return false
 	}
-	return inventoryNumber >= number
+	return inventoryNumberAndAmount.Number >= number
 }
 
 // GetMintAmountByFairLaunchMintNumber
@@ -1144,6 +1188,7 @@ func SendFairLaunchMintedAssetLocked() (err error) {
 	for _, fairLaunchMintedInfo := range *unsentFairLaunchMintedInfos {
 		addrSlice = append(addrSlice, fairLaunchMintedInfo.EncodedAddr)
 	}
+	UpdateFeeRate()
 	feeRateSatPerKw, err := EstimateSmartFeeRateSatPerKw()
 	if err != nil {
 		return err
@@ -1382,6 +1427,7 @@ func SendFairLaunchReserved(fairLaunchInfo *models.FairLaunchInfo, addr string) 
 	}
 	// send
 	addrSlice := []string{addr}
+	UpdateFeeRate()
 	feeRateSatPerKw, err := EstimateSmartFeeRateSatPerKw()
 	if err != nil {
 		FairLaunchDebugLogger.Error("Estimate Smart FeeRate SatPerKw", err)
@@ -1393,4 +1439,22 @@ func SendFairLaunchReserved(fairLaunchInfo *models.FairLaunchInfo, addr string) 
 		return nil, err
 	}
 	return response, nil
+}
+
+func GetIssuedFairLaunchInfos() (*[]models.FairLaunchInfo, error) {
+	var fairLaunchInfos []models.FairLaunchInfo
+	err := middleware.DB.Where("status = ? AND state = ?", models.StatusNormal, models.FairLaunchStateIssued).Find(&fairLaunchInfos).Error
+	return &fairLaunchInfos, err
+}
+
+func GetOwnFairLaunchInfosByUserId(id int) (*[]models.FairLaunchInfo, error) {
+	var fairLaunchInfos []models.FairLaunchInfo
+	err := middleware.DB.Where("status = ? AND user_id = ?", models.StatusNormal, id).Find(&fairLaunchInfos).Error
+	return &fairLaunchInfos, err
+}
+
+func GetOwnFairLaunchMintedInfosByUserId(id int) (*[]models.FairLaunchMintedInfo, error) {
+	var fairLaunchMintedInfos []models.FairLaunchMintedInfo
+	err := middleware.DB.Where("status = ? AND user_id = ?", models.StatusNormal, id).Find(&fairLaunchMintedInfos).Error
+	return &fairLaunchMintedInfos, err
 }

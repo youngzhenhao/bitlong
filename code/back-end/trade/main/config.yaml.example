@@ -14,9 +14,11 @@ redis:
     username: ""
     password: ""
     db: 0
-routers:
+router_block:
     login: false
     fair_launch: false
+    fee: false
+    custody_account: false
     ping: false
 api_config:
     lnd:

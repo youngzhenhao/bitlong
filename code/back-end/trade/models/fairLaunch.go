@@ -92,7 +92,7 @@ type FairLaunchMintedInfo struct {
 	PaidSuccessTime       int                   `json:"paid_success_time"`
 	UserID                int                   `json:"user_id"`
 	AssetID               string                `json:"asset_id" gorm:"type:varchar(255)"`
-	AssetType             string                `json:"asset_type" gorm:"type:varchar(255)"`
+	AssetType             int                   `json:"asset_type"`
 	AddrAmount            int                   `json:"amount_addr"`
 	ScriptKey             string                `json:"script_key" gorm:"type:varchar(255)"`
 	InternalKey           string                `json:"internal_key" gorm:"type:varchar(255)"`

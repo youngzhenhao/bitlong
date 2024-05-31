@@ -137,7 +137,7 @@ func ProcessFairLaunchMintedInfo(fairLaunchInfoID int, mintedNumber int, mintedF
 		EncodedAddr:           addr,
 		UserID:                userId,
 		AssetID:               hex.EncodeToString(decodedAddrInfo.AssetId),
-		AssetType:             decodedAddrInfo.AssetType.String(),
+		AssetType:             int(decodedAddrInfo.AssetType),
 		AddrAmount:            int(decodedAddrInfo.Amount),
 		ScriptKey:             hex.EncodeToString(decodedAddrInfo.ScriptKey),
 		InternalKey:           hex.EncodeToString(decodedAddrInfo.InternalKey),
@@ -1443,7 +1443,8 @@ func SendFairLaunchReserved(fairLaunchInfo *models.FairLaunchInfo, addr string) 
 
 func GetIssuedFairLaunchInfos() (*[]models.FairLaunchInfo, error) {
 	var fairLaunchInfos []models.FairLaunchInfo
-	err := middleware.DB.Where("status = ? AND state = ?", models.StatusNormal, models.FairLaunchStateIssued).Find(&fairLaunchInfos).Error
+	//@dev: add more condition
+	err := middleware.DB.Where("status = ? AND state = ? AND is_mint_all = ?", models.StatusNormal, models.FairLaunchStateIssued, false).Find(&fairLaunchInfos).Error
 	return &fairLaunchInfos, err
 }
 

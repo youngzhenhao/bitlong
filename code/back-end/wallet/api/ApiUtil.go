@@ -29,6 +29,7 @@ type JsonResult struct {
 	Data    any     `json:"data"`
 }
 
+// Deprecated: Use MakeJsonErrorResult instead
 func MakeJsonResult(success bool, error string, data any) string {
 	jsr := JsonResult{
 		Success: success,

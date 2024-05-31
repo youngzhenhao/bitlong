@@ -113,7 +113,7 @@ func NewMeta(description string) *Meta {
 	return &meta
 }
 func (m *Meta) LoadImageByByte(image []byte) (bool, error) {
-	if len(image) != 0 {
+	if len(image) == 0 {
 		fmt.Println("image data is nil")
 		return false, fmt.Errorf("image data is nil")
 	}

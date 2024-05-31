@@ -10,6 +10,7 @@ type Config struct {
 	GinConfig struct {
 		Bind string `yaml:"bind" json:"bind"`
 		Port string `yaml:"port" json:"port"`
+		Mode string `yaml:"mode" json:"mode"`
 	} `yaml:"gin_config" json:"gin_config"`
 	GormConfig struct {
 		Mysql struct {

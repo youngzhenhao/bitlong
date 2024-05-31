@@ -3,19 +3,19 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/robfig/cron/v3"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-	"trade/dao"
-	"trade/task"
-	"trade/utils"
-
-	"github.com/robfig/cron/v3"
 	"trade/config"
+	"trade/dao"
 	"trade/middleware"
 	"trade/routers"
+	"trade/task"
+	"trade/utils"
 )
 
 func main() {
@@ -23,6 +23,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
+	mode := loadConfig.GinConfig.Mode
+	if !(mode == gin.DebugMode || mode == gin.ReleaseMode || mode == gin.TestMode) {
+		mode = gin.DebugMode
+	}
+	gin.SetMode(mode)
 	// Initialize the database connection
 	if err := middleware.InitMysql(); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)

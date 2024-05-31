@@ -1,6 +1,7 @@
 gin_config:
     bind: ""
     port: ""
+    mode: ""
 gorm_config:
     mysql:
         host: ""

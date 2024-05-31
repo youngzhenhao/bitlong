@@ -7,6 +7,7 @@ import (
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
+
 	if !config.GetLoadConfig().RouterBlock.Login {
 		SetupLoginRouter(r)
 	}

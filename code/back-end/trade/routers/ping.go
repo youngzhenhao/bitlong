@@ -7,7 +7,8 @@ import (
 )
 
 func SetupPingRouter(router *gin.Engine) *gin.Engine {
-	authorized := router.Group("/admin", gin.BasicAuth(gin.Accounts{
+	version := router.Group("/v1")
+	authorized := version.Group("/admin", gin.BasicAuth(gin.Accounts{
 		config.GetLoadConfig().AdminUser.Username: config.GetLoadConfig().AdminUser.Password,
 	}))
 	authorized.GET("/ping", handlers.PingHandler)

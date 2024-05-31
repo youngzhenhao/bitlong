@@ -96,6 +96,7 @@ func QueryInvoice(c *gin.Context) {
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "service error"})
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{"invoices": invoices})
 }

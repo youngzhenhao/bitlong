@@ -54,7 +54,11 @@ POST 查询发票： /custodyAccount/invoice/querybalance
 Authorization ： "Bearer" token
 
 请求体：
-无
+{
+"asset_id":"00"
+}
+
+asset_id：string 资产ID,00表示比特币
 
 返回值：
 ```json

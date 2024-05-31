@@ -15,7 +15,7 @@ redis:
     username: ""
     password: ""
     db: 0
-router_block:
+router_disable:
     login: false
     fair_launch: false
     fee: false

@@ -8,18 +8,24 @@ import (
 	"net/http"
 )
 
+var serverHost string = "http://132.232.109.84:8090"
+
 const (
-	Server     = "http://localhost:8081"
 	LoginUrl   = "/login"
 	RefreshUrl = "/refresh"
 )
 
+func SetServerHost(server string) string {
+	serverHost = server
+	return serverHost
+}
+
 func Login(username, password string) (string, error) {
-	url := Server + LoginUrl
+	url := serverHost + LoginUrl
 	return login(url, username, password)
 }
 func Refresh(username, password string) (string, error) {
-	url := Server + RefreshUrl
+	url := serverHost + RefreshUrl
 	return refresh(url, username, password)
 }
 

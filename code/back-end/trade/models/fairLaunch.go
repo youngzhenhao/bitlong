@@ -125,10 +125,10 @@ type FairLaunchMintedUserInfo struct {
 
 type FairLaunchInventoryInfo struct {
 	gorm.Model
-	FairLaunchInfoID int                      `json:"fair_launch_info_id" gorm:"not null"`
-	Quantity         int                      `json:"quantity"`
-	IsMinted         bool                     `json:"is_minted"`
-	MintedID         int                      `json:"minted_id"`
-	Status           int                      `json:"status" gorm:"default:1"`
-	State            FairLaunchInventoryState `json:"state"`
+	FairLaunchInfoID       int                      `json:"fair_launch_info_id" gorm:"not null"`
+	Quantity               int                      `json:"quantity"`
+	IsMinted               bool                     `json:"is_minted"`
+	FairLaunchMintedInfoID int                      `json:"fair_launch_minted_info_id"`
+	Status                 int                      `json:"status" gorm:"default:1"`
+	State                  FairLaunchInventoryState `json:"state"`
 }

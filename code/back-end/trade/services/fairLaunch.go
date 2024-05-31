@@ -441,7 +441,7 @@ func LockInventoryByFairLaunchMintedIdAndMintNumber(fairLaunchMintedInfoId int, 
 	//for _, inventory := range mintInventoryInfos {
 	//	inventory.Status = models.StatusPending
 	//}
-	err = middleware.DB.Model(&mintInventoryInfos).Updates(map[string]any{"state": models.FairLaunchInventoryStateLocked, "minted_id": fairLaunchMintedInfoId}).Error
+	err = middleware.DB.Model(&mintInventoryInfos).Updates(map[string]any{"state": models.FairLaunchInventoryStateLocked, "fair_launch_minted_info_id": fairLaunchMintedInfoId}).Error
 	return &mintInventoryInfos, err
 }
 
@@ -1210,9 +1210,9 @@ func SendFairLaunchMintedAssetLocked() (err error) {
 
 func GetAllLockedInventoryByFairLaunchMintedInfo(fairLaunchMintedInfo *models.FairLaunchMintedInfo) (*[]models.FairLaunchInventoryInfo, error) {
 	var fairLaunchInventoryInfos []models.FairLaunchInventoryInfo
-	err := middleware.DB.Where("status = ? AND state = ? AND minted_id = ?", models.StatusNormal, models.FairLaunchInventoryStateLocked, fairLaunchMintedInfo.ID).Find(&fairLaunchInventoryInfos).Error
+	err := middleware.DB.Where("status = ? AND state = ? AND fair_launch_minted_info_id = ?", models.StatusNormal, models.FairLaunchInventoryStateLocked, fairLaunchMintedInfo.ID).Find(&fairLaunchInventoryInfos).Error
 	if err != nil {
-		FairLaunchDebugLogger.Error("DB Find by state AND minted_id", err)
+		FairLaunchDebugLogger.Error("DB Find by state AND fair_launch_minted_info_id", err)
 		return nil, err
 	}
 	return &fairLaunchInventoryInfos, nil

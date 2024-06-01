@@ -13,12 +13,12 @@ import (
 func GetBlockWrap(blockHash string) string {
 	response, err := GetBlock(blockHash)
 	if err != nil {
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
 	msgBlock := &wire.MsgBlock{}
 	blockReader := bytes.NewReader(response.RawBlock)
 	err = msgBlock.Deserialize(blockReader)
-	return MakeJsonResult(true, "", msgBlock)
+	return MakeJsonErrorResult(SUCCESS, "", msgBlock)
 }
 
 func GetBlock(blockHashStr string) (response *chainrpc.GetBlockResponse, err error) {

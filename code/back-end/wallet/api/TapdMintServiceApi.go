@@ -205,10 +205,10 @@ func (m *Meta) GetImage() []byte {
 func (m *Meta) FetchAssetMeta(isHash bool, data string) string {
 	response, err := fetchAssetMeta(isHash, data)
 	if err != nil {
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
 	m.GetMetaFromStr(string(response.Data))
-	return MakeJsonResult(true, "", nil)
+	return MakeJsonErrorResult(SUCCESS, "", nil)
 }
 
 // finalizeBatch
@@ -231,9 +231,9 @@ func finalizeBatch(shortResponse bool, feeRate int) string {
 	response, err := client.FinalizeBatch(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s mintrpc FinalizeBatch Error: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
-	return MakeJsonResult(true, "", response)
+	return MakeJsonErrorResult(SUCCESS, "", response)
 }
 
 // mintAsset
@@ -300,7 +300,7 @@ func mintAsset(assetVersionIsV1 bool, assetTypeIsCollectible bool, name string, 
 	response, err := client.MintAsset(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s mintrpc MintAsset Error: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
-	return MakeJsonResult(true, "", response)
+	return MakeJsonErrorResult(SUCCESS, "", response)
 }

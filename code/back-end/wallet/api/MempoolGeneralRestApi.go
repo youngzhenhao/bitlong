@@ -28,13 +28,13 @@ func GetDifficultyAdjustmentByMempool() string {
 	response, err := http.Get(targetUrl)
 	if err != nil {
 		fmt.Printf("%s http.Get :%v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, "http get fail.", "")
+		return MakeJsonErrorResult(DefaultErr, "http get fail.", "")
 	}
 	bodyBytes, _ := io.ReadAll(response.Body)
 	var difficultyResponse DifficultyResponse
 	if err := json.Unmarshal(bodyBytes, &difficultyResponse); err != nil {
 		fmt.Printf("%s GDABM json.Unmarshal :%v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, "Unmarshal response body fail.", "")
+		return MakeJsonErrorResult(DefaultErr, "Unmarshal response body fail.", "")
 	}
-	return MakeJsonResult(true, "", difficultyResponse)
+	return MakeJsonErrorResult(SUCCESS, "", difficultyResponse)
 }

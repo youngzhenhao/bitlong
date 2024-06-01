@@ -468,6 +468,24 @@ func pollInvoice() {
 				v.Status = int16(temp.State)
 				mutex.Lock()
 				defer mutex.Unlock()
+				if v.Status == int16(lnrpc.Invoice_SETTLED) {
+					ba := models.Balance{}
+					ba.AccountId = *v.AccountID
+					ba.Amount = float64(v.Amount)
+					ba.Unit = models.UNIT_SATOSHIS
+					ba.BillType = models.BILL_TYPE_RECHARGE
+					ba.Away = models.AWAY_IN
+					ba.State = models.STATE_SUCCESS
+					ba.Invoice = &v.Invoice
+					hash := hex.EncodeToString(rHash)
+					ba.PaymentHash = &hash
+					err = middleware.DB.Save(&ba).Error
+					if err != nil {
+						CUST.Warning(err.Error())
+					}
+				}
+				mutex.Lock()
+				defer mutex.Unlock()
 				err = middleware.DB.Save(&v).Error
 				if err != nil {
 					CUST.Warning(err.Error())

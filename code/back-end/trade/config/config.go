@@ -69,6 +69,7 @@ type Config struct {
 	FairLaunchConfig struct {
 		EstimateSmartFeeRateBlocks int  `yaml:"estimate_smart_fee_rate_blocks" json:"estimate_smart_fee_rate_blocks"`
 		IsAutoUpdateFeeRate        bool `yaml:"is_auto_update_fee_rate" json:"is_auto_update_fee_rate"`
+		MaxNumberOfMint            int  `yaml:"max_number_of_mint" json:"max_number_of_mint"`
 	} `yaml:"fair_launch_config" json:"fair_launch_config"`
 	AdminUser     BasicAuth `yaml:"admin_user" json:"admin_user"`
 	FrpsServer    string    `yaml:"frps_server" json:"frps_server"`

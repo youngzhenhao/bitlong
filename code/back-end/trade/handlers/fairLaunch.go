@@ -290,6 +290,18 @@ func QueryMintIsAvailable(c *gin.Context) {
 	}
 	fairLaunchInfoID := mintFairLaunchRequest.FairLaunchInfoID
 	mintedNumber := mintFairLaunchRequest.MintedNumber
+	// @dev: calculated FeeRate
+	calculatedFeeRateSatPerKw, err := services.UpdateAndCalculateGasFeeRateSatPerKw(mintedNumber)
+	calculatedFeeRateSatPerB, err := services.UpdateAndCalculateGasFeeRateSatPerB(mintedNumber)
+	if err != nil {
+		utils.LogError("Calculate Gas FeeRate SatPerKw.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Calculate Gas FeeRate SatPerKw. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
 	inventoryAmount, err := services.GetAmountOfInventoryCouldBeMintedByMintedNumber(fairLaunchInfoID, mintedNumber)
 	//isMintAvailable := services.IsMintAvailable(fairLaunchInfoID, mintedNumber)
 	isMintAvailable := inventoryAmount > 0
@@ -297,8 +309,10 @@ func QueryMintIsAvailable(c *gin.Context) {
 		Success: true,
 		Error:   "",
 		Data: gin.H{
-			"is_mint_available": isMintAvailable,
-			"inventory_amount":  inventoryAmount,
+			"is_mint_available":              isMintAvailable,
+			"inventory_amount":               inventoryAmount,
+			"calculated_fee_rate_sat_per_kw": calculatedFeeRateSatPerKw,
+			"calculated_fee_rate_sat_per_b":  calculatedFeeRateSatPerB,
 		},
 	})
 }

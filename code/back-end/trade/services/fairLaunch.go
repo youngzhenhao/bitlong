@@ -105,6 +105,17 @@ func ProcessFairLaunchInfo(imageData string, name string, assetType int, amount 
 		return nil, err
 	}
 	var fairLaunchInfo models.FairLaunchInfo
+	//@dev: setting fee rate need to bigger equal than fee rate now
+	estimatedFeeRateSatPerKw, err := UpdateAndEstimateSmartFeeRateSatPerKw()
+	if err != nil {
+		utils.LogError("Update And Estimate Smart FeeRate SatPerKw", err)
+		return nil, err
+	}
+	if feeRate < estimatedFeeRateSatPerKw {
+		err = errors.New("setting fee rate need to bigger equal than fee rate now")
+		utils.LogError("Insufficient fee rate", err)
+		return nil, err
+	}
 	fairLaunchInfo = models.FairLaunchInfo{
 		ImageData:              imageData,
 		Name:                   name,
@@ -162,7 +173,17 @@ func ProcessFairLaunchMintedInfo(fairLaunchInfoID int, mintedNumber int, mintedF
 		err = errors.New("decoded addr asset id is not equal fair launch info's asset id")
 		return nil, err
 	}
-	//calculatedGasFeeRateSatPerKw, _ := CalculateGasFeeRateSatPerKw(mintedNumber, 6)
+	//@dev: setting fee rate need to bigger equal than calculated fee rate now
+	calculateFeeRateSatPerKw, err := UpdateAndCalculateGasFeeRateSatPerKw(mintedNumber)
+	if err != nil {
+		utils.LogError("Update And Calculate Smart FeeRate SatPerKw", err)
+		return nil, err
+	}
+	if mintedFeeRateSatPerKw < calculateFeeRateSatPerKw {
+		err = errors.New("setting minted FeeRate SatPerKw need to bigger equal than calculated fee rate now")
+		utils.LogError("Insufficient minted feeRate SatPerKw", err)
+		return nil, err
+	}
 	fairLaunchMintedInfo = models.FairLaunchMintedInfo{
 		FairLaunchInfoID:      fairLaunchInfoID,
 		MintedNumber:          mintedNumber,

@@ -49,6 +49,7 @@ api_config:
 fair_launch_config:
     estimate_smart_fee_rate_blocks: 0
     is_auto_update_fee_rate: false
+    max_number_of_mint: 0
 admin_user:
     username: ""
     password: ""

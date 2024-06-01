@@ -11,11 +11,12 @@ import (
 )
 
 type IssuanceHistoryInfo struct {
-	AssetName    string `json:"asset_name"`
-	AssetID      string `json:"asset_id"`
-	AssetType    int    `json:"asset_type"`
-	IssuanceTime int    `json:"issuance_time"`
-	State        int    `json:"state"`
+	IsFairLaunchIssuance bool   `json:"isFairLaunchIssuance"`
+	AssetName            string `json:"asset_name"`
+	AssetID              string `json:"asset_id"`
+	AssetType            int    `json:"asset_type"`
+	IssuanceTime         int    `json:"issuance_time"`
+	State                int    `json:"state"`
 }
 
 func GetIssuanceTransactionFee(token string) (fee int, err error) {
@@ -108,11 +109,12 @@ func ProcessOwnSetFairLaunchResponseToIssuanceHistoryInfo(fairLaunchInfos *[]mod
 	}
 	for _, fairLaunchInfo := range *fairLaunchInfos {
 		issuanceHistoryInfos = append(issuanceHistoryInfos, IssuanceHistoryInfo{
-			AssetName:    fairLaunchInfo.Name,
-			AssetID:      fairLaunchInfo.AssetID,
-			AssetType:    int(fairLaunchInfo.AssetType),
-			IssuanceTime: fairLaunchInfo.IssuanceTime,
-			State:        int(fairLaunchInfo.State),
+			IsFairLaunchIssuance: true,
+			AssetName:            fairLaunchInfo.Name,
+			AssetID:              fairLaunchInfo.AssetID,
+			AssetType:            int(fairLaunchInfo.AssetType),
+			IssuanceTime:         fairLaunchInfo.IssuanceTime,
+			State:                int(fairLaunchInfo.State),
 		})
 	}
 	return &issuanceHistoryInfos, nil
@@ -236,4 +238,8 @@ func GetServerIssuanceHistoryInfos(token string) (*[]IssuanceHistoryInfo, error)
 		return nil, err
 	}
 	return issuanceHistoryInfos, nil
+}
+
+func GetLocalIssuanceHistoryInfos() {
+	//	TODO: need to complete
 }

@@ -1500,3 +1500,13 @@ func UpdateFairLaunchInfoIsReservedSent(fairLaunchInfo *models.FairLaunchInfo) (
 	f := FairLaunchStore{DB: middleware.DB}
 	return f.UpdateFairLaunchInfo(fairLaunchInfo)
 }
+
+func GetFairLaunchInfoByAssetId(assetId string) (*models.FairLaunchInfo, error) {
+	var fairLaunchInfo models.FairLaunchInfo
+	err := middleware.DB.Where("asset_id = ?", assetId).First(&fairLaunchInfo).Error
+	if err != nil {
+		FairLaunchDebugLogger.Error("Get FairLaunchInfo By AssetId", err)
+		return nil, err
+	}
+	return &fairLaunchInfo, err
+}

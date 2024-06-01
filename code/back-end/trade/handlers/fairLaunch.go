@@ -481,3 +481,22 @@ func GetOwnFairLaunchMintedInfo(c *gin.Context) {
 		Data:    fairLaunchMintedInfos,
 	})
 }
+
+func GetFairLaunchInfoByAssetId(c *gin.Context) {
+	id := c.Param("id")
+	fairLaunch, err := services.GetFairLaunchInfoByAssetId(id)
+	if err != nil {
+		utils.LogError("Get fair launch info By AssetId.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Can not get fair launch info By AssetId. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, models.JsonResult{
+		Success: true,
+		Error:   "",
+		Data:    fairLaunch,
+	})
+}

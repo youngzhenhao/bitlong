@@ -67,9 +67,9 @@ func getTransactionByMempool(transaction string) (*GetTransactionsResponse, erro
 func GetTransactionByMempool(transaction string) string {
 	response, err := getTransactionByMempool(transaction)
 	if err != nil {
-		return MakeJsonResult(false, "Unmarshal response body fail.", "")
+		return MakeJsonErrorResult(DefaultErr, "Unmarshal response body fail.", "")
 	}
-	return MakeJsonResult(true, "", response)
+	return MakeJsonErrorResult(SUCCESS, "", response)
 }
 
 func GetTransactionHexByMempool() {}

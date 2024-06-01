@@ -10,9 +10,9 @@ import (
 func SubServerStatus() string {
 	response, err := subServerStatus()
 	if err != nil {
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
-	return MakeJsonResult(true, "", response)
+	return MakeJsonErrorResult(SUCCESS, "", response)
 }
 
 func GetTapdStatus() bool {

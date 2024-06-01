@@ -32,9 +32,9 @@ func GetNewAddress_P2TR() string {
 	response, err := client.NewAddress(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s lnrpc NewAddress err: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, "AddressType_TAPROOT_PUBKEY error", "")
+		return MakeJsonErrorResult(DefaultErr, "AddressType_TAPROOT_PUBKEY error", "")
 	}
-	return MakeJsonResult(true, "", Addr{
+	return MakeJsonErrorResult(SUCCESS, "", Addr{
 		Name:           "default",
 		Address:        response.Address,
 		Balance:        0,
@@ -62,9 +62,9 @@ func GetNewAddress_P2WKH() string {
 	response, err := client.NewAddress(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s lnrpc NewAddress err: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, "AddressType_WITNESS_PUBKEY_HASH error", "")
+		return MakeJsonErrorResult(DefaultErr, "AddressType_WITNESS_PUBKEY_HASH error", "")
 	}
-	return MakeJsonResult(true, "", Addr{
+	return MakeJsonErrorResult(SUCCESS, "", Addr{
 		Name:           "default",
 		Address:        response.Address,
 		Balance:        0,
@@ -92,9 +92,9 @@ func GetNewAddress_NP2WKH() string {
 	response, err := client.NewAddress(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s lnrpc NewAddress err: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, "AddressType_NESTED_PUBKEY_HASH error", "")
+		return MakeJsonErrorResult(DefaultErr, "AddressType_NESTED_PUBKEY_HASH error", "")
 	}
-	return MakeJsonResult(true, "", Addr{
+	return MakeJsonErrorResult(SUCCESS, "", Addr{
 		Name:           "default",
 		Address:        response.Address,
 		Balance:        0,
@@ -133,9 +133,9 @@ func StoreAddr(name string, address string, balance int, addressType string, der
 		IsInternal:     isInternal,
 	})
 	if err != nil {
-		return MakeJsonResult(false, "Store address fail", "")
+		return MakeJsonErrorResult(DefaultErr, "Store address fail", "")
 	}
-	return MakeJsonResult(true, "", address)
+	return MakeJsonErrorResult(SUCCESS, "", address)
 }
 
 // RemoveAddr
@@ -158,13 +158,13 @@ func RemoveAddr(address string) string {
 	s := &AddrStore{DB: db}
 	_, err = s.ReadAddr("addresses", address)
 	if err != nil {
-		return MakeJsonResult(false, "No such address available for deletion. Read Addr fail.", "")
+		return MakeJsonErrorResult(DefaultErr, "No such address available for deletion. Read Addr fail.", "")
 	}
 	err = s.DeleteAddr("addresses", address)
 	if err != nil {
-		return MakeJsonResult(false, "Delete Addr fail. "+err.Error(), "")
+		return MakeJsonErrorResult(DefaultErr, "Delete Addr fail. "+err.Error(), "")
 	}
-	return MakeJsonResult(true, "", address)
+	return MakeJsonErrorResult(SUCCESS, "", address)
 }
 
 // QueryAddr
@@ -187,9 +187,9 @@ func QueryAddr(address string) string {
 	s := &AddrStore{DB: db}
 	addr, err := s.ReadAddr("addresses", address)
 	if err != nil {
-		return MakeJsonResult(false, "No such address, read Addr fail.", "")
+		return MakeJsonErrorResult(DefaultErr, "No such address, read Addr fail.", "")
 	}
-	return MakeJsonResult(true, "", addr)
+	return MakeJsonErrorResult(SUCCESS, "", addr)
 }
 
 // QueryAllAddr
@@ -211,9 +211,9 @@ func QueryAllAddr() string {
 	s := &AddrStore{DB: db}
 	addresses, err := s.AllAddresses("addresses")
 	if err != nil || len(addresses) == 0 {
-		return MakeJsonResult(false, "Addresses is NULL or read fail.", "")
+		return MakeJsonErrorResult(DefaultErr, "Addresses is NULL or read fail.", "")
 	}
-	return MakeJsonResult(true, "", addresses)
+	return MakeJsonErrorResult(SUCCESS, "", addresses)
 }
 
 //	 QueryAddresses
@@ -223,12 +223,12 @@ func QueryAllAddr() string {
 func GetNonZeroBalanceAddresses() string {
 	listAddrResp, err := listAddress()
 	if err != nil {
-		return MakeJsonResult(false, "Query addresses fail. "+err.Error(), "")
+		return MakeJsonErrorResult(DefaultErr, "Query addresses fail. "+err.Error(), "")
 	}
 	var addrs []Addr
 	listAddrs := listAddrResp.GetAccountWithAddresses()
 	if len(listAddrs) == 0 {
-		return MakeJsonResult(false, "Queried non-zero balance addresses NULL.", "")
+		return MakeJsonErrorResult(DefaultErr, "Queried non-zero balance addresses NULL.", "")
 	}
 	for _, accWithAddr := range listAddrs {
 		addresses := accWithAddr.Addresses
@@ -245,7 +245,7 @@ func GetNonZeroBalanceAddresses() string {
 			}
 		}
 	}
-	return MakeJsonResult(true, "", addrs)
+	return MakeJsonErrorResult(SUCCESS, "", addrs)
 }
 
 // UpdateAllAddressesByGNZBA
@@ -254,12 +254,12 @@ func GetNonZeroBalanceAddresses() string {
 func UpdateAllAddressesByGNZBA() string {
 	listAddrResp, err := listAddress()
 	if err != nil {
-		return MakeJsonResult(false, "Query addresses fail. "+err.Error(), "")
+		return MakeJsonErrorResult(DefaultErr, "Query addresses fail. "+err.Error(), "")
 	}
 	var addresses []string
 	listAddrs := listAddrResp.GetAccountWithAddresses()
 	if len(listAddrs) == 0 {
-		return MakeJsonResult(false, "Queried non-zero balance addresses NULL.", "")
+		return MakeJsonErrorResult(DefaultErr, "Queried non-zero balance addresses NULL.", "")
 	}
 	for _, accWithAddr := range listAddrs {
 		if accWithAddr.Name != "default" {
@@ -272,16 +272,16 @@ func UpdateAllAddressesByGNZBA() string {
 				_re := StoreAddr(accWithAddr.Name, _address.Address, int(_address.Balance), accWithAddr.AddressType.String(), accWithAddr.DerivationPath, _address.IsInternal)
 				err := json.Unmarshal([]byte(_re), &result)
 				if err != nil {
-					return MakeJsonResult(false, "Store address Unmarshal fail. "+err.Error(), "")
+					return MakeJsonErrorResult(DefaultErr, "Store address Unmarshal fail. "+err.Error(), "")
 				}
 				if !result.Success {
-					return MakeJsonResult(false, "Store address result false", "")
+					return MakeJsonErrorResult(DefaultErr, "Store address result false", "")
 				}
 				addresses = append(addresses, _address.Address)
 			}
 		}
 	}
-	return MakeJsonResult(true, "", addresses)
+	return MakeJsonErrorResult(SUCCESS, "", addresses)
 }
 
 // @dev: Acc
@@ -296,9 +296,9 @@ type Account struct {
 func GetAllAccountsString() string {
 	accs := GetAllAccounts()
 	if accs == nil {
-		return MakeJsonResult(false, "get all accounts fail.", "")
+		return MakeJsonErrorResult(DefaultErr, "get all accounts fail.", "")
 	}
-	return MakeJsonResult(true, "", accs)
+	return MakeJsonErrorResult(SUCCESS, "", accs)
 }
 
 func GetAllAccounts() []Account {
@@ -343,9 +343,9 @@ func GetPathByAddressType(addressType string) string {
 	}
 	for _, acc := range accs {
 		if acc.AddressType == addressType {
-			return MakeJsonResult(true, "", acc.DerivationPath)
+			return MakeJsonErrorResult(SUCCESS, "", acc.DerivationPath)
 		}
 	}
 	fmt.Printf("%s %v is not a valid address type.\n", GetTimeNow(), addressType)
-	return MakeJsonResult(false, "can't find path by given address type.", "")
+	return MakeJsonErrorResult(DefaultErr, "can't find path by given address type.", "")
 }

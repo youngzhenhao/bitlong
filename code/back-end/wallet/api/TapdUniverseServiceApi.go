@@ -50,12 +50,12 @@ func AssetLeafKeys(id string, proofType string) string {
 	response, err := assetLeafKeys(id, _proofType)
 	if err != nil {
 		fmt.Printf("%s universerpc AssetLeafKeys Error: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
 	if len(response.AssetKeys) == 0 {
-		return MakeJsonResult(false, "Result length is zero.", nil)
+		return MakeJsonErrorResult(DefaultErr, "Result length is zero.", nil)
 	}
-	return MakeJsonResult(true, "", processAssetKey(response))
+	return MakeJsonErrorResult(SUCCESS, "", processAssetKey(response))
 }
 
 type AssetKey struct {
@@ -78,32 +78,32 @@ func AssetLeaves(id string) string {
 	response, err := assetLeaves(false, id, universerpc.ProofType_PROOF_TYPE_ISSUANCE)
 	if err != nil {
 		fmt.Printf("%s universerpc AssetLeaves Error: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
 
 	if response.Leaves == nil {
-		return MakeJsonResult(false, "NOT_FOUND", nil)
+		return MakeJsonErrorResult(DefaultErr, "NOT_FOUND", nil)
 	}
 
-	return MakeJsonResult(true, "", response)
+	return MakeJsonErrorResult(SUCCESS, "", response)
 }
 
 func GetAssetInfo(id string) string {
 	response, err := assetLeaves(false, id, universerpc.ProofType_PROOF_TYPE_ISSUANCE)
 	if err != nil {
 		fmt.Printf("%s universerpc AssetLeaves Error: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
 	if response.Leaves == nil {
-		return MakeJsonResult(false, "NOT_FOUND", nil)
+		return MakeJsonErrorResult(DefaultErr, "NOT_FOUND", nil)
 	}
 	proof, err := decodeProof(response.Leaves[0].Proof, 0, true, false)
 	if err != nil {
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
 	block, err := GetBlock(proof.DecodedProof.Asset.ChainAnchor.AnchorBlockHash)
 	if err != nil {
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
 	msgBlock := &wire.MsgBlock{}
 	blockReader := bytes.NewReader(block.RawBlock)
@@ -144,7 +144,7 @@ func GetAssetInfo(id string) string {
 		Meta:         string(meta),
 		CreateTime:   createTime,
 	}
-	return MakeJsonResult(true, "", assetInfo)
+	return MakeJsonErrorResult(SUCCESS, "", assetInfo)
 }
 
 func AssetRoots() {}
@@ -169,9 +169,9 @@ func UniverseInfo() string {
 	response, err := client.Info(context.Background(), request)
 	if err != nil {
 		fmt.Printf("%s universerpc Info Error: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
-	return MakeJsonResult(true, "", response)
+	return MakeJsonErrorResult(SUCCESS, "", response)
 }
 
 func InsertProof() {}
@@ -203,18 +203,18 @@ func QueryAssetRoots(id string) string {
 	response, err := queryAssetRoot(id)
 	if err != nil {
 		fmt.Printf("%s universerpc AssetRoots Error: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
-	return MakeJsonResult(true, "", response)
+	return MakeJsonErrorResult(SUCCESS, "", response)
 }
 
 func QueryAssetStats(assetId string) string {
 	response, err := queryAssetStats(assetId)
 	if err != nil {
 		fmt.Printf("%s universerpc QueryAssetStats Error: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, err.Error(), "")
+		return MakeJsonErrorResult(DefaultErr, err.Error(), "")
 	}
-	return MakeJsonResult(true, "", response)
+	return MakeJsonErrorResult(SUCCESS, "", response)
 }
 
 func QueryEvents() {}
@@ -243,9 +243,9 @@ func SyncUniverse(universeHost string, asset_id string) string {
 	}
 	response, err := syncUniverse(universeHost, targets, 0)
 	if err != nil {
-		return MakeJsonResult(false, err.Error(), "")
+		return MakeJsonErrorResult(DefaultErr, err.Error(), "")
 	}
-	return MakeJsonResult(true, "", response)
+	return MakeJsonErrorResult(SUCCESS, "", response)
 
 }
 

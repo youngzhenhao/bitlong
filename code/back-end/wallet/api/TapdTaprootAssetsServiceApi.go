@@ -14,7 +14,7 @@ import (
 func AddrReceives(assetId string) string {
 	response, err := rpcclient.AddrReceives()
 	if err != nil {
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
 	type addrEvent struct {
 		CreationTimeUnixSeconds int64           `json:"creation_time_unix_seconds"`
@@ -45,9 +45,9 @@ func AddrReceives(assetId string) string {
 		addrEvents = append(addrEvents, e)
 	}
 	if len(addrEvents) == 0 {
-		return MakeJsonResult(true, "NOT_FOUND", nil)
+		return MakeJsonErrorResult(SUCCESS, "NOT_FOUND", nil)
 	}
-	return MakeJsonResult(true, "", addrEvents)
+	return MakeJsonErrorResult(SUCCESS, "", addrEvents)
 }
 
 func BurnAsset() {
@@ -61,13 +61,13 @@ func DebugLevel() {
 func DecodeAddr(addr string) string {
 	response, err := rpcclient.DecodeAddr(addr)
 	if err != nil {
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
 	// make result struct
 	result := jsonResultAddr{}
 	result.getData(response)
 
-	return MakeJsonResult(true, "", result)
+	return MakeJsonErrorResult(SUCCESS, "", result)
 }
 
 func DecodeProof(rawProof string) {
@@ -81,9 +81,9 @@ func ExportProof() {
 func FetchAssetMeta(isHash bool, data string) string {
 	response, err := fetchAssetMeta(isHash, data)
 	if err != nil {
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
-	return MakeJsonResult(true, "", string(response.Data))
+	return MakeJsonErrorResult(SUCCESS, "", string(response.Data))
 }
 
 // GetInfoOfTap
@@ -114,16 +114,16 @@ func ListAssets(withWitness, includeSpent, includeLeased bool) string {
 	response, err := listAssets(withWitness, includeSpent, includeLeased)
 	if err != nil {
 		fmt.Printf("%s taprpc ListAssets Error: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
-	return MakeJsonResult(true, "", response)
+	return MakeJsonErrorResult(SUCCESS, "", response)
 }
 
 func ListSimpleAssets(withWitness, includeSpent, includeLeased bool) string {
 	response, err := listAssets(withWitness, includeSpent, includeLeased)
 	if err != nil {
 		fmt.Printf("%s taprpc ListAssets Error: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
 	var (
 		simpleAssets []struct {
@@ -158,7 +158,7 @@ func ListSimpleAssets(withWitness, includeSpent, includeLeased bool) string {
 		})
 	}
 
-	return MakeJsonResult(true, "", simpleAssets)
+	return MakeJsonErrorResult(SUCCESS, "", simpleAssets)
 }
 
 func FindAssetByAssetName(assetName string) string {
@@ -170,10 +170,10 @@ func FindAssetByAssetName(assetName string) string {
 	list := ListAssets(false, false, false)
 	err := json.Unmarshal([]byte(list), &response)
 	if err != nil {
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
 	if response.Success == false {
-		return MakeJsonResult(false, response.Error, nil)
+		return MakeJsonErrorResult(DefaultErr, response.Error, nil)
 	}
 	var assets []*taprpc.Asset
 	for _, asset := range response.Data.Assets {
@@ -183,9 +183,9 @@ func FindAssetByAssetName(assetName string) string {
 		}
 	}
 	if len(assets) == 0 {
-		return MakeJsonResult(false, "NOT_FOUND", nil)
+		return MakeJsonErrorResult(DefaultErr, "NOT_FOUND", nil)
 	}
-	return MakeJsonResult(true, "", assets)
+	return MakeJsonErrorResult(SUCCESS, "", assets)
 }
 
 // ListGroups
@@ -216,7 +216,7 @@ func QueryAssetTransfers(assetId string) string {
 	response, err := rpcclient.ListTransfers()
 	if err != nil {
 		fmt.Printf("%s taprpc ListTransfers Error: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
 	var transfers []transfer
 	for _, t := range response.Transfers {
@@ -229,9 +229,9 @@ func QueryAssetTransfers(assetId string) string {
 	}
 
 	if len(transfers) == 0 {
-		return MakeJsonResult(true, "NOT_FOUND", transfers)
+		return MakeJsonErrorResult(SUCCESS, "NOT_FOUND", transfers)
 	}
-	return MakeJsonResult(true, "", transfers)
+	return MakeJsonErrorResult(SUCCESS, "", transfers)
 }
 
 // ListUtxos
@@ -263,19 +263,19 @@ func ListUtxos(includeLeased bool) string {
 func NewAddr(assetId string, amt int) string {
 	response, err := rpcclient.NewAddr(assetId, amt)
 	if err != nil {
-		return MakeJsonResult(false, err.Error(), "")
+		return MakeJsonErrorResult(DefaultErr, err.Error(), "")
 	}
 	result := jsonResultAddr{}
 	result.getData(response)
 
-	return MakeJsonResult(true, "", result)
+	return MakeJsonErrorResult(SUCCESS, "", result)
 }
 
 func QueryAddrs(assetId string) string {
 	addrRcv, err := rpcclient.QueryAddr()
 	if err != nil {
 		fmt.Printf("%s taprpc QueryAddrs Error: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, err.Error(), "")
+		return MakeJsonErrorResult(DefaultErr, err.Error(), "")
 	}
 
 	var addrs []jsonResultAddr
@@ -289,9 +289,9 @@ func QueryAddrs(assetId string) string {
 	}
 
 	if len(addrs) == 0 {
-		return MakeJsonResult(true, "NOT_FOUND", addrs)
+		return MakeJsonErrorResult(SUCCESS, "NOT_FOUND", addrs)
 	}
-	return MakeJsonResult(true, "", addrs)
+	return MakeJsonErrorResult(SUCCESS, "", addrs)
 }
 
 // jsonAddrs : ["addrs1","addrs2",...]
@@ -300,13 +300,13 @@ func SendAssets(jsonAddrs string, feeRate int64) string {
 	err := json.Unmarshal([]byte(jsonAddrs), &addrs)
 	if err != nil {
 		fmt.Printf("%s json.Unmarshal Error: %v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, "Please use the correct json format", "")
+		return MakeJsonErrorResult(DefaultErr, "Please use the correct json format", "")
 	}
 	response, err := sendAssets(addrs, uint32(feeRate))
 	if err != nil {
-		return MakeJsonResult(false, err.Error(), "")
+		return MakeJsonErrorResult(DefaultErr, err.Error(), "")
 	}
-	return MakeJsonResult(true, "", response)
+	return MakeJsonErrorResult(SUCCESS, "", response)
 }
 
 // SendAsset
@@ -458,9 +458,9 @@ func ProcessListBalancesResponse(response *taprpc.ListBalancesResponse) *[]ListA
 func ListBalances() string {
 	response, err := listBalances(false, nil, nil)
 	if err != nil {
-		return MakeJsonResult(false, err.Error(), nil)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
-	return MakeJsonResult(true, "", ProcessListBalancesResponse(response))
+	return MakeJsonErrorResult(SUCCESS, "", ProcessListBalancesResponse(response))
 }
 
 func listAssets(withWitness, includeSpent, includeLeased bool) (*taprpc.ListAssetResponse, error) {

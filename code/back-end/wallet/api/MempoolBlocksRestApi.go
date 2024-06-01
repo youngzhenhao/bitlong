@@ -24,12 +24,12 @@ func GetBlockTipHeightByMempool() string {
 	response, err := http.Get(targetUrl)
 	if err != nil {
 		fmt.Printf("%s http.Get :%v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, "http get fail.", "")
+		return MakeJsonErrorResult(DefaultErr, "http get fail.", "")
 	}
 	bodyBytes, _ := io.ReadAll(response.Body)
 	var height string
 	height = string(bodyBytes)
-	return MakeJsonResult(true, "", height)
+	return MakeJsonErrorResult(SUCCESS, "", height)
 }
 
 // BlockTipHeight

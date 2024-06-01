@@ -134,15 +134,15 @@ func GetAddressInfoByMempool(address string) string {
 	response, err := http.Get(targetUrl)
 	if err != nil {
 		fmt.Printf("%s http.PostForm :%v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, "http get fail.", "")
+		return MakeJsonErrorResult(DefaultErr, "http get fail.", "")
 	}
 	bodyBytes, _ := io.ReadAll(response.Body)
 	var getAddressResponse GetAddressResponse
 	if err := json.Unmarshal(bodyBytes, &getAddressResponse); err != nil {
 		fmt.Printf("%s GAIBM json.Unmarshal :%v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, "Unmarshal response body fail.", "")
+		return MakeJsonErrorResult(DefaultErr, "Unmarshal response body fail.", "")
 	}
-	return MakeJsonResult(true, "", getAddressResponse)
+	return MakeJsonErrorResult(SUCCESS, "", getAddressResponse)
 }
 
 func getAddressInfoByMempool(address string) *GetAddressResponse {
@@ -170,16 +170,16 @@ func GetAddressTransactionsByMempool(address string) string {
 	response, err := http.Get(targetUrl)
 	if err != nil {
 		fmt.Printf("%s http.Get :%v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, "http get fail.", "")
+		return MakeJsonErrorResult(DefaultErr, "http get fail.", "")
 	}
 	bodyBytes, _ := io.ReadAll(response.Body)
 	var getAddressTransactionsResponse GetAddressTransactionsResponse
 	if err := json.Unmarshal(bodyBytes, &getAddressTransactionsResponse); err != nil {
 		fmt.Printf("%s GATBM json.Unmarshal :%v\n", GetTimeNow(), err)
-		return MakeJsonResult(false, "Unmarshal response body fail.", "")
+		return MakeJsonErrorResult(DefaultErr, "Unmarshal response body fail.", "")
 	}
 	transactions := SimplifyTransactions(address, &getAddressTransactionsResponse)
-	return MakeJsonResult(true, "", transactions)
+	return MakeJsonErrorResult(SUCCESS, "", transactions)
 }
 
 func GetAddressTransactionsChainByMempool() {}

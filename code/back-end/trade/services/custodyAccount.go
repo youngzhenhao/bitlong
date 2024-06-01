@@ -299,6 +299,7 @@ func PayInvoice(account *models.Account, PayInvoiceRequest *PayInvoiceRequest) (
 	return payment, nil
 }
 
+// QueryAccountBalanceByUserId 查询用户账户余额
 func QueryAccountBalanceByUserId(userId uint) (uint64, error) {
 	// 查询账户
 	account, err := ReadAccountByUserId(userId)
@@ -322,6 +323,7 @@ type InvoiceResponce struct {
 	status  int16  `json:"status"`
 }
 
+// QueryInvoiceByUserId 查询用户发票
 func QueryInvoiceByUserId(userId uint, assetId string) ([]InvoiceResponce, error) {
 	params := QueryParams{
 		"UserID":  userId,
@@ -345,6 +347,11 @@ func QueryInvoiceByUserId(userId uint, assetId string) ([]InvoiceResponce, error
 		return invoices, nil
 	}
 	return nil, nil
+
+}
+
+// QueryPaymentByUserId 查询用户支付记录
+func QueryPaymentByUserId(userId uint, assetId string) {
 
 }
 
@@ -398,6 +405,9 @@ func pollPayment() {
 	}
 	if len(a) > 0 {
 		for _, v := range a {
+			if v.Invoice == nil {
+				continue
+			}
 			temp, err := TrackPayment(*v.PaymentHash)
 			if err != nil {
 				CUST.Warning(err.Error())
@@ -420,6 +430,7 @@ func pollPayment() {
 					CUST.Warning(err.Error())
 				}
 			}
+
 		}
 	}
 }

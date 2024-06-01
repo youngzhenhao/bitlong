@@ -298,6 +298,12 @@ func PaymentTrack(paymentHash string) (*lnrpc.Payment, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer func(stream routerrpc.Router_TrackPaymentV2Client) {
+		err := stream.CloseSend()
+		if err != nil {
+
+		}
+	}(stream)
 	for {
 		payment, err := stream.Recv()
 		if err != nil {

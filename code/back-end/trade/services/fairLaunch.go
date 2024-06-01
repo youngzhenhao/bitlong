@@ -29,6 +29,7 @@ func FairLaunchIssuance() {
 
 // FairLaunchMint
 // @Description: Scheduled Task
+// TODO: 重复扣费
 func FairLaunchMint() {
 	processionResult, err := ProcessAllFairLaunchMintedInfos()
 	if err != nil {

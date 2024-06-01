@@ -62,21 +62,22 @@ func CreateCustodyAccount(user *models.User) (*models.Account, error) {
 
 // Update  托管账户更新
 func UpdateCustodyAccount(account *models.Account, away models.BalanceAway, balance uint64) (uint, error) {
-	acc, err := servicesrpc.AccountInfo(account.UserAccountCode)
-	if err != nil {
-		return 0, err
-	}
-	var amount int64
-
-	switch away {
-	case models.AWAY_IN:
-		amount = acc.CurrentBalance + int64(balance)
-	case models.AWAY_OUT:
-		amount = acc.CurrentBalance - int64(balance)
-	default:
-		return 0, fmt.Errorf("away error")
-	}
+	var err error
 	if account.UserAccountCode != "admin" {
+		acc, err := servicesrpc.AccountInfo(account.UserAccountCode)
+		if err != nil {
+			return 0, err
+		}
+		var amount int64
+		switch away {
+		case models.AWAY_IN:
+			amount = acc.CurrentBalance + int64(balance)
+		case models.AWAY_OUT:
+			amount = acc.CurrentBalance - int64(balance)
+		default:
+			return 0, fmt.Errorf("away error")
+		}
+
 		// Change the escrow account balance
 		_, err = servicesrpc.AccountUpdate(account.UserAccountCode, amount, -1)
 		if err != nil {
@@ -299,6 +300,7 @@ func PayInvoice(account *models.Account, PayInvoiceRequest *PayInvoiceRequest) (
 	return payment, nil
 }
 
+// QueryAccountBalanceByUserId 查询用户账户余额
 func QueryAccountBalanceByUserId(userId uint) (uint64, error) {
 	// 查询账户
 	account, err := ReadAccountByUserId(userId)
@@ -322,6 +324,7 @@ type InvoiceResponce struct {
 	status  int16  `json:"status"`
 }
 
+// QueryInvoiceByUserId 查询用户发票
 func QueryInvoiceByUserId(userId uint, assetId string) ([]InvoiceResponce, error) {
 	params := QueryParams{
 		"UserID":  userId,
@@ -345,6 +348,11 @@ func QueryInvoiceByUserId(userId uint, assetId string) ([]InvoiceResponce, error
 		return invoices, nil
 	}
 	return nil, nil
+
+}
+
+// QueryPaymentByUserId 查询用户支付记录
+func QueryPaymentByUserId(userId uint, assetId string) {
 
 }
 
@@ -398,6 +406,9 @@ func pollPayment() {
 	}
 	if len(a) > 0 {
 		for _, v := range a {
+			if v.Invoice == nil {
+				continue
+			}
 			temp, err := TrackPayment(*v.PaymentHash)
 			if err != nil {
 				CUST.Warning(err.Error())
@@ -420,6 +431,7 @@ func pollPayment() {
 					CUST.Warning(err.Error())
 				}
 			}
+
 		}
 	}
 }

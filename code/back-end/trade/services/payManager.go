@@ -1,6 +1,6 @@
 package services
 
-const adminUserId uint = 2
+const adminUserId uint = 1
 
 func NewRecharge() {
 

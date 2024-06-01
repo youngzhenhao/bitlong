@@ -10,7 +10,7 @@ import (
 // ListAddress
 //
 //	@Description: ListAddresses retrieves all the addresses along with their balance.
-//	An account name filter can be provided to filter through all of the wallet accounts and return the addresses of only those matching.
+//	An account name filter can be provided to filter through all the wallet accounts and return the addresses of only those matching.
 //	@return string
 func listAddress() (*walletrpc.ListAddressesResponse, error) {
 	conn, clearUp, err := connect.GetConnection("lnd", false)

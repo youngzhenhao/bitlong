@@ -3,7 +3,9 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/wallet/models"
 	"io"
 	"net/http"
 )
@@ -31,9 +33,30 @@ func GetMintTransactionByteSize() int {
 
 // http://127.0.0.1:8080/v1/fair_launch/query/own_set
 
+func ProcessOwnSetFairLaunchResponseToIssuanceHistoryInfo(fairLaunchInfos *[]models.FairLaunchInfo) (*[]IssuanceHistoryInfo, error) {
+	var err error
+	var issuanceHistoryInfos []IssuanceHistoryInfo
+	if fairLaunchInfos == nil || len(*fairLaunchInfos) == 0 {
+		err = errors.New("fairLaunchInfos is null")
+		LogError("", err)
+		return nil, err
+	}
+	for _, fairLaunchInfo := range *fairLaunchInfos {
+		issuanceHistoryInfos = append(issuanceHistoryInfos, IssuanceHistoryInfo{
+			AssetName:    fairLaunchInfo.Name,
+			AssetID:      fairLaunchInfo.AssetID,
+			AssetType:    int(fairLaunchInfo.AssetType),
+			IssuanceTime: fairLaunchInfo.IssuanceTime,
+			State:        int(fairLaunchInfo.State),
+		})
+	}
+	return &issuanceHistoryInfos, nil
+
+}
+
 func GetOwnSet(token string) (string, error) {
 	url := serverHost + "/v1/fair_launch/query/own_set"
-	// 创建HTTP请求
+	// Create an HTTP request
 	responce, err := SendGetReq(url, token, nil)
 	return responce, err
 }
@@ -52,7 +75,7 @@ func GetAssetQueryMint(token string, FairLaunchInfoId string, MintedNumber int) 
 		MintedNumber     int    `json:"minted_number"`
 	}{}
 	requestBody, _ := json.Marshal(resquest)
-	// 创建HTTP请求
+	// Create an HTTP request
 	responce, err := SendGetReq(url, token, requestBody)
 	return responce, err
 }
@@ -61,11 +84,10 @@ func SendGetReq(url string, token string, requestBody []byte) (string, error) {
 	if err != nil {
 		fmt.Println("An error occurred while creating an HTTP request:", err)
 	}
-	// 设置Authorization Header
+	// Set Authorization Header
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/json")
-
-	// 发送HTTP请求
+	// Send HTTP request
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {

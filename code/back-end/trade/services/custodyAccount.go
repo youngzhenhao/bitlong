@@ -62,21 +62,22 @@ func CreateCustodyAccount(user *models.User) (*models.Account, error) {
 
 // Update  托管账户更新
 func UpdateCustodyAccount(account *models.Account, away models.BalanceAway, balance uint64) (uint, error) {
-	acc, err := servicesrpc.AccountInfo(account.UserAccountCode)
-	if err != nil {
-		return 0, err
-	}
-	var amount int64
-
-	switch away {
-	case models.AWAY_IN:
-		amount = acc.CurrentBalance + int64(balance)
-	case models.AWAY_OUT:
-		amount = acc.CurrentBalance - int64(balance)
-	default:
-		return 0, fmt.Errorf("away error")
-	}
+	var err error
 	if account.UserAccountCode != "admin" {
+		acc, err := servicesrpc.AccountInfo(account.UserAccountCode)
+		if err != nil {
+			return 0, err
+		}
+		var amount int64
+		switch away {
+		case models.AWAY_IN:
+			amount = acc.CurrentBalance + int64(balance)
+		case models.AWAY_OUT:
+			amount = acc.CurrentBalance - int64(balance)
+		default:
+			return 0, fmt.Errorf("away error")
+		}
+
 		// Change the escrow account balance
 		_, err = servicesrpc.AccountUpdate(account.UserAccountCode, amount, -1)
 		if err != nil {

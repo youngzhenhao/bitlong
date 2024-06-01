@@ -181,3 +181,12 @@ func FeeRateSatPerBToBtcPerKb(feeRateSatPerB int) (feeRateBtcPerKb float64) {
 func FeeRateSatPerBToSatPerKw(feeRateSatPerB int) (feeRateSatPerKw int) {
 	return feeRateSatPerB * 1000 / 4
 }
+
+func ValueJsonString(value any) string {
+	resultJSON, err := json.MarshalIndent(value, "", "\t")
+	if err != nil {
+		LogError("MarshalIndent error", err)
+		return ""
+	}
+	return string(resultJSON)
+}

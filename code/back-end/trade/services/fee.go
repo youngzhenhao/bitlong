@@ -122,7 +122,7 @@ func EstimateSmartFeeRateSatPerKw() (estimatedFeeSatPerKw int, err error) {
 		FEE.Error("Estimate Smart FeeRate", err)
 		return 0, err
 	}
-	estimatedFeeSatPerKw = BtcPerKbToSatPerKw(estimatedFee)
+	estimatedFeeSatPerKw = FeeRateBtcPerKbToSatPerKw(estimatedFee)
 	return estimatedFeeSatPerKw, nil
 }
 
@@ -142,24 +142,53 @@ func EstimateSmartFeeRateBtcPerKb() (estimatedFeeBtcPerKb float64, err error) {
 	return GetEstimateSmartFeeRate()
 }
 
-// BtcPerKbToSatPerKw
-// @Description: 1 sat/vB = 0.25 sat/wu
+// FeeRateBtcPerKbToSatPerKw
+// @Description: BTC/Kb to sat/kw
+// 1 sat/vB = 0.25 sat/wu
 // https://bitcoin.stackexchange.com/questions/106333/different-fee-rate-units-sat-vb-sat-perkw-sat-perkb
-func BtcPerKbToSatPerKw(btcPerKb float64) (satPerKw int) {
+func FeeRateBtcPerKbToSatPerKw(btcPerKb float64) (satPerKw int) {
 	// @dev: 1 BTC/kB = 1e8 sat/kB 1e5 sat/B = 0.25e5 sat/w = 0.25e8 sat/kw
 	return int(0.25e8 * btcPerKb)
 }
 
+// FeeRateBtcPerKbToSatPerB
+// @Description: BTC/Kb to sat/b
+// @param btcPerKb
+// @return satPerB
+func FeeRateBtcPerKbToSatPerB(btcPerKb float64) (satPerB int) {
+	return int(1e5 * btcPerKb)
+}
+
+// FeeRateSatPerKwToBtcPerKb
+// @Description: sat/kw to BTC/Kb
+// @param feeRateSatPerKw
+// @return feeRateBtcPerKb
+func FeeRateSatPerKwToBtcPerKb(feeRateSatPerKw int) (feeRateBtcPerKb float64) {
+	return utils.RoundToDecimalPlace(float64(feeRateSatPerKw)/0.25e8, 8)
+}
+
+// FeeRateSatPerKwToSatPerB
+// @Description: sat/kw to sat/b
+// @param feeRateSatPerKw
+// @return feeRateSatPerB
 func FeeRateSatPerKwToSatPerB(feeRateSatPerKw int) (feeRateSatPerB int) {
 	return feeRateSatPerKw * 4 / 1000
 }
 
+// FeeRateSatPerBToBtcPerKb
+// @Description: sat/b to BTC/Kb
+// @param feeRateSatPerB
+// @return feeRateBtcPerKb
 func FeeRateSatPerBToBtcPerKb(feeRateSatPerB int) (feeRateBtcPerKb float64) {
 	return utils.RoundToDecimalPlace(float64(feeRateSatPerB)/100000, 8)
 }
 
-func FeeRateSatPerKwToBtcPerKb(feeRateSatPerKw int) (feeRateBtcPerKb float64) {
-	return utils.RoundToDecimalPlace(float64(feeRateSatPerKw)/0.25e8, 8)
+// FeeRateSatPerBToSatPerKw
+// @Description: sat/b to sat/kw
+// @param feeRateSatPerB
+// @return feeRateSatPerKw
+func FeeRateSatPerBToSatPerKw(feeRateSatPerB int) (feeRateSatPerKw int) {
+	return feeRateSatPerB * 1000 / 4
 }
 
 // sat/kw

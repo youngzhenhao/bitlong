@@ -25,7 +25,7 @@ type IssuanceHistoryInfo struct {
 	State                int    `json:"state"`
 }
 
-func GetIssuanceTransactionFee(token string) (fee int, err error) {
+func GetIssuanceTransactionCalculatedFee(token string) (fee int, err error) {
 	size := GetIssuanceTransactionByteSize()
 	serverFeeRateResponse, err := GetServerFeeRate(token)
 	if err != nil {
@@ -36,7 +36,7 @@ func GetIssuanceTransactionFee(token string) (fee int, err error) {
 	return feeRate * size, err
 }
 
-func GetMintTransactionByteFee(token string, id int, number int) (fee int, err error) {
+func GetMintTransactionCalculatedFee(token string, id int, number int) (fee int, err error) {
 	size := GetMintTransactionByteSize()
 	serverQueryMintResponse, err := GetServerQueryMint(token, id, number)
 	if err != nil {
@@ -246,8 +246,67 @@ func GetServerIssuanceHistoryInfos(token string) (*[]IssuanceHistoryInfo, error)
 	return issuanceHistoryInfos, nil
 }
 
-func GetLocalIssuanceHistoryInfos() {
-	//	TODO: need to complete
+func GetLocalTapdIssuanceHistoryInfos() (*[]IssuanceHistoryInfo, error) {
+	var err error
+	var issuanceHistoryInfos []IssuanceHistoryInfo
+	batchs, err := ListBatchesAndGetResponse()
+	if err != nil {
+		LogError("", err)
+		return nil, err
+	}
+	transactions, err := GetTransactionsAndGetResponse()
+	if err != nil {
+		LogError("", err)
+		return nil, err
+	}
+	assets, err := ListAssetAndGetResponse()
+	if err != nil {
+		LogError("", err)
+		return nil, err
+	}
+	var timestamp int
+	var assetId string
+	for _, batch := range (*batchs).Batches {
+		timestamp, err = GetTimestampByBatchTxidWithGetTransactionsResponse(transactions, batch.BatchTxid)
+		if err != nil {
+			LogError("", err)
+			//	@dev:do not return
+		}
+		assetId, err = GetAssetIdByBatchTxidWithListAssetResponse(assets, batch.BatchTxid)
+		for _, batchAsset := range batch.Assets {
+			issuanceHistoryInfos = append(issuanceHistoryInfos, IssuanceHistoryInfo{
+				IsFairLaunchIssuance: false,
+				AssetName:            batchAsset.Name,
+				AssetID:              assetId,
+				AssetType:            int(batchAsset.AssetType),
+				IssuanceTime:         timestamp,
+				State:                int(batch.State),
+			})
+		}
+	}
+	return &issuanceHistoryInfos, err
+}
+
+// GetAllUserOwnServerAndLocalTapdIssuanceHistoryInfos
+// @Description: Get User Own Issuance History Infos
+// @param token
+// @return *[]IssuanceHistoryInfo
+// @return error
+func GetAllUserOwnServerAndLocalTapdIssuanceHistoryInfos(token string) (*[]IssuanceHistoryInfo, error) {
+	var issuanceHistoryInfos []IssuanceHistoryInfo
+	serverResult, err := GetServerIssuanceHistoryInfos(token)
+	if err != nil {
+		LogError("", err)
+		return nil, err
+	}
+	localTapdResult, err := GetLocalTapdIssuanceHistoryInfos()
+	if err != nil {
+		LogError("", err)
+		return nil, err
+	}
+	issuanceHistoryInfos = append(issuanceHistoryInfos, *serverResult...)
+	issuanceHistoryInfos = append(issuanceHistoryInfos, *localTapdResult...)
+	return &issuanceHistoryInfos, nil
 }
 
 func ListBatchesAndGetResponse() (*mintrpc.ListBatchResponse, error) {
@@ -278,7 +337,7 @@ func GetTransactionsAndGetResponse() (*lnrpc.TransactionDetails, error) {
 	return response, err
 }
 
-func ListAssetAndGetResponse() (*[]ListAssetResponse, error) {
+func ListAssetAndGetCustomResponse() (*[]ListAssetResponse, error) {
 	response, err := listAssets(false, true, false)
 	if err != nil {
 		LogError("", err)
@@ -330,6 +389,10 @@ type ListAssetResponse struct {
 	ChainAnchor      ChainAnchorStruct  `json:"chain_anchor"`
 }
 
+func ListAssetAndGetResponse() (*taprpc.ListAssetResponse, error) {
+	return listAssets(false, true, false)
+}
+
 func GetTimestampByBatchTxidWithGetTransactionsResponse(transactionDetails *lnrpc.TransactionDetails, batchTxid string) (timestamp int, err error) {
 	for _, transaction := range transactionDetails.Transactions {
 		if batchTxid == transaction.TxHash {
@@ -351,33 +414,43 @@ func GetAssetIdByBatchTxidWithListAssetResponse(listAssetResponse *taprpc.ListAs
 	return "", err
 }
 
-func ProcessListAssetAndGetResponseToIssuanceHistoryInfo(listAssetResponse *[]ListAssetResponse) (*[]IssuanceHistoryInfo, error) {
-	var err error
-	var issuanceHistoryInfos []IssuanceHistoryInfo
-	batchs, err := ListBatchesAndGetResponse()
+// GetUserOwnIssuanceHistoryInfos
+// @Description: Get User Own Issuance History Infos
+// @param token
+// @return string
+func GetUserOwnIssuanceHistoryInfos(token string) string {
+	result, err := GetAllUserOwnServerAndLocalTapdIssuanceHistoryInfos(token)
 	if err != nil {
 		LogError("", err)
-		return nil, err
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
 	}
-	transactions, err := GetTransactionsAndGetResponse()
-	if err != nil {
-		LogError("", err)
-		return nil, err
-	}
-	assets, err := ListAssetAndGetResponse()
-	if err != nil {
-		LogError("", err)
-		return nil, err
-	}
-	var timestamp int
-	var assetId string
-	for _, batch := range (*batchs).Batches {
-		timestamp, err = GetTimestampByBatchTxidWithGetTransactionsResponse(transactions, batch.BatchTxid)
-		if err != nil {
-			LogError("", err)
-			//	@dev:do not return
-		}
-		assetId, err = GetAssetIdByBatchTxidWithListAssetResponse(assets, batch.BatchTxid)
-	}
+	return MakeJsonErrorResult(SUCCESS, "", result)
+}
 
+// GetIssuanceTransactionFee
+// @Description: Get Issuance Transaction Fee
+// @param token
+// @return string
+func GetIssuanceTransactionFee(token string) string {
+	result, err := GetIssuanceTransactionCalculatedFee(token)
+	if err != nil {
+		LogError("", err)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
+	}
+	return MakeJsonErrorResult(SUCCESS, "", result)
+}
+
+// GetMintTransactionFee
+// @Description: Get Mint Transaction Fee
+// @param token
+// @param id
+// @param number
+// @return string
+func GetMintTransactionFee(token string, id int, number int) string {
+	result, err := GetMintTransactionCalculatedFee(token, id, number)
+	if err != nil {
+		LogError("", err)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
+	}
+	return MakeJsonErrorResult(SUCCESS, "", result)
 }

@@ -51,9 +51,9 @@ func MakeJsonResult(success bool, error string, data any) string {
 	return string(jstr)
 }
 
-func MakeJsonErrorResult(code ErrCode, error string, data any) string {
+func MakeJsonErrorResult(code ErrCode, errorString string, data any) string {
 	jsr := JsonResult{
-		Error: error,
+		Error: errorString,
 		Code:  code,
 		Data:  data,
 	}

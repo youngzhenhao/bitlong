@@ -44,6 +44,7 @@ type FairLaunchInfo struct {
 	EndTime                int              `json:"end_time"`
 	Description            string           `json:"description"`
 	FeeRate                int              `json:"fee_rate"`
+	SetTime                int              `json:"set_time"`
 	ActualReserved         float64          `json:"actual_reserved"`
 	ReserveTotal           int              `json:"reserve_total"`
 	MintNumber             int              `json:"mint_number"`
@@ -60,6 +61,7 @@ type FairLaunchInfo struct {
 	PayMethod              FeePaymentMethod `json:"pay_method"`
 	PaidSuccessTime        int              `json:"paid_success_time"`
 	IssuanceFeePaidID      int              `json:"issuance_fee_paid_id"`
+	IssuanceTime           int              `json:"issuance_time"`
 	ReservedCouldMint      bool             `json:"reserved_could_mint"`
 	IsReservedSent         bool             `json:"is_reserved_sent"`
 	MintedNumber           int              `json:"minted_number"`
@@ -98,7 +100,8 @@ type FairLaunchMintedInfo struct {
 	InternalKey           string                `json:"internal_key" gorm:"type:varchar(255)"`
 	TaprootOutputKey      string                `json:"taproot_output_key" gorm:"type:varchar(255)"`
 	ProofCourierAddr      string                `json:"proof_courier_addr" gorm:"type:varchar(512)"`
-	MintedTime            int                   `json:"minted_time"`
+	MintedSetTime         int                   `json:"minted_set_time"`
+	SendAssetTime         int                   `json:"send_asset_time"`
 	IsAddrSent            bool                  `json:"is_addr_sent"`
 	OutpointTxHash        string                `json:"outpoint_tx_hash" gorm:"type:varchar(255)"`
 	Outpoint              string                `json:"outpoint" gorm:"type:varchar(255)"`

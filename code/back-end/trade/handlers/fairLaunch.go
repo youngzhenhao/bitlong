@@ -366,10 +366,23 @@ func MintFairLaunchReserved(c *gin.Context) {
 		})
 		return
 	}
+	err = services.UpdateFairLaunchInfoIsReservedSent(fairLaunch)
+	if err != nil {
+		utils.LogError("Update FairLaunchInfo IsReservedSent.", err)
+		c.JSON(http.StatusOK, models.JsonResult{
+			Success: false,
+			Error:   "Update FairLaunchInfo IsReservedSent. " + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	result := services.ProcessSendFairLaunchReservedResponse(response)
 	c.JSON(http.StatusOK, models.JsonResult{
 		Success: true,
 		Error:   "",
-		Data:    response,
+		Data: gin.H{
+			"anchor_outpoint_txid": result,
+		},
 	})
 }
 

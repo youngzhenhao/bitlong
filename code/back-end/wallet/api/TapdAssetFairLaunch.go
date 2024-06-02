@@ -25,6 +25,47 @@ type IssuanceHistoryInfo struct {
 	State                int    `json:"state"`
 }
 
+// GetUserOwnIssuanceHistoryInfos
+// @Description: Get User Own Issuance History Infos
+// @param token
+// @return string
+func GetUserOwnIssuanceHistoryInfos(token string) string {
+	result, err := GetAllUserOwnServerAndLocalTapdIssuanceHistoryInfos(token)
+	if err != nil {
+		LogError("", err)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
+	}
+	return MakeJsonErrorResult(SUCCESS, "", result)
+}
+
+// GetIssuanceTransactionFee
+// @Description: Get Issuance Transaction Fee
+// @param token
+// @return string
+func GetIssuanceTransactionFee(token string) string {
+	result, err := GetIssuanceTransactionCalculatedFee(token)
+	if err != nil {
+		LogError("", err)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
+	}
+	return MakeJsonErrorResult(SUCCESS, "", result)
+}
+
+// GetMintTransactionFee
+// @Description: Get Mint Transaction Fee
+// @param token
+// @param id
+// @param number
+// @return string
+func GetMintTransactionFee(token string, id int, number int) string {
+	result, err := GetMintTransactionCalculatedFee(token, id, number)
+	if err != nil {
+		LogError("", err)
+		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
+	}
+	return MakeJsonErrorResult(SUCCESS, "", result)
+}
+
 func GetIssuanceTransactionCalculatedFee(token string) (fee int, err error) {
 	size := GetIssuanceTransactionByteSize()
 	serverFeeRateResponse, err := GetServerFeeRate(token)
@@ -108,10 +149,14 @@ func GetServerOwnSetFairLaunchInfos(token string) (fairLaunchInfos *[]models.Fai
 func ProcessOwnSetFairLaunchResponseToIssuanceHistoryInfo(fairLaunchInfos *[]models.FairLaunchInfo) (*[]IssuanceHistoryInfo, error) {
 	var err error
 	var issuanceHistoryInfos []IssuanceHistoryInfo
-	if fairLaunchInfos == nil || len(*fairLaunchInfos) == 0 {
+	if fairLaunchInfos == nil {
 		err = errors.New("fairLaunchInfos is null")
 		LogError("", err)
 		return nil, err
+	}
+	if len(*(fairLaunchInfos)) == 0 {
+		LogInfo("fairLaunchInfos length is zero")
+		return &issuanceHistoryInfos, nil
 	}
 	for _, fairLaunchInfo := range *fairLaunchInfos {
 		issuanceHistoryInfos = append(issuanceHistoryInfos, IssuanceHistoryInfo{
@@ -137,7 +182,7 @@ type ServerFeeRateResponse struct {
 	} `json:"data"`
 }
 
-func GetServerFeeRate(token string) (serverFeeRateResponse *ServerFeeRateResponse, err error) {
+func GetServerFeeRate(token string) (*ServerFeeRateResponse, error) {
 	serverDomainOrSocket := "132.232.109.84:8090"
 	//serverDomainOrSocket := "127.0.0.1:8080"
 	url := "http://" + serverDomainOrSocket + "/v1/fee/query/rate"
@@ -146,14 +191,14 @@ func GetServerFeeRate(token string) (serverFeeRateResponse *ServerFeeRateRespons
 	request, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonData))
 	if err != nil {
 		fmt.Println("Error creating request:", err)
-		return
+		return nil, err
 	}
 	request.Header.Add("Authorization", "Bearer "+token)
 	request.Header.Add("Content-Type", "application/json")
 	response, err := client.Do(request)
 	if err != nil {
 		fmt.Println("Error sending request:", err)
-		return
+		return nil, err
 	}
 	defer func(Body io.ReadCloser) {
 		err = Body.Close()
@@ -166,11 +211,12 @@ func GetServerFeeRate(token string) (serverFeeRateResponse *ServerFeeRateRespons
 		fmt.Println("Error reading response body:", err)
 		return nil, err
 	}
+	var serverFeeRateResponse ServerFeeRateResponse
 	if err = json.Unmarshal(bodyBytes, &serverFeeRateResponse); err != nil {
 		fmt.Printf("%s json.Unmarshal :%v\n", GetTimeNow(), err)
 		return nil, err
 	}
-	return serverFeeRateResponse, nil
+	return &serverFeeRateResponse, nil
 }
 
 type ServerQueryMintResponse struct {
@@ -184,7 +230,7 @@ type ServerQueryMintResponse struct {
 	} `json:"data"`
 }
 
-func GetServerQueryMint(token string, id int, number int) (serverQueryMintResponse *ServerQueryMintResponse, err error) {
+func GetServerQueryMint(token string, id int, number int) (*ServerQueryMintResponse, error) {
 	serverDomainOrSocket := "132.232.109.84:8090"
 	//serverDomainOrSocket := "127.0.0.1:8080"
 	url := "http://" + serverDomainOrSocket + "/v1/fair_launch/query/mint"
@@ -197,17 +243,17 @@ func GetServerQueryMint(token string, id int, number int) (serverQueryMintRespon
 		MintedNumber:     number,
 	}
 	requestJsonBytes, _ := json.Marshal(requestJson)
-	request, err := http.NewRequest("GET", url, bytes.NewBuffer(requestJsonBytes))
+	request, err := http.NewRequest("POST", url, bytes.NewBuffer(requestJsonBytes))
 	if err != nil {
 		fmt.Println("Error creating request:", err)
-		return
+		return nil, err
 	}
 	request.Header.Add("Authorization", "Bearer "+token)
 	request.Header.Add("Content-Type", "application/json")
 	response, err := client.Do(request)
 	if err != nil {
 		fmt.Println("Error sending request:", err)
-		return
+		return nil, err
 	}
 	defer func(Body io.ReadCloser) {
 		err = Body.Close()
@@ -220,11 +266,12 @@ func GetServerQueryMint(token string, id int, number int) (serverQueryMintRespon
 		fmt.Println("Error reading response body:", err)
 		return nil, err
 	}
+	var serverQueryMintResponse ServerQueryMintResponse
 	if err = json.Unmarshal(bodyBytes, &serverQueryMintResponse); err != nil {
 		fmt.Printf("%s json.Unmarshal :%v\n", GetTimeNow(), err)
 		return nil, err
 	}
-	return serverQueryMintResponse, nil
+	return &serverQueryMintResponse, nil
 }
 
 // GetServerIssuanceHistoryInfos
@@ -268,11 +315,19 @@ func GetLocalTapdIssuanceHistoryInfos() (*[]IssuanceHistoryInfo, error) {
 	var assetId string
 	for _, batch := range (*batchs).Batches {
 		timestamp, err = GetTimestampByBatchTxidWithGetTransactionsResponse(transactions, batch.BatchTxid)
+		// transaction not found
 		if err != nil {
-			LogError("", err)
+			//LogError("", err)
+			continue
 			//	@dev:do not return
 		}
 		assetId, err = GetAssetIdByBatchTxidWithListAssetResponse(assets, batch.BatchTxid)
+		// asset not found
+		if err != nil {
+			//LogError("", err)
+			continue
+			//	@dev:do not return
+		}
 		for _, batchAsset := range batch.Assets {
 			issuanceHistoryInfos = append(issuanceHistoryInfos, IssuanceHistoryInfo{
 				IsFairLaunchIssuance: false,
@@ -284,7 +339,7 @@ func GetLocalTapdIssuanceHistoryInfos() (*[]IssuanceHistoryInfo, error) {
 			})
 		}
 	}
-	return &issuanceHistoryInfos, err
+	return &issuanceHistoryInfos, nil
 }
 
 // GetAllUserOwnServerAndLocalTapdIssuanceHistoryInfos
@@ -412,45 +467,4 @@ func GetAssetIdByBatchTxidWithListAssetResponse(listAssetResponse *taprpc.ListAs
 	}
 	err = errors.New("asset not found")
 	return "", err
-}
-
-// GetUserOwnIssuanceHistoryInfos
-// @Description: Get User Own Issuance History Infos
-// @param token
-// @return string
-func GetUserOwnIssuanceHistoryInfos(token string) string {
-	result, err := GetAllUserOwnServerAndLocalTapdIssuanceHistoryInfos(token)
-	if err != nil {
-		LogError("", err)
-		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
-	}
-	return MakeJsonErrorResult(SUCCESS, "", result)
-}
-
-// GetIssuanceTransactionFee
-// @Description: Get Issuance Transaction Fee
-// @param token
-// @return string
-func GetIssuanceTransactionFee(token string) string {
-	result, err := GetIssuanceTransactionCalculatedFee(token)
-	if err != nil {
-		LogError("", err)
-		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
-	}
-	return MakeJsonErrorResult(SUCCESS, "", result)
-}
-
-// GetMintTransactionFee
-// @Description: Get Mint Transaction Fee
-// @param token
-// @param id
-// @param number
-// @return string
-func GetMintTransactionFee(token string, id int, number int) string {
-	result, err := GetMintTransactionCalculatedFee(token, id, number)
-	if err != nil {
-		LogError("", err)
-		return MakeJsonErrorResult(DefaultErr, err.Error(), nil)
-	}
-	return MakeJsonErrorResult(SUCCESS, "", result)
 }

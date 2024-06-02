@@ -484,8 +484,6 @@ func pollInvoice() {
 						CUST.Warning(err.Error())
 					}
 				}
-				mutex.Lock()
-				defer mutex.Unlock()
 				err = middleware.DB.Save(&v).Error
 				if err != nil {
 					CUST.Warning(err.Error())

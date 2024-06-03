@@ -114,7 +114,7 @@ func PayAmountInside(payUserId, receiveUserId uint, gasFee, serveFee uint64) (ui
 	}
 	outId, err := UpdateCustodyAccount(payAccount, models.AWAY_OUT, amount)
 	if err != nil {
-		CUST.Error("UpdateCustodyAccount error:%v", err)
+		CUST.Error("UpdateCustodyAccount error(payUserId:%v):%v", payUserId, err)
 		return 0, err
 	}
 	remark := fmt.Sprintf("gasFee:%v ,serverFee:%v", gasFee, serveFee)
@@ -134,7 +134,7 @@ func PayAmountInside(payUserId, receiveUserId uint, gasFee, serveFee uint64) (ui
 	}
 	Id, err := UpdateCustodyAccount(receiveAccount, models.AWAY_IN, amount)
 	if err != nil {
-		CUST.Error("UpdateCustodyAccount error:%v", err)
+		CUST.Error("UpdateCustodyAccount error(receiveUserId:%v):%v", receiveUserId, err)
 		return 0, err
 	}
 	return Id, nil

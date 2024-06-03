@@ -24,6 +24,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
+	log.Print("/n/n/n-------------------------start--------------------------/n/n/n")
 	mode := loadConfig.GinConfig.Mode
 	if !(mode == gin.DebugMode || mode == gin.ReleaseMode || mode == gin.TestMode) {
 		mode = gin.DebugMode
@@ -36,11 +37,11 @@ func main() {
 	if err := middleware.RedisConnect(); err != nil {
 		log.Fatalf("Failed to initialize redis: %v", err)
 	}
-	if !checkStart() {
-		return
-	}
 	if config.GetLoadConfig().IsAutoMigrate {
 		err = dao.Migrate()
+	}
+	if !checkStart() {
+		return
 	}
 	if err != nil {
 		utils.LogError("AutoMigrate error", err)
@@ -117,12 +118,13 @@ func main() {
 func checkStart() bool {
 	cfg := config.GetConfig()
 	if cfg.ApiConfig.CustodyAccount.MacaroonDir == "" {
-		fmt.Println("Custody account MacaroonDir is not set")
+		log.Println("Custody account MacaroonDir is not set")
 		return false
 	}
+	fmt.Println("Custody account MacaroonDir is set:", cfg.ApiConfig.CustodyAccount.MacaroonDir)
 	// 检测admin账户
 	if !services.CheckAdminAccount() {
-		fmt.Println("Admin account is not set")
+		log.Println("Admin account is not set")
 		return false
 	}
 	return true

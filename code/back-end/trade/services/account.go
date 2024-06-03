@@ -20,7 +20,7 @@ func ReadAccount(id uint) (*models.Account, error) {
 // ReadAccountByUserId retrieves an account by user ID
 func ReadAccountByUserId(userId uint) (*models.Account, error) {
 	var account models.Account
-	err := middleware.DB.Where("user_id =?", userId).Find(&account).Error
+	err := middleware.DB.Where("user_id =?", userId).First(&account).Error
 	return &account, err
 }
 

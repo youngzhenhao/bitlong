@@ -189,9 +189,11 @@ func ProcessFairLaunchMintedInfo(fairLaunchInfoID int, mintedNumber int, mintedF
 		FairLaunchInfoID:      fairLaunchInfoID,
 		MintedNumber:          mintedNumber,
 		MintedFeeRateSatPerKw: mintedFeeRateSatPerKw,
+		MintedGasFee:          CalculateGasFeeByMintedFeeRateSatPerKw(mintedFeeRateSatPerKw),
 		EncodedAddr:           addr,
 		UserID:                userId,
 		AssetID:               hex.EncodeToString(decodedAddrInfo.AssetId),
+		AssetName:             fairLaunchInfo.Name,
 		AssetType:             int(decodedAddrInfo.AssetType),
 		AddrAmount:            int(decodedAddrInfo.Amount),
 		ScriptKey:             hex.EncodeToString(decodedAddrInfo.ScriptKey),
@@ -202,6 +204,12 @@ func ProcessFairLaunchMintedInfo(fairLaunchInfoID int, mintedNumber int, mintedF
 		State:                 models.FairLaunchMintedStateNoPay,
 	}
 	return &fairLaunchMintedInfo, nil
+}
+
+func CalculateGasFeeByMintedFeeRateSatPerKw(feeRateSatPerKw int) int {
+	feeRate := FeeRateSatPerKwToSatPerB(feeRateSatPerKw)
+	size := GetTransactionByteSize()
+	return feeRate * size
 }
 
 type CalculateSeparateAmount struct {

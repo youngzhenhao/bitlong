@@ -1264,6 +1264,11 @@ func SendFairLaunchMintedAssetLocked() (err error) {
 	if err != nil {
 		return err
 	}
+	if len(addrSlice) == 0 {
+		err = errors.New("length of addr slice is zero, can't send assets and update")
+		FairLaunchDebugLogger.Error("", err)
+		return err
+	}
 	// @dev: Send Asset
 	response, err := api.SendAssetAddrSliceAndGetResponse(addrSlice, feeRateSatPerKw)
 	if err != nil {

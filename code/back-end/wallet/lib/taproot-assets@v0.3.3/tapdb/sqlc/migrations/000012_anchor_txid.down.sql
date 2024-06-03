@@ -1,2 +1,0 @@
--- This file is empty on purpose. There is nothing to roll back for this
--- migration.

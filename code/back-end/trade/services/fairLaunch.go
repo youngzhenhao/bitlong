@@ -29,7 +29,6 @@ func FairLaunchIssuance() {
 
 // FairLaunchMint
 // @Description: Scheduled Task
-// TODO: 重复扣费
 func FairLaunchMint() {
 	processionResult, err := ProcessAllFairLaunchMintedInfos()
 	if err != nil {
@@ -772,7 +771,7 @@ func UpdateFairLaunchInfoBatchTxidAndAssetId(fairLaunchInfo *models.FairLaunchIn
 func FairLaunchTapdMint(fairLaunchInfo *models.FairLaunchInfo) (err error) {
 	// @dev: 1.taprpc MintAsset
 	var isCollectible bool
-	if taprpc.AssetType(fairLaunchInfo.AssetType) == taprpc.AssetType_COLLECTIBLE {
+	if fairLaunchInfo.AssetType == taprpc.AssetType_COLLECTIBLE {
 		isCollectible = true
 	}
 	newMeta := api.NewMeta(fairLaunchInfo.Description, fairLaunchInfo.ImageData)
@@ -1170,7 +1169,8 @@ func GetAllUnsentFairLaunchMintedInfos() (fairLaunchMintedInfos *[]models.FairLa
 	return fairLaunchMintedInfos, err
 }
 
-// @dev: dprecated
+// UpdateFairLaunchMintedInfosIsAddrSent
+// Deprecated
 func UpdateFairLaunchMintedInfosIsAddrSent(fairLaunchMintedInfos *[]models.FairLaunchMintedInfo, isAddrSent bool) (err error) {
 	return middleware.DB.Model(&fairLaunchMintedInfos).Update("is_addr_sent", isAddrSent).Error
 }
@@ -1215,6 +1215,7 @@ func GetListChainTransactionsOutpointAddress(outpoint string) (address string, e
 	return "", err
 }
 
+// UpdateFairLaunchMintedInfosBySendAssetResponse
 // @dev: Updated outpoint and is_addr_sent
 func UpdateFairLaunchMintedInfosBySendAssetResponse(fairLaunchMintedInfos *[]models.FairLaunchMintedInfo, sendAssetResponse *taprpc.SendAssetResponse) (err error) {
 	var fairLaunchMintedInfosUpdated []models.FairLaunchMintedInfo
@@ -1246,6 +1247,7 @@ func UpdateFairLaunchMintedInfosBySendAssetResponse(fairLaunchMintedInfos *[]mod
 	return middleware.DB.Save(&fairLaunchMintedInfosUpdated).Error
 }
 
+// SendFairLaunchMintedAssetLocked
 // @dev: Trigger after ProcessFairLaunchMintedStatePaidNoSendInfo
 func SendFairLaunchMintedAssetLocked() (err error) {
 	// @dev: all unsent

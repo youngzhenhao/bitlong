@@ -47,7 +47,7 @@ const (
 type BalanceState int16
 
 const (
-	STATE_UNKNOWN BalanceState = 0
+	STATE_UNKNOW  BalanceState = 0
 	STATE_SUCCESS BalanceState = 1
 	STATE_FAILED  BalanceState = 2
 )

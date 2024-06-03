@@ -18,6 +18,13 @@ func GetInvoice(id uint) (*models.Invoice, error) {
 	return &invoice, err
 }
 
+// GetInvoiceByReq retrieves an invoice by request
+func GetInvoiceByReq(invoiceReq string) (*models.Invoice, error) {
+	var invoice models.Invoice
+	err := middleware.DB.Where("invoice =?", invoiceReq).First(&invoice).Error
+	return &invoice, err
+}
+
 // UpdateInvoice updates an existing invoice
 func UpdateInvoice(db *gorm.DB, invoice *models.Invoice) error {
 	return db.Save(invoice).Error

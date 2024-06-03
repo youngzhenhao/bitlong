@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"github.com/lightninglabs/lightning-terminal/litrpc"
 	"github.com/lightningnetwork/lnd/lnrpc"
+	"github.com/lightningnetwork/lnd/lnrpc/invoicesrpc"
 	"github.com/lightningnetwork/lnd/lnrpc/routerrpc"
 	"strconv"
 	"trade/config"
@@ -313,4 +314,24 @@ func PaymentTrack(paymentHash string) (*lnrpc.Payment, error) {
 			return payment, nil
 		}
 	}
+}
+
+func InvoiceCancel(hash []byte) error {
+	lndconf := config.GetConfig().ApiConfig.Lnd
+
+	grpcHost := lndconf.Host + ":" + strconv.Itoa(lndconf.Port)
+	tlsCertPath := lndconf.TlsCertPath
+	macaroonPath := lndconf.MacaroonPath
+
+	conn, connClose := utils.GetConn(grpcHost, tlsCertPath, macaroonPath)
+	defer connClose()
+	client := invoicesrpc.NewInvoicesClient(conn)
+	request := &invoicesrpc.CancelInvoiceMsg{
+		PaymentHash: hash,
+	}
+	_, err := client.CancelInvoice(context.Background(), request)
+	if err != nil {
+		return err
+	}
+	return nil
 }

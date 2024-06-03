@@ -49,9 +49,9 @@ func GenericQuery[T any](model *T, params QueryParams) ([]*T, error) {
 		return nil, err
 	}
 	// Optionally print the results (assuming model has a method String() string to print its details)
-	for _, result := range results {
-		fmt.Println(result)
-	}
+	//for _, result := range results {
+	//	fmt.Println(result)
+	//}
 	return results, nil
 }
 

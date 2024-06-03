@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"net/http"
 	"trade/services"
 )
@@ -45,11 +47,10 @@ func ApplyInvoice(c *gin.Context) {
 
 	account, err := services.ReadAccountByUserId(user.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	if account.UserAccountCode == "" {
-		// 为用户创建托管账户
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "service is default"})
+			return
+		}
 		account, err = services.CreateCustodyAccount(user)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "创建托管账户失败"})

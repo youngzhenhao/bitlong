@@ -1,0 +1,2626 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "trader.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Trader"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/pool/accounts": {
+      "get": {
+        "summary": "pool: `accounts list`\nListAccounts returns a list of all accounts known to the trader daemon and\ntheir current state.",
+        "operationId": "Trader_ListAccounts",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcListAccountsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "active_only",
+            "description": "Only list accounts that are still active.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      },
+      "delete": {
+        "summary": "pool: `accounts close`\nCloseAccount closes an account and returns the funds locked in that account\nto the connected lnd node's wallet.",
+        "operationId": "Trader_CloseAccount",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcCloseAccountResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "trader_key",
+            "description": "The trader key associated with the account that will be closed.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "output_with_fee.address",
+            "description": "The address corresponding to the output.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "output_with_fee.conf_target",
+            "description": "The target number of blocks that the transaction should be confirmed in.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "output_with_fee.fee_rate_sat_per_kw",
+            "description": "The fee rate, in satoshis per kw, to use for the withdrawal transaction.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      },
+      "post": {
+        "summary": "pool: `accounts new`\nInitAccount creates a new account with the requested size and expiration,\nfunding it from the wallet of the connected lnd node.",
+        "operationId": "Trader_InitAccount",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcAccount"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/poolrpcInitAccountRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/accounts/bump": {
+      "post": {
+        "summary": "pool: `accounts bumpfee`\nBumpAccountFee attempts to bump the fee of an account's transaction through\nchild-pays-for-parent (CPFP). Since the CPFP is performed through the\nbacking lnd node, the account transaction must contain an output under its\ncontrol for a successful bump. If a CPFP has already been performed for an\naccount, and this RPC is invoked again, then a replacing transaction (RBF)\nof the child will be broadcast.",
+        "operationId": "Trader_BumpAccountFee",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcBumpAccountFeeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/poolrpcBumpAccountFeeRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/accounts/deposit": {
+      "post": {
+        "summary": "pool: `accounts deposit`\nDepositAccount adds more funds from the connected lnd node's wallet to an\naccount.",
+        "operationId": "Trader_DepositAccount",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcDepositAccountResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/poolrpcDepositAccountRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/accounts/quote": {
+      "post": {
+        "summary": "QuoteAccount gets a fee quote to fund an account of the given size with the\ngiven confirmation target. If the connected lnd wallet doesn't have enough\nbalance to fund an account of the requested size, an error is returned.",
+        "operationId": "Trader_QuoteAccount",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcQuoteAccountResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/poolrpcQuoteAccountRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/accounts/recover": {
+      "post": {
+        "summary": "pool: `accounts recover`\nRecoverAccounts queries the auction server for this trader daemon's accounts\nin case we lost our local account database.",
+        "operationId": "Trader_RecoverAccounts",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcRecoverAccountsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/poolrpcRecoverAccountsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/accounts/renew": {
+      "post": {
+        "summary": "pool: `accounts renew`\nRenewAccount renews the expiration of an account.",
+        "operationId": "Trader_RenewAccount",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcRenewAccountResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/poolrpcRenewAccountRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/accounts/withdraw": {
+      "post": {
+        "summary": "pool: `accounts withdraw`\nWithdrawAccount splits off parts of the account balance into the specified\noutputs while recreating the account with a reduced balance.",
+        "operationId": "Trader_WithdrawAccount",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcWithdrawAccountResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/poolrpcWithdrawAccountRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/batch/next": {
+      "get": {
+        "summary": "pool: `auction nextbatchinfo`\nNextBatchInfo returns information about the next batch the auctioneer will\nperform.",
+        "operationId": "Trader_NextBatchInfo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcNextBatchInfoResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/batch/snapshot": {
+      "get": {
+        "summary": "pool: `auction snapshot`\nBatchSnapshot returns the snapshot of a past batch identified by its ID.\nIf no ID is provided, the snapshot of the last finalized batch is returned.\nDeprecated, use BatchSnapshots instead.",
+        "operationId": "Trader_BatchSnapshot",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcBatchSnapshotResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "batch_id",
+            "description": "The unique identifier of the batch encoded as a compressed pubkey.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/batch/snapshots": {
+      "get": {
+        "summary": "pool: `auction snapshot`\nBatchSnapshots returns a list of batch snapshots starting at the start batch\nID and going back through the history of batches, returning at most the\nnumber of specified batches. A maximum of 100 snapshots can be queried in\none call. If no start batch ID is provided, the most recent finalized batch\nis used as the starting point to go back from.",
+        "operationId": "Trader_BatchSnapshots",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcBatchSnapshotsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "start_batch_id",
+            "description": "The unique identifier of the first batch to return, encoded as a compressed\npubkey. This represents the newest/most current batch to fetch. If this is\nempty or a zero batch ID, the most recent finalized batch is used as the\nstarting point to go back from.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "num_batches_back",
+            "description": "The number of batches to return at most, including the start batch.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/batch/snapshots/{start_batch_id}": {
+      "get": {
+        "summary": "pool: `auction snapshot`\nBatchSnapshots returns a list of batch snapshots starting at the start batch\nID and going back through the history of batches, returning at most the\nnumber of specified batches. A maximum of 100 snapshots can be queried in\none call. If no start batch ID is provided, the most recent finalized batch\nis used as the starting point to go back from.",
+        "operationId": "Trader_BatchSnapshots2",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcBatchSnapshotsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "start_batch_id",
+            "description": "The unique identifier of the first batch to return, encoded as a compressed\npubkey. This represents the newest/most current batch to fetch. If this is\nempty or a zero batch ID, the most recent finalized batch is used as the\nstarting point to go back from.",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "num_batches_back",
+            "description": "The number of batches to return at most, including the start batch.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/batch/snapshots/{start_batch_id}/{num_batches_back}": {
+      "get": {
+        "summary": "pool: `auction snapshot`\nBatchSnapshots returns a list of batch snapshots starting at the start batch\nID and going back through the history of batches, returning at most the\nnumber of specified batches. A maximum of 100 snapshots can be queried in\none call. If no start batch ID is provided, the most recent finalized batch\nis used as the starting point to go back from.",
+        "operationId": "Trader_BatchSnapshots3",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcBatchSnapshotsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "start_batch_id",
+            "description": "The unique identifier of the first batch to return, encoded as a compressed\npubkey. This represents the newest/most current batch to fetch. If this is\nempty or a zero batch ID, the most recent finalized batch is used as the\nstarting point to go back from.",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "num_batches_back",
+            "description": "The number of batches to return at most, including the start batch.",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/fee": {
+      "get": {
+        "summary": "pool: `auction fee`\nAuctionFee returns the current auction order execution fee specified by the\nauction server.",
+        "operationId": "Trader_AuctionFee",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcAuctionFeeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/info": {
+      "get": {
+        "summary": "pool: `getinfo`\nGetInfo returns general information about the state of the Pool trader\ndaemon.",
+        "operationId": "Trader_GetInfo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcGetInfoResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/lease_durations": {
+      "get": {
+        "summary": "pool: `auction leasedurations`\nLeaseDurations returns the current set of valid lease duration in the\nmarket as is, and also information w.r.t if the market is currently active.",
+        "operationId": "Trader_LeaseDurations",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcLeaseDurationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/leases": {
+      "get": {
+        "summary": "pool: `auction leases`\nLeases returns the list of channels that were either purchased or sold by\nthe trader within the auction.",
+        "operationId": "Trader_Leases",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcLeasesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "batch_ids",
+            "description": "An optional list of batches to retrieve the leases of. If empty, leases\nthroughout all batches are returned.",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "byte"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "accounts",
+            "description": "An optional list of accounts to retrieve the leases of. If empty, leases\nfor all accounts are returned.",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "byte"
+            },
+            "collectionFormat": "multi"
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/lsat/tokens": {
+      "get": {
+        "summary": "pool: `listauth`\nGetLsatTokens returns all LSAT tokens the daemon ever paid for.",
+        "operationId": "Trader_GetLsatTokens",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcTokensResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/node_ratings": {
+      "get": {
+        "summary": "pool: `auction ratings`\nReturns the Node Tier information for this target Lightning node, and other\nrelated ranking information.",
+        "operationId": "Trader_NodeRatings",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcNodeRatingResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "node_pubkeys",
+            "description": "The target node to obtain ratings information for.",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "byte"
+            },
+            "collectionFormat": "multi"
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/orders": {
+      "get": {
+        "summary": "pool: `orders list`\nListOrders returns a list of all active and archived orders that are\ncurrently known to the trader daemon.",
+        "operationId": "Trader_ListOrders",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcListOrdersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "verbose",
+            "description": "Can be set to true to list the orders including all events, which can be\nvery verbose.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "active_only",
+            "description": "Only list orders that are still active.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      },
+      "post": {
+        "summary": "pool: `orders submit`\nSubmitOrder creates a new ask or bid order and submits for the given account\nand submits it to the auction server for matching.",
+        "operationId": "Trader_SubmitOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcSubmitOrderResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/poolrpcSubmitOrderRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/orders/quote": {
+      "post": {
+        "summary": "QuoteOrder calculates the premium, execution fees and max batch fee rate for\nan order based on the given order parameters.",
+        "operationId": "Trader_QuoteOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcQuoteOrderResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/poolrpcQuoteOrderRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/orders/{order_nonce}": {
+      "delete": {
+        "summary": "pool: `orders cancel`\nCancelOrder cancels an active order with the auction server to remove it\nfrom future matching.",
+        "operationId": "Trader_CancelOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcCancelOrderResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "order_nonce",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "byte"
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/sidecar/expect": {
+      "post": {
+        "summary": "pool: `sidecar expectchannel`\nExpectSidecarChannel is step 4/4 of the sidecar negotiation between the\nprovider (the trader submitting the bid order) and the recipient (the trader\nreceiving the sidecar channel).\nThis step must be run by the recipient once the provider has submitted the\nbid order for the sidecar channel. From this point onwards the Pool trader\ndaemon of both the provider as well as the recipient need to be online to\nreceive and react to match making events from the server.",
+        "operationId": "Trader_ExpectSidecarChannel",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcExpectSidecarChannelResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/poolrpcExpectSidecarChannelRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/sidecar/offer": {
+      "post": {
+        "summary": "pool: `sidecar offer`\nOfferSidecar is step 1/4 of the sidecar negotiation between the provider\n(the trader submitting the bid order) and the recipient (the trader\nreceiving the sidecar channel).\nThis step must be run by the provider. The result is a sidecar ticket with\nan offer to lease a sidecar channel for the recipient. The offer will be\nsigned with the provider's lnd node public key. The ticket returned by this\ncall will have the state \"offered\".",
+        "operationId": "Trader_OfferSidecar",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcSidecarTicket"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/poolrpcOfferSidecarRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/sidecar/register": {
+      "post": {
+        "summary": "pool: `sidecar register`\nRegisterSidecarRequest is step 2/4 of the sidecar negotiation between the\nprovider (the trader submitting the bid order) and the recipient (the trader\nreceiving the sidecar channel).\nThis step must be run by the recipient. The result is a sidecar ticket with\nthe recipient's node information and channel funding multisig pubkey filled\nin. The ticket returned by this call will have the state \"registered\".",
+        "operationId": "Trader_RegisterSidecar",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcSidecarTicket"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/poolrpcRegisterSidecarRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    },
+    "/v1/pool/stop": {
+      "post": {
+        "summary": "pool: `stop`\nStop gracefully shuts down the Pool trader daemon.",
+        "operationId": "Trader_StopDaemon",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/poolrpcStopDaemonResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/poolrpcStopDaemonRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Trader"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "InvalidOrderFailReason": {
+      "type": "string",
+      "enum": [
+        "INVALID_AMT"
+      ],
+      "default": "INVALID_AMT"
+    },
+    "MarketInfoTierValue": {
+      "type": "object",
+      "properties": {
+        "tier": {
+          "$ref": "#/definitions/poolrpcNodeTier"
+        },
+        "value": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "poolrpcAccount": {
+      "type": "object",
+      "properties": {
+        "trader_key": {
+          "type": "string",
+          "format": "byte",
+          "description": "The identifying component of an account. This is the key used for the trader\nin the 2-of-2 multi-sig construction of an account with an auctioneer."
+        },
+        "outpoint": {
+          "$ref": "#/definitions/poolrpcOutPoint",
+          "description": "The current outpoint associated with the account. This will change every\ntime the account has been updated."
+        },
+        "value": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The current total amount of satoshis in the account."
+        },
+        "available_balance": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The amount of satoshis in the account that is available, meaning not\nallocated to any oustanding orders."
+        },
+        "expiration_height": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The height at which the account will expire."
+        },
+        "state": {
+          "$ref": "#/definitions/poolrpcAccountState",
+          "description": "The current state of the account."
+        },
+        "latest_txid": {
+          "type": "string",
+          "format": "byte",
+          "description": "The hash of the account's latest transaction."
+        },
+        "version": {
+          "$ref": "#/definitions/poolrpcAccountVersion",
+          "description": "The current version of the account."
+        }
+      }
+    },
+    "poolrpcAccountModificationFee": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "description": "Modification action type."
+        },
+        "txid": {
+          "type": "string",
+          "description": "Transaction ID."
+        },
+        "block_height": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Action transaction block height."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "int64",
+          "description": "Action transaction timestamp."
+        },
+        "output_amount": {
+          "type": "string",
+          "format": "int64",
+          "description": "Action transaction output amount."
+        },
+        "fee_null": {
+          "type": "boolean",
+          "description": "A flag which is true if fee value has not been set, and is otherwise\nfalse."
+        },
+        "fee_value": {
+          "type": "string",
+          "format": "int64",
+          "description": "Action transaction fee value."
+        }
+      }
+    },
+    "poolrpcAccountModificationFeesResponse": {
+      "type": "object",
+      "properties": {
+        "accounts": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/poolrpcListOfAccountModificationFees"
+          },
+          "description": "A map from account key to an ordered list of account modification fees."
+        }
+      }
+    },
+    "poolrpcAccountState": {
+      "type": "string",
+      "enum": [
+        "PENDING_OPEN",
+        "PENDING_UPDATE",
+        "OPEN",
+        "EXPIRED",
+        "PENDING_CLOSED",
+        "CLOSED",
+        "RECOVERY_FAILED",
+        "PENDING_BATCH"
+      ],
+      "default": "PENDING_OPEN",
+      "description": " - PENDING_OPEN: The state of an account when it is pending its confirmation on-chain.\n - PENDING_UPDATE: The state of an account when it has undergone an update on-chain either as\npart of a matched order or a trader modification and it is pending its\nconfirmation on-chain.\n - OPEN: The state of an account once it has confirmed on-chain.\n - EXPIRED: The state of an account once its expiration has been reached and its closing\ntransaction has confirmed.\n - PENDING_CLOSED: The state of an account when we're waiting for the closing transaction of\nan account to confirm that required cooperation with the auctioneer.\n - CLOSED: The state of an account once its closing transaction has confirmed.\n - RECOVERY_FAILED: The state of an account that indicates that the account was attempted to be\nrecovered but failed because the opening transaction wasn't found by lnd.\nThis could be because it was never published or it never confirmed. Then the\nfunds are SAFU and the account can be considered to never have been opened\nin the first place.\n - PENDING_BATCH: The account has recently participated in a batch and is not yet confirmed."
+    },
+    "poolrpcAccountVersion": {
+      "type": "string",
+      "enum": [
+        "ACCOUNT_VERSION_LND_DEPENDENT",
+        "ACCOUNT_VERSION_LEGACY",
+        "ACCOUNT_VERSION_TAPROOT",
+        "ACCOUNT_VERSION_TAPROOT_V2"
+      ],
+      "default": "ACCOUNT_VERSION_LND_DEPENDENT",
+      "description": " - ACCOUNT_VERSION_LND_DEPENDENT: Let the version of lnd decide. If a version of lnd \u003e= 0.15.0-beta is\ndetected then a Taproot account is created. For earlier versions a legacy\naccount is created. If a version of lnd \u003e= 0.16.0-beta is detected, then a\nTaproot v2 account is created.\n - ACCOUNT_VERSION_LEGACY: A legacy SegWit v0 p2wsh account with a single script.\n - ACCOUNT_VERSION_TAPROOT: A Taproot enabled account with MuSig2 combined internal key and the expiry\nscript as a single tap script leaf.\n - ACCOUNT_VERSION_TAPROOT_V2: A Taproot enabled account with MuSig2 combined internal key and the expiry\nscript as a single tap script leaf. This version uses the MuSig2 v1.0.0-rc2\nprotocol for creating the combined internal key. This can only be selected\nwhen the connected lnd version is \u003e= 0.16.0-beta."
+    },
+    "poolrpcAsk": {
+      "type": "object",
+      "properties": {
+        "details": {
+          "$ref": "#/definitions/poolrpcOrder",
+          "description": "The common fields shared between both ask and bid order types."
+        },
+        "lease_duration_blocks": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The number of blocks the liquidity provider is willing to provide the\nchannel funds for."
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The version of the order format that is used. Will be increased once new\nfeatures are added."
+        },
+        "announcement_constraints": {
+          "$ref": "#/definitions/poolrpcChannelAnnouncementConstraints",
+          "description": "The constraints for selling the liquidity based on channel discoverability."
+        },
+        "confirmation_constraints": {
+          "$ref": "#/definitions/poolrpcChannelConfirmationConstraints",
+          "description": "The constraints for selling the liquidity based on the number of\nblocks before considering the channel confirmed."
+        }
+      }
+    },
+    "poolrpcAskSnapshot": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The version of the order."
+        },
+        "lease_duration_blocks": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The period of time the channel will survive for."
+        },
+        "rate_fixed": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The true bid price of the order in parts per billion."
+        },
+        "chan_type": {
+          "$ref": "#/definitions/poolrpcOrderChannelType",
+          "description": "The channel type to be created."
+        }
+      }
+    },
+    "poolrpcAuctionFeeResponse": {
+      "type": "object",
+      "properties": {
+        "execution_fee": {
+          "$ref": "#/definitions/poolrpcExecutionFee",
+          "description": "The execution fee charged per matched order."
+        }
+      }
+    },
+    "poolrpcAuctionType": {
+      "type": "string",
+      "enum": [
+        "AUCTION_TYPE_BTC_INBOUND_LIQUIDITY",
+        "AUCTION_TYPE_BTC_OUTBOUND_LIQUIDITY"
+      ],
+      "default": "AUCTION_TYPE_BTC_INBOUND_LIQUIDITY",
+      "description": " - AUCTION_TYPE_BTC_INBOUND_LIQUIDITY: Default auction type where the bidder is paying for getting bitcoin inbound\nliqiudity from the asker.\n - AUCTION_TYPE_BTC_OUTBOUND_LIQUIDITY: Auction type where the bidder is paying the asker to accept a channel\n(bitcoin outbound liquidity) from the bidder."
+    },
+    "poolrpcBatchSnapshotResponse": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The version of the batch."
+        },
+        "batch_id": {
+          "type": "string",
+          "format": "byte",
+          "description": "The unique identifier of the batch."
+        },
+        "prev_batch_id": {
+          "type": "string",
+          "format": "byte",
+          "description": "The unique identifier of the prior batch."
+        },
+        "clearing_price_rate": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Deprecated, use matched_markets."
+        },
+        "matched_orders": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/poolrpcMatchedOrderSnapshot"
+          },
+          "description": "Deprecated, use matched_markets."
+        },
+        "batch_tx_id": {
+          "type": "string",
+          "description": "The txid of the batch transaction."
+        },
+        "batch_tx": {
+          "type": "string",
+          "format": "byte",
+          "description": "The batch transaction including all witness data."
+        },
+        "batch_tx_fee_rate_sat_per_kw": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The fee rate, in satoshis per kiloweight, of the batch transaction."
+        },
+        "creation_timestamp_ns": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The unix timestamp in nanoseconds the batch was made."
+        },
+        "matched_markets": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/poolrpcMatchedMarketSnapshot"
+          },
+          "description": "Maps the distinct lease duration markets to the orders that were matched\nwithin and the discovered market clearing price."
+        }
+      }
+    },
+    "poolrpcBatchSnapshotsResponse": {
+      "type": "object",
+      "properties": {
+        "batches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/poolrpcBatchSnapshotResponse"
+          },
+          "description": "The list of batches requested."
+        }
+      }
+    },
+    "poolrpcBid": {
+      "type": "object",
+      "properties": {
+        "details": {
+          "$ref": "#/definitions/poolrpcOrder",
+          "description": "The common fields shared between both ask and bid order types."
+        },
+        "lease_duration_blocks": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Required number of blocks that a channel opened as a result of this bid\nshould be kept open."
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The version of the order format that is used. Will be increased once new\nfeatures are added."
+        },
+        "min_node_tier": {
+          "$ref": "#/definitions/poolrpcNodeTier",
+          "description": "The minimum node tier this order should be matched with. Only asks backed by\na node this tier or higher will be eligible for matching with this bid."
+        },
+        "self_chan_balance": {
+          "type": "string",
+          "format": "uint64",
+          "description": "Give the incoming channel that results from this bid being matched an\ninitial outbound balance by adding additional funds from the taker's account\ninto the channel. As a simplification for the execution protocol and the\nchannel reserve calculations the min_chan_amt must be set to the full order\namount. For the inbound liquidity market the self_chan_balance can be at\nmost the same as the order amount."
+        },
+        "sidecar_ticket": {
+          "type": "string",
+          "description": "If this bid order is meant to lease a channel for another node (which is\ndubbed a \"sidecar channel\") then this ticket contains all information\nrequired for setting up that sidecar channel. The ticket is expected to be\nthe base58 encoded ticket, including the prefix and the checksum."
+        },
+        "unannounced_channel": {
+          "type": "boolean",
+          "description": "Signals if this bid is interested in an announced or unannounced channel."
+        },
+        "zero_conf_channel": {
+          "type": "boolean",
+          "description": "Signals if this bid is interested in a zero conf channel or not."
+        }
+      }
+    },
+    "poolrpcBidSnapshot": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The version of the order."
+        },
+        "lease_duration_blocks": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The period of time the matched channel should be allocated for."
+        },
+        "rate_fixed": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The true bid price of the order in parts per billion."
+        },
+        "chan_type": {
+          "$ref": "#/definitions/poolrpcOrderChannelType",
+          "description": "The channel type to be created."
+        }
+      }
+    },
+    "poolrpcBumpAccountFeeRequest": {
+      "type": "object",
+      "properties": {
+        "trader_key": {
+          "type": "string",
+          "format": "byte",
+          "description": "The trader key associated with the account that will have its fee bumped."
+        },
+        "fee_rate_sat_per_kw": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The new fee rate, in satoshis per kw, to use for the child of the account\ntransaction."
+        }
+      }
+    },
+    "poolrpcBumpAccountFeeResponse": {
+      "type": "object"
+    },
+    "poolrpcCancelOrderResponse": {
+      "type": "object"
+    },
+    "poolrpcCancelSidecarResponse": {
+      "type": "object"
+    },
+    "poolrpcChannelAnnouncementConstraints": {
+      "type": "string",
+      "enum": [
+        "ANNOUNCEMENT_NO_PREFERENCE",
+        "ONLY_ANNOUNCED",
+        "ONLY_UNANNOUNCED"
+      ],
+      "default": "ANNOUNCEMENT_NO_PREFERENCE",
+      "description": "Channel announcement constraints for matched channels."
+    },
+    "poolrpcChannelConfirmationConstraints": {
+      "type": "string",
+      "enum": [
+        "CONFIRMATION_NO_PREFERENCE",
+        "ONLY_CONFIRMED",
+        "ONLY_ZEROCONF"
+      ],
+      "default": "CONFIRMATION_NO_PREFERENCE",
+      "description": "Channel confirmation constraints for matched channels."
+    },
+    "poolrpcCloseAccountResponse": {
+      "type": "object",
+      "properties": {
+        "close_txid": {
+          "type": "string",
+          "format": "byte",
+          "description": "The hash of the closing transaction."
+        }
+      }
+    },
+    "poolrpcDecodedSidecarTicket": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "byte",
+          "description": "The unique, pseudorandom identifier of the ticket."
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The version of the ticket encoding format."
+        },
+        "state": {
+          "type": "string",
+          "description": "The state of the ticket."
+        },
+        "offer_capacity": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The offered channel capacity in satoshis."
+        },
+        "offer_push_amount": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The offered push amount in satoshis."
+        },
+        "offer_lease_duration_blocks": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The offered lease duration in blocks."
+        },
+        "offer_sign_pubkey": {
+          "type": "string",
+          "format": "byte",
+          "description": "The public key the offer was signed with."
+        },
+        "offer_signature": {
+          "type": "string",
+          "format": "byte",
+          "description": "The signature over the offer's digest."
+        },
+        "offer_auto": {
+          "type": "boolean",
+          "description": "Whether the offer was created with the automatic order creation flag."
+        },
+        "recipient_node_pubkey": {
+          "type": "string",
+          "format": "byte",
+          "description": "The recipient node's public identity key."
+        },
+        "recipient_multisig_pubkey": {
+          "type": "string",
+          "format": "byte",
+          "description": "The recipient node's channel multisig public key to be used for the sidecar\nchannel."
+        },
+        "recipient_multisig_pubkey_index": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The index used when deriving the above multisig pubkey."
+        },
+        "order_bid_nonce": {
+          "type": "string",
+          "format": "byte",
+          "description": "The nonce of the bid order created for this sidecar ticket."
+        },
+        "order_signature": {
+          "type": "string",
+          "format": "byte",
+          "description": "The signature over the order's digest, signed with the private key that\ncorresponds to the offer_sign_pubkey."
+        },
+        "execution_pending_channel_id": {
+          "type": "string",
+          "format": "byte",
+          "description": "The pending channel ID of the sidecar channel during the execution phase."
+        },
+        "encoded_ticket": {
+          "type": "string",
+          "description": "The original, base58 encoded ticket."
+        },
+        "offer_unannounced_channel": {
+          "type": "boolean",
+          "description": "If true, the channel acceptor for this ticket will expect an unannounced\nchannel."
+        },
+        "offer_zero_conf_channel": {
+          "type": "boolean",
+          "description": "If true, the channel acceptor for this ticket will expect a zero conf\nchannel."
+        }
+      }
+    },
+    "poolrpcDepositAccountRequest": {
+      "type": "object",
+      "properties": {
+        "trader_key": {
+          "type": "string",
+          "format": "byte",
+          "description": "The trader key associated with the account that funds will be deposited\ninto."
+        },
+        "amount_sat": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The amount in satoshis to deposit into the account."
+        },
+        "fee_rate_sat_per_kw": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The fee rate, in satoshis per kw, to use for the deposit transaction."
+        },
+        "absolute_expiry": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The new absolute expiration height of the account."
+        },
+        "relative_expiry": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The new relative expiration height of the account."
+        },
+        "new_version": {
+          "$ref": "#/definitions/poolrpcAccountVersion",
+          "description": "The new version of the account. If this is set and is a valid version\ngreater than the account's current version, then the account is upgraded to\nthat version during the deposit."
+        }
+      }
+    },
+    "poolrpcDepositAccountResponse": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "$ref": "#/definitions/poolrpcAccount",
+          "description": "The state of the account after processing the deposit."
+        },
+        "deposit_txid": {
+          "type": "string",
+          "format": "byte",
+          "description": "The transaction used to deposit funds into the account."
+        }
+      }
+    },
+    "poolrpcDurationBucketState": {
+      "type": "string",
+      "enum": [
+        "NO_MARKET",
+        "MARKET_CLOSED",
+        "ACCEPTING_ORDERS",
+        "MARKET_OPEN"
+      ],
+      "default": "NO_MARKET",
+      "description": " - NO_MARKET: NO_MARKET indicates that this bucket doesn't actually exist, in that no\nmarket is present for this market.\n - MARKET_CLOSED: MARKET_CLOSED indicates that this market exists, but that it isn't currently\nrunning.\n - ACCEPTING_ORDERS: ACCEPTING_ORDERS indicates that we're accepting orders for this bucket, but\nnot yet clearing for this duration.\n - MARKET_OPEN: MARKET_OPEN indicates that we're accepting orders, and fully clearing the\nmarket for this duration."
+    },
+    "poolrpcExecutionFee": {
+      "type": "object",
+      "properties": {
+        "base_fee": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The base fee in satoshis charged per order, regardless of the matched size."
+        },
+        "fee_rate": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The fee rate in parts per million."
+        }
+      }
+    },
+    "poolrpcExpectSidecarChannelRequest": {
+      "type": "object",
+      "properties": {
+        "ticket": {
+          "type": "string",
+          "description": "The sidecar ticket to expect an incoming channel for. The ticket must be in\nthe state \"ordered\"."
+        }
+      }
+    },
+    "poolrpcExpectSidecarChannelResponse": {
+      "type": "object"
+    },
+    "poolrpcGetInfoResponse": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "The version of the Pool daemon that is running."
+        },
+        "accounts_total": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The total number of accounts in the local database."
+        },
+        "accounts_active": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The total number of accounts that are in an active, non-archived state,\nincluding expired accounts."
+        },
+        "accounts_active_expired": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The total number of accounts that are active but have expired."
+        },
+        "accounts_archived": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The total number of accounts that are in an archived/closed state."
+        },
+        "orders_total": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The total number of orders in the local database."
+        },
+        "orders_active": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The total number of active/pending orders that are still waiting for\nexecution."
+        },
+        "orders_archived": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The total number of orders that have been archived."
+        },
+        "current_block_height": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The current block height as seen by the connected lnd node."
+        },
+        "batches_involved": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The number of batches an account of this node was ever involved in."
+        },
+        "node_rating": {
+          "$ref": "#/definitions/poolrpcNodeRating",
+          "description": "Our lnd node's rating as judged by the auctioneer server."
+        },
+        "lsat_tokens": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The number of available LSAT tokens."
+        },
+        "subscribed_to_auctioneer": {
+          "type": "boolean",
+          "description": "Indicates whether there is an active subscription connection to the\nauctioneer. This will never be true if there is no active account. If there\nare active accounts, this value represents the network connection status to\nthe auctioneer server."
+        },
+        "new_nodes_only": {
+          "type": "boolean",
+          "description": "Indicates whether the global `--newnodesonly` command line flag or\n`newnodesonly=true` configuration parameter was set on the Pool trader\ndaemon."
+        },
+        "market_info": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/poolrpcMarketInfo"
+          },
+          "description": "A map of all markets identified by their lease duration and the current\nset of statistics such as number of open orders and total units of open\ninterest."
+        }
+      }
+    },
+    "poolrpcInitAccountRequest": {
+      "type": "object",
+      "properties": {
+        "account_value": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "absolute_height": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "relative_height": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "conf_target": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The target number of blocks that the transaction should be confirmed in."
+        },
+        "fee_rate_sat_per_kw": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The fee rate, in satoshis per kw, to use for the initial funding\ntransaction."
+        },
+        "initiator": {
+          "type": "string",
+          "description": "An optional identification string that will be appended to the user agent\nstring sent to the server to give information about the usage of pool. This\ninitiator part is meant for user interfaces to add their name to give the\nfull picture of the binary used (poold, LiT) and the method used for opening\nthe account (pool CLI, LiT UI, other 3rd party UI)."
+        },
+        "version": {
+          "$ref": "#/definitions/poolrpcAccountVersion",
+          "description": "The version of account to create."
+        }
+      }
+    },
+    "poolrpcInvalidOrder": {
+      "type": "object",
+      "properties": {
+        "order_nonce": {
+          "type": "string",
+          "format": "byte"
+        },
+        "fail_reason": {
+          "$ref": "#/definitions/InvalidOrderFailReason"
+        },
+        "fail_string": {
+          "type": "string"
+        }
+      }
+    },
+    "poolrpcLease": {
+      "type": "object",
+      "properties": {
+        "channel_point": {
+          "$ref": "#/definitions/poolrpcOutPoint",
+          "description": "The outpoint of the channel created."
+        },
+        "channel_amt_sat": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The amount, in satoshis, of the channel created."
+        },
+        "channel_duration_blocks": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The intended duration, in blocks, of the channel created."
+        },
+        "channel_lease_expiry": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The absolute height that this channel lease expires."
+        },
+        "premium_sat": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The premium, in satoshis, either paid or received for the offered liquidity."
+        },
+        "execution_fee_sat": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The execution fee, in satoshis, charged by the auctioneer for the channel\ncreated."
+        },
+        "chain_fee_sat": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The fee, in satoshis, charged by the auctioneer for the batch execution\ntransaction that created this lease."
+        },
+        "clearing_rate_price": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The actual fixed rate expressed in parts per billionth this lease was\nbought/sold at."
+        },
+        "order_fixed_rate": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The actual fixed rate of the bid/ask, this should always be 'better' than\nthe clearing_rate_price."
+        },
+        "order_nonce": {
+          "type": "string",
+          "format": "byte",
+          "description": "The order executed that resulted in the channel created."
+        },
+        "matched_order_nonce": {
+          "type": "string",
+          "format": "byte",
+          "description": "The unique identifier for the order that was matched with that resulted\nin the channel created."
+        },
+        "purchased": {
+          "type": "boolean",
+          "description": "Whether this channel was purchased from another trader or not."
+        },
+        "channel_remote_node_key": {
+          "type": "string",
+          "format": "byte",
+          "description": "The pubkey of the node that this channel was bought/sold from."
+        },
+        "channel_node_tier": {
+          "$ref": "#/definitions/poolrpcNodeTier",
+          "description": "The tier of the node that this channel was bought/sold from."
+        },
+        "self_chan_balance": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The self channel balance that was pushed to the recipient."
+        },
+        "sidecar_channel": {
+          "type": "boolean",
+          "description": "Whether the channel was leased as a sidecar channel (bid orders only)."
+        }
+      }
+    },
+    "poolrpcLeaseDurationResponse": {
+      "type": "object",
+      "properties": {
+        "lease_durations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "boolean"
+          },
+          "description": "Deprecated, use lease_duration_buckets."
+        },
+        "lease_duration_buckets": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/poolrpcDurationBucketState"
+          },
+          "description": "The set of lease durations the market is currently accepting and the state\nthe duration buckets currently are in."
+        }
+      }
+    },
+    "poolrpcLeasesResponse": {
+      "type": "object",
+      "properties": {
+        "leases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/poolrpcLease"
+          },
+          "description": "The relevant list of leases purchased or sold within the auction."
+        },
+        "total_amt_earned_sat": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The total amount of satoshis earned from the leases returned."
+        },
+        "total_amt_paid_sat": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The total amount of satoshis paid for the leases returned."
+        }
+      }
+    },
+    "poolrpcListAccountsResponse": {
+      "type": "object",
+      "properties": {
+        "accounts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/poolrpcAccount"
+          }
+        }
+      }
+    },
+    "poolrpcListOfAccountModificationFees": {
+      "type": "object",
+      "properties": {
+        "modification_fees": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/poolrpcAccountModificationFee"
+          }
+        }
+      }
+    },
+    "poolrpcListOrdersResponse": {
+      "type": "object",
+      "properties": {
+        "asks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/poolrpcAsk"
+          }
+        },
+        "bids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/poolrpcBid"
+          }
+        }
+      }
+    },
+    "poolrpcListSidecarsResponse": {
+      "type": "object",
+      "properties": {
+        "tickets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/poolrpcDecodedSidecarTicket"
+          }
+        }
+      }
+    },
+    "poolrpcLsatToken": {
+      "type": "object",
+      "properties": {
+        "base_macaroon": {
+          "type": "string",
+          "format": "byte",
+          "description": "*\nThe base macaroon that was baked by the auth server."
+        },
+        "payment_hash": {
+          "type": "string",
+          "format": "byte",
+          "description": "*\nThe payment hash of the payment that was paid to obtain the token."
+        },
+        "payment_preimage": {
+          "type": "string",
+          "format": "byte",
+          "description": "*\nThe preimage of the payment hash, knowledge of this is proof that the\npayment has been paid. If the preimage is set to all zeros, this means the\npayment is still pending and the token is not yet fully valid."
+        },
+        "amount_paid_msat": {
+          "type": "string",
+          "format": "int64",
+          "description": "*\nThe amount of millisatoshis that was paid to get the token."
+        },
+        "routing_fee_paid_msat": {
+          "type": "string",
+          "format": "int64",
+          "description": "*\nThe amount of millisatoshis paid in routing fee to pay for the token."
+        },
+        "time_created": {
+          "type": "string",
+          "format": "int64",
+          "description": "*\nThe creation time of the token as UNIX timestamp in seconds."
+        },
+        "expired": {
+          "type": "boolean",
+          "description": "*\nIndicates whether the token is expired or still valid."
+        },
+        "storage_name": {
+          "type": "string",
+          "description": "*\nIdentifying attribute of this token in the store. Currently represents the\nfile name of the token where it's stored on the file system."
+        }
+      }
+    },
+    "poolrpcMarketInfo": {
+      "type": "object",
+      "properties": {
+        "num_asks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MarketInfoTierValue"
+          },
+          "description": "The number of open/pending ask orders per node tier."
+        },
+        "num_bids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MarketInfoTierValue"
+          },
+          "description": "The number of open/pending bid orders per node tier."
+        },
+        "ask_open_interest_units": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MarketInfoTierValue"
+          },
+          "description": "The total number of open/unmatched units in open/pending ask orders per node\ntier."
+        },
+        "bid_open_interest_units": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MarketInfoTierValue"
+          },
+          "description": "The total number of open/unmatched units in open/pending bid orders per node\ntier."
+        }
+      }
+    },
+    "poolrpcMatchEvent": {
+      "type": "object",
+      "properties": {
+        "match_state": {
+          "$ref": "#/definitions/poolrpcMatchState",
+          "description": "The state of the match making process the order went through."
+        },
+        "units_filled": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The number of units that would be (or were) filled with this match."
+        },
+        "matched_order": {
+          "type": "string",
+          "format": "byte",
+          "description": "The nonce of the order we were matched to."
+        },
+        "reject_reason": {
+          "$ref": "#/definitions/poolrpcMatchRejectReason",
+          "description": "The reason why the trader daemon rejected the order. Is only set if\nmatch_state is set to REJECTED."
+        }
+      }
+    },
+    "poolrpcMatchRejectReason": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "SERVER_MISBEHAVIOR",
+        "BATCH_VERSION_MISMATCH",
+        "PARTIAL_REJECT_COLLATERAL",
+        "PARTIAL_REJECT_DUPLICATE_PEER",
+        "PARTIAL_REJECT_CHANNEL_FUNDING_FAILED"
+      ],
+      "default": "NONE",
+      "description": " - NONE: No reject occurred, this is the default value.\n - SERVER_MISBEHAVIOR: The client didn't come up with the same result as the server and is\nrejecting the batch because of that.\n - BATCH_VERSION_MISMATCH: The client doesn't support the current batch verification version the\nserver is using.\n - PARTIAL_REJECT_COLLATERAL: The client rejects some of the orders, not the full batch. This reason is\nset on matches for orders that were in the same batch as partial reject ones\nbut were not themselves rejected.\n - PARTIAL_REJECT_DUPLICATE_PEER: The trader's client has a preference to only match orders with peers it\ndoesn't already have channels with. The order that is rejected with this\nreason type comes from a peer that the trader already has channels with.\n - PARTIAL_REJECT_CHANNEL_FUNDING_FAILED: The trader's client couldn't connect to the remote node of the matched\norder or the channel funding could not be initialized for another\nreason. This could also be the rejecting node's fault if their\nconnection is not stable. Using this code can have a negative impact on\nthe reputation score of both nodes, depending on the number of errors\nrecorded."
+    },
+    "poolrpcMatchState": {
+      "type": "string",
+      "enum": [
+        "PREPARE",
+        "ACCEPTED",
+        "REJECTED",
+        "SIGNED",
+        "FINALIZED"
+      ],
+      "default": "PREPARE",
+      "description": " - PREPARE: The OrderMatchPrepare message from the auctioneer was received initially.\n - ACCEPTED: The OrderMatchPrepare message from the auctioneer was processed successfully\nand the batch was accepted.\n - REJECTED: The order was rejected by the trader daemon, either as an answer to a\nOrderMatchSignBegin or OrderMatchFinalize message from the auctioneer.\n - SIGNED: The OrderMatchSignBegin message from the auctioneer was processed\nsuccessfully.\n - FINALIZED: The OrderMatchFinalize message from the auctioneer was processed\nsuccessfully."
+    },
+    "poolrpcMatchedMarketSnapshot": {
+      "type": "object",
+      "properties": {
+        "matched_orders": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/poolrpcMatchedOrderSnapshot"
+          },
+          "description": "The set of all orders matched in the batch."
+        },
+        "clearing_price_rate": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The uniform clearing price rate in parts per billion that was used for this\nbatch."
+        }
+      }
+    },
+    "poolrpcMatchedOrderSnapshot": {
+      "type": "object",
+      "properties": {
+        "ask": {
+          "$ref": "#/definitions/poolrpcAskSnapshot",
+          "description": "The full ask order that was matched."
+        },
+        "bid": {
+          "$ref": "#/definitions/poolrpcBidSnapshot",
+          "description": "The full bid order that was matched."
+        },
+        "matching_rate": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The fixed rate premium that was matched, expressed in parts-ber-billion."
+        },
+        "total_sats_cleared": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The total number of satoshis that were bought."
+        },
+        "units_matched": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The total number of units that were matched."
+        }
+      }
+    },
+    "poolrpcNextBatchInfoResponse": {
+      "type": "object",
+      "properties": {
+        "conf_target": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The confirmation target the auctioneer will use for fee estimation of the\nnext batch."
+        },
+        "fee_rate_sat_per_kw": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The fee rate, in satoshis per kiloweight, estimated by the auctioneer to use\nfor the next batch."
+        },
+        "clear_timestamp": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The absolute unix timestamp in seconds at which the auctioneer will attempt\nto clear the next batch."
+        },
+        "auto_renew_extension_blocks": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The value used by the auctioneer to determine if an account expiry height\nneeds to be extended after participating in a batch and for how long."
+        }
+      }
+    },
+    "poolrpcNodeRating": {
+      "type": "object",
+      "properties": {
+        "node_pubkey": {
+          "type": "string",
+          "format": "byte",
+          "description": "The pubkey for the node these ratings belong to."
+        },
+        "node_tier": {
+          "$ref": "#/definitions/poolrpcNodeTier",
+          "description": "The tier of the target node."
+        }
+      }
+    },
+    "poolrpcNodeRatingResponse": {
+      "type": "object",
+      "properties": {
+        "node_ratings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/poolrpcNodeRating"
+          },
+          "description": "A series of node ratings for each of the queried nodes."
+        }
+      }
+    },
+    "poolrpcNodeTier": {
+      "type": "string",
+      "enum": [
+        "TIER_DEFAULT",
+        "TIER_0",
+        "TIER_1"
+      ],
+      "default": "TIER_DEFAULT",
+      "description": " - TIER_DEFAULT: The default node tier. This value will be determined at run-time by the\ncurrent order version.\n - TIER_0: Tier 0, bid with this tier are opting out of the smaller \"higher\nquality\" pool of nodes to match their bids. Nodes in this tier are\nconsidered to have \"no rating\".\n - TIER_1: Tier 1, the \"base\" node tier. Nodes in this tier are shown to have a\nhigher degree of up time and route-ability compared to the rest of the\nnodes in the network. This is the current default node tier when\nsubmitting bid orders."
+    },
+    "poolrpcOfferSidecarRequest": {
+      "type": "object",
+      "properties": {
+        "auto_negotiate": {
+          "type": "boolean",
+          "description": "If false, then only the trader_key, unit, self_chan_balance, and\nlease_duration_blocks need to be set in the bid below. Otherwise, the\nfields as they're set when submitting a bid need to be filled in."
+        },
+        "bid": {
+          "$ref": "#/definitions/poolrpcBid",
+          "description": "The bid template that will be used to populate the initial sidecar ticket\nas well as auto negotiate the remainig steps of the sidecar channel if\nneeded."
+        }
+      }
+    },
+    "poolrpcOrder": {
+      "type": "object",
+      "properties": {
+        "trader_key": {
+          "type": "string",
+          "format": "byte",
+          "description": "The trader's account key of the account that is used for the order."
+        },
+        "rate_fixed": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Fixed order rate in parts per billion."
+        },
+        "amt": {
+          "type": "string",
+          "format": "uint64",
+          "description": "Order amount in satoshis."
+        },
+        "max_batch_fee_rate_sat_per_kw": {
+          "type": "string",
+          "format": "uint64",
+          "description": "Maximum fee rate the trader is willing to pay for the batch transaction,\nexpressed in satoshis per 1000 weight units (sat/KW)."
+        },
+        "order_nonce": {
+          "type": "string",
+          "format": "byte",
+          "description": "Order nonce, acts as unique order identifier."
+        },
+        "state": {
+          "$ref": "#/definitions/poolrpcOrderState",
+          "description": "The state the order currently is in."
+        },
+        "units": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The number of order units the amount corresponds to."
+        },
+        "units_unfulfilled": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The number of currently unfilled units of this order. This will be equal to\nthe total amount of units until the order has reached the state PARTIAL_FILL\nor EXECUTED."
+        },
+        "reserved_value_sat": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The value reserved from the account by this order to ensure the account\ncan pay execution and chain fees in case it gets matched."
+        },
+        "creation_timestamp_ns": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The unix timestamp in nanoseconds the order was first created/submitted."
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/poolrpcOrderEvent"
+          },
+          "description": "A list of events that were emitted for this order. This field is only set\nwhen the verbose flag is set to true in the request."
+        },
+        "min_units_match": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The minimum number of order units that must be matched per order pair."
+        },
+        "channel_type": {
+          "$ref": "#/definitions/poolrpcOrderChannelType",
+          "description": "The channel type to use for the resulting matched channels."
+        },
+        "allowed_node_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "byte"
+          },
+          "description": "List of nodes that will be allowed to match with our order. Incompatible\nwith the `not_allowed_node_ids` field."
+        },
+        "not_allowed_node_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "byte"
+          },
+          "description": "List of nodes that won't be allowed to match with our order. Incompatible\nwith the `allowed_node_ids` field."
+        },
+        "auction_type": {
+          "$ref": "#/definitions/poolrpcAuctionType",
+          "description": "Auction type where this order must be considered during the matching."
+        },
+        "is_public": {
+          "type": "boolean",
+          "description": "Flag used to signal that this order can be shared in public market\nplaces."
+        }
+      }
+    },
+    "poolrpcOrderChannelType": {
+      "type": "string",
+      "enum": [
+        "ORDER_CHANNEL_TYPE_UNKNOWN",
+        "ORDER_CHANNEL_TYPE_PEER_DEPENDENT",
+        "ORDER_CHANNEL_TYPE_SCRIPT_ENFORCED"
+      ],
+      "default": "ORDER_CHANNEL_TYPE_UNKNOWN",
+      "description": " - ORDER_CHANNEL_TYPE_UNKNOWN: Used to set defaults when a trader doesn't specify a channel type.\n - ORDER_CHANNEL_TYPE_PEER_DEPENDENT: The channel type will vary per matched channel based on the features shared\nbetween its participants.\n - ORDER_CHANNEL_TYPE_SCRIPT_ENFORCED: A channel type that builds upon the anchors commitment format to enforce\nchannel lease maturities in the commitment and HTLC outputs that pay to the\nchannel initiator/seller."
+    },
+    "poolrpcOrderEvent": {
+      "type": "object",
+      "properties": {
+        "timestamp_ns": {
+          "type": "string",
+          "format": "int64",
+          "description": "The unix timestamp in nanoseconds the event was emitted at. This is the\nprimary key of the event and is unique across the database."
+        },
+        "event_str": {
+          "type": "string",
+          "description": "The human readable representation of the event."
+        },
+        "state_change": {
+          "$ref": "#/definitions/poolrpcUpdatedEvent",
+          "description": "The order was updated in the database."
+        },
+        "matched": {
+          "$ref": "#/definitions/poolrpcMatchEvent",
+          "description": "The order was involved in a match making attempt."
+        }
+      }
+    },
+    "poolrpcOrderState": {
+      "type": "string",
+      "enum": [
+        "ORDER_SUBMITTED",
+        "ORDER_CLEARED",
+        "ORDER_PARTIALLY_FILLED",
+        "ORDER_EXECUTED",
+        "ORDER_CANCELED",
+        "ORDER_EXPIRED",
+        "ORDER_FAILED"
+      ],
+      "default": "ORDER_SUBMITTED"
+    },
+    "poolrpcOutPoint": {
+      "type": "object",
+      "properties": {
+        "txid": {
+          "type": "string",
+          "format": "byte",
+          "description": "Raw bytes representing the transaction id."
+        },
+        "output_index": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The index of the output on the transaction."
+        }
+      }
+    },
+    "poolrpcOutput": {
+      "type": "object",
+      "properties": {
+        "value_sat": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The value, in satoshis, of the output."
+        },
+        "address": {
+          "type": "string",
+          "description": "The address corresponding to the output."
+        }
+      }
+    },
+    "poolrpcOutputWithFee": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string",
+          "description": "The address corresponding to the output."
+        },
+        "conf_target": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The target number of blocks that the transaction should be confirmed in."
+        },
+        "fee_rate_sat_per_kw": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The fee rate, in satoshis per kw, to use for the withdrawal transaction."
+        }
+      }
+    },
+    "poolrpcOutputsWithImplicitFee": {
+      "type": "object",
+      "properties": {
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/poolrpcOutput"
+          }
+        }
+      }
+    },
+    "poolrpcQuoteAccountRequest": {
+      "type": "object",
+      "properties": {
+        "account_value": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "conf_target": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The target number of blocks that the transaction should be confirmed in."
+        }
+      }
+    },
+    "poolrpcQuoteAccountResponse": {
+      "type": "object",
+      "properties": {
+        "miner_fee_rate_sat_per_kw": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "miner_fee_total": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "poolrpcQuoteOrderRequest": {
+      "type": "object",
+      "properties": {
+        "amt": {
+          "type": "string",
+          "format": "uint64",
+          "description": "Order amount in satoshis."
+        },
+        "rate_fixed": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Fixed order rate in parts per billion."
+        },
+        "lease_duration_blocks": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Required number of blocks that a channel opened as a result of this bid\nshould be kept open."
+        },
+        "max_batch_fee_rate_sat_per_kw": {
+          "type": "string",
+          "format": "uint64",
+          "description": "Maximum fee rate the trader is willing to pay for the batch transaction,\nexpressed in satoshis per 1000 weight units (sat/KW)."
+        },
+        "min_units_match": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The minimum number of order units that must be matched per order pair."
+        }
+      }
+    },
+    "poolrpcQuoteOrderResponse": {
+      "type": "object",
+      "properties": {
+        "total_premium_sat": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The total order premium in satoshis for filling the entire order. This\nrepresents the interest amount paid to the maker by the taker excluding any\nexecution or chain fees."
+        },
+        "rate_per_block": {
+          "type": "number",
+          "format": "double",
+          "description": "The fixed order rate expressed as a fraction instead of parts per billion."
+        },
+        "rate_percent": {
+          "type": "number",
+          "format": "double",
+          "description": "The fixed order rate expressed as a percentage instead of parts per billion."
+        },
+        "total_execution_fee_sat": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The total execution fee in satoshis that needs to be paid to the auctioneer\nfor executing the entire order."
+        },
+        "worst_case_chain_fee_sat": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The worst case chain fees that need to be paid if fee rates spike up to the\nmax_batch_fee_rate_sat_per_kw value specified in the request. This value is\nhighly dependent on the min_units_match parameter as well since the\ncalculation assumes chain fees for the chain footprint of opening\namt/min_units_match channels (hence worst case calculation)."
+        }
+      }
+    },
+    "poolrpcRecoverAccountsRequest": {
+      "type": "object",
+      "properties": {
+        "full_client": {
+          "type": "boolean",
+          "description": "Recover the latest account states without interacting with the\nLightning Labs server."
+        },
+        "account_target": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Number of accounts that we are trying to recover. Used during the\nfull_client recovery process."
+        },
+        "auctioneer_key": {
+          "type": "string",
+          "description": "Auctioneer's public key. Used during the full_client recovery process.\nThis field should be left empty for testnet/mainnet, its value is already\nhardcoded in our codebase."
+        },
+        "height_hint": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Initial block height. We won't try to look for any account with an expiry\nheight smaller than this value. Used during the full_client recovery\nprocess."
+        },
+        "bitcoin_host": {
+          "type": "string",
+          "description": "bitcoind/btcd instance address. Used during the full_client recovery\nprocess."
+        },
+        "bitcoin_user": {
+          "type": "string",
+          "description": "bitcoind/btcd user name. Used during the full_client recovery\nprocess."
+        },
+        "bitcoin_password": {
+          "type": "string",
+          "description": "bitcoind/btcd password. Used during the full_client recovery\nprocess."
+        },
+        "bitcoin_httppostmode": {
+          "type": "boolean",
+          "description": "Use HTTP POST mode? bitcoind only supports this mode. Used during the\nfull_client recovery process."
+        },
+        "bitcoin_usetls": {
+          "type": "boolean",
+          "description": "Use TLS to connect? bitcoind only supports non-TLS connections. Used\nduring the full_client recovery process."
+        },
+        "bitcoin_tlspath": {
+          "type": "string",
+          "description": "Path to btcd's TLS certificate, if TLS is enabled. Used  during the\nfull_client recovery process."
+        }
+      }
+    },
+    "poolrpcRecoverAccountsResponse": {
+      "type": "object",
+      "properties": {
+        "num_recovered_accounts": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The number of accounts that were recovered."
+        }
+      }
+    },
+    "poolrpcRegisterSidecarRequest": {
+      "type": "object",
+      "properties": {
+        "ticket": {
+          "type": "string",
+          "description": "The sidecar ticket to register and add the node and channel funding\ninformation to. The ticket must be in the state \"offered\"."
+        },
+        "auto_negotiate": {
+          "type": "boolean",
+          "description": "If this value is True, then the daemon will attempt to finish negotiating\nthe details of the sidecar channel automatically in the background. The\nprogress of the ticket can be monitored using the SidecarState RPC. In\naddition, if this flag is set, then this method will _block_ until the\nsidecar negotiation either finishes or breaks down."
+        }
+      }
+    },
+    "poolrpcRenewAccountRequest": {
+      "type": "object",
+      "properties": {
+        "account_key": {
+          "type": "string",
+          "format": "byte",
+          "description": "The key associated with the account to renew."
+        },
+        "absolute_expiry": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The new absolute expiration height of the account."
+        },
+        "relative_expiry": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The new relative expiration height of the account."
+        },
+        "fee_rate_sat_per_kw": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The fee rate, in satoshis per kw, to use for the renewal transaction."
+        },
+        "new_version": {
+          "$ref": "#/definitions/poolrpcAccountVersion",
+          "description": "The new version of the account. If this is set and is a valid version\ngreater than the account's current version, then the account is upgraded to\nthat version during the renewal."
+        }
+      }
+    },
+    "poolrpcRenewAccountResponse": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "$ref": "#/definitions/poolrpcAccount",
+          "description": "The state of the account after processing the renewal."
+        },
+        "renewal_txid": {
+          "type": "string",
+          "format": "byte",
+          "description": "The transaction used to renew the expiration of the account."
+        }
+      }
+    },
+    "poolrpcSidecarTicket": {
+      "type": "object",
+      "properties": {
+        "ticket": {
+          "type": "string",
+          "description": "The complete sidecar ticket in its string encoded form which is base58\nencoded, has a human readable prefix ('sidecar...') and a checksum built in.\nThe string encoded version will only be used on the trader side of the API.\nAll requests to the auctioneer expect the ticket to be in its raw, tlv\nencoded byte form."
+        }
+      }
+    },
+    "poolrpcStopDaemonRequest": {
+      "type": "object"
+    },
+    "poolrpcStopDaemonResponse": {
+      "type": "object"
+    },
+    "poolrpcSubmitOrderRequest": {
+      "type": "object",
+      "properties": {
+        "ask": {
+          "$ref": "#/definitions/poolrpcAsk"
+        },
+        "bid": {
+          "$ref": "#/definitions/poolrpcBid"
+        },
+        "initiator": {
+          "type": "string",
+          "description": "An optional identification string that will be appended to the user agent\nstring sent to the server to give information about the usage of pool. This\ninitiator part is meant for user interfaces to add their name to give the\nfull picture of the binary used (poold, LiT) and the method used for\nsubmitting the order (pool CLI, LiT UI, other 3rd party UI)."
+        }
+      }
+    },
+    "poolrpcSubmitOrderResponse": {
+      "type": "object",
+      "properties": {
+        "invalid_order": {
+          "$ref": "#/definitions/poolrpcInvalidOrder",
+          "description": "Order failed with the given reason."
+        },
+        "accepted_order_nonce": {
+          "type": "string",
+          "format": "byte",
+          "description": "The order nonce of the accepted order."
+        },
+        "updated_sidecar_ticket": {
+          "type": "string",
+          "description": "In case a bid order was submitted for a sidecar ticket, that ticket is\nupdated with the new state and bid order nonce."
+        }
+      }
+    },
+    "poolrpcTokensResponse": {
+      "type": "object",
+      "properties": {
+        "tokens": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/poolrpcLsatToken"
+          },
+          "description": "*\nList of all tokens the daemon knows of, including old/expired tokens."
+        }
+      }
+    },
+    "poolrpcUpdatedEvent": {
+      "type": "object",
+      "properties": {
+        "previous_state": {
+          "$ref": "#/definitions/poolrpcOrderState",
+          "description": "The state of the order previous to the change. This is what the state\nchanged from."
+        },
+        "new_state": {
+          "$ref": "#/definitions/poolrpcOrderState",
+          "description": "The new state of the order after the change. This is what the state changed\nto."
+        },
+        "units_filled": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The units that were filled at the time of the event."
+        }
+      }
+    },
+    "poolrpcWithdrawAccountRequest": {
+      "type": "object",
+      "properties": {
+        "trader_key": {
+          "type": "string",
+          "format": "byte",
+          "description": "The trader key associated with the account that funds will be withdrawed\nfrom."
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/poolrpcOutput"
+          },
+          "description": "The outputs we'll withdraw funds from the account into."
+        },
+        "fee_rate_sat_per_kw": {
+          "type": "string",
+          "format": "uint64",
+          "description": "The fee rate, in satoshis per kw, to use for the withdrawal transaction."
+        },
+        "absolute_expiry": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The new absolute expiration height of the account."
+        },
+        "relative_expiry": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The new relative expiration height of the account."
+        },
+        "new_version": {
+          "$ref": "#/definitions/poolrpcAccountVersion",
+          "description": "The new version of the account. If this is set and is a valid version\ngreater than the account's current version, then the account is upgraded to\nthat version during the withdrawal."
+        }
+      }
+    },
+    "poolrpcWithdrawAccountResponse": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "$ref": "#/definitions/poolrpcAccount",
+          "description": "The state of the account after processing the withdrawal."
+        },
+        "withdraw_txid": {
+          "type": "string",
+          "format": "byte",
+          "description": "The transaction used to withdraw funds from the account."
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

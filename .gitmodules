@@ -1,0 +1,6 @@
+[submodule "code/back-end/wallet"]
+	path = code/back-end/wallet
+	url = https://github.com/youngzhenhao/wallet.git
+[submodule "code/back-end/trade"]
+	path = code/back-end/trade
+	url = https://github.com/youngzhenhao/trade.git

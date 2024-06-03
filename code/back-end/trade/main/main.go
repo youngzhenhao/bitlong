@@ -14,6 +14,7 @@ import (
 	"trade/dao"
 	"trade/middleware"
 	"trade/routers"
+	"trade/services"
 	"trade/task"
 	"trade/utils"
 )
@@ -35,7 +36,7 @@ func main() {
 	if err := middleware.RedisConnect(); err != nil {
 		log.Fatalf("Failed to initialize redis: %v", err)
 	}
-	if !checkConfig() {
+	if !checkStart() {
 		return
 	}
 	if config.GetLoadConfig().IsAutoMigrate {
@@ -113,10 +114,15 @@ func main() {
 }
 
 // check config
-func checkConfig() bool {
+func checkStart() bool {
 	cfg := config.GetConfig()
 	if cfg.ApiConfig.CustodyAccount.MacaroonDir == "" {
 		fmt.Println("Custody account MacaroonDir is not set")
+		return false
+	}
+	// 检测admin账户
+	if !services.CheckAdminAccount() {
+		fmt.Println("Admin account is not set")
 		return false
 	}
 	return true

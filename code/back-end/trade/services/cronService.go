@@ -80,3 +80,33 @@ func (sm *CronService) PollInvoiceCron() {
 	CUST.Info("start cron job: PollInvoice")
 	pollInvoice()
 }
+
+func CreatePollPaymentCron() (err error) {
+	return CreateScheduledTask(&models.ScheduledTask{
+		Name:           "PollPaymentCron",
+		CronExpression: "*/25 * * * * *",
+		FunctionName:   "PollPaymentCron",
+		Package:        "services",
+	})
+}
+
+func CreatePollInvoiceCron() (err error) {
+	return CreateScheduledTask(&models.ScheduledTask{
+		Name:           "PollInvoiceCron",
+		CronExpression: "*/25 * * * * *",
+		FunctionName:   "PollInvoiceCron",
+		Package:        "services",
+	})
+}
+
+func CreatePAYTasks() {
+	err := CreatePollPaymentCron()
+	if err != nil {
+		CUST.Error("", err)
+	}
+	err = CreatePollInvoiceCron()
+	if err != nil {
+		CUST.Error("", err)
+	}
+	fmt.Println("Create FairLaunch ScheduledTasks Procession finished!")
+}

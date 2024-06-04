@@ -95,6 +95,32 @@ Authorization ： "Bearer" token
 "balance": int 账户余额
 "error": string 错误信息
 
+### 4.转账
+
+
+POST 转账  /custodyAccount/invoice/pay
+转账请求参数：
+
+请求头：
+Authorization ： "Bearer" token
+
+请求体：
+```json 
+{
+    "invoice":"lnbcrt44440n1pn9mq3fpp5mvnjhz8tguz4e5qene5ztnw4w2rlyvcwecqf53lzyxxvl74aedyqdqqcqzzsxqyz5vqsp5a0gxaku4n3klkjk0x62377u9g97az7mgrmqajp2lludwx70hv3eq9qyyssqq63zjpahhy3r0nlqduyjpjrttlfwxvm052qmehupxfpflyg4fj6yrytfwyl546xd3ptupusr8gazky76f30jny8zhtvx4vrf0ngs72cq98qtry",
+    "feeLimit": 0
+}
+```
+
+invoice： string 发票号码
+feeLimit：int 转账手续费限制，默认0，单位satoshi，0表示不限制手续费
+
+
+返回值:
+
+"error": string 错误信息
+"payment": 当成功时返回success
+
 
 
 

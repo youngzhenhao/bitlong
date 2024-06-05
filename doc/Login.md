@@ -4,7 +4,7 @@
 
 ### 用户名
 
-func GetPublicKey() string 
+func GetNPublicKey() string 
 
 ###  密码
 

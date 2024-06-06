@@ -48,7 +48,7 @@ Authorization ： "Bearer" token
 
 ### 2.查询发票
 
-POST 查询发票： /custodyAccount/invoice/querybalance
+POST 查询发票： /custodyAccount/invoice/queryinvoice
 查询发票请求参数：
 请求头：
 Authorization ： "Bearer" token

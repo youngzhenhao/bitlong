@@ -1,5 +1,0 @@
-dirpath=D:\mySpace\walletDataDir\localnode
-lndhost=127.0.0.1:10009
-taproothost=127.0.0.1:8443
-litdhost=127.0.0.1:8443
-LnurlServerHost=127.0.0.1:9080
